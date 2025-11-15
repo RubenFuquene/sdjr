@@ -1,0 +1,11 @@
+vendor
+node_modules
+.git
+.gitignore
+.env
+.env.example
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
