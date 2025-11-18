@@ -1,0 +1,13 @@
+Backend/run
+Backend/vendor
+Backend/storage/*.key
+Backend/storage/oauth-private.key
+Backend/storage/oauth-public.key
+Backend/.env
+Backend/.env.testing
+Backend/.idea
+Backend/.vscode
+Backend/.phpunit.result.cache
+Backend/node_modules
+Backend/database/database.sqlite
+Backend/public/storage/logs/*
