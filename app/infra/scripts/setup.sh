@@ -14,7 +14,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker compose &> /dev/null; then
     echo "❌ Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
@@ -36,17 +36,8 @@ if [ ! -f ".env" ]; then
     echo "✅ Created .env file for backend"
 fi
 
-if [ ! -d "vendor" ]; then
-    composer install
-fi
-
-# Generate application key if not set
-if ! grep -q "APP_KEY=base64:" .env; then
-    php artisan key:generate
-fi
-
 echo "✅ Setup complete!"
 echo ""
 echo "To start the development environment, run:"
 echo "  cd app/infra"
-echo "  docker-compose up -d"
+echo "  docker compose up -d"

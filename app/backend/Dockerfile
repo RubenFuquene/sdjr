@@ -40,6 +40,9 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# Create application key
+RUN php artisan key:generate
+
 # Expose port 8000 for Laravel development server
 EXPOSE 8000
 
