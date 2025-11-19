@@ -9,7 +9,11 @@ echo "🚀 Starting SDJR development environment..."
 
 cd "$(dirname "$0")/.."
 
+echo "🏗️ Building Docker images (this might take a while the first time)..."
+docker-compose build
+
 # Start Docker containers
+echo "⬆️ Starting containers..."
 docker-compose up -d
 
 echo "✅ Development environment is running!"
