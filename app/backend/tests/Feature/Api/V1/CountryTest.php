@@ -1,0 +1,124 @@
+<?php
+
+namespace Tests\Feature\Api\V1;
+
+use App\Models\Country;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class CountryTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * Test that the index endpoint returns a list of countries.
+     *
+     * @return void
+     */
+    public function test_index_returns_countries()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        Country::create(['name' => 'Colombia', 'status' => 'A']);
+        Country::create(['name' => 'Peru', 'status' => 'A']);
+
+        $response = $this->getJson('/api/v1/countries');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(2, 'data');
+    }
+
+    /**
+     * Test that the store endpoint creates a new country.
+     *
+     * @return void
+     */
+    public function test_store_creates_country()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $data = ['name' => 'Argentina', 'status' => 'A'];
+
+        $response = $this->postJson('/api/v1/countries', $data);
+
+        $response->assertStatus(201)
+            ->assertJsonFragment($data);
+
+        $this->assertDatabaseHas('countries', $data);
+    }
+
+    /**
+     * Test that the show endpoint returns a specific country.
+     *
+     * @return void
+     */
+    public function test_show_returns_country()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $country = Country::create(['name' => 'Chile', 'status' => 'A']);
+
+        $response = $this->getJson("/api/v1/countries/{$country->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['name' => 'Chile']);
+    }
+
+    /**
+     * Test that the update endpoint updates an existing country.
+     *
+     * @return void
+     */
+    public function test_update_updates_country()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $country = Country::create(['name' => 'Brazil', 'status' => 'A']);
+        $data = ['name' => 'Brasil', 'status' => 'I'];
+
+        $response = $this->putJson("/api/v1/countries/{$country->id}", $data);
+
+        $response->assertStatus(200)
+            ->assertJsonFragment($data);
+
+        $this->assertDatabaseHas('countries', $data);
+    }
+
+    /**
+     * Test that the destroy endpoint deletes a country.
+     *
+     * @return void
+     */
+    public function test_destroy_deletes_country()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $country = Country::create(['name' => 'Uruguay', 'status' => 'A']);
+
+        $response = $this->deleteJson("/api/v1/countries/{$country->id}");
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('countries', ['id' => $country->id]);
+    }
+
+    /**
+     * Test that unauthenticated users cannot access the endpoints.
+     *
+     * @return void
+     */
+    public function test_unauthenticated_user_cannot_access()
+    {
+        $response = $this->getJson('/api/v1/countries');
+
+        $response->assertStatus(401);
+    }
+}
