@@ -1,0 +1,1157 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SDJR API",
+        "description": "API documentation for SDJR application",
+        "contact": {
+            "email": "admin@sdjr.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Authenticate user and get token",
+                "operationId": "bae68d1c55329ecb6e41f48285840c8f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|laravel_sanctum_token_string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cities": {
+            "get": {
+                "tags": [
+                    "Cities"
+                ],
+                "summary": "Get list of cities",
+                "description": "Returns list of cities",
+                "operationId": "getCitiesList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CityResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Cities"
+                ],
+                "summary": "Store new city",
+                "description": "Returns city data",
+                "operationId": "storeCity",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CityRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CityResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cities/{id}": {
+            "get": {
+                "tags": [
+                    "Cities"
+                ],
+                "summary": "Get city information",
+                "description": "Returns city data",
+                "operationId": "getCityById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "City id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CityResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Cities"
+                ],
+                "summary": "Update existing city",
+                "description": "Returns updated city data",
+                "operationId": "updateCity",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "City id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CityRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CityResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Cities"
+                ],
+                "summary": "Delete existing city",
+                "description": "Deletes a record and returns no content",
+                "operationId": "deleteCity",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "City id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "City deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/countries": {
+            "get": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Get list of countries",
+                "description": "Returns list of countries",
+                "operationId": "getCountriesList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountryResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Store new country",
+                "description": "Returns country data",
+                "operationId": "storeCountry",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CountryRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountryResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/countries/{id}": {
+            "get": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Get country information",
+                "description": "Returns country data",
+                "operationId": "getCountryById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Country id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountryResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Update existing country",
+                "description": "Returns updated country data",
+                "operationId": "updateCountry",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Country id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CountryRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountryResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Delete existing country",
+                "description": "Deletes a record and returns no content",
+                "operationId": "deleteCountry",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Country id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Country deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/departments": {
+            "get": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Get list of departments",
+                "description": "Returns list of departments",
+                "operationId": "getDepartmentsList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DepartmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Store new department",
+                "description": "Returns department data",
+                "operationId": "storeDepartment",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DepartmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DepartmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/departments/{id}": {
+            "get": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Get department information",
+                "description": "Returns department data",
+                "operationId": "getDepartmentById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Department id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DepartmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Update existing department",
+                "description": "Returns updated department data",
+                "operationId": "updateDepartment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Department id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DepartmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DepartmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Departments"
+                ],
+                "summary": "Delete existing department",
+                "description": "Deletes a record and returns no content",
+                "operationId": "deleteDepartment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Department id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CityRequest": {
+                "title": "City Request",
+                "description": "City request body data",
+                "required": [
+                    "department_id",
+                    "name"
+                ],
+                "properties": {
+                    "department_id": {
+                        "title": "department_id",
+                        "description": "ID of the department",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "Name of the city",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Bogota"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "Status of the city (A: Active, I: Inactive)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    }
+                },
+                "type": "object"
+            },
+            "CountryRequest": {
+                "title": "Country Request",
+                "description": "Country request body data",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "name",
+                        "description": "Name of the country",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Colombia"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "Status of the country (A: Active, I: Inactive)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    }
+                },
+                "type": "object"
+            },
+            "DepartmentRequest": {
+                "title": "Department Request",
+                "description": "Department request body data",
+                "required": [
+                    "country_id",
+                    "name"
+                ],
+                "properties": {
+                    "country_id": {
+                        "title": "country_id",
+                        "description": "ID of the country",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "Name of the department",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Cundinamarca"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "Status of the department (A: Active, I: Inactive)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "title": "Login Request",
+                "description": "Login request body data",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "description": "User's email address",
+                        "type": "string",
+                        "format": "email",
+                        "example": "user@example.com"
+                    },
+                    "password": {
+                        "description": "User's password",
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    }
+                },
+                "type": "object"
+            },
+            "CityResource": {
+                "title": "City Resource",
+                "description": "City resource representation",
+                "properties": {
+                    "id": {
+                        "title": "id",
+                        "description": "City ID",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                    },
+                    "department_id": {
+                        "title": "department_id",
+                        "description": "Department ID",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "City name",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Bogota"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "City status",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    },
+                    "department": {
+                        "$ref": "#/components/schemas/DepartmentResource"
+                    },
+                    "created_at": {
+                        "title": "created_at",
+                        "description": "Created at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "title": "updated_at",
+                        "description": "Updated at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "CityResource"
+                }
+            },
+            "CountryResource": {
+                "title": "Country Resource",
+                "description": "Country resource representation",
+                "properties": {
+                    "id": {
+                        "title": "id",
+                        "description": "Country ID",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "Country name",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Colombia"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "Country status",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    },
+                    "created_at": {
+                        "title": "created_at",
+                        "description": "Created at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "title": "updated_at",
+                        "description": "Updated at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "CountryResource"
+                }
+            },
+            "DepartmentResource": {
+                "title": "Department Resource",
+                "description": "Department resource representation",
+                "properties": {
+                    "id": {
+                        "title": "id",
+                        "description": "Department ID",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                    },
+                    "country_id": {
+                        "title": "country_id",
+                        "description": "Country ID",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "Department name",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Cundinamarca"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "Department status",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    },
+                    "country": {
+                        "$ref": "#/components/schemas/CountryResource"
+                    },
+                    "created_at": {
+                        "title": "created_at",
+                        "description": "Created at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "title": "updated_at",
+                        "description": "Updated at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "DepartmentResource"
+                }
+            },
+            "UserResource": {
+                "title": "User Resource",
+                "description": "User resource representation",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "9b1c4d8e-1234-5678-90ab-cdef12345678"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "API Endpoints for User Authentication"
+        },
+        {
+            "name": "Cities",
+            "description": "API Endpoints of Cities"
+        },
+        {
+            "name": "Countries",
+            "description": "API Endpoints of Countries"
+        },
+        {
+            "name": "Departments",
+            "description": "API Endpoints of Departments"
+        }
+    ]
+}

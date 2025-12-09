@@ -1,13 +1,26 @@
-Backend/run
-Backend/vendor
-Backend/storage/*.key
-Backend/storage/oauth-private.key
-Backend/storage/oauth-public.key
-Backend/.env
-Backend/.env.testing
-Backend/.idea
-Backend/.vscode
-Backend/.phpunit.result.cache
-Backend/node_modules
-Backend/database/database.sqlite
-Backend/public/storage/logs/*
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp

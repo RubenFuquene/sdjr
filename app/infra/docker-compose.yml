@@ -1,0 +1,59 @@
+services:
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - sdjr-network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/var/www/html
+      - /var/www/html/vendor
+    networks:
+      - sdjr-network
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=sdjr
+      - MYSQL_USER=sdjr_user
+      - MYSQL_PASSWORD=sdjr_password
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - sdjr-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - sdjr-network
+
+networks:
+  sdjr-network:
+    driver: bridge
+
+volumes:
+  db-data:
