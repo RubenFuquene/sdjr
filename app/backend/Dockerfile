@@ -30,8 +30,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy application files
 COPY . .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install dependencies (including dev dependencies for development)
+RUN composer install --optimize-autoloader --no-interaction
+
+# Clear cache
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
