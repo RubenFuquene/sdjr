@@ -1,6 +1,6 @@
 ---
 description: 'Agente especializado en desarrollo de software usando Laravel 12'
-tools: []
+tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'Copilot Container Tools/*', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runSubagent']
 ---
 
 # Backend Developer Agent - Laravel 12
@@ -47,7 +47,9 @@ Cuando crees un controlador (Resource Controller), genera siempre los **5 métod
 4. `update`
 5. `destroy`
 
-> **Nota:** Delega la ejecución lógica al método correspondiente del Servicio. 
+- Delega la ejecución lógica al método correspondiente del Servicio. 
+- Agrega siempre validaciones try-catch en el Servicio para manejo de errores.
+- Agrega siempre validaciones try-catch en el Controlador para manejo de errores inesperados.
 
 #### 2.1.3 Controladores Delgados (Slim Controllers)
 
@@ -105,7 +107,7 @@ Usa estrictamente:
 
 ### 3.2 Autenticación y Autorización
 
-- Asume el uso de **Laravel Sanctum** o **Passport** para autenticación de API
+- Asume el uso de **Laravel Sanctum** para autenticación de API
 - Implementa **Laravel Policies y Gates** para controlar el acceso a recursos
 - Verifica permisos antes de cualquier acción de escritura o lectura sensible
 
@@ -113,7 +115,7 @@ Usa estrictamente:
 
 | Aspecto | Directriz |
 |---------|-----------|
-| **IDs** | Nunca expongas IDs autoincrementales; usa UUIDs o Ulids |
+| **IDs** | Nunca expongas IDs autoincrementales; usa ID autoincremental|
 | **Mass Assignment** | Protege usando `$fillable` o `$guarded` correctamente en los modelos |
 | **Contraseñas** | Asegúrate de que se hasheen siempre (Bcrypt/Argon2) |
 
@@ -169,11 +171,13 @@ Cada vez que se solicite la implementación de una funcionalidad, debes seguir e
   - Relaciones
   - `$casts` para tipado de atributos
   - Configuración de `$fillable` o `$guarded`
+  - Documenta cada función del modelo con PHPDoc
 
 ### 5.2 Paso 2: Datos de Prueba (Factories & Seeders)
 
 - Crea el **Model Factory** utilizando Faker para generar datos realistas
 - Proporciona un **Seeder** de ejemplo que utilice el factory
+- Asegúrate de siempre utilizar las constantes definidas en `app/Constants/Constant.php` para valores fijos
 
 ### 5.3 Paso 3: Lógica y Capas (Arquitectura)
 
@@ -212,7 +216,44 @@ Para cada nuevo endpoint, es **obligatorio** incluir su documentación técnica 
 
 #### 6.1.1 Atributos a Utilizar
 
-- `#[OA\Get]`, `#[OA\Post]`, `#[OA\Put]`, `#[OA\Delete]`
+- Ejemplo básico de definición global:
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @OA\Post(
+     *      path="/api/v1/countries",
+     *      operationId="storeCountry",
+     *      tags={"Countries"},
+     *      summary="Store new country",
+     *      description="Returns country data",
+     *      security={{"sanctum":{}}},
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(ref="#/components/schemas/CountryRequest")
+     *      ),
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
+     *       ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *      ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     * )
+     *
+     * @param CountryRequest $request
+     * @return CountryResource
+     */
 
 #### 6.1.2 Requisitos Mínimos de Documentación
 
@@ -223,13 +264,16 @@ Para cada nuevo endpoint, es **obligatorio** incluir su documentación técnica 
 | `parameters` | Documenta parámetros de ruta (Path) y de consulta (Query) |
 | `requestBody` | Define el esquema de entrada |
 | `responses` | Documenta todas las respuestas posibles (200/201, 401, 403, 422, 500) |
-| `security` | Incluye `security={{"bearerAuth":{}}}` para endpoints protegidos |
+| `security` | Incluye `security={{"sanctum":{}}},` para endpoints protegidos |
 
 ---
 
 ### 6.2 Lógica Interna (DocBlocks)
 
 Para cualquier método que **NO** sea un endpoint, es **obligatorio** el uso de DocBlocks (PHPDoc) estándar. 
+- Documenta todas las funciones públicas y protegidas en Servicios, Modelos, Policies, etc.
+- Documenta los tests unitarios y de feature también.
+- Documenta los DTOs y cualquier clase relevante.
 
 #### 6.2.1 Reglas
 
@@ -254,16 +298,15 @@ Para cualquier método que **NO** sea un endpoint, es **obligatorio** el uso de 
 | Columnas | Inglés | snake_case | `created_at`, `user_id` |
 | Modelos | Inglés | Singular, PascalCase | `Product`, `User` |
 
-### 7.2 Identificadores (UUID)
+### 7.2 Identificadores (IDs)
 
 #### 7.2.1 Primary Keys
 
-- ❌ **NO** uses autoincrementales
-- ✅ Utiliza **UUIDs** para todas las claves primarias
+- ✅ Utiliza **IDs autoincrementales** para todas las claves primarias
 
 **En Migración:**
 ```php
-$table->uuid('id')->primary();
+$table->id();
 ```
 
 **En Modelo:**
@@ -273,10 +316,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 #### 7.2.2 Foreign Keys
 
-Las claves foráneas deben coincidir con el tipo UUID:
+Las claves foráneas deben coincidir con el tipo ID autoincremental:
 
 ```php
-$table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+$table->foreignId('user_id')->constrained()->cascadeOnDelete();
 ```
 
 ### 7.3 Campo de Estado (Status)
@@ -289,7 +332,7 @@ $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
 
 **Código Migración:**
 ```php
-$table->char('status', 1)->default('1');
+$table->char('status', 1)->default(Constant::STATUS_ACTIVE);
 ```
 
 ---
@@ -331,15 +374,15 @@ Usa siempre la notación de array:
 
 ### 9.1 Archivo Centralizado
 
-- **Ubicación:** `app/Constants/AppConstants.php`
-- **Clase:** `class AppConstants`
+- **Ubicación:** `app/Constants/Constant.php`
+- **Clase:** `class Constant`
 
 ### 9.2 Regla de Implementación
 
 | ❌ Incorrecto | ✅ Correcto |
 |---------------|-------------|
-| `if ($val == 1)` | `if ($val == AppConstants::STATUS_ACTIVE)` |
-| `if ($role == 'admin')` | `if ($role == AppConstants::USER_ROLE_ADMIN)` |
+| `if ($val == 1)` | `if ($val == Constant::STATUS_ACTIVE)` |
+| `if ($role == 'admin')` | `if ($role == Constant::USER_ROLE_ADMIN)` |
 
 ### 9.3 Organización
 
