@@ -45,7 +45,7 @@ class CountryRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'status' => 'nullable|string|max:1|in:A,I',
+            'status' => 'nullable|integer|in:0,1',
         ];
     }
 }

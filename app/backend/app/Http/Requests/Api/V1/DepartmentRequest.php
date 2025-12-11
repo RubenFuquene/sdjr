@@ -53,7 +53,7 @@ class DepartmentRequest extends FormRequest
         return [
             'country_id' => 'required|exists:countries,id',
             'name' => 'required|string|max:255',
-            'status' => 'nullable|string|max:1|in:A,I',
+            'status' => 'nullable|integer|in:0,1',
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Department;
+use App\Constants\Constant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,7 +21,7 @@ class CityFactory extends Factory
         return [
             'department_id' => Department::factory(),
             'name' => $this->faker->city(),
-            'status' => $this->faker->randomElement(['A', 'I']),
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
     }
 }

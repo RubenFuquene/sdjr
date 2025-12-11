@@ -12,9 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     description="User resource representation",
  *     @OA\Property(
  *         property="id",
- *         type="string",
- *         format="uuid",
- *         example="9b1c4d8e-1234-5678-90ab-cdef12345678"
+ *         type="integer",
+ *         example=1
  *     ),
  *     @OA\Property(
  *         property="name",

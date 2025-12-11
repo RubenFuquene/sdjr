@@ -51,10 +51,17 @@ class DepartmentController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): AnonymousResourceCollection|JsonResponse
     {
-        $departments = $this->departmentService->getPaginated();
-        return DepartmentResource::collection($departments);
+        try {
+            $departments = $this->departmentService->getPaginated();
+            return DepartmentResource::collection($departments);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error retrieving departments',
+                'error' => app()->environment('production') ? null : $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -93,10 +100,17 @@ class DepartmentController extends Controller
      * @param DepartmentRequest $request
      * @return DepartmentResource
      */
-    public function store(DepartmentRequest $request): DepartmentResource
+    public function store(DepartmentRequest $request): DepartmentResource|JsonResponse
     {
-        $department = $this->departmentService->create($request->validated());
-        return new DepartmentResource($department);
+        try {
+            $department = $this->departmentService->create($request->validated());
+            return new DepartmentResource($department);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error creating department',
+                'error' => app()->environment('production') ? null : $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -146,13 +160,18 @@ class DepartmentController extends Controller
      */
     public function show(string $id): DepartmentResource|JsonResponse
     {
-        $department = $this->departmentService->find($id);
-
-        if (!$department) {
-            return response()->json(['message' => 'Department not found'], 404);
+        try {
+            $department = $this->departmentService->find($id);
+            if (!$department) {
+                return response()->json(['message' => 'Department not found'], 404);
+            }
+            return new DepartmentResource($department);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error retrieving department',
+                'error' => app()->environment('production') ? null : $e->getMessage(),
+            ], 500);
         }
-
-        return new DepartmentResource($department);
     }
 
     /**
@@ -207,14 +226,19 @@ class DepartmentController extends Controller
      */
     public function update(DepartmentRequest $request, string $id): DepartmentResource|JsonResponse
     {
-        $department = $this->departmentService->find($id);
-
-        if (!$department) {
-            return response()->json(['message' => 'Department not found'], 404);
+        try {
+            $department = $this->departmentService->find($id);
+            if (!$department) {
+                return response()->json(['message' => 'Department not found'], 404);
+            }
+            $updatedDepartment = $this->departmentService->update($department, $request->validated());
+            return new DepartmentResource($updatedDepartment);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error updating department',
+                'error' => app()->environment('production') ? null : $e->getMessage(),
+            ], 500);
         }
-
-        $updatedDepartment = $this->departmentService->update($department, $request->validated());
-        return new DepartmentResource($updatedDepartment);
     }
 
     /**
@@ -262,13 +286,18 @@ class DepartmentController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $department = $this->departmentService->find($id);
-
-        if (!$department) {
-            return response()->json(['message' => 'Department not found'], 404);
+        try {
+            $department = $this->departmentService->find($id);
+            if (!$department) {
+                return response()->json(['message' => 'Department not found'], 404);
+            }
+            $this->departmentService->delete($department);
+            return response()->json(['message' => 'Department deleted successfully']);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error deleting department',
+                'error' => app()->environment('production') ? null : $e->getMessage(),
+            ], 500);
         }
-
-        $this->departmentService->delete($department);
-        return response()->json(['message' => 'Department deleted successfully']);
     }
 }

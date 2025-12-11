@@ -1,52 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CountryRequest;
-use App\Http\Requests\Api\V1\CountryFilterRequest;
-use App\Http\Resources\Api\V1\CountryResource;
-use App\Services\CountryService;
+use App\Http\Requests\Api\V1\CategoryRequest;
+use App\Services\CategoryService;
+use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Http\Resources\Api\V1\CategoryResource;
+use OpenApi\Attributes as OA;
+
 
 /**
- * @OA\Info(
- *      version="1.0.0",
- *      title="SDJR API",
- *      description="API documentation for SDJR application",
- *      @OA\Contact(
- *          email="admin@sdjr.com"
- *      ),
- *      @OA\License(
- *          name="Apache 2.0",
- *          url="http://www.apache.org/licenses/LICENSE-2.0.html"
- *      )
- * )
- *
  * @OA\Tag(
- *     name="Countries",
- *     description="API Endpoints of Countries"
+ *     name="Categories",
+ *     description="API Endpoints of Categories"
  * )
  */
-class CountryController extends Controller
+class CategoryController extends Controller
 {
-    protected CountryService $countryService;
+    protected CategoryService $categoryService;
 
-    public function __construct(CountryService $countryService)
+    public function __construct(CategoryService $categoryService)
     {
-        $this->countryService = $countryService;
+        $this->categoryService = $categoryService;
     }
 
     /**
      * Display a listing of the resource.
      *
      * @OA\Get(
-     *      path="/api/v1/countries",
-     *      operationId="getCountriesList",
-     *      tags={"Countries"},
-     *      summary="Get list of countries",
-     *      description="Returns list of countries. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
+     *      path="/api/v1/categories",
+     *      operationId="getCategoriesList",
+     *      tags={"Categories"},
+     *      summary="Get list of categories",
+     *      description="Returns list of categories. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
      *      security={{"sanctum":{}}},
      *      @OA\Parameter(
      *          name="per_page",
@@ -65,7 +56,7 @@ class CountryController extends Controller
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
+     *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
      *       ),
      *      @OA\Response(
      *          response=401,
@@ -77,19 +68,16 @@ class CountryController extends Controller
      *      )
      *     )
      *
-     * @param CountryFilterRequest $request
      * @return AnonymousResourceCollection
      */
-    public function index(CountryFilterRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $perPage = $request->validatedPerPage();
-            $status = $request->validatedStatus();
-            $countries = $this->countryService->getPaginated($perPage, $status);
-            return CountryResource::collection($countries);
+            $categories = $this->categoryService->getPaginated();
+            return CategoryResource::collection($categories);
         } catch (\Throwable $e) {
             return response()->json([
-                'message' => 'Error retrieving countries',
+                'message' => 'Error retrieving categories',
                 'error' => app()->environment('production') ? null : $e->getMessage(),
             ], 500);
         }
@@ -99,20 +87,20 @@ class CountryController extends Controller
      * Store a newly created resource in storage.
      *
      * @OA\Post(
-     *      path="/api/v1/countries",
-     *      operationId="storeCountry",
-     *      tags={"Countries"},
-     *      summary="Store new country",
-     *      description="Returns country data",
+     *      path="/api/v1/categories",
+     *      operationId="storeCategory",
+     *      tags={"Categories"},
+     *      summary="Store new category",
+     *      description="Returns category data",
      *      security={{"sanctum":{}}},
      *      @OA\RequestBody(
      *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/CountryRequest")
+     *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
      *      ),
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
+     *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
      *       ),
      *      @OA\Response(
      *          response=400,
@@ -128,17 +116,17 @@ class CountryController extends Controller
      *      )
      * )
      *
-     * @param CountryRequest $request
-     * @return CountryResource
+     * @param CategoryRequest $request
+     * @return CategoryResource
      */
-    public function store(CountryRequest $request): CountryResource|JsonResponse
+    public function store(CategoryRequest $request): CategoryResource|JsonResponse
     {
         try {
-            $country = $this->countryService->create($request->validated());
-            return new CountryResource($country);
+            $category = $this->categoryService->create($request->validated());
+            return new CategoryResource($category);
         } catch (\Throwable $e) {
             return response()->json([
-                'message' => 'Error creating country',
+                'message' => 'Error creating category',
                 'error' => app()->environment('production') ? null : $e->getMessage(),
             ], 500);
         }
@@ -148,15 +136,15 @@ class CountryController extends Controller
      * Display the specified resource.
      *
      * @OA\Get(
-     *      path="/api/v1/countries/{id}",
-     *      operationId="getCountryById",
-     *      tags={"Countries"},
-     *      summary="Get country information",
-     *      description="Returns country data",
+     *      path="/api/v1/categories/{id}",
+     *      operationId="getCategoryById",
+     *      tags={"Categories"},
+     *      summary="Get category information",
+     *      description="Returns category data",
      *      security={{"sanctum":{}}},
      *      @OA\Parameter(
      *          name="id",
-     *          description="Country id",
+     *          description="Category id",
      *          required=true,
      *          in="path",
      *          @OA\Schema(
@@ -166,7 +154,7 @@ class CountryController extends Controller
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
+     *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
      *       ),
      *      @OA\Response(
      *          response=400,
@@ -187,19 +175,19 @@ class CountryController extends Controller
      * )
      *
      * @param string $id
-     * @return CountryResource|JsonResponse
+     * @return CategoryResource|JsonResponse
      */
-    public function show(string $id): CountryResource|JsonResponse
+    public function show(string $id): CategoryResource|JsonResponse
     {
         try {
-            $country = $this->countryService->find($id);
-            if (!$country) {
-                return response()->json(['message' => 'Country not found'], 404);
+            $category = $this->categoryService->find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
             }
-            return new CountryResource($country);
+            return new CategoryResource($category);
         } catch (\Throwable $e) {
             return response()->json([
-                'message' => 'Error retrieving country',
+                'message' => 'Error retrieving category',
                 'error' => app()->environment('production') ? null : $e->getMessage(),
             ], 500);
         }
@@ -209,15 +197,15 @@ class CountryController extends Controller
      * Update the specified resource in storage.
      *
      * @OA\Put(
-     *      path="/api/v1/countries/{id}",
-     *      operationId="updateCountry",
-     *      tags={"Countries"},
-     *      summary="Update existing country",
-     *      description="Returns updated country data",
+     *      path="/api/v1/categories/{id}",
+     *      operationId="updateCategory",
+     *      tags={"Categories"},
+     *      summary="Update existing category",
+     *      description="Returns updated category data",
      *      security={{"sanctum":{}}},
      *      @OA\Parameter(
      *          name="id",
-     *          description="Country id",
+     *          description="Category id",
      *          required=true,
      *          in="path",
      *          @OA\Schema(
@@ -226,12 +214,12 @@ class CountryController extends Controller
      *      ),
      *      @OA\RequestBody(
      *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/CountryRequest")
+     *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
      *      ),
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
+     *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
      *       ),
      *      @OA\Response(
      *          response=400,
@@ -251,22 +239,22 @@ class CountryController extends Controller
      *      )
      * )
      *
-     * @param CountryRequest $request
+     * @param CategoryRequest $request
      * @param string $id
-     * @return CountryResource|JsonResponse
+     * @return CategoryResource|JsonResponse
      */
-    public function update(CountryRequest $request, string $id): CountryResource|JsonResponse
+    public function update(CategoryRequest $request, string $id): CategoryResource|JsonResponse
     {
         try {
-            $country = $this->countryService->find($id);
-            if (!$country) {
-                return response()->json(['message' => 'Country not found'], 404);
+            $category = $this->categoryService->find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
             }
-            $updatedCountry = $this->countryService->update($country, $request->validated());
-            return new CountryResource($updatedCountry);
+            $updated = $this->categoryService->update($category, $request->validated());
+            return new CategoryResource($updated);
         } catch (\Throwable $e) {
             return response()->json([
-                'message' => 'Error updating country',
+                'message' => 'Error updating category',
                 'error' => app()->environment('production') ? null : $e->getMessage(),
             ], 500);
         }
@@ -276,15 +264,15 @@ class CountryController extends Controller
      * Remove the specified resource from storage.
      *
      * @OA\Delete(
-     *      path="/api/v1/countries/{id}",
-     *      operationId="deleteCountry",
-     *      tags={"Countries"},
-     *      summary="Delete existing country",
+     *      path="/api/v1/categories/{id}",
+     *      operationId="deleteCategory",
+     *      tags={"Categories"},
+     *      summary="Delete existing category",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
      *      @OA\Parameter(
      *          name="id",
-     *          description="Country id",
+     *          description="Category id",
      *          required=true,
      *          in="path",
      *          @OA\Schema(
@@ -295,7 +283,7 @@ class CountryController extends Controller
      *          response=200,
      *          description="Successful operation",
      *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Country deleted successfully")
+     *              @OA\Property(property="message", type="string", example="Category deleted successfully")
      *          )
      *       ),
      *      @OA\Response(
@@ -318,15 +306,15 @@ class CountryController extends Controller
     public function destroy(string $id): JsonResponse
     {
         try {
-            $country = $this->countryService->find($id);
-            if (!$country) {
-                return response()->json(['message' => 'Country not found'], 404);
+            $category = $this->categoryService->find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
             }
-            $this->countryService->delete($country);
-            return response()->json(['message' => 'Country deleted successfully']);
+            $this->categoryService->delete($category);
+            return response()->json(['message' => 'Category deleted successfully']);
         } catch (\Throwable $e) {
             return response()->json([
-                'message' => 'Error deleting country',
+                'message' => 'Error deleting category',
                 'error' => app()->environment('production') ? null : $e->getMessage(),
             ], 500);
         }

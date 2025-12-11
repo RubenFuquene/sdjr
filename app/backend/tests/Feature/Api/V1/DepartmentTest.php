@@ -8,10 +8,19 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use Faker\Generator;
+use App\Constants\Constant;
 
 class DepartmentTest extends TestCase
 {
     use RefreshDatabase;
+    protected Generator $faker;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->faker = \Faker\Factory::create();
+    }
 
     /**
      * Test that the index endpoint returns a list of departments.
@@ -23,8 +32,8 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => 'A']);
-        Department::create(['country_id' => $country->id, 'name' => 'Cundinamarca', 'status' => 'A']);
+        $country = Country::create(['name' => 'Colombia', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
+        Department::create(['country_id' => $country->id, 'name' => 'Cundinamarca', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
 
         $response = $this->getJson('/api/v1/departments');
 
@@ -42,8 +51,8 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => 'A']);
-        $data = ['country_id' => $country->id, 'name' => 'Antioquia', 'status' => 'A'];
+        $country = Country::create(['name' => 'Colombia', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
+        $data = ['country_id' => $country->id, 'name' => 'Antioquia', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])];
 
         $response = $this->postJson('/api/v1/departments', $data);
 
@@ -63,8 +72,8 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => 'A']);
-        $department = Department::create(['country_id' => $country->id, 'name' => 'Valle del Cauca', 'status' => 'A']);
+        $country = Country::create(['name' => 'Colombia', 'status' => Constant::STATUS_ACTIVE]);
+        $department = Department::create(['country_id' => $country->id, 'name' => 'Valle del Cauca', 'status' => Constant::STATUS_ACTIVE]);
 
         $response = $this->getJson("/api/v1/departments/{$department->id}");
 
@@ -82,9 +91,9 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => 'A']);
-        $department = Department::create(['country_id' => $country->id, 'name' => 'Atlantico', 'status' => 'A']);
-        $data = ['country_id' => $country->id, 'name' => 'Atlántico', 'status' => 'I'];
+        $country = Country::create(['name' => 'Colombia', 'status' => Constant::STATUS_ACTIVE]);
+        $department = Department::create(['country_id' => $country->id, 'name' => 'Atlantico', 'status' => Constant::STATUS_ACTIVE]);
+        $data = ['country_id' => $country->id, 'name' => 'Atlántico', 'status' => Constant::STATUS_INACTIVE];
 
         $response = $this->putJson("/api/v1/departments/{$department->id}", $data);
 
@@ -104,8 +113,8 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => 'A']);
-        $department = Department::create(['country_id' => $country->id, 'name' => 'Bolivar', 'status' => 'A']);
+        $country = Country::create(['name' => 'Colombia', 'status' => Constant::STATUS_ACTIVE]);
+        $department = Department::create(['country_id' => $country->id, 'name' => 'Bolivar', 'status' => Constant::STATUS_ACTIVE]);
 
         $response = $this->deleteJson("/api/v1/departments/{$department->id}");
 
