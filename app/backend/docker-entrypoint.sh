@@ -18,9 +18,17 @@ if grep -q "DB_CONNECTION=sqlite" .env; then
     touch database/database.sqlite 2>/dev/null || true
 fi
 
+# Install Composer dependencies
+echo "Installing Composer dependencies..."
+composer install --no-interaction --prefer-dist --optimize-autoloader
+
 # Run migrations
 echo "Running migrations..."
 php artisan migrate --force --no-interaction
+
+#Run seeders
+echo "Seeding database..."
+php artisan db:seed --force --no-interaction
 
 # Start Laravel development server
 echo "Starting Laravel development server on 0.0.0.0:8000..."
