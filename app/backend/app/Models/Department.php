@@ -14,9 +14,17 @@ class Department extends Model
 
     protected $fillable = [
         'country_id',
+        'code',
         'name',
         'status',
     ];
+    /**
+     * Sanitize code before saving.
+     */
+    public function setCodeAttribute($value): void
+    {
+        $this->attributes['code'] = strtoupper(trim($value));
+    }
 
     /**
      * Get the country that owns the department.

@@ -47,15 +47,24 @@ class CityRequest extends FormRequest
      *      description="Status of the city (A: Active, I: Inactive)",
      *      example="A"
      * )
+     * 
+     * @OA\Property(
+     *      property="code",
+     *      title="code",
+     *      description="Unique code for the city (6 alphanumeric characters)",
+     *      example="CITY01"
+     * )
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
+    {        
         return [
             'department_id' => 'required|exists:departments,id',
             'name' => 'required|string|max:255',
+            'code' => 'required|string|size:6|regex:/^[A-Za-z0-9]+$/|unique:cities,code',
             'status' => 'nullable|integer|in:0,1',
         ];
     }
+
 }

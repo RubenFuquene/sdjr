@@ -75,6 +75,7 @@ class DepartmentResource extends JsonResource
         return [
             'id' => $this->id,
             'country_id' => $this->country_id,
+            'code' => $this->code,
             'name' => $this->name,
             'status' => $this->status,
             'country' => new CountryResource($this->whenLoaded('country')),

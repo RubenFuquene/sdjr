@@ -32,8 +32,16 @@ class CountryTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        Country::create(['name' => 'Colombia', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
-        Country::create(['name' => 'Peru', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
+        Country::create([
+            'name' => 'Colombia',
+            'code' => 'CO1234',
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+        ]);
+        Country::create([
+            'name' => 'Peru',
+            'code' => 'PE5678',
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+        ]);
 
         $response = $this->getJson('/api/v1/countries');
 
@@ -51,7 +59,11 @@ class CountryTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $data = ['name' => 'Argentina', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])];
+        $data = [
+            'name' => 'Argentina',
+            'code' => 'AR0001',
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+        ];
 
         $response = $this->postJson('/api/v1/countries', $data);
 
@@ -71,12 +83,16 @@ class CountryTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Chile', 'status' => Constant::STATUS_ACTIVE]);
+        $country = Country::create([
+            'name' => 'Chile',
+            'code' => 'CL9999',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
 
         $response = $this->getJson("/api/v1/countries/{$country->id}");
 
         $response->assertStatus(200)
-            ->assertJsonFragment(['name' => 'Chile']);
+            ->assertJsonFragment(['name' => 'Chile', 'code' => 'CL9999']);
     }
 
     /**
@@ -89,8 +105,16 @@ class CountryTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Brazil', 'status' => Constant::STATUS_ACTIVE]);
-        $data = ['name' => 'Brasil', 'status' => Constant::STATUS_INACTIVE];
+        $country = Country::create([
+            'name' => 'Brazil',
+            'code' => 'BR0001',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
+        $data = [
+            'name' => 'Brasil',
+            'code' => 'BR0002',
+            'status' => Constant::STATUS_INACTIVE
+        ];
 
         $response = $this->putJson("/api/v1/countries/{$country->id}", $data);
 

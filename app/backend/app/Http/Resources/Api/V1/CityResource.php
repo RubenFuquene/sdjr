@@ -75,6 +75,7 @@ class CityResource extends JsonResource
         return [
             'id' => $this->id,
             'department_id' => $this->department_id,
+            'code' => $this->code,
             'name' => $this->name,
             'status' => $this->status,
             'department' => new DepartmentResource($this->whenLoaded('department')),

@@ -19,6 +19,7 @@ class CountryFactory extends Factory
     {
         return [
             'name' => $this->faker->country(),
+            'code' => strtoupper($this->faker->unique()->bothify('??####')),
             'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
     }

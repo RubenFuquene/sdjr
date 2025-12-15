@@ -13,9 +13,17 @@ class City extends Model
 
     protected $fillable = [
         'department_id',
+        'code',
         'name',
         'status',
     ];
+    /**
+     * Sanitize code before saving.
+     */
+    public function setCodeAttribute($value): void
+    {
+        $this->attributes['code'] = strtoupper(trim($value));
+    }
 
     /**
      * Get the department that owns the city.

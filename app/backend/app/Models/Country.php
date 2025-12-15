@@ -12,16 +12,24 @@ class Country extends Model
     use HasFactory, SanitizesTextAttributes;
 
     protected $fillable = [
+        'code',
         'name',
         'status',
     ];
+    /**
+     * Sanitize code before saving.
+     */
+    public function setCodeAttribute($value): void
+    {
+        $this->attributes['code'] = strtoupper(trim($value));
+    }
 
     /**
      * Sanitize name before saving.
      */
     public function setNameAttribute($value): void
     {
-        $this->attributes['name'] = $this->sanitizeText($value);
+        $this->attributes['name'] = $this->capitalizeText($value);
     }
 
     /**

@@ -21,6 +21,7 @@ class CityFactory extends Factory
         return [
             'department_id' => Department::factory(),
             'name' => $this->faker->city(),
+            'code' => strtoupper($this->faker->unique()->bothify('??####')),
             'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
     }

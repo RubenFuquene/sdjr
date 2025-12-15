@@ -48,6 +48,13 @@ class DepartmentRequest extends FormRequest
      *      example="A"
      * )
      *
+     * @OA\Property(
+     *      property="code",
+     *      title="code",
+     *      description="Unique code for the department (6 alphanumeric characters)",
+     *      example="DEP001"
+     * )
+     * 
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -55,6 +62,7 @@ class DepartmentRequest extends FormRequest
         return [
             'country_id' => 'required|exists:countries,id',
             'name' => 'required|string|max:255',
+            'code' => 'required|string|size:6|regex:/^[A-Za-z0-9]+$/|unique:departments,code',
             'status' => 'nullable|integer|in:0,1',
         ];
     }

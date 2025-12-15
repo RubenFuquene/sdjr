@@ -32,8 +32,17 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
-        Department::create(['country_id' => $country->id, 'name' => 'Cundinamarca', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
+        $country = Country::create([
+            'name' => 'Colombia',
+            'code' => 'CO1234',
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+        ]);
+        Department::create([
+            'country_id' => $country->id,
+            'name' => 'Cundinamarca',
+            'code' => 'DEP001',
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+        ]);
 
         $response = $this->getJson('/api/v1/departments');
 
@@ -51,15 +60,24 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])]);
-        $data = ['country_id' => $country->id, 'name' => 'Antioquia', 'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])];
+        $country = Country::create([
+            'name' => 'Colombia',
+            'code' => 'CO1234',
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+        ]);
+        $data = [
+            'country_id' => $country->id,
+            'name' => 'Antioquia',
+            'code' => 'DEP002',
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+        ];
 
         $response = $this->postJson('/api/v1/departments', $data);
 
         $response->assertStatus(201)
-            ->assertJsonFragment(['name' => 'Antioquia']);
+            ->assertJsonFragment(['name' => 'Antioquia', 'code' => 'DEP002']);
 
-        $this->assertDatabaseHas('departments', ['name' => 'Antioquia']);
+        $this->assertDatabaseHas('departments', ['name' => 'Antioquia', 'code' => 'DEP002']);
     }
 
     /**
@@ -72,13 +90,22 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => Constant::STATUS_ACTIVE]);
-        $department = Department::create(['country_id' => $country->id, 'name' => 'Valle del Cauca', 'status' => Constant::STATUS_ACTIVE]);
+        $country = Country::create([
+            'name' => 'Colombia',
+            'code' => 'CO1234',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
+        $department = Department::create([
+            'country_id' => $country->id,
+            'name' => 'Valle del Cauca',
+            'code' => 'DEP003',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
 
         $response = $this->getJson("/api/v1/departments/{$department->id}");
 
         $response->assertStatus(200)
-            ->assertJsonFragment(['name' => 'Valle del Cauca']);
+            ->assertJsonFragment(['name' => 'Valle del Cauca', 'code' => 'DEP003']);
     }
 
     /**
@@ -91,16 +118,30 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => Constant::STATUS_ACTIVE]);
-        $department = Department::create(['country_id' => $country->id, 'name' => 'Atlantico', 'status' => Constant::STATUS_ACTIVE]);
-        $data = ['country_id' => $country->id, 'name' => 'Atlántico', 'status' => Constant::STATUS_INACTIVE];
+        $country = Country::create([
+            'name' => 'Colombia',
+            'code' => 'CO1234',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
+        $department = Department::create([
+            'country_id' => $country->id,
+            'name' => 'Atlantico',
+            'code' => 'DEP004',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
+        $data = [
+            'country_id' => $country->id,
+            'name' => 'Atlántico',
+            'code' => 'DEP005',
+            'status' => Constant::STATUS_INACTIVE
+        ];
 
         $response = $this->putJson("/api/v1/departments/{$department->id}", $data);
 
         $response->assertStatus(200)
-            ->assertJsonFragment(['name' => 'Atlántico']);
+            ->assertJsonFragment(['name' => 'Atlántico', 'code' => 'DEP005']);
 
-        $this->assertDatabaseHas('departments', ['name' => 'Atlántico']);
+        $this->assertDatabaseHas('departments', ['name' => 'Atlántico', 'code' => 'DEP005']);
     }
 
     /**
@@ -113,8 +154,17 @@ class DepartmentTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Colombia', 'status' => Constant::STATUS_ACTIVE]);
-        $department = Department::create(['country_id' => $country->id, 'name' => 'Bolivar', 'status' => Constant::STATUS_ACTIVE]);
+        $country = Country::create([
+            'name' => 'Colombia',
+            'code' => 'CO1234',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
+        $department = Department::create([
+            'country_id' => $country->id,
+            'name' => 'Bolivar',
+            'code' => 'DEP006',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
 
         $response = $this->deleteJson("/api/v1/departments/{$department->id}");
 

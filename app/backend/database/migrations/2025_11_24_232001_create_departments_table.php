@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('country_id')->constrained()->onDelete('cascade');
+            $table->string('code', 6)->unique();
             $table->string('name');
             $table->char('status', 1)->default(Constant::STATUS_ACTIVE);
             $table->timestamps();

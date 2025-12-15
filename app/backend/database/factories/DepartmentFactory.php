@@ -21,6 +21,7 @@ class DepartmentFactory extends Factory
         return [
             'country_id' => Country::factory(),
             'name' => $this->faker->state(),
+            'code' => strtoupper($this->faker->unique()->bothify('??####')),
             'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
     }
