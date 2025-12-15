@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\RoleController;
+use App\Http\Controllers\Api\V1\UserController;
 
 Route::prefix('v1')->group(function () {
     
@@ -24,6 +25,9 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('cities', CityController::class);
         Route::apiResource('categories', CategoryController::class);
 
+        // User Management routes
+        Route::apiResource('users', UserController::class);
+        
         // Role and Permission Management routes
         Route::get('roles', [RoleController::class, 'index']);
         Route::post('roles', [RoleController::class, 'store']);

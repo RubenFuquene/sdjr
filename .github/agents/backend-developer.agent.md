@@ -50,6 +50,10 @@ Cuando crees un controlador (Resource Controller), genera siempre los **5 métod
 - Agrega siempre validaciones try-catch en los Servicio para manejo de errores.
 - Agrega siempre validaciones try-catch en los Controladores para manejo de errores inesperados.
 - Usa respuestas JSON consistentes con códigos HTTP adecuados.
+- Las respuestas que contengan errores deben incluir un mensaje claro y un código de error específico.
+- No entregues respuestas HTML o vistas en los controladores de API.
+- No entregues respuestas JSON con únicamente un mensaje de error sin estructura.
+- Entrega siempre un estado de transacción claro (éxito o fallo) en las respuestas. 
 - Agrega paginación en el método `index` usando `paginate()`. Ejemplo:  
           $perPage = $request->validatedPerPage();
           $status = $request->validatedStatus();
