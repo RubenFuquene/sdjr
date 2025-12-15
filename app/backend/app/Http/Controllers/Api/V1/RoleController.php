@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\RoleResource;
+use App\Http\Resources\Api\V1\RoleResource;
 use App\Http\Requests\Api\V1\RoleStoreRequest;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Requests\Api\V1\PermissionStoreRequest;
@@ -19,6 +19,20 @@ use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Traits\ApiResponseTrait;
 
+/**
+ * @OA\Tag(
+ *     name="Roles",
+ *     description="API Endpoints of Roles"
+ * )
+ * @OA\Tag(
+ *     name="Permissions",
+ *     description="API Endpoints of Permissions"
+ * )
+ * @OA\Tag(
+ *     name="Users",
+ *     description="API Endpoints of Users"
+ * )
+ */
 class RoleController extends Controller
 {
     use ApiResponseTrait;
@@ -35,12 +49,17 @@ class RoleController extends Controller
      *     operationId="getRolesList",
      *     tags={"Roles"},
      *     summary="Get list of roles",
-     *     description="Returns list of roles with permissions and user count.",
+     *     description="Returns a paginated list of roles with permissions and user count.",
      *     security={{"sanctum":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/RoleResource"))
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/RoleResource")),
+     *             @OA\Property(property="meta", type="object"),
+     *             @OA\Property(property="links", type="object")
+     *         )
      *     ),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -74,7 +93,7 @@ class RoleController extends Controller
      *     @OA\Response(
      *         response=201,
      *         description="Role created successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Role")
+     *         @OA\JsonContent(ref="#/components/schemas/RoleResource")
      *     ),
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -96,28 +115,35 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/permissions",
-     *     operationId="storePermission",
-     *     tags={"Permissions"},
-     *     summary="Create a new permission",
-     *     description="Creates a new permission.",
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/PermissionStoreRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Permission created successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Permission")
-     *     ),
-     *     @OA\Response(response=400, description="Bad Request"),
-     *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
+        /**
+         * @OA\Post(
+         *     path="/api/v1/permissions",
+         *     operationId="storePermission",
+         *     tags={"Permissions"},
+         *     summary="Create a new permission",
+         *     description="Creates a new permission.",
+         *     security={{"sanctum":{}}},
+         *     @OA\RequestBody(
+         *         required=true,
+         *         @OA\JsonContent(ref="#/components/schemas/PermissionStoreRequest")
+         *     ),
+         *     @OA\Response(
+         *         response=201,
+         *         description="Permission created successfully",
+         *         @OA\JsonContent(
+         *             type="object",
+         *             @OA\Property(property="id", type="integer", example=1),
+         *             @OA\Property(property="name", type="string", example="users.create"),
+         *             @OA\Property(property="description", type="string", example="Permite crear usuarios"),
+         *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-12-15T12:34:56Z"),
+         *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-12-15T12:34:56Z")
+         *         )
+         *     ),
+         *     @OA\Response(response=400, description="Bad Request"),
+         *     @OA\Response(response=401, description="Unauthenticated"),
+         *     @OA\Response(response=403, description="Forbidden")
+         * )
+         */
     public function storePermission(PermissionStoreRequest $request): JsonResponse
     {
         try {
@@ -152,7 +178,8 @@ class RoleController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Roles and permissions assigned successfully"
+     *         description="Roles and permissions assigned successfully",
+     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Roles and permissions assigned successfully"))
      *     ),
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -195,7 +222,8 @@ class RoleController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Permissions assigned successfully"
+     *         description="Permissions assigned successfully",
+     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Permissions assigned successfully"))
      *     ),
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),

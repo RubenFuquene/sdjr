@@ -13,6 +13,88 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/audit-logs": {
+            "get": {
+                "tags": [
+                    "AuditLogs"
+                ],
+                "summary": "Get all audit logs",
+                "description": "Returns a list of audit logs",
+                "operationId": "getAuditLogs",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AuditLogResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/audit-logs/{id}": {
+            "get": {
+                "tags": [
+                    "AuditLogs"
+                ],
+                "summary": "Get audit log by ID",
+                "description": "Returns a single audit log entry",
+                "operationId": "getAuditLogById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuditLogResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/login": {
             "post": {
                 "tags": [
@@ -74,6 +156,269 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/v1/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get list of categories",
+                "description": "Returns list of categories. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
+                "operationId": "getCategoriesList",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de registros por página (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Store new category",
+                "description": "Returns category data",
+                "operationId": "storeCategory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/categories/{id}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get category information",
+                "description": "Returns category data",
+                "operationId": "getCategoryById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Category id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update existing category",
+                "description": "Returns updated category data",
+                "operationId": "updateCategory",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Category id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete existing category",
+                "description": "Deletes a record and returns no content",
+                "operationId": "deleteCategory",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Category id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/cities": {
@@ -318,8 +663,35 @@
                     "Countries"
                 ],
                 "summary": "Get list of countries",
-                "description": "Returns list of countries",
+                "description": "Returns list of countries. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
                 "operationId": "getCountriesList",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de registros por página (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -783,10 +1155,820 @@
                     }
                 ]
             }
+        },
+        "/api/v1/neighborhoods": {
+            "get": {
+                "tags": [
+                    "Neighborhoods"
+                ],
+                "summary": "List neighborhoods",
+                "description": "Get paginated list of neighborhoods",
+                "operationId": "indexNeighborhoods",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Neighborhoods"
+                ],
+                "summary": "Create neighborhood",
+                "description": "Store a new neighborhood",
+                "operationId": "storeNeighborhood",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NeighborhoodRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NeighborhoodResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/neighborhoods/{id}": {
+            "get": {
+                "tags": [
+                    "Neighborhoods"
+                ],
+                "summary": "Show neighborhood",
+                "description": "Get a specific neighborhood",
+                "operationId": "showNeighborhood",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NeighborhoodResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Neighborhoods"
+                ],
+                "summary": "Update neighborhood",
+                "description": "Update a specific neighborhood",
+                "operationId": "updateNeighborhood",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NeighborhoodRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NeighborhoodResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Neighborhoods"
+                ],
+                "summary": "Delete neighborhood",
+                "description": "Delete a specific neighborhood",
+                "operationId": "deleteNeighborhood",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/roles": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Get list of roles",
+                "description": "Returns a paginated list of roles with permissions and user count.",
+                "operationId": "getRolesList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RoleResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create a new role",
+                "description": "Creates a new role and assigns permissions.",
+                "operationId": "storeRole",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleStoreRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/permissions": {
+            "post": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Create a new permission",
+                "description": "Creates a new permission.",
+                "operationId": "storePermission",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermissionStoreRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Permission created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "users.create"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Permite crear usuarios"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-12-15T12:34:56Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-12-15T12:34:56Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{user}/assign-roles-permissions": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Assign roles and permissions to user",
+                "description": "Assigns roles and permissions to a user.",
+                "operationId": "assignRolesPermissionsToUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserAssignRolePermissionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Roles and permissions assigned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Roles and permissions assigned successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/roles/{role}/assign-permissions": {
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Assign permissions to a role",
+                "description": "Assigns permissions to a role.",
+                "operationId": "assignPermissionsToRole",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleAssignPermissionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Permissions assigned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permissions assigned successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get list of users",
+                "description": "Returns list of users with roles and permissions.",
+                "operationId": "getUsersList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "description": "Creates a new user.",
+                "operationId": "storeUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{user}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user by ID",
+                "description": "Returns a single user with roles and permissions.",
+                "operationId": "getUserById",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user",
+                "description": "Updates a user.",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete user",
+                "description": "Deletes a user.",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{user}/status": {
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Activate or inactivate a user",
+                "description": "Updates the status (active/inactive) of a user.",
+                "operationId": "updateUserStatus",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "description": "User status: 1=active, 0=inactive",
+                                        "type": "string",
+                                        "enum": [
+                                            "0",
+                                            "1"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
         "schemas": {
+            "CategoryRequest": {
+                "title": "Category Request",
+                "description": "Category request body data",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Food"
+                    },
+                    "icon": {
+                        "type": "string",
+                        "example": "https://example.com/icon.png"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
             "CityRequest": {
                 "title": "City Request",
                 "description": "City request body data",
@@ -821,6 +2003,15 @@
                             "type": "mixed"
                         },
                         "example": "A"
+                    },
+                    "code": {
+                        "title": "code",
+                        "description": "Unique code for the city (6 alphanumeric characters)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "CITY01"
                     }
                 },
                 "type": "object"
@@ -849,6 +2040,15 @@
                             "type": "mixed"
                         },
                         "example": "A"
+                    },
+                    "code": {
+                        "title": "code",
+                        "description": "Unique code for the country (6 alphanumeric characters)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "CO1234"
                     }
                 },
                 "type": "object"
@@ -887,6 +2087,15 @@
                             "type": "mixed"
                         },
                         "example": "A"
+                    },
+                    "code": {
+                        "title": "code",
+                        "description": "Unique code for the department (6 alphanumeric characters)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "DEP001"
                     }
                 },
                 "type": "object"
@@ -914,6 +2123,301 @@
                 },
                 "type": "object"
             },
+            "NeighborhoodRequest": {
+                "title": "Neighborhood Request",
+                "description": "Neighborhood request body data",
+                "required": [
+                    "city_id",
+                    "name",
+                    "code"
+                ],
+                "properties": {
+                    "city_id": {
+                        "title": "city_id",
+                        "description": "ID of the city",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": 1
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "Name of the neighborhood",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Chapinero"
+                    },
+                    "code": {
+                        "title": "code",
+                        "description": "Unique code for the neighborhood (6 alphanumeric characters)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "NB0001"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "Status of the neighborhood (A: Active, I: Inactive)",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    }
+                },
+                "type": "object"
+            },
+            "PermissionStoreRequest": {
+                "required": [
+                    "name",
+                    "description"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Permission name (unique)",
+                        "type": "string",
+                        "maxLength": 50,
+                        "example": "users.create"
+                    },
+                    "description": {
+                        "description": "Permission description",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Permite crear usuarios"
+                    }
+                },
+                "type": "object"
+            },
+            "RoleAssignPermissionRequest": {
+                "required": [
+                    "permissions"
+                ],
+                "properties": {
+                    "permissions": {
+                        "description": "Array of permission names to assign",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "users.create"
+                        }
+                    },
+                    "sync": {
+                        "description": "If true, replaces all permissions; if false, adds",
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "RoleStoreRequest": {
+                "required": [
+                    "name",
+                    "description"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Role name (unique)",
+                        "type": "string",
+                        "maxLength": 50,
+                        "example": "admin"
+                    },
+                    "description": {
+                        "description": "Role description",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Administrador del sistema"
+                    },
+                    "permissions": {
+                        "description": "Array of permission names",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "users.create"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "UserAssignRolePermissionRequest": {
+                "properties": {
+                    "roles": {
+                        "description": "Array of role names to assign",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "admin"
+                        }
+                    },
+                    "permissions": {
+                        "description": "Array of permission names to assign",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "users.create"
+                        }
+                    },
+                    "sync": {
+                        "description": "If true, replaces all roles/permissions; if false, adds",
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "UserRequest": {
+                "required": [
+                    "name",
+                    "last_name",
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "User first name",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Juan"
+                    },
+                    "last_name": {
+                        "description": "User last name",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Pérez"
+                    },
+                    "email": {
+                        "description": "User email address",
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    },
+                    "phone": {
+                        "description": "User phone number",
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "3001234567"
+                    },
+                    "password": {
+                        "description": "User password (required on create)",
+                        "type": "string",
+                        "minLength": 8,
+                        "example": "secret123"
+                    },
+                    "password_confirmation": {
+                        "description": "Password confirmation (required on create)",
+                        "type": "string",
+                        "minLength": 8,
+                        "example": "secret123"
+                    },
+                    "status": {
+                        "description": "User status: 1=active, 0=inactive",
+                        "type": "integer",
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "AuditLogResource": {
+                "title": "Audit Log Resource",
+                "description": "Audit log entry resource",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "ID del usuario autenticado o null",
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "method": {
+                        "description": "Método HTTP usado",
+                        "type": "string",
+                        "example": "POST"
+                    },
+                    "endpoint": {
+                        "description": "Ruta solicitada",
+                        "type": "string",
+                        "example": "/api/v1/users"
+                    },
+                    "payload": {
+                        "description": "Cuerpo de la petición (campos sensibles ofuscados)",
+                        "type": "object"
+                    },
+                    "response_code": {
+                        "description": "Código de respuesta HTTP",
+                        "type": "integer",
+                        "example": 201
+                    },
+                    "response_time": {
+                        "description": "Tiempo de respuesta en ms",
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "ip_address": {
+                        "description": "IP del cliente",
+                        "type": "string",
+                        "example": "192.168.1.10"
+                    },
+                    "user_agent": {
+                        "description": "User agent del cliente",
+                        "type": "string",
+                        "example": "Mozilla/5.0"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
+            "CategoryResource": {
+                "title": "Category Resource",
+                "description": "Category resource response",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Alimentos"
+                    },
+                    "icon": {
+                        "type": "string",
+                        "example": "icon.png"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
             "CityResource": {
                 "title": "City Resource",
                 "description": "City resource representation",
@@ -921,20 +2425,14 @@
                     "id": {
                         "title": "id",
                         "description": "City ID",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
-                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                        "type": "integer",
+                        "example": 1
                     },
                     "department_id": {
                         "title": "department_id",
                         "description": "Department ID",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
-                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                        "type": "integer",
+                        "example": 1
                     },
                     "name": {
                         "title": "name",
@@ -988,11 +2486,8 @@
                     "id": {
                         "title": "id",
                         "description": "Country ID",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
-                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                        "type": "integer",
+                        "example": 1
                     },
                     "name": {
                         "title": "name",
@@ -1043,20 +2538,14 @@
                     "id": {
                         "title": "id",
                         "description": "Department ID",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
-                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                        "type": "integer",
+                        "example": 1
                     },
                     "country_id": {
                         "title": "country_id",
                         "description": "Country ID",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
-                        "example": "9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
+                        "type": "integer",
+                        "example": 1
                     },
                     "name": {
                         "title": "name",
@@ -1103,23 +2592,110 @@
                     "name": "DepartmentResource"
                 }
             },
+            "NeighborhoodResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "city_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Chapinero"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "NB0001"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "A"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "RoleResource": {
+                "title": "Role Resource",
+                "description": "Role resource response",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Admin"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Administrator role with full permissions"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
             "UserResource": {
                 "title": "User Resource",
                 "description": "User resource representation",
                 "properties": {
                     "id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "example": "9b1c4d8e-1234-5678-90ab-cdef12345678"
+                        "type": "integer",
+                        "example": 1
                     },
                     "name": {
                         "type": "string",
-                        "example": "John Doe"
+                        "example": "Juan"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Pérez"
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "example": "john@example.com"
+                        "example": "juan.perez@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "3001234567"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "admin",
+                            "user"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "A"
                     },
                     "created_at": {
                         "type": "string",
@@ -1133,6 +2709,89 @@
                     }
                 },
                 "type": "object"
+            },
+            "AuditLog": {
+                "title": "Audit Log",
+                "description": "Audit log entry",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "method": {
+                        "type": "string",
+                        "example": "POST"
+                    },
+                    "endpoint": {
+                        "type": "string",
+                        "example": "/api/v1/countries"
+                    },
+                    "payload": {
+                        "type": "string",
+                        "example": "{...}"
+                    },
+                    "response_code": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "response_time": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "ip_address": {
+                        "type": "string",
+                        "example": "127.0.0.1"
+                    },
+                    "user_agent": {
+                        "type": "string",
+                        "example": "PostmanRuntime/7.32.2"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Category": {
+                "title": "Category",
+                "description": "Category model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Alimentos"
+                    },
+                    "icon": {
+                        "type": "string",
+                        "example": "icon.png"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "A"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -1140,6 +2799,10 @@
         {
             "name": "Authentication",
             "description": "API Endpoints for User Authentication"
+        },
+        {
+            "name": "Categories",
+            "description": "API Endpoints of Categories"
         },
         {
             "name": "Cities",
@@ -1152,6 +2815,26 @@
         {
             "name": "Departments",
             "description": "API Endpoints of Departments"
+        },
+        {
+            "name": "Roles",
+            "description": "API Endpoints of Roles"
+        },
+        {
+            "name": "Permissions",
+            "description": "API Endpoints of Permissions"
+        },
+        {
+            "name": "Users",
+            "description": "API Endpoints of Users"
+        },
+        {
+            "name": "AuditLogs",
+            "description": "AuditLogs"
+        },
+        {
+            "name": "Neighborhoods",
+            "description": "Neighborhoods"
         }
     ]
 }
