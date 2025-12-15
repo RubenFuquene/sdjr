@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ProviderSeeder::class,
             CategorySeeder::class,
             RolePermissionSeeder::class,
+            NeighborhoodSeeder::class,
         ]);
     }
 }

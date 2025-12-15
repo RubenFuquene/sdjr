@@ -17,13 +17,6 @@ class City extends Model
         'name',
         'status',
     ];
-    /**
-     * Sanitize code before saving.
-     */
-    public function setCodeAttribute($value): void
-    {
-        $this->attributes['code'] = strtoupper(trim($value));
-    }
 
     /**
      * Get the department that owns the city.
@@ -36,10 +29,26 @@ class City extends Model
     }
 
     /**
+     * Get the neighborhoods for the city.
+     */
+    public function neighborhoods()
+    {
+        return $this->hasMany(Neighborhood::class);
+    }
+
+    /**
      * Sanitize name before saving.
      */
     public function setNameAttribute($value): void
     {
         $this->attributes['name'] = $this->sanitizeText($value);
+    }
+    
+    /**
+     * Sanitize code before saving.
+     */
+    public function setCodeAttribute($value): void
+    {
+        $this->attributes['code'] = strtoupper(trim($value));
     }
 }
