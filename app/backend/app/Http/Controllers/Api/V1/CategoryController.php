@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Http\Resources\Api\V1\CategoryResource;
 use OpenApi\Attributes as OA;
-
+use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -22,6 +22,7 @@ use OpenApi\Attributes as OA;
  */
 class CategoryController extends Controller
 {
+    use ApiResponseTrait;
     protected CategoryService $categoryService;
 
     public function __construct(CategoryService $categoryService)
@@ -76,12 +77,10 @@ class CategoryController extends Controller
             $perPage = $request->validatedPerPage();
             $status = $request->validatedStatus();
             $categories = $this->categoryService->getPaginated($perPage, $status);
-            return CategoryResource::collection($categories);
+            $resource = CategoryResource::collection($categories);
+            return $this->paginatedResponse($categories, $resource, 'Categories retrieved successfully');
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error retrieving categories',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error retrieving categories', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -125,12 +124,9 @@ class CategoryController extends Controller
     {
         try {
             $category = $this->categoryService->create($request->validated());
-            return new CategoryResource($category);
+            return $this->successResponse(new CategoryResource($category), 'Category created successfully', 201);
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error creating category',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error creating category', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -184,14 +180,11 @@ class CategoryController extends Controller
         try {
             $category = $this->categoryService->find($id);
             if (!$category) {
-                return response()->json(['message' => 'Category not found'], 404);
+                return $this->errorResponse('Category not found', 404);
             }
-            return new CategoryResource($category);
+            return $this->successResponse(new CategoryResource($category), 'Category retrieved successfully', 200);
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error retrieving category',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error retrieving category', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -250,15 +243,12 @@ class CategoryController extends Controller
         try {
             $category = $this->categoryService->find($id);
             if (!$category) {
-                return response()->json(['message' => 'Category not found'], 404);
+                return $this->errorResponse('Category not found', 404);
             }
             $updated = $this->categoryService->update($category, $request->validated());
-            return new CategoryResource($updated);
+            return $this->successResponse(new CategoryResource($updated), 'Category updated successfully', 200);
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error updating category',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error updating category', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -310,15 +300,12 @@ class CategoryController extends Controller
         try {
             $category = $this->categoryService->find($id);
             if (!$category) {
-                return response()->json(['message' => 'Category not found'], 404);
+                return $this->errorResponse('Category not found', 404);
             }
             $this->categoryService->delete($category);
-            return response()->json(['message' => 'Category deleted successfully']);
+            return $this->noContentResponse();
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error deleting category',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error deleting category', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 }

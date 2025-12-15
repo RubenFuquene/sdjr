@@ -9,6 +9,7 @@ use App\Http\Resources\Api\V1\CountryResource;
 use App\Services\CountryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Info(
@@ -31,6 +32,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class CountryController extends Controller
 {
+    use ApiResponseTrait;
     protected CountryService $countryService;
 
     public function __construct(CountryService $countryService)
@@ -86,12 +88,10 @@ class CountryController extends Controller
             $perPage = $request->validatedPerPage();
             $status = $request->validatedStatus();
             $countries = $this->countryService->getPaginated($perPage, $status);
-            return CountryResource::collection($countries);
+            $resource = CountryResource::collection($countries);
+            return $this->paginatedResponse($countries, $resource, 'Countries retrieved successfully');
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error retrieving countries',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error retrieving countries', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -135,12 +135,9 @@ class CountryController extends Controller
     {
         try {
             $country = $this->countryService->create($request->validated());
-            return new CountryResource($country);
+            return $this->successResponse(new CountryResource($country), 'Country created successfully', 201);
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error creating country',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error creating country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -194,14 +191,11 @@ class CountryController extends Controller
         try {
             $country = $this->countryService->find($id);
             if (!$country) {
-                return response()->json(['message' => 'Country not found'], 404);
+                return $this->errorResponse('Country not found', 404);
             }
-            return new CountryResource($country);
+            return $this->successResponse(new CountryResource($country), 'Country retrieved successfully', 200);
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error retrieving country',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error retrieving country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -260,15 +254,12 @@ class CountryController extends Controller
         try {
             $country = $this->countryService->find($id);
             if (!$country) {
-                return response()->json(['message' => 'Country not found'], 404);
+                return $this->errorResponse('Country not found', 404);
             }
             $updatedCountry = $this->countryService->update($country, $request->validated());
-            return new CountryResource($updatedCountry);
+            return $this->successResponse(new CountryResource($updatedCountry), 'Country updated successfully', 200);
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error updating country',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error updating country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 
@@ -320,15 +311,12 @@ class CountryController extends Controller
         try {
             $country = $this->countryService->find($id);
             if (!$country) {
-                return response()->json(['message' => 'Country not found'], 404);
+                return $this->errorResponse('Country not found', 404);
             }
             $this->countryService->delete($country);
-            return response()->json(['message' => 'Country deleted successfully']);
+            return $this->noContentResponse();
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error deleting country',
-                'error' => app()->environment('production') ? null : $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Error deleting country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
     }
 }

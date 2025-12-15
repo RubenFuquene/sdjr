@@ -17,9 +17,11 @@ use App\Http\Requests\Api\V1\PermissionStoreRequest;
 use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
 use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Traits\ApiResponseTrait;
 
 class RoleController extends Controller
 {
+    use ApiResponseTrait;
     private RoleService $roleService;
 
     public function __construct(RoleService $roleService)
@@ -49,10 +51,11 @@ class RoleController extends Controller
         try {
             $perPage = request('per_page', 15);
             $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount((int)$perPage);
-            return RoleResource::collection($roles);
+            $resource = RoleResource::collection($roles);
+            return $this->paginatedResponse($roles, $resource, 'Roles retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error listing roles', ['error' => $e->getMessage().' Line: '.$e->getLine()]);
-            return response()->json(['message' => 'Error listing roles'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse('Error listing roles', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
 
@@ -86,10 +89,10 @@ class RoleController extends Controller
                 $request->validated('description'),
                 $request->validated('permissions', [])
             );
-            return response()->json($role, Response::HTTP_CREATED);
+            return $this->successResponse($role, 'Role created successfully', Response::HTTP_CREATED);
         } catch (\Throwable $e) {
             Log::error('Error creating role', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Error creating role'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse('Error creating role', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
 
@@ -122,10 +125,10 @@ class RoleController extends Controller
                 $request->validated('name'),
                 $request->validated('description')
             );
-            return response()->json($permission, Response::HTTP_CREATED);
+            return $this->successResponse($permission, 'Permission created successfully', Response::HTTP_CREATED);
         } catch (\Throwable $e) {
             Log::error('Error creating permission', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Error creating permission'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse('Error creating permission', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
 
@@ -165,10 +168,10 @@ class RoleController extends Controller
                 $request->validated('permissions', []),
                 $request->boolean('sync', true)
             );
-            return response()->json(['message' => 'Roles and permissions assigned successfully'], Response::HTTP_OK);
+            return $this->successResponse(null, 'Roles and permissions assigned successfully', Response::HTTP_OK);
         } catch (\Throwable $e) {
             Log::error('Error assigning roles/permissions', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Error assigning roles/permissions'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse('Error assigning roles/permissions', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
 
@@ -203,10 +206,10 @@ class RoleController extends Controller
     {
         try {
             $this->roleService->assignPermissionsToRole($role, $request->validated('permissions'), $request->boolean('sync', true));
-            return response()->json(['message' => 'Permissions assigned successfully'], 200);
+            return $this->successResponse(null, 'Permissions assigned successfully', 200);
         } catch (\Throwable $e) {
             Log::error('Error assigning permissions to role', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Error assigning permissions to role'], 500);
+            return $this->errorResponse('Error assigning permissions to role', 500, ['exception' => $e->getMessage()]);
         }
     }
 }
