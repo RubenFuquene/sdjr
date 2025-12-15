@@ -70,10 +70,12 @@ class CategoryController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection|JsonResponse
+    public function index(\App\Http\Requests\Api\V1\CategoryIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $categories = $this->categoryService->getPaginated();
+            $perPage = $request->validatedPerPage();
+            $status = $request->validatedStatus();
+            $categories = $this->categoryService->getPaginated($perPage, $status);
             return CategoryResource::collection($categories);
         } catch (\Throwable $e) {
             return response()->json([

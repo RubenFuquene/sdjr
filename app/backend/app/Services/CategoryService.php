@@ -15,9 +15,13 @@ class CategoryService
      * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
     {
-        return Category::paginate($perPage);
+        $query = Category::query();
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        return $query->paginate($perPage);
     }
 
     /**

@@ -49,6 +49,10 @@ Cuando crees un controlador (Resource Controller), genera siempre los **5 métod
 - Delega la ejecución lógica al método correspondiente del Servicio.
 - Agrega siempre validaciones try-catch en los Servicio para manejo de errores.
 - Agrega siempre validaciones try-catch en los Controladores para manejo de errores inesperados.
+- Usa respuestas JSON consistentes con códigos HTTP adecuados.
+- Agrega paginación en el método `index` usando `paginate()`. Ejemplo:  
+          $perPage = $request->validatedPerPage();
+          $status = $request->validatedStatus();
 
 #### 2.1.3 Controladores Delgados (Slim Controllers)
 

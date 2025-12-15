@@ -51,10 +51,12 @@ class DepartmentController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection|JsonResponse
+    public function index(\App\Http\Requests\Api\V1\DepartmentIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $departments = $this->departmentService->getPaginated();
+            $perPage = $request->validatedPerPage();
+            $status = $request->validatedStatus();
+            $departments = $this->departmentService->getPaginated($perPage, $status);
             return DepartmentResource::collection($departments);
         } catch (\Throwable $e) {
             return response()->json([

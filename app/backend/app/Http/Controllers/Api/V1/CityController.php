@@ -51,10 +51,12 @@ class CityController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection|JsonResponse
+    public function index(\App\Http\Requests\Api\V1\CityIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $cities = $this->cityService->getPaginated();
+            $perPage = $request->validatedPerPage();
+            $status = $request->validatedStatus();
+            $cities = $this->cityService->getPaginated($perPage, $status);
             return CityResource::collection($cities);
         } catch (\Throwable $e) {
             return response()->json([
