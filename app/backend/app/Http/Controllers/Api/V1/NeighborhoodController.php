@@ -11,10 +11,16 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Services\NeighborhoodService;
-use App\Http\Resources\NeighborhoodResource;
+use App\Http\Resources\Api\V1\NeighborhoodResource;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Requests\Api\V1\NeighborhoodRequest;
 
+/**
+ * @OA\Tag(
+ *     name="Neighborhoods",
+ *     description="API Endpoints of Neighborhoods"
+ * )
+ */
 class NeighborhoodController extends Controller
 {
     use ApiResponseTrait;

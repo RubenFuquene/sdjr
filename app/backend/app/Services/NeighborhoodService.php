@@ -20,7 +20,7 @@ class NeighborhoodService
      */
     public function getPaginated(int $perPage = 15): LengthAwarePaginator
     {
-        return Neighborhood::query()->paginate($perPage);
+        return Neighborhood::with('city')->paginate($perPage);
     }
 
     /**
