@@ -10,8 +10,7 @@ class RoleAssignPermissionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Solo usuarios autenticados pueden asignar permisos a roles
-        return Auth::check();
+        return $this->user()?->can('roles.assign_permissions') ?? false;
     }
 
     public function rules(): array

@@ -10,7 +10,7 @@ class DepartmentIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('departments.view') ?? false;
     }
 
     public function rules(): array

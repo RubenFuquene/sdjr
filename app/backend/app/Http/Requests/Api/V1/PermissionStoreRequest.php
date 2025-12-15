@@ -11,8 +11,7 @@ class PermissionStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Solo usuarios autenticados pueden crear permisos
-        return Auth::check();
+        return $this->user()?->can('permissions.create') ?? false;
     }
 
     public function rules(): array

@@ -10,7 +10,7 @@ class CityIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('cities.view') ?? false;
     }
 
     public function rules(): array

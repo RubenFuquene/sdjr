@@ -11,8 +11,7 @@ class RoleStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Solo usuarios autenticados pueden crear roles
-        return Auth::check();
+        return $this->user()?->can('roles.create') ?? false;
     }
 
     public function rules(): array
