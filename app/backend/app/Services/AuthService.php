@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
@@ -17,19 +18,18 @@ class AuthService
      */
     public function login(array $credentials): array
     {
-        if (!Auth::attempt($credentials)) {
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => [__('auth.failed')],
             ]);
         }
-
-        $user = User::where('email', $credentials['email'])->first();
-
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('api-token')->plainTextToken;
 
         return [
-            'user' => $user,
             'token' => $token,
+            'user' => $user,
         ];
     }
 }
