@@ -10,6 +10,7 @@ use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use Faker\Generator;
 use App\Constants\Constant;
+use Spatie\Permission\Models\Permission;
 
 class CountryTest extends TestCase
 {
@@ -29,7 +30,9 @@ class CountryTest extends TestCase
      */
     public function test_index_returns_countries()
     {
+        Permission::firstOrCreate(['name' => 'countries.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('countries.index');
         Sanctum::actingAs($user);
 
         Country::create([
@@ -56,7 +59,9 @@ class CountryTest extends TestCase
      */
     public function test_store_creates_country()
     {
+        Permission::firstOrCreate(['name' => 'countries.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('countries.create');
         Sanctum::actingAs($user);
 
         $data = [
@@ -68,9 +73,14 @@ class CountryTest extends TestCase
         $response = $this->postJson('/api/v1/countries', $data);
 
         $response->assertStatus(201)
-            ->assertJsonFragment($data);
+            ->assertJsonPath('data.name', 'Argentina')
+            ->assertJsonPath('data.code', 'AR0001');
 
-        $this->assertDatabaseHas('countries', $data);
+        $this->assertDatabaseHas('countries', [
+            'name' => 'Argentina',
+            'code' => 'AR0001',
+            'status' => $data['status'],
+        ]);
     }
 
     /**
@@ -80,7 +90,9 @@ class CountryTest extends TestCase
      */
     public function test_show_returns_country()
     {
+        Permission::firstOrCreate(['name' => 'countries.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('countries.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -92,7 +104,8 @@ class CountryTest extends TestCase
         $response = $this->getJson("/api/v1/countries/{$country->id}");
 
         $response->assertStatus(200)
-            ->assertJsonFragment(['name' => 'Chile', 'code' => 'CL9999']);
+            ->assertJsonPath('data.name', 'Chile')
+            ->assertJsonPath('data.code', 'CL9999');
     }
 
     /**
@@ -102,7 +115,9 @@ class CountryTest extends TestCase
      */
     public function test_update_updates_country()
     {
+        Permission::firstOrCreate(['name' => 'countries.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('countries.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -131,14 +146,20 @@ class CountryTest extends TestCase
      */
     public function test_destroy_deletes_country()
     {
+        Permission::firstOrCreate(['name' => 'countries.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('countries.delete');
         Sanctum::actingAs($user);
 
-        $country = Country::create(['name' => 'Uruguay', 'status' => Constant::STATUS_ACTIVE]);
+        $country = Country::create([
+            'name' => 'Uruguay',
+            'code' => 'UY0001',
+            'status' => Constant::STATUS_ACTIVE
+        ]);
 
         $response = $this->deleteJson("/api/v1/countries/{$country->id}");
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
 
         $this->assertDatabaseMissing('countries', ['id' => $country->id]);
     }

@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CategoryRequest;
-use App\Services\CategoryService;
 use App\Models\Category;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Http\Resources\Api\V1\CategoryResource;
 use OpenApi\Attributes as OA;
 use App\Traits\ApiResponseTrait;
+use App\Services\CategoryService;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\CategoryRequest;
+use App\Http\Resources\Api\V1\CategoryResource;
+use App\Http\Requests\Api\V1\CategoryIndexRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * @OA\Tag(
@@ -71,7 +72,7 @@ class CategoryController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(\App\Http\Requests\Api\V1\CategoryIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(CategoryIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $perPage = $request->validatedPerPage();

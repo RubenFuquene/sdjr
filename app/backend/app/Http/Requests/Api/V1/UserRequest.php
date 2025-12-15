@@ -25,6 +25,7 @@ class UserRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required_if:action,store', 'string', 'min:8', 'confirmed'],
+            'status' => 'nullable|integer|in:0,1',
         ];
 
         if (in_array($method, ['POST'])) {

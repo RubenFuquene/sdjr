@@ -43,6 +43,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'cities.update', 'guard_name' => $guardName, 'description' => 'Permission to update cities', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'cities.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete cities', 'created_at' => now(), 'updated_at' => now()],
 
+            ['name' => 'neighborhoods.index', 'guard_name' => $guardName, 'description' => 'List neighborhoods', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'neighborhoods.create', 'guard_name' => $guardName, 'description' => 'Create neighborhoods', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'neighborhoods.show', 'guard_name' => $guardName, 'description' => 'View neighborhoods', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'neighborhoods.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit neighborhoods', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'neighborhoods.update', 'guard_name' => $guardName, 'description' => 'Permission to update neighborhoods', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'neighborhoods.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete neighborhoods', 'created_at' => now(), 'updated_at' => now()],
+
             ['name' => 'categories.index', 'guard_name' => $guardName, 'description' => 'List categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'categories.create', 'guard_name' => $guardName, 'description' => 'Create categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'categories.show', 'guard_name' => $guardName, 'description' => 'View categories', 'created_at' => now(), 'updated_at' => now()],

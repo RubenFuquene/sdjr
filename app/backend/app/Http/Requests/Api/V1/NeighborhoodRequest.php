@@ -35,7 +35,7 @@ class NeighborhoodRequest extends FormRequest
             'city_id' => 'required|exists:cities,id',
             'name' => 'required|string|max:255',
             'code' => 'required|string|size:6|regex:/^[A-Za-z0-9]+$/|unique:neighborhoods,code',
-            'status' => 'nullable|string|in:A,I',
+            'status' => 'nullable|integer|in:0,1',
         ];
     }
 }

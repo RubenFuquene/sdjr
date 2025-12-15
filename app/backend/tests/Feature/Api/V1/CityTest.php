@@ -11,6 +11,7 @@ use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use Faker\Generator;
 use App\Constants\Constant;
+use Spatie\Permission\Models\Permission;
 
 class CityTest extends TestCase
 {
@@ -30,7 +31,9 @@ class CityTest extends TestCase
      */
     public function test_index_returns_cities()
     {
+        Permission::firstOrCreate(['name' => 'cities.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('cities.index');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -64,7 +67,9 @@ class CityTest extends TestCase
      */
     public function test_store_creates_city()
     {
+        Permission::firstOrCreate(['name' => 'cities.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('cities.create');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -88,9 +93,15 @@ class CityTest extends TestCase
         $response = $this->postJson('/api/v1/cities', $data);
 
         $response->assertStatus(201)
-            ->assertJsonFragment(['name' => 'Medellin', 'code' => 'CITY02']);
+            ->assertJsonPath('data.name', 'Medellin')
+            ->assertJsonPath('data.code', 'CITY02');
 
-        $this->assertDatabaseHas('cities', ['name' => 'Medellin', 'code' => 'CITY02']);
+        $this->assertDatabaseHas('cities', [
+            'name' => 'Medellin',
+            'code' => 'CITY02',
+            'department_id' => $department->id,
+            'status' => $data['status'],
+        ]);
     }
 
     /**
@@ -100,7 +111,9 @@ class CityTest extends TestCase
      */
     public function test_show_returns_city()
     {
+        Permission::firstOrCreate(['name' => 'cities.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('cities.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -134,7 +147,9 @@ class CityTest extends TestCase
      */
     public function test_update_updates_city()
     {
+        Permission::firstOrCreate(['name' => 'cities.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('cities.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -164,9 +179,15 @@ class CityTest extends TestCase
         $response = $this->putJson("/api/v1/cities/{$city->id}", $data);
 
         $response->assertStatus(200)
-            ->assertJsonFragment(['name' => 'Barranquilla Updated', 'code' => 'CITY05']);
+            ->assertJsonPath('data.name', 'Barranquilla updated')
+            ->assertJsonPath('data.code', 'CITY05');
 
-        $this->assertDatabaseHas('cities', ['name' => 'Barranquilla Updated', 'code' => 'CITY05']);
+        $this->assertDatabaseHas('cities', [
+            'name' => 'Barranquilla updated',
+            'code' => 'CITY05',
+            'department_id' => $department->id,
+            'status' => $data['status'],
+        ]);
     }
 
     /**
@@ -176,7 +197,9 @@ class CityTest extends TestCase
      */
     public function test_destroy_deletes_city()
     {
+        Permission::firstOrCreate(['name' => 'cities.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
+        $user->givePermissionTo('cities.delete');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -199,7 +222,7 @@ class CityTest extends TestCase
 
         $response = $this->deleteJson("/api/v1/cities/{$city->id}");
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
 
         $this->assertDatabaseMissing('cities', ['id' => $city->id]);
     }
