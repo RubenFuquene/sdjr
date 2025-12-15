@@ -175,6 +175,7 @@ Cada vez que se solicite la implementación de una funcionalidad, debes seguir e
   - `$casts` para tipado de atributos
   - Configuración de `$fillable` o `$guarded`
   - Documenta cada función del modelo con PHPDoc
+  - Define políticas (Policies) si aplica
 
 ### 5.2 Paso 2: Datos de Prueba (Factories & Seeders)
 
@@ -204,11 +205,199 @@ FormRequest → DTO (si aplica) → Service → Controller → API Resource
 - ✅ Happy Path (éxito)
 - ✅ Al menos un caso de error (validación fallida o sin autorización)
 
-### 5.5 Paso 5: Resumen de Archivos
+### 5.5 Instrucción: Validación y sanitización obligatoria en todos los modelos
+
+#### 5.5.1 Regla global e innegociable
+- Todo modelo debe garantizar la validación y sanitización de los datos de entrada antes de ser persistidos en base de datos.
+- No se permite guardar datos “tal como llegan” desde el request.
+- Nunca se debe confiar en datos provenientes del frontend, integraciones o scripts internos.
+- 📌 La validación no debe realizarse en el modelo directamente, sino antes de invocar su persistencia.
+#### 5.5.2 Sanitización obligatoria en modelos
+- Todos los modelos deben sanitizar los atributos antes de guardarlos, incluso si ya vienen validados.
+- El agente debe implementar al menos una de estas estrategias:
+  - Mutators (setXxxAttribute)
+  - Trait reutilizable
+  - Observer (creating, updating)
+#### 5.5.3 Normalización de texto (Regla obligatoria)
+- Para todo campo de tipo texto (ej: name, title, city, category, etc.):
+- Si el valor llega en mayúsculas, minúsculas o mixto
+- Debe almacenarse en el formato: Primera letra en mayúscula, el resto en minúscula
+  - Ejemplos:
+|Entrada |Valor guardado|
+|--------|--------------|
+|JUAN	|Juan |
+|juan	|Juan |
+|jUaN	|Juan |
+|mARÍA	|María |
+
+- 📌 El proceso debe incluir:
+  - trim()
+  - Normalización de mayúsculas/minúsculas
+  - Soporte UTF-8 (acentos y caracteres especiales)
+
+#### 5.5.4 Implementación técnica recomendada
+- El agente debe preferir una solución centralizada y reutilizable.
+- Ejemplo recomendado: Trait de sanitización
+
+use Illuminate\Support\Str;
+trait SanitizesTextAttributes
+{
+    protected function sanitizeText(?string $value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+
+        $value = trim($value);
+        return Str::of($value)
+            ->lower()
+            ->ucfirst();
+    }
+}
+
+Uso en el modelo:
+class User extends Model
+{
+    use SanitizesTextAttributes;
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = $this->sanitizeText($value);
+    }
+}
+#### 5.5.5 Excepciones controladas
+Campos como:
+- emails
+- usernames
+- passwords
+- tokens
+- códigos técnicos
+
+❌ NO deben capitalizarse, solo sanitizarse según su naturaleza.
+El agente debe documentar cualquier excepción explícitamente.
+6. Condiciones obligatorias
+❌ No se permite guardar texto sin sanitizar
+❌ No se permite lógica duplicada por modelo
+✅ La sanitización debe ser consistente en toda la aplicación
+✅ El código debe ser mantenible y testeable
+
+#### 5.5.6 Expectativa del agente
+Cuando se solicite:
+- Crear un modelo
+- Modificar atributos
+- Agregar nuevos campos de texto
+👉 El agente debe automáticamente:
+- Verificar que existe sanitización
+- Agregarla si no existe
+- Explicar brevemente qué campos se normalizan
+
+
+### 5.6 Autorización obligatoria por permisos en todos los endpoints
+- Regla global e innegociable
+- Todo endpoint del backend debe ser accesible únicamente por usuarios autenticados y autorizados mediante permisos explícitos.
+- La autenticación se realiza con Sanctum y la autorización se controla con Spatie Laravel Permission.
+
+#### 5.6.1 Doble capa de seguridad obligatoria
+Todo endpoint DEBE cumplir ambas condiciones:
+✅ Usuario autenticado (auth:sanctum)
+✅ Usuario autorizado por permiso específico (Spatie Permissions)
+❌ No se permite ningún endpoint público sin autorización explícita documentada.
+
+#### 5.6.2 Prohibición explícita
+❌ No se permite validar permisos directamente en:
+- Controllers
+- Services
+- Repositories
+- 👉 La validación de permisos debe realizarse exclusivamente en el FormRequest asociado al endpoint.
+
+#### 5.6.3 Implementación obligatoria en FormRequest
+Cada endpoint DEBE tener un FormRequest dedicado que:
+- Valide los datos de entrada
+- Valide la autorización del usuario mediante permisos
+
+#### 5.6.4 Método authorize() (obligatorio)
+El agente debe implementar siempre el método authorize() en cada FormRequest.
+- Ejemplo base obligatorio:
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()?->can('users.create') ?? false;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string'],
+            'email' => ['required', 'email'],
+        ];
+    }
+}
+
+📌 Reglas clave:
+- Usar can() o hasPermissionTo()
+- Usar permisos explícitos, no roles
+- Retornar siempre boolean
+
+#### 5.6.5 Convención obligatoria de permisos
+Los permisos DEBEN seguir una convención clara y predecible:
+- recurso.acción
+- Ejemplos:
+|Endpoint	|Permiso requerido|
+|-----------------  |-------------------
+|POST /users	|users.create|
+|GET /users	|users.view|
+|PUT /users/{id}	|users.update|
+|DELETE /users/{id}	|users.delete|
+
+#### 5.6.6 Manejo de respuestas no autorizadas
+Si el usuario:
+❌ No está autenticado → 401 Unauthorized
+❌ Está autenticado pero no tiene permiso → 403 Forbidden
+📌 El agente debe confiar en el flujo estándar de Laravel + FormRequest
+📌 No debe devolver respuestas manuales desde el controlador
+
+#### 5.6.7 Relación con rutas
+Las rutas DEBEN incluir siempre:
+Route::middleware('auth:sanctum')->group(function () {
+    // endpoints protegidos
+});
+📌 La autorización por permisos NO reemplaza la autenticación.
+
+#### 5.6.8 Condiciones obligatorias
+❌ No se permite lógica de permisos duplicada
+❌ No se permite validación de permisos en controllers
+❌ No se permite uso de Gate::allows() en controllers
+✅ Cada endpoint tiene su permiso claramente definido
+✅ Cada permiso es verificable y testeable
+
+#### 5.6.9 Expectativa del agente
+Cuando se solicite:
+- Crear un endpoint
+- Modificar uno existente
+- Refactorizar lógica
+👉 El agente debe automáticamente:
+- Crear o usar un FormRequest
+- Implementar authorize()
+- Verificar el permiso correspondiente
+- Mencionar explícitamente qué permiso protege el endpoint
+
+#### 5.6.10 Ejemplo de controlador correcto (sin autorización)
+public function store(StoreUserRequest $request)
+{
+    // Aquí ya se garantiza:
+    // - Usuario autenticado
+    // - Usuario autorizado
+    // - Datos validados
+
+    return User::create($request->validated());
+}
+
+
+### 5.7 Paso 5: Resumen de Archivos
 
 Lista brevemente la ubicación de cada archivo creado para facilitar la implementación.
-
----
 
 ## 6. Documentación Integral (API y Código Interno)
 
