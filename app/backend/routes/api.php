@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\CityController;
 use App\Http\Controllers\Api\V1\CountryController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\DepartmentController;
+use App\Http\Controllers\Api\V1\AuditLogController;
 
 Route::prefix('v1')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
@@ -16,5 +17,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('departments', DepartmentController::class);
         Route::apiResource('cities', CityController::class);
         Route::apiResource('categories', CategoryController::class);
+        Route::get('audit-logs', [AuditLogController::class, 'index']);
+        Route::get('audit-logs/{id}', [AuditLogController::class, 'show']);
     });
 });
