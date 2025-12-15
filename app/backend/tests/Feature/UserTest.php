@@ -25,7 +25,7 @@ class UserTest extends TestCase
         $response->assertJsonStructure([
             'data' => [
                 '*' => [
-                    'id', 'name', 'email', 'roles', 'permissions', 'created_at', 'updated_at'
+                    'id', 'name', 'last_name', 'email', 'phone', 'roles', 'status', 'created_at', 'updated_at'
                 ]
             ]
         ]);
@@ -45,15 +45,17 @@ class UserTest extends TestCase
         Sanctum::actingAs($admin);
 
         $data = [
-            'name' => 'New User',
+            'name' => 'New',
+            'last_name' => 'User',
             'email' => 'new@example.com',
+            'phone' => '3001234567',
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ];
 
         $response = $this->postJson('/api/v1/users', $data);
         $response->assertCreated();
-        $response->assertJsonFragment(['name' => 'New User']);
+        $response->assertJsonFragment(['name' => 'New', 'last_name' => 'User', 'phone' => '3001234567']);
     }
 
     /** @test */

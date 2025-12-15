@@ -15,6 +15,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ApiResponseTrait;
+use App\Http\Requests\Api\V1\UserStatusRequest;
 
 class UserController extends Controller
 {
@@ -114,12 +115,16 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function show(User $user): JsonResponse
+    public function show(int $user_id): JsonResponse
     {
         try {
+            $user = $this->userService->find($user_id);
+            if (!$user) {
+                return $this->errorResponse('user not found', 404);
+            }
             return $this->successResponse(new UserResource($user), 'User retrieved successfully', Response::HTTP_OK);            
         } catch (\Throwable $e) {
-            Log::error('Error retrieving user', ['id' => $user?->id, 'error' => $e->getMessage()]);
+            Log::error('Error retrieving user', ['error' => $e->getMessage()]);
             return $this->errorResponse('Error retrieving users', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -152,13 +157,13 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function update(UserRequest $request, User $user): JsonResponse
+    public function update(UserRequest $request, int $user_id): JsonResponse
     {
         try {
-            $updatedUser = $this->userService->update($user, $request->validated());
+            $updatedUser = $this->userService->update($user_id, $request->validated());
             return $this->successResponse(new UserResource($updatedUser), 'User updated successfully', Response::HTTP_OK);            
         } catch (\Throwable $e) {
-            Log::error('Error updating user', ['id' => $user?->id, 'error' => $e->getMessage()]);
+            Log::error('Error updating user', ['error' => $e->getMessage()]);
             return $this->errorResponse('Error updating users', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -185,14 +190,57 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function destroy(User $user): JsonResponse
+    public function destroy(int $user_id): JsonResponse
     {
         try {
-            $this->userService->delete($user);
+            $this->userService->delete($user_id);
             return $this->noContentResponse();            
         } catch (\Throwable $e) {
             Log::error('Error deleting user', ['id' => $user?->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Error deleting users', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/users/{user}/status",
+     *     operationId="updateUserStatus",
+     *     tags={"Users"},
+     *     summary="Activate or inactivate a user",
+     *     description="Updates the status (active/inactive) of a user.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", enum={"0","1"}, description="User status: 1=active, 0=inactive")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User status updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/UserResource")
+     *     ),
+     *     @OA\Response(response=400, description="Bad Request"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not Found")
+     * )
+     */
+    public function updateStatus(UserStatusRequest $request, int $user_id): JsonResponse
+    {
+        try {
+            $updatedUser = $this->userService->updateStatus($user_id, $request->validated('status'));
+            return $this->successResponse(new UserResource($updatedUser), 'User status updated successfully');
+        } catch (\Throwable $e) {
+            \Log::error('Error updating user status', ['id' => $user?->id, 'error' => $e->getMessage()]);
+            return $this->errorResponse('Error updating user status', 500);
         }
     }
 }

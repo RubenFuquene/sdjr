@@ -8,12 +8,13 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, SanitizesTextAttributes;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, SanitizesTextAttributes, SoftDeletes;
 
     // Sanctum guard name
     protected string $guard_name = 'sanctum';
@@ -26,8 +27,11 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'last_name',
         'email',
+        'phone',
         'password',
+        'status',
     ];
 
     /**
@@ -50,7 +54,31 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'phone' => 'string',
         ];
+    }
+    /**
+     * Sanitize last_name before saving.
+     */
+    public function setLastNameAttribute($value): void
+    {
+        $this->attributes['last_name'] = $this->capitalizeText($value);
+    }
+
+    /**
+     * Sanitize phone before saving.
+     */
+    public function setPhoneAttribute($value): void
+    {
+        $this->attributes['phone'] = $this->sanitizePhone($value);
+    }
+
+    /**
+     * Sanitize email before saving.
+     */
+    public function setEmailAttribute($value): void
+    {
+        $this->attributes['email'] = $this->sanitizeEmail($value);
     }
 
     /**
@@ -58,6 +86,7 @@ class User extends Authenticatable
      */
     public function setNameAttribute($value): void
     {
-        $this->attributes['name'] = $this->sanitizeText($value);
+        $this->attributes['name'] = $this->capitalizeText($value);
     }
+    
 }

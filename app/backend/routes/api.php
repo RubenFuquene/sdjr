@@ -27,6 +27,7 @@ Route::prefix('v1')->group(function () {
 
         // User Management routes
         Route::apiResource('users', UserController::class);
+        Route::patch('users/{user}/status', [UserController::class, 'updateStatus']);
         
         // Role and Permission Management routes
         Route::get('roles', [RoleController::class, 'index']);

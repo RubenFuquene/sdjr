@@ -16,13 +16,23 @@ class UserRequest extends FormRequest
     }
 
     public function rules(): array
-    {
-        $userId = $this->route('user')?->id ?? null;
+    {        
+        $method = $this->method();
 
-        return [
+
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email,' . $userId],
+            'last_name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required_if:action,store', 'string', 'min:8', 'confirmed'],
         ];
+
+        if (in_array($method, ['POST'])) {
+            $rules['email'] = ['required', 'email', 'unique:users,email'];
+        } elseif (in_array($method, ['PUT', 'PATCH'])) {
+            $rules['email'] = ['email'];
+        }
+
+        return $rules;
     }
 }

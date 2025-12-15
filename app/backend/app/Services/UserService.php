@@ -64,15 +64,16 @@ class UserService
     /**
      * Update an existing user, hashing password if provided.
      *
-     * @param User $user The user to update
+     * @param int $user The user to update
      * @param array<string, mixed> $data Updated user data
      * @return User The updated user instance
      */
-    public function update(User $user, array $data): User
+    public function update(int $user_id, array $data): User
     {
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
+        $user = User::findOrFail($user_id);
         $user->update($data);
         return $user;
     }
@@ -80,11 +81,27 @@ class UserService
     /**
      * Delete a user.
      *
-     * @param User $user The user to delete
+     * @param int $user_id The user to delete
      * @return bool True if deletion was successful
      */
-    public function delete(User $user): bool
+    public function delete(int $user_id): bool
     {
+        $user = User::findOrFail($user_id); 
         return $user->delete();
+    }
+
+    /**
+     * Update the status of a user (activate/inactivate).
+     *
+     * @param int $user_id The user to update
+     * @param string $status
+     * @return User
+     */
+    public function updateStatus(int $user_id, string $status): User
+    {
+        $user = User::findOrFail($user_id);
+        $user->status = $status;
+        $user->save();
+        return $user;
     }
 }
