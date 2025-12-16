@@ -9,8 +9,10 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\CountryController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CommerceController;
 use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\NeighborhoodController;
+use App\Http\Controllers\Api\V1\EstablishmentTypeController;
 
 Route::prefix('v1')->group(function () {
     
@@ -26,6 +28,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('cities', CityController::class);
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('neighborhoods', NeighborhoodController::class);
+        Route::apiResource('establishment-types', EstablishmentTypeController::class);
 
         // User Management routes
         Route::apiResource('users', UserController::class);
@@ -41,5 +44,8 @@ Route::prefix('v1')->group(function () {
         // Audit Log routes
         Route::get('audit-logs', [AuditLogController::class, 'index']);
         Route::get('audit-logs/{id}', [AuditLogController::class, 'show']);
+
+        // Commerce routes
+        Route::apiResource('commerces', CommerceController::class);
     });
 });
