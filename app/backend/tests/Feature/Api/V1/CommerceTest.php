@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+namespace Tests\Feature\Api\V1;
 
 use App\Models\Commerce;
 use App\Models\User;
@@ -34,6 +34,7 @@ class CommerceTest extends TestCase
         $payload = Commerce::factory()->make()->toArray();
         $response = $this->postJson('/api/v1/commerces', $payload);
         $response->assertCreated();
+        $response->assertJsonPath('status', true);
         $response->assertJsonPath('data.name', $payload['name']);
     }
 
@@ -46,6 +47,7 @@ class CommerceTest extends TestCase
         $commerce = Commerce::factory()->create();
         $response = $this->getJson('/api/v1/commerces/' . $commerce->id);
         $response->assertOk();
+        $response->assertJsonPath('status', true);
         $response->assertJsonPath('data.id', $commerce->id);
     }
 
@@ -56,10 +58,12 @@ class CommerceTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         $commerce = Commerce::factory()->create();
-        $payload = ['name' => 'Nuevo Nombre'];
+        $payload = $commerce->toArray();
+        $payload['name'] = 'Nuevo Nombre';
         $response = $this->putJson('/api/v1/commerces/' . $commerce->id, $payload);
         $response->assertOk();
-        $response->assertJsonPath('data.name', 'Nuevo Nombre');
+        $response->assertJsonPath('status', true);
+        $response->assertJsonPath('data.name', 'Nuevo nombre');
     }
 
     public function test_user_can_delete_commerce()
@@ -70,7 +74,7 @@ class CommerceTest extends TestCase
 
         $commerce = Commerce::factory()->create();
         $response = $this->deleteJson('/api/v1/commerces/' . $commerce->id);
-        $response->assertNoContent();
+        $response->assertStatus(204);
         $this->assertSoftDeleted('commerces', ['id' => $commerce->id]);
     }
 

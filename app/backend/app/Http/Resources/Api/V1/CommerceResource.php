@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Api\V1\LegalRepresentativeResource;
 
 /**
  * @OA\Schema(
@@ -16,6 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="department_id", type="integer", example=1),
  *     @OA\Property(property="city_id", type="integer", example=1),
  *     @OA\Property(property="neighborhood_id", type="integer", example=1),
+ *     @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeResource")),
  *     @OA\Property(property="name", type="string", example="Comercial S.A.S"),
  *     @OA\Property(property="description", type="string", example="Comercio de tecnología"),
  *     @OA\Property(property="tax_id", type="string", example="900123456"),
@@ -39,6 +41,7 @@ class CommerceResource extends JsonResource
             'department_id' => $this->department_id,
             'city_id' => $this->city_id,
             'neighborhood_id' => $this->neighborhood_id,
+            'legal_representatives' => LegalRepresentativeResource::collection($this->whenLoaded('legalRepresentatives')),
             'name' => $this->name,
             'description' => $this->description,
             'tax_id' => $this->tax_id,

@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             RolePermissionSeeder::class,
             NeighborhoodSeeder::class,
+            CommerceSeeder::class,
+            LegalRepresentativeSeeder::class,
         ]);
     }
 }

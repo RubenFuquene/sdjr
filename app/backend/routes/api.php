@@ -47,5 +47,7 @@ Route::prefix('v1')->group(function () {
 
         // Commerce routes
         Route::apiResource('commerces', CommerceController::class);
+        // Legal Representative routes
+        Route::apiResource('legal-representatives', \App\Http\Controllers\Api\V1\LegalRepresentativeController::class);
     });
 });

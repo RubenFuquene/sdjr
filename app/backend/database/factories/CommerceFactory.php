@@ -30,8 +30,7 @@ class CommerceFactory extends Factory
             'phone' => $this->faker->phoneNumber(),
             'email' => $this->faker->unique()->safeEmail(),
             'is_active' => $this->faker->boolean(90),
-            'is_verified' => $this->faker->boolean(10),
-            'status' => '1',
+            'is_verified' => $this->faker->boolean(10),            
         ];
     }
 }

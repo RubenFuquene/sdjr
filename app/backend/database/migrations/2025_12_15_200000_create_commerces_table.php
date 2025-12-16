@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('description', 500)->nullable();
             $table->string('tax_id', 30);
-            $table->enum('tax_id_type', ['NIT', 'Cédula de Ciudadanía', 'Pasaporte', 'Cédula de Extranjería']);
+            $table->enum('tax_id_type', ['NIT', 'CC', 'PS', 'CE']);
             $table->string('address', 255);
             $table->string('phone', 20)->nullable();
             $table->string('email', 100)->nullable();
