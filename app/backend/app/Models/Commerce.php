@@ -68,6 +68,7 @@ class Commerce extends Model
     public function city() { return $this->belongsTo(City::class); }
     public function neighborhood() { return $this->belongsTo(Neighborhood::class); }
     public function legalRepresentatives() { return $this->hasMany(LegalRepresentative::class); }
+    public function commerceDocuments() { return $this->hasMany(CommerceDocument::class); }
 
     // Sanitización de campos de texto
     public function setNameAttribute($value) { $this->attributes['name'] = $this->sanitizeText($value); }

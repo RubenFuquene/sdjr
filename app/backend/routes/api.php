@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CommerceController;
 use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\NeighborhoodController;
+use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\EstablishmentTypeController;
 
 Route::prefix('v1')->group(function () {
@@ -46,7 +47,9 @@ Route::prefix('v1')->group(function () {
         Route::get('audit-logs/{id}', [AuditLogController::class, 'show']);
 
         // Commerce routes
-        Route::apiResource('commerces', CommerceController::class);
+        Route::apiResource('commerces', CommerceController::class);        
+        Route::post('commerces/basic', [CommerceBasicDataController::class, 'store']);
+        
         // Legal Representative routes
         Route::apiResource('legal-representatives', \App\Http\Controllers\Api\V1\LegalRepresentativeController::class);
     });
