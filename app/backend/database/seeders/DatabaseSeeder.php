@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             DepartmentSeeder::class,
             CitySeeder::class,
-            ProviderSeeder::class,
+            EstablishmentTypeSeeder::class,            
             CategorySeeder::class,
             RolePermissionSeeder::class,
             NeighborhoodSeeder::class,
