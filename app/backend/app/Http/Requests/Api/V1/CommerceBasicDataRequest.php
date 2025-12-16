@@ -7,7 +7,12 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Request to receive commerce basic data with nested related arrays.
+ * @OA\Schema(
+ *     schema="CommerceBasicDataRequest",
+ *     @OA\Property(property="commerce", ref="#/components/schemas/CommerceRequest"),
+ *     @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeRequest")),
+ *     @OA\Property(property="commerce_documents", type="array", @OA\Items(ref="#/components/schemas/CommerceDocument"))
+ * )
  */
 class CommerceBasicDataRequest extends FormRequest
 {
@@ -19,20 +24,20 @@ class CommerceBasicDataRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'commerce' => ['required', 'array'],
-            'commerce.owner_user_id' => ['required', 'integer', 'exists:users,id'],
-            'commerce.department_id' => ['required', 'integer', 'exists:departments,id'],
-            'commerce.city_id' => ['required', 'integer', 'exists:cities,id'],
-            'commerce.neighborhood_id' => ['required', 'integer', 'exists:neighborhoods,id'],
-            'commerce.name' => ['required', 'string', 'max:255'],
-            'commerce.description' => ['nullable', 'string', 'max:500'],
-            'commerce.tax_id' => ['required', 'string', 'max:50'],
-            'commerce.tax_id_type' => ['required', 'string', 'max:10'],
-            'commerce.address' => ['required', 'string', 'max:255'],
-            'commerce.phone' => ['nullable', 'string', 'max:20'],
-            'commerce.email' => ['nullable', 'string', 'email', 'max:100'],
-            'commerce.is_verified' => ['boolean'],
-            'commerce.is_active' => ['boolean'],
+            'commerce' => ['nullable', 'array'],
+            'commerce.*.owner_user_id' => ['required', 'integer', 'exists:users,id'],
+            'commerce.*.department_id' => ['required', 'integer', 'exists:departments,id'],
+            'commerce.*.city_id' => ['required', 'integer', 'exists:cities,id'],
+            'commerce.*.neighborhood_id' => ['required', 'integer', 'exists:neighborhoods,id'],
+            'commerce.*.name' => ['required', 'string', 'max:255'],
+            'commerce.*.description' => ['nullable', 'string', 'max:500'],
+            'commerce.*.tax_id' => ['required', 'string', 'max:50'],
+            'commerce.*.tax_id_type' => ['required', 'string', 'max:10'],
+            'commerce.*.address' => ['required', 'string', 'max:255'],
+            'commerce.*.phone' => ['nullable', 'string', 'max:20'],
+            'commerce.*.email' => ['nullable', 'string', 'email', 'max:100'],
+            'commerce.*.is_verified' => ['boolean'],
+            'commerce.*.is_active' => ['boolean'],
 
             'legal_representatives' => ['nullable', 'array'],
             'legal_representatives.*.name' => ['required_with:legal_representatives', 'string', 'max:255'],

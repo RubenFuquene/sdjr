@@ -42,7 +42,7 @@ class CommerceBasicDataController extends Controller
      *         @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeRequest")),
      *         @OA\Property(property="commerce_documents", type="array", @OA\Items(ref="#/components/schemas/CommerceDocument"))
      *     )),
-     *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/CommerceResource")),
+    *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/CommerceBasicDataResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=422, description="Validation Error")

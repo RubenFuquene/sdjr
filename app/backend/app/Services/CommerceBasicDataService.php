@@ -39,7 +39,7 @@ class CommerceBasicDataService
                 }
             }
 
-            return $commerce->load(['legalRepresentatives', 'legalRepresentatives.commerce']);
+            return $commerce->load(['legalRepresentatives', 'commerceDocuments']);
         });
     }
 }
