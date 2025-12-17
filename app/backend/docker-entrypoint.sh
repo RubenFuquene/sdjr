@@ -1,81 +1,168 @@
 #!/bin/bash
 set -e
 
-# Copy .env.example to .env if it doesn't exist
-if [ ! -f .env ]; then
-    echo "Creating .env file from .env.example..."
-    cp .env.example .env
-fi
+ENV_FILE=".env"
+DB_WAIT_TIMEOUT=${DB_WAIT_TIMEOUT:-60}
+DB_WAIT_REQUIRED=0
 
-# Parse DATABASE_URL for Railway if provided
-if [ ! -z "$DATABASE_URL" ]; then
-    echo "Configuring database from DATABASE_URL..."
-    
-    # Detect database type from URL scheme
-    if [[ $DATABASE_URL == mysql://* ]]; then
-        DB_CONNECTION="mysql"
-        # Extract components from mysql://user:password@host:port/database
-        DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\).*/\1/p')
-        DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
-        DB_DATABASE=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
-        DB_USERNAME=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
-        DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
-    elif [[ $DATABASE_URL == postgres://* ]]; then
-        DB_CONNECTION="pgsql"
-        # Extract components from postgres://user:password@host:port/database
-        DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\).*/\1/p')
-        DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
-        DB_DATABASE=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
-        DB_USERNAME=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
-        DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
+update_env_var() {
+    local key="$1"
+    local value="$2"
+    if grep -q "^$key=" "$ENV_FILE"; then
+        sed -i "s|^$key=.*|$key=$value|" "$ENV_FILE"
     else
-        echo "Warning: Unsupported DATABASE_URL scheme. Keeping default config."
-        DB_CONNECTION=$(grep "^DB_CONNECTION=" .env | cut -d '=' -f2)
+        echo "$key=$value" >> "$ENV_FILE"
     fi
-    
-    # Update .env with parsed values if we have a supported connection
-    if [ ! -z "$DB_CONNECTION" ] && [[ "$DB_CONNECTION" == "mysql" || "$DB_CONNECTION" == "pgsql" ]]; then
-        sed -i "s/DB_CONNECTION=.*/DB_CONNECTION=$DB_CONNECTION/" .env
-        sed -i "s/DB_HOST=.*/DB_HOST=$DB_HOST/" .env
-        sed -i "s/DB_PORT=.*/DB_PORT=$DB_PORT/" .env
-        sed -i "s/DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/" .env
-        sed -i "s/DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" .env
-        sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env
+}
+
+bootstrap_env_file() {
+    if [ ! -f "$ENV_FILE" ]; then
+        echo "Creating .env file from .env.example..."
+        cp .env.example "$ENV_FILE"
     fi
-fi
+}
 
-# Generate application key if not set
-if ! grep -q "APP_KEY=base64:" .env; then
-    echo "Generating application key..."
-    php artisan key:generate --ansi
-fi
+configure_database_from_url() {
+    local url="$1"
+    [ -z "$url" ] && return 1
 
-# Create database file if using SQLite
-if grep -q "DB_CONNECTION=sqlite" .env; then
-    touch database/database.sqlite 2>/dev/null || true
-fi
+    echo "Configuring database from DATABASE_URL..."
 
-# Wait for database to be ready (for Railway)
-if [ ! -z "$DATABASE_URL" ]; then
-    echo "Waiting for database connection..."
-    timeout=30
-    while ! php artisan db:show >/dev/null 2>&1; do
+    local scheme=$(php -r 'echo parse_url($argv[1], PHP_URL_SCHEME);' "$url")
+    local connection=""
+    case "$scheme" in
+        mysql)
+            connection="mysql"
+            ;;
+        postgres|postgresql)
+            connection="pgsql"
+            ;;
+        *)
+            echo "Warning: Unsupported DATABASE_URL scheme. Keeping default config."
+            return 1
+            ;;
+    esac
+
+    local host=$(php -r 'echo parse_url($argv[1], PHP_URL_HOST);' "$url")
+    local port=$(php -r 'echo parse_url($argv[1], PHP_URL_PORT);' "$url")
+    local db=$(php -r 'echo ltrim(parse_url($argv[1], PHP_URL_PATH),"/");' "$url")
+    local user=$(php -r 'echo parse_url($argv[1], PHP_URL_USER);' "$url")
+    local pass=$(php -r 'echo parse_url($argv[1], PHP_URL_PASS);' "$url")
+
+    if [ -z "$port" ]; then
+        port=$([ "$connection" = "mysql" ] && echo "3306" || echo "5432")
+    fi
+
+    update_env_var DB_CONNECTION "$connection"
+    update_env_var DB_HOST "$host"
+    update_env_var DB_PORT "$port"
+    update_env_var DB_DATABASE "$db"
+    update_env_var DB_USERNAME "$user"
+    update_env_var DB_PASSWORD "$pass"
+
+    DB_WAIT_REQUIRED=1
+}
+
+configure_database_from_mysql_env() {
+    [ -z "$MYSQLHOST" ] && return 1
+
+    echo "Configuring database from Railway MySQL env vars..."
+
+    local host="$MYSQLHOST"
+    local port="${MYSQLPORT:-3306}"
+    local db="${MYSQL_DATABASE:-${MYSQLDATABASE:-sdjr}}"
+    local user="${MYSQLUSER:-${MYSQL_USERNAME:-sdjr_user}}"
+    local pass="${MYSQLPASSWORD:-${MYSQL_PASSWORD:-sdjr_password}}"
+
+    update_env_var DB_CONNECTION "mysql"
+    update_env_var DB_HOST "$host"
+    update_env_var DB_PORT "$port"
+    update_env_var DB_DATABASE "$db"
+    update_env_var DB_USERNAME "$user"
+    update_env_var DB_PASSWORD "$pass"
+
+    DB_WAIT_REQUIRED=1
+}
+
+determine_wait_requirement() {
+    local connection=$(grep '^DB_CONNECTION=' "$ENV_FILE" | cut -d '=' -f2)
+    if [[ "$connection" == "mysql" || "$connection" == "pgsql" ]]; then
+        DB_WAIT_REQUIRED=1
+    fi
+}
+
+wait_for_database() {
+    if [ "$DB_WAIT_REQUIRED" -ne 1 ]; then
+        return
+    fi
+
+    local host=$(grep '^DB_HOST=' "$ENV_FILE" | cut -d '=' -f2)
+    local port=$(grep '^DB_PORT=' "$ENV_FILE" | cut -d '=' -f2)
+
+    if [ -z "$host" ]; then
+        echo "DB host not defined, skipping wait."
+        return
+    fi
+
+    echo "Waiting for database connection ($host:${port:-unknown})..."
+    local timeout=$DB_WAIT_TIMEOUT
+
+    until php artisan db:show >/dev/null 2>&1; do
         timeout=$((timeout - 1))
-        if [ $timeout -eq 0 ]; then
+        if [ $timeout -le 0 ]; then
             echo "Database connection timeout!"
             exit 1
         fi
-        echo "Waiting for database... ($timeout)"
         sleep 1
     done
+
     echo "Database connection established!"
-fi
+}
 
-# Run migrations
-echo "Running migrations..."
-php artisan migrate --force --no-interaction
+generate_app_key_if_needed() {
+    if ! grep -q "APP_KEY=base64:" "$ENV_FILE"; then
+        echo "Generating application key..."
+        php artisan key:generate --ansi
+    fi
+}
 
-# Start Laravel server (Railway uses PORT env variable)
-PORT=${PORT:-8000}
-echo "Starting Laravel server on 0.0.0.0:$PORT..."
-exec php artisan serve --host=0.0.0.0 --port=$PORT
+ensure_sqlite_file_if_needed() {
+    if grep -q "DB_CONNECTION=sqlite" "$ENV_FILE"; then
+        touch database/database.sqlite 2>/dev/null || true
+    fi
+}
+
+run_migrations() {
+    echo "Running migrations..."
+    php artisan migrate --force --no-interaction
+}
+
+start_server() {
+    local port=${PORT:-8000}
+    echo "Starting Laravel server on 0.0.0.0:$port..."
+    exec php artisan serve --host=0.0.0.0 --port=$port
+}
+
+main() {
+    bootstrap_env_file
+
+    # Normalize URLs provided by hosting platforms
+    if [ -z "$DATABASE_URL" ] && [ ! -z "$MYSQL_URL" ]; then
+        DATABASE_URL="$MYSQL_URL"
+    fi
+
+    configure_database_from_url "$DATABASE_URL" || true
+
+    if [ $DB_WAIT_REQUIRED -ne 1 ]; then
+        configure_database_from_mysql_env || true
+    fi
+
+    determine_wait_requirement
+    generate_app_key_if_needed
+    ensure_sqlite_file_if_needed
+    wait_for_database
+    run_migrations
+    start_server
+}
+
+main "$@"
