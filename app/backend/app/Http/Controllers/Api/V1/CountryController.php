@@ -4,25 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CountryRequest;
+use App\Http\Requests\Api\V1\CountryFilterRequest;
 use App\Http\Resources\Api\V1\CountryResource;
 use App\Services\CountryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Traits\ApiResponseTrait;
 
 /**
- * @OA\Info(
- *      version="1.0.0",
- *      title="SDJR API",
- *      description="API documentation for SDJR application",
- *      @OA\Contact(
- *          email="admin@sdjr.com"
- *      ),
- *      @OA\License(
- *          name="Apache 2.0",
- *          url="http://www.apache.org/licenses/LICENSE-2.0.html"
- *      )
- * )
- *
  * @OA\Tag(
  *     name="Countries",
  *     description="API Endpoints of Countries"
@@ -30,6 +19,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class CountryController extends Controller
 {
+    use ApiResponseTrait;
     protected CountryService $countryService;
 
     public function __construct(CountryService $countryService)
@@ -45,8 +35,22 @@ class CountryController extends Controller
      *      operationId="getCountriesList",
      *      tags={"Countries"},
      *      summary="Get list of countries",
-     *      description="Returns list of countries",
+     *      description="Returns list of countries. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
      *      security={{"sanctum":{}}},
+     *      @OA\Parameter(
+     *          name="per_page",
+     *          in="query",
+     *          description="Cantidad de registros por página (1-100)",
+     *          required=false,
+     *          @OA\Schema(type="integer", default=15)
+     *      ),
+     *      @OA\Parameter(
+     *          name="status",
+     *          in="query",
+     *          description="Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+     *          required=false,
+     *          @OA\Schema(type="string", enum={"1","0","all"}, default="all")
+     *      ),
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
@@ -62,12 +66,20 @@ class CountryController extends Controller
      *      )
      *     )
      *
+     * @param CountryFilterRequest $request
      * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection
+    public function index(CountryFilterRequest $request): AnonymousResourceCollection|JsonResponse
     {
-        $countries = $this->countryService->getPaginated();
-        return CountryResource::collection($countries);
+        try {
+            $perPage = $request->validatedPerPage();
+            $status = $request->validatedStatus();
+            $countries = $this->countryService->getPaginated($perPage, $status);
+            $resource = CountryResource::collection($countries);
+            return $this->paginatedResponse($countries, $resource, 'Countries retrieved successfully');
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error retrieving countries', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -106,10 +118,14 @@ class CountryController extends Controller
      * @param CountryRequest $request
      * @return CountryResource
      */
-    public function store(CountryRequest $request): CountryResource
+    public function store(CountryRequest $request): CountryResource|JsonResponse
     {
-        $country = $this->countryService->create($request->validated());
-        return new CountryResource($country);
+        try {
+            $country = $this->countryService->create($request->validated());
+            return $this->successResponse(new CountryResource($country), 'Country created successfully', 201);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error creating country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -159,13 +175,15 @@ class CountryController extends Controller
      */
     public function show(string $id): CountryResource|JsonResponse
     {
-        $country = $this->countryService->find($id);
-
-        if (!$country) {
-            return response()->json(['message' => 'Country not found'], 404);
+        try {
+            $country = $this->countryService->find($id);
+            if (!$country) {
+                return $this->errorResponse('Country not found', 404);
+            }
+            return $this->successResponse(new CountryResource($country), 'Country retrieved successfully', 200);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error retrieving country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
-
-        return new CountryResource($country);
     }
 
     /**
@@ -220,14 +238,16 @@ class CountryController extends Controller
      */
     public function update(CountryRequest $request, string $id): CountryResource|JsonResponse
     {
-        $country = $this->countryService->find($id);
-
-        if (!$country) {
-            return response()->json(['message' => 'Country not found'], 404);
+        try {
+            $country = $this->countryService->find($id);
+            if (!$country) {
+                return $this->errorResponse('Country not found', 404);
+            }
+            $updatedCountry = $this->countryService->update($country, $request->validated());
+            return $this->successResponse(new CountryResource($updatedCountry), 'Country updated successfully', 200);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error updating country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
-
-        $updatedCountry = $this->countryService->update($country, $request->validated());
-        return new CountryResource($updatedCountry);
     }
 
     /**
@@ -275,13 +295,15 @@ class CountryController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $country = $this->countryService->find($id);
-
-        if (!$country) {
-            return response()->json(['message' => 'Country not found'], 404);
+        try {
+            $country = $this->countryService->find($id);
+            if (!$country) {
+                return $this->errorResponse('Country not found', 404);
+            }
+            $this->countryService->delete($country);
+            return $this->noContentResponse();
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error deleting country', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
-
-        $this->countryService->delete($country);
-        return response()->json(['message' => 'Country deleted successfully']);
     }
 }

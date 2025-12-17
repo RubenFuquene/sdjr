@@ -2,21 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Traits\SanitizesTextAttributes;
 
 class Department extends Model
 {
-    use HasUuids, HasFactory;
+    use HasFactory, SanitizesTextAttributes;
 
     protected $fillable = [
         'country_id',
+        'code',
         'name',
         'status',
     ];
+    /**
+     * Sanitize code before saving.
+     */
+    public function setCodeAttribute($value): void
+    {
+        $this->attributes['code'] = strtoupper(trim($value));
+    }
 
     /**
      * Get the country that owns the department.
@@ -36,5 +44,13 @@ class Department extends Model
     public function cities(): HasMany
     {
         return $this->hasMany(City::class);
+    }
+
+    /**
+     * Sanitize name before saving.
+     */
+    public function setNameAttribute($value): void
+    {
+        $this->attributes['name'] = $this->sanitizeText($value);
     }
 }

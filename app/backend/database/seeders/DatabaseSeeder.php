@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,7 +23,12 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             DepartmentSeeder::class,
             CitySeeder::class,
-            ProviderSeeder::class,
+            EstablishmentTypeSeeder::class,            
+            CategorySeeder::class,
+            RolePermissionSeeder::class,
+            NeighborhoodSeeder::class,
+            CommerceSeeder::class,
+            LegalRepresentativeSeeder::class,
         ]);
     }
 }

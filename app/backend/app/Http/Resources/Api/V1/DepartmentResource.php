@@ -19,19 +19,21 @@ class DepartmentResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @OA\Property(
-     *      property="id",
-     *      title="id",
-     *      description="Department ID",
-     *      example="9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
-     * )
+    * @OA\Property(
+    *      property="id",
+    *      title="id",
+    *      description="Department ID",
+    *      type="integer",
+    *      example=1
+    * )
      *
-     * @OA\Property(
-     *      property="country_id",
-     *      title="country_id",
-     *      description="Country ID",
-     *      example="9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
-     * )
+    * @OA\Property(
+    *      property="country_id",
+    *      title="country_id",
+    *      description="Country ID",
+    *      type="integer",
+    *      example=1
+    * )
      *
      * @OA\Property(
      *      property="name",
@@ -73,6 +75,7 @@ class DepartmentResource extends JsonResource
         return [
             'id' => $this->id,
             'country_id' => $this->country_id,
+            'code' => $this->code,
             'name' => $this->name,
             'status' => $this->status,
             'country' => new CountryResource($this->whenLoaded('country')),
