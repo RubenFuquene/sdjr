@@ -35,12 +35,14 @@ async function fetchSession(): Promise<Session | null> {
     return { userId: "demo", email: "demo@sumass.com", role: "admin" };
   }
 
-  const hasSession = cookies().has(SESSION_COOKIE);
+  // Next.js 14/React 19: cookies() es async; debemos await para evitar errores de sync dynamic API.
+  const cookieStore = await cookies();
+  const hasSession = cookieStore.has(SESSION_COOKIE);
   if (!hasSession) return null;
 
   // TODO: Reemplazar con decodificación real de token o fetch a `/api/me`.
-  const role = (cookies().get(ROLE_COOKIE)?.value as Role | undefined) ?? "admin";
-  const email = cookies().get("sdjr_email")?.value ?? "user@sumass.com";
+  const role = (cookieStore.get(ROLE_COOKIE)?.value as Role | undefined) ?? "admin";
+  const email = cookieStore.get("sdjr_email")?.value ?? "user@sumass.com";
   return { userId: "unknown", email, role };
 }
 
