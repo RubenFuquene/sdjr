@@ -10,6 +10,10 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING_INTERVAL=1000
+      - NEXT_DISABLE_TURBOPACK=1
     networks:
       - sdjr-network
     depends_on:
