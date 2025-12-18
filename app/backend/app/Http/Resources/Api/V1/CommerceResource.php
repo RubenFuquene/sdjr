@@ -37,7 +37,7 @@ class CommerceResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'owner_user_id' => $this->owner_user_id,
+            'owner_user' => new UserResource($this->whenLoaded('ownerUser')),
             'department_id' => $this->department_id,
             'city_id' => $this->city_id,
             'neighborhood_id' => $this->neighborhood_id,

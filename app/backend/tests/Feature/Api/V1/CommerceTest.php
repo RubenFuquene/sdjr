@@ -86,4 +86,16 @@ class CommerceTest extends TestCase
         $response = $this->postJson('/api/v1/commerces', $payload);
         $response->assertForbidden();
     }
+    
+    public function test_user_can_update_commerce_status()
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('commerces.update');
+        $this->actingAs($user, 'sanctum');
+
+        $commerce = Commerce::factory()->create(['is_active' => \App\Constants\Constant::STATUS_ACTIVE]);
+        $response = $this->patchJson('/api/v1/commerces/' . $commerce->id . '/status', ['is_active' => \App\Constants\Constant::STATUS_INACTIVE]);
+        $response->assertOk();
+        $response->assertJsonPath('data.is_active', \App\Constants\Constant::STATUS_INACTIVE);
+    }
 }

@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CommerceRequest;
-use App\Http\Resources\Api\V1\CommerceResource;
+use App\Traits\ApiResponseTrait;
 use App\Services\CommerceService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\CommerceRequest;
 use Symfony\Component\HttpFoundation\Response;
-use App\Traits\ApiResponseTrait;
+use App\Http\Resources\Api\V1\CommerceResource;
+use App\Http\Requests\Api\V1\CommerceStatusRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * @OA\Tag(
@@ -184,6 +185,46 @@ class CommerceController extends Controller
         } catch (\Throwable $e) {
             Log::error('Error deleting commerce', ['error' => $e->getMessage()]);
             return $this->errorResponse('Error deleting commerce', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/commerces/{id}/status",
+     *     operationId="updateCommerceStatus",
+     *     tags={"Commerces"},
+     *     summary="Activate or inactivate a commerce",
+     *     description="Updates the status (active/inactive) of a commerce.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"is_active"},
+     *             @OA\Property(property="is_active", type="integer", enum={0,1}, description="Commerce status: 1=active, 0=inactive")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commerce status updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceResource")
+     *     ),
+     *     @OA\Response(response=400, description="Bad Request"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not Found")
+     * )
+     */
+    public function updateStatus(CommerceStatusRequest $request, int $id): JsonResponse
+    {
+        try {
+            $commerce = $this->commerceService->updateStatus($id, intval($request->validated('is_active')));
+            return $this->successResponse(new CommerceResource($commerce), 'Commerce status updated successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', Response::HTTP_NOT_FOUND);
+        } catch (\Throwable $e) {
+            Log::error('Error updating commerce status', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Error updating commerce status', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
 }

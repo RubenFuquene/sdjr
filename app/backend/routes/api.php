@@ -37,6 +37,8 @@ Route::prefix('v1')->group(function () {
         
         // Role and Permission Management routes
         Route::get('roles', [RoleController::class, 'index']);
+        Route::get('roles/{id}', [RoleController::class, 'show']);
+        Route::patch('roles/{id}/status', [RoleController::class, 'updateStatus']);
         Route::post('roles', [RoleController::class, 'store']);
         Route::post('permissions', [RoleController::class, 'storePermission']);
         Route::post('users/{user}/assign-roles-permissions', [RoleController::class, 'assignRolesPermissions']);
@@ -47,7 +49,8 @@ Route::prefix('v1')->group(function () {
         Route::get('audit-logs/{id}', [AuditLogController::class, 'show']);
 
         // Commerce routes
-        Route::apiResource('commerces', CommerceController::class);        
+        Route::apiResource('commerces', CommerceController::class);
+        Route::patch('commerces/{id}/status', [CommerceController::class, 'updateStatus']);
         Route::post('commerces/basic', [CommerceBasicDataController::class, 'store']);
         
         // Legal Representative routes

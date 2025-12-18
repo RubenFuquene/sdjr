@@ -19,7 +19,7 @@ class CommerceService
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        return Commerce::query()->paginate($perPage);
+        return Commerce::with(['ownerUser','legalRepresentatives'])->paginate($perPage);
     }
 
     /**
@@ -72,6 +72,21 @@ class CommerceService
      */
     public function show(int $commerce_id): Commerce
     {
-        return Commerce::findOrFail($commerce_id);
+        return Commerce::with(['ownerUser','legalRepresentatives'])->findOrFail($commerce_id);
+    }
+
+    /**
+     * Update the active status of a commerce.
+     *
+     * @param int $commerce_id
+     * @param int $is_active
+     * @return Commerce
+     */
+    public function updateStatus(int $commerce_id, int $is_active): Commerce
+    {
+        $commerce = Commerce::findOrFail($commerce_id);
+        $commerce->is_active = $is_active;
+        $commerce->save();
+        return $commerce;
     }
 }
