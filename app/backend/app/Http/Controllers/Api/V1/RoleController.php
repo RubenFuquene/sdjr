@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\User;
+use App\Constants\Constant;
 use App\Services\RoleService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
@@ -13,11 +15,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\RoleResource;
 use App\Http\Requests\Api\V1\RoleStoreRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\Api\V1\RoleUpdateRequest;
 use App\Http\Requests\Api\V1\PermissionStoreRequest;
 use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
 use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -238,6 +240,91 @@ class RoleController extends Controller
         } catch (\Throwable $e) {
             Log::error('Error assigning permissions to role', ['error' => $e->getMessage()]);
             return $this->errorResponse('Error assigning permissions to role', 500, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/roles/{id}",
+     *     operationId="showRole",
+     *     tags={"Roles"},
+     *     summary="Get a specific role with its permissions",
+     *     description="Returns a role and its permissions.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/RoleResource")
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not Found")
+     * )
+     */
+    public function show(int $id): JsonResponse
+    {
+        try {
+            $role = $this->roleService->getRoleWithPermissions($id);
+            return $this->successResponse(new RoleResource($role), 'Role retrieved successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Role not found', Response::HTTP_NOT_FOUND);
+        } catch (\Throwable $e) {
+            Log::error('Error retrieving role', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Error retrieving role', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/roles/{id}/status",
+     *     operationId="updateRoleStatus",
+     *     tags={"Roles"},
+     *     summary="Update role status (activate/inactivate)",
+     *     description="Activate or inactivate a role by status (1=active, 0=inactive)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", enum={"0","1"}, example="1")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Role status updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/RoleResource")
+     *     ),
+     *     @OA\Response(response=400, description="Bad Request"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not Found")
+     * )
+     */
+    public function updateStatus(RoleUpdateRequest $request, int $id): JsonResponse
+    {
+        $status = $request->validated('status');
+        try {
+            $role = $this->roleService->getRoleWithPermissions($id);
+            $role->status = $status;
+            $role->save();
+            return $this->successResponse(new RoleResource($role), 'Role status updated successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Role not found', Response::HTTP_NOT_FOUND);
+        } catch (\Throwable $e) {
+            Log::error('Error updating role status', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Error updating role status', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
 }

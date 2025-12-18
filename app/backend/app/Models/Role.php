@@ -11,6 +11,27 @@ use App\Models\User;
 class Role extends SpatieRole
 {
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'description',
+        'guard_name',
+        'status',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'status' => 'string',
+    ];
+    
+    /**
      * Get all users that have this role.
      *
      * @return BelongsToMany

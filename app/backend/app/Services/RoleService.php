@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use App\Models\User;
+use App\Constants\Constant;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Permission;
 
 class RoleService
 {
@@ -40,6 +41,7 @@ class RoleService
             $role = Role::create([
                 'name' => $name,
                 'description' => $description,
+                'status' => Constant::STATUS_ACTIVE,
             ]);
             if (!empty($permissions)) {
                 $role->syncPermissions($permissions);
@@ -135,5 +137,18 @@ class RoleService
             Log::error('Error assigning permissions to role', ['error' => $e->getMessage()]);
             throw $e;
         }
+    }
+
+    /**
+     * Get a specific role with its permissions.
+     *
+     * @param int $id
+     * @return Role
+     * @throws Exception
+     */
+    public function getRoleWithPermissions(int $id): Role
+    {
+        $role = Role::with('permissions')->findOrFail($id);
+        return $role;
     }
 }

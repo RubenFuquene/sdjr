@@ -117,6 +117,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'commerces.edit', 'guard_name' => $guardName, 'description' => 'Edit commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'commerces.update', 'guard_name' => $guardName, 'description' => 'Update commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'commerces.delete', 'guard_name' => $guardName, 'description' => 'Delete commerces', 'created_at' => now(), 'updated_at' => now()],
+
+            ['name' => 'legal_representatives.index', 'guard_name' => $guardName, 'description' => 'List legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.create', 'guard_name' => $guardName, 'description' => 'Create legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.show', 'guard_name' => $guardName, 'description' => 'View legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.edit', 'guard_name' => $guardName, 'description' => 'Edit legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.update', 'guard_name' => $guardName, 'description' => 'Update legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.delete', 'guard_name' => $guardName, 'description' => 'Delete legal representatives', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // Crear roles y asignar permisos

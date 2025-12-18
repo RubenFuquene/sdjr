@@ -9,6 +9,7 @@ use App\Http\Requests\Api\V1\UserRequest;
 use App\Http\Requests\Api\V1\UserIndexRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\UserService;
+use App\Services\RoleService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -23,9 +24,12 @@ class UserController extends Controller
 
     private UserService $userService;
 
-    public function __construct(UserService $userService)
+    private RoleService $roleService;
+
+    public function __construct(UserService $userService, RoleService $roleService)
     {
         $this->userService = $userService;
+        $this->roleService = $roleService;
     }
 
     /**
@@ -160,8 +164,13 @@ class UserController extends Controller
     public function update(UserRequest $request, int $user_id): JsonResponse
     {
         try {
-            $updatedUser = $this->userService->update($user_id, $request->validated());
-            return $this->successResponse(new UserResource($updatedUser), 'User updated successfully', Response::HTTP_OK);            
+            $data = $request->validated();
+            $updatedUser = $this->userService->update($user_id, $data);
+            // Asignar rol si viene en el request
+            if (!empty($data['role'])) {
+                $this->roleService->assignToUser($updatedUser, [$data['role']], [], true);
+            }
+            return $this->successResponse(new UserResource($updatedUser), 'User updated successfully', Response::HTTP_OK);
         } catch (\Throwable $e) {
             Log::error('Error updating user', ['error' => $e->getMessage()]);
             return $this->errorResponse('Error updating users', Response::HTTP_INTERNAL_SERVER_ERROR);

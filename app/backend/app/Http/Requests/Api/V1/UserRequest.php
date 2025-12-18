@@ -16,7 +16,8 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="phone", type="string", maxLength=20, example="3001234567", description="User phone number"),
  *     @OA\Property(property="password", type="string", minLength=8, example="secret123", description="User password (required on create)"),
  *     @OA\Property(property="password_confirmation", type="string", minLength=8, example="secret123", description="Password confirmation (required on create)"),
- *     @OA\Property(property="status", type="integer", enum={0,1}, example=1, description="User status: 1=active, 0=inactive")
+ *     @OA\Property(property="status", type="integer", enum={0,1}, example=1, description="User status: 1=active, 0=inactive"),
+ *     @OA\Property(property="role", type="string", example="admin", description="Role name to assign to user (optional on update)")
  * )
  */
 class UserRequest extends FormRequest
@@ -39,6 +40,7 @@ class UserRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required_if:action,store', 'string', 'min:8', 'confirmed'],
             'status' => 'nullable|integer|in:0,1',
+            'role' => ['nullable', 'string', 'exists:roles,name'],
         ];
 
         if (in_array($method, ['POST'])) {
