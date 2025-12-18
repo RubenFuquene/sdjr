@@ -57,12 +57,12 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'categories.update', 'guard_name' => $guardName, 'description' => 'Permission to update categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'categories.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete categories', 'created_at' => now(), 'updated_at' => now()],
 
-            ['name' => 'establishments.index', 'guard_name' => $guardName, 'description' => 'List establishments', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'establishments.create', 'guard_name' => $guardName, 'description' => 'Create establishments', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'establishments.show', 'guard_name' => $guardName, 'description' => 'View establishments', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'establishments.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit establishments', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'establishments.update', 'guard_name' => $guardName, 'description' => 'Permission to update establishments', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'establishments.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete establishments', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.index', 'guard_name' => $guardName, 'description' => 'List establishments', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.create', 'guard_name' => $guardName, 'description' => 'Create establishments', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.show', 'guard_name' => $guardName, 'description' => 'View establishments', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit establishments', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.update', 'guard_name' => $guardName, 'description' => 'Permission to update establishments', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete establishments', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'roles.index', 'guard_name' => $guardName, 'description' => 'List roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'roles.create', 'guard_name' => $guardName, 'description' => 'Create roles', 'created_at' => now(), 'updated_at' => now()],

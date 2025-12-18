@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Models\User;
+use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Permission;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_list_users(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'users.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'users.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
         $user->givePermissionTo('users.index');
         User::factory()->count(3)->create();
@@ -33,17 +35,17 @@ class UserTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_list_users(): void
     {
         $response = $this->getJson('/api/v1/users');
         $response->assertUnauthorized();
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_create_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'users.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'users.create', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
         $admin->givePermissionTo('users.create');
         Sanctum::actingAs($admin);
@@ -62,10 +64,10 @@ class UserTest extends TestCase
         $response->assertJsonFragment(['name' => 'New', 'last_name' => 'User', 'phone' => '3001234567']);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_view_single_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'users.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'users.show', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
         $admin->givePermissionTo('users.show');
         $user = User::factory()->create();
@@ -76,10 +78,10 @@ class UserTest extends TestCase
         $response->assertJsonFragment(['id' => $user->id]);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_update_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'users.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'users.update', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
         $admin->givePermissionTo('users.update');
         $user = User::factory()->create();
@@ -91,10 +93,10 @@ class UserTest extends TestCase
         $response->assertJsonFragment(['name' => 'Updated Name']);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_delete_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'users.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'users.delete', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
         $admin->givePermissionTo('users.delete');
         $user = User::factory()->create();
