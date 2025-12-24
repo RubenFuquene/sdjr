@@ -8,6 +8,7 @@ use App\Http\Resources\Api\V1\CityResource;
 use App\Services\CityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -17,6 +18,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class CityController extends Controller
 {
+    use ApiResponseTrait;
     protected CityService $cityService;
 
     public function __construct(CityService $cityService)
@@ -51,10 +53,17 @@ class CityController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection
+    public function index(\App\Http\Requests\Api\V1\CityIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
-        $cities = $this->cityService->getPaginated();
-        return CityResource::collection($cities);
+        try {
+            $perPage = $request->validatedPerPage();
+            $status = $request->validatedStatus();
+            $cities = $this->cityService->getPaginated($perPage, $status);
+            $resource = CityResource::collection($cities);
+            return $this->paginatedResponse($cities, $resource, 'Cities retrieved successfully');
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error retrieving cities', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -93,10 +102,14 @@ class CityController extends Controller
      * @param CityRequest $request
      * @return CityResource
      */
-    public function store(CityRequest $request): CityResource
+    public function store(CityRequest $request): CityResource|JsonResponse
     {
-        $city = $this->cityService->create($request->validated());
-        return new CityResource($city);
+        try {
+            $city = $this->cityService->create($request->validated());
+            return $this->successResponse(new CityResource($city), 'City created successfully', 201);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error creating city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -146,13 +159,15 @@ class CityController extends Controller
      */
     public function show(string $id): CityResource|JsonResponse
     {
-        $city = $this->cityService->find($id);
-
-        if (!$city) {
-            return response()->json(['message' => 'City not found'], 404);
+        try {
+            $city = $this->cityService->find($id);
+            if (!$city) {
+                return $this->errorResponse('City not found', 404);
+            }
+            return $this->successResponse(new CityResource($city), 'City retrieved successfully', 200);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error retrieving city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
-
-        return new CityResource($city);
     }
 
     /**
@@ -207,14 +222,16 @@ class CityController extends Controller
      */
     public function update(CityRequest $request, string $id): CityResource|JsonResponse
     {
-        $city = $this->cityService->find($id);
-
-        if (!$city) {
-            return response()->json(['message' => 'City not found'], 404);
+        try {
+            $city = $this->cityService->find($id);
+            if (!$city) {
+                return $this->errorResponse('City not found', 404);
+            }
+            $updatedCity = $this->cityService->update($city, $request->validated());
+            return $this->successResponse(new CityResource($updatedCity), 'City updated successfully', 200);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error updating city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
-
-        $updatedCity = $this->cityService->update($city, $request->validated());
-        return new CityResource($updatedCity);
     }
 
     /**
@@ -262,13 +279,15 @@ class CityController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $city = $this->cityService->find($id);
-
-        if (!$city) {
-            return response()->json(['message' => 'City not found'], 404);
+        try {
+            $city = $this->cityService->find($id);
+            if (!$city) {
+                return $this->errorResponse('City not found', 404);
+            }
+            $this->cityService->delete($city);
+            return $this->noContentResponse();
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Error deleting city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }
-
-        $this->cityService->delete($city);
-        return response()->json(['message' => 'City deleted successfully']);
     }
 }

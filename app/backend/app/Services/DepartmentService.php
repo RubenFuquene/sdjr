@@ -24,9 +24,13 @@ class DepartmentService
      * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
     {
-        return Department::with('country')->paginate($perPage);
+        $query = Department::with('country');
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        return $query->paginate($perPage);
     }
 
     /**

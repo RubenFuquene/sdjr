@@ -19,7 +19,9 @@ class CountryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $action = $this->route()->getActionMethod();
+        $permission = 'countries.' . ($action === 'store' ? 'create' : 'update');
+        return $this->user()?->can($permission) ?? false;
     }
 
     /**
@@ -39,13 +41,21 @@ class CountryRequest extends FormRequest
      *      example="A"
      * )
      *
+     * @OA\Property(
+     *      property="code",
+     *      title="code",
+     *      description="Unique code for the country (6 alphanumeric characters)",
+     *      example="CO1234"
+     * )
+     * 
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
+    {        
         return [
             'name' => 'required|string|max:255',
-            'status' => 'nullable|string|max:1|in:A,I',
+            'code' => 'required|string|size:6|regex:/^[A-Za-z0-9]+$/|unique:countries,code',
+            'status' => 'nullable|integer|in:0,1',
         ];
     }
 }

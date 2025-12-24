@@ -19,14 +19,19 @@ class CountryService
     }
 
     /**
-     * Get paginated countries.
+     * Get paginated countries with optional status filter.
      *
      * @param int $perPage
+     * @param string $status
      * @return LengthAwarePaginator
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
     {
-        return Country::paginate($perPage);
+        $query = Country::query();
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        return $query->paginate($perPage);
     }
 
     /**

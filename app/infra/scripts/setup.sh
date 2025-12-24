@@ -23,14 +23,14 @@ echo "✅ Docker and Docker Compose are installed"
 
 # Setup Frontend
 echo "📦 Setting up Frontend..."
-cd ../frontend
+cd ../../frontend
 if [ ! -d "node_modules" ]; then
     npm install
 fi
 
 # Setup Backend
 echo "📦 Setting up Backend..."
-cd ../backend
+cd ../../backend
 if [ ! -f ".env" ]; then
     cp .env.example .env
     echo "✅ Created .env file for backend"

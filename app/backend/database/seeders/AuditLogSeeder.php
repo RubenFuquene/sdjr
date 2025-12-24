@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\Provider;
 use Illuminate\Database\Seeder;
+use App\Models\AuditLog;
 
-class ProviderSeeder extends Seeder
+class AuditLogSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * @return void
      */
     public function run(): void
     {
-        Provider::factory(5)->create();
+        AuditLog::factory()->count(20)->create();
     }
 }

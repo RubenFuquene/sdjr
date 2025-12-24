@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Constants\Constant;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Country>
@@ -18,7 +19,8 @@ class CountryFactory extends Factory
     {
         return [
             'name' => $this->faker->country(),
-            'status' => $this->faker->randomElement(['A', 'I']),
+            'code' => strtoupper($this->faker->unique()->bothify('??####')),
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
     }
 }

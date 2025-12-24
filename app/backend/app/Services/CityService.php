@@ -24,9 +24,13 @@ class CityService
      * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
     {
-        return City::with('department')->paginate($perPage);
+        $query = City::with('department');
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        return $query->paginate($perPage);
     }
 
     /**
