@@ -18,11 +18,11 @@ class CommerceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Crear permisos necesarios
-        Permission::findOrCreate('commerces.create');
-        Permission::findOrCreate('commerces.update');
-        Permission::findOrCreate('commerces.view');
-        Permission::findOrCreate('commerces.delete');
+        // Crear permisos necesarios con guard sanctum
+        Permission::findOrCreate('commerces.create', 'sanctum');
+        Permission::findOrCreate('commerces.update', 'sanctum');
+        Permission::findOrCreate('commerces.view', 'sanctum');
+        Permission::findOrCreate('commerces.delete', 'sanctum');
     }
 
     public function test_user_can_create_commerce()

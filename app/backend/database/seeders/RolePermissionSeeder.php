@@ -18,8 +18,8 @@ class RolePermissionSeeder extends Seeder
 
         $guardName = 'sanctum';
 
-        // Crear permisos
-        Permission::insert([
+        // Crear permisos solo si no existen
+        $permissions = [
 
             // Parametrization
             ['name' => 'countries.index', 'guard_name' => $guardName, 'description' => 'List countries', 'created_at' => now(), 'updated_at' => now()],
@@ -114,18 +114,52 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'commerces.index', 'guard_name' => $guardName, 'description' => 'List commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'commerces.create', 'guard_name' => $guardName, 'description' => 'Create commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'commerces.show', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'commerces.view', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'commerces.edit', 'guard_name' => $guardName, 'description' => 'Edit commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'commerces.update', 'guard_name' => $guardName, 'description' => 'Update commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'commerces.delete', 'guard_name' => $guardName, 'description' => 'Delete commerces', 'created_at' => now(), 'updated_at' => now()],
-        ]);
 
-        // Crear roles y asignar permisos
-        Role::insert([
-            ['name' => 'superadmin', 'guard_name' => $guardName, 'description' => 'Super Administrator role', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin', 'guard_name' => $guardName, 'description' => 'Administrator role', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider', 'guard_name' => $guardName, 'description' => 'Provider role', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'user', 'guard_name' => $guardName, 'description' => 'User role', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+            // Legal Representatives
+            ['name' => 'legal_representatives.index', 'guard_name' => $guardName, 'description' => 'List legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.create', 'guard_name' => $guardName, 'description' => 'Create legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.show', 'guard_name' => $guardName, 'description' => 'View legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.view', 'guard_name' => $guardName, 'description' => 'View legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.edit', 'guard_name' => $guardName, 'description' => 'Edit legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.update', 'guard_name' => $guardName, 'description' => 'Update legal representatives', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_representatives.delete', 'guard_name' => $guardName, 'description' => 'Delete legal representatives', 'created_at' => now(), 'updated_at' => now()],
+
+            // Establishment Types
+            ['name' => 'establishment_types.index', 'guard_name' => $guardName, 'description' => 'List establishment types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.create', 'guard_name' => $guardName, 'description' => 'Create establishment types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.show', 'guard_name' => $guardName, 'description' => 'View establishment types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.view', 'guard_name' => $guardName, 'description' => 'View establishment types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.edit', 'guard_name' => $guardName, 'description' => 'Edit establishment types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.update', 'guard_name' => $guardName, 'description' => 'Update establishment types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Delete establishment types', 'created_at' => now(), 'updated_at' => now()],
+        ];
+
+        // Crear permisos si no existen
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(
+                ['name' => $permission['name'], 'guard_name' => $permission['guard_name']],
+                $permission
+            );
+        }
+
+        // Crear roles si no existen
+        $roles = [
+            ['name' => 'superadmin', 'guard_name' => $guardName, 'description' => 'Super Administrator role'],
+            ['name' => 'admin', 'guard_name' => $guardName, 'description' => 'Administrator role'],
+            ['name' => 'provider', 'guard_name' => $guardName, 'description' => 'Provider role'],
+            ['name' => 'user', 'guard_name' => $guardName, 'description' => 'User role'],
+        ];
+
+        foreach ($roles as $roleData) {
+            Role::firstOrCreate(
+                ['name' => $roleData['name'], 'guard_name' => $roleData['guard_name']],
+                $roleData
+            );
+        }
 
         // Asignar permisos a roles
         $role = Role::where('name', 'superadmin')->first();        

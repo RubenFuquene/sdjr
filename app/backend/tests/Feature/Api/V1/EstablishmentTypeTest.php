@@ -18,11 +18,11 @@ class EstablishmentTypeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Crear permisos necesarios
-        Permission::findOrCreate('establishment_types.create');
-        Permission::findOrCreate('establishment_types.update');
-        Permission::findOrCreate('establishment_types.view');
-        Permission::findOrCreate('establishment_types.delete');
+        // Crear permisos necesarios con guard sanctum
+        Permission::findOrCreate('establishment_types.create', 'sanctum');
+        Permission::findOrCreate('establishment_types.update', 'sanctum');
+        Permission::findOrCreate('establishment_types.view', 'sanctum');
+        Permission::findOrCreate('establishment_types.delete', 'sanctum');
     }
 
     public function test_user_can_create_establishment_type()

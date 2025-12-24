@@ -55,7 +55,7 @@ class LegalRepresentative extends Model
     public function commerce() { return $this->belongsTo(Commerce::class); }
 
     // Sanitización de campos de texto
-    public function setNameAttribute($value) { $this->attributes['name'] = $this->sanitizeText($value); }
-    public function setLastNameAttribute($value) { $this->attributes['last_name'] = $this->sanitizeText($value); }
+    public function setNameAttribute($value) { $this->attributes['name'] = $this->capitalizeText($value); }
+    public function setLastNameAttribute($value) { $this->attributes['last_name'] = $this->capitalizeText($value); }
     public function setEmailAttribute($value) { $this->attributes['email'] = $this->sanitizeEmail($value); }
 }
