@@ -7,10 +7,11 @@ type Session = {
   userId: string;
   email: string;
   role: Role;
+  name?: string;
+  last_name?: string;
+  token?: string;
 };
 
-const SESSION_COOKIE = "sdjr_session";
-const ROLE_COOKIE = "sdjr_role";
 const BYPASS_AUTH = process.env.NEXT_PUBLIC_BYPASS_AUTH === "true";
 
 const LOGIN_PATH_BY_ROLE: Record<Role, string> = {
@@ -19,31 +20,57 @@ const LOGIN_PATH_BY_ROLE: Record<Role, string> = {
   app: "/app/login",
 };
 
-// -------------------------------------------------------------
-// Dummies de sesión/rol (quitar al conectar backend real)
-//  - BYPASS_AUTH=true => siempre retorna sesión admin de prueba
-//  - Cookie sdjr_session presente => sesión válida con rol de cookie
-//  - Sin cookie => null (redirige a login)
-// -------------------------------------------------------------
-
 /**
- * Dev-only stub. Replace with a real call to `/api/me` when backend is ready.
- * Expected shape: { userId, email, role }
+ * Fetch user session - simplified version for current implementation
  */
 async function fetchSession(): Promise<Session | null> {
   if (BYPASS_AUTH) {
     return { userId: "demo", email: "demo@sumass.com", role: "admin" };
   }
 
-  // Next.js 14/React 19: cookies() es async; debemos await para evitar errores de sync dynamic API.
-  const cookieStore = await cookies();
-  const hasSession = cookieStore.has(SESSION_COOKIE);
-  if (!hasSession) return null;
+  try {
+    // Next.js 14/React 19: cookies() es async
+    const cookieStore = await cookies();
+    
+    // Por ahora, buscar cookies simples que podamos setear después del login
+    const sessionData = cookieStore.get("sdjr_session")?.value;
+    
+    if (!sessionData) {
+      return null;
+    }
+    
+    // Intentar decodificar datos de sesión básicos
+    try {
+      const parsed = JSON.parse(decodeURIComponent(sessionData));
+      return {
+        userId: parsed.userId || "unknown",
+        email: parsed.email || "",
+        role: parsed.role || "admin",
+        name: parsed.name,
+        last_name: parsed.last_name
+      };
+    } catch {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching session:", error);
+    return null;
+  }
+}
 
-  // TODO: Reemplazar con decodificación real de token o fetch a `/api/me`.
-  const role = (cookieStore.get(ROLE_COOKIE)?.value as Role | undefined) ?? "admin";
-  const email = cookieStore.get("sdjr_email")?.value ?? "user@sumass.com";
-  return { userId: "unknown", email, role };
+/**
+ * Map Laravel role to frontend role
+ */
+function mapLaravelRoleToRole(laravelRole: string): Role {
+  switch (laravelRole) {
+    case "provider":
+      return "provider";
+    case "customer":
+      return "app";
+    case "admin":
+    default:
+      return "admin";
+  }
 }
 
 export async function getSession(): Promise<Session | null> {

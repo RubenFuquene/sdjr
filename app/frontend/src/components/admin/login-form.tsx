@@ -25,12 +25,33 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const persistDummySession = (role: "admin" | "provider" | "app", emailValue: string) => {
-    // Dummy cookies para que el middleware y el guard pasen mientras no hay backend real
-    const maxAge = 60 * 60; // 1h
-    document.cookie = `sdjr_session=dummy; path=/; max-age=${maxAge}`;
-    document.cookie = `sdjr_role=${role}; path=/; max-age=${maxAge}`;
-    document.cookie = `sdjr_email=${encodeURIComponent(emailValue)}; path=/; max-age=${maxAge}`;
+  const persistSession = (userData: any, token?: string) => {
+    // Crear datos de sesión basados en la respuesta de la API
+    const sessionData = {
+      userId: userData.id?.toString() || "unknown",
+      email: userData.email || "",
+      role: mapLaravelRoleToRole(userData.rol),
+      name: userData.name,
+      last_name: userData.last_name,
+      token: token
+    };
+    
+    // Guardar en cookie para que el middleware pueda leerlo
+    const maxAge = 60 * 60 * 24 * 7; // 1 semana
+    const encodedData = encodeURIComponent(JSON.stringify(sessionData));
+    document.cookie = `sdjr_session=${encodedData}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  };
+
+  const mapLaravelRoleToRole = (laravelRole: string) => {
+    switch (laravelRole) {
+      case "provider":
+        return "provider";
+      case "customer":
+        return "app";
+      case "admin":
+      default:
+        return "admin";
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -39,15 +60,35 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
     setLoading(true);
     try {
       let redirectTo = "/admin/dashboard";
+      let userData: any = null;
+      let token: string | undefined;
 
       if (onSubmit) {
         await onSubmit({ email, password });
+        // Para onSubmit personalizado, crear datos básicos
+        userData = {
+          id: "unknown",
+          email: email,
+          rol: "admin",
+          name: email.split('@')[0],
+          last_name: ''
+        };
       } else {
         const result = await login({ email, password });
+        token = result.token;
         redirectTo = result.redirectTo ?? redirectTo;
+        // Usar datos del usuario de la respuesta de la API
+        userData = result.user || {
+          id: "unknown", 
+          email: email,
+          rol: redirectTo.includes('/admin/') ? 'admin' : 
+               redirectTo.includes('/provider/') ? 'provider' : 'customer',
+          name: email.split('@')[0],
+          last_name: ''
+        };
       }
 
-      persistDummySession("admin", email);
+      persistSession(userData, token);
 
       router.push(redirectTo);
     } catch (err) {
