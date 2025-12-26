@@ -73,6 +73,6 @@ function buildLoginUrl(role: Role, redirectTo?: string) {
   const loginPath = LOGIN_PATH_BY_ROLE[role];
   if (!redirectTo) return loginPath;
   
-  // Construcción relativa sin necesidad de base URL
+  // Construcción relativa
   return `${loginPath}?redirectTo=${encodeURIComponent(redirectTo)}`;
 }

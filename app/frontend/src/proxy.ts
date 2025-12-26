@@ -10,13 +10,13 @@ const LOGIN_BY_SEGMENT: Record<string, string> = {
 };
 
 // -------------------------------------------------------------
-// Dummy guard (quitar al conectar backend real)
+// Proxy guard (Next.js 16+ convention)
 //  - BYPASS_AUTH=true => permite todo
 //  - Sin cookie sdjr_session => redirige a login del segmento
 //  - Con cookie => deja pasar (no valida rol aquí; rol se valida en layout protegido)
 // -------------------------------------------------------------
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
   if (BYPASS_AUTH) return NextResponse.next();
