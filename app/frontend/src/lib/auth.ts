@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Role, SessionData } from "@/types/auth";
+import { getSessionFromServerCookies } from "@/lib/session";
 
 // Alias para compatibilidad interna
 type Session = SessionData;
@@ -22,29 +23,8 @@ async function fetchSession(): Promise<Session | null> {
   }
 
   try {
-    // Next.js 14/React 19: cookies() es async
     const cookieStore = await cookies();
-    
-    // Por ahora, buscar cookies simples que podamos setear después del login
-    const sessionData = cookieStore.get("sdjr_session")?.value;
-    
-    if (!sessionData) {
-      return null;
-    }
-    
-    // Intentar decodificar datos de sesión básicos
-    try {
-      const parsed = JSON.parse(decodeURIComponent(sessionData));
-      return {
-        userId: parsed.userId || "unknown",
-        email: parsed.email || "",
-        role: parsed.role || "admin",
-        name: parsed.name,
-        last_name: parsed.last_name
-      };
-    } catch {
-      return null;
-    }
+    return await getSessionFromServerCookies(cookieStore);
   } catch (error) {
     console.error("Error fetching session:", error);
     return null;

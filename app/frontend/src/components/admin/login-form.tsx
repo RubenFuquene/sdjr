@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import type { SessionData } from "@/types/auth";
 import { mapLaravelRoleToRole } from "@/lib/roles";
+import { persistSession } from "@/lib/session";
 
 type LoginFormProps = {
   // Optional hook for future customization; expected to be passed from a Client Component only
@@ -26,13 +27,6 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
-  const persistSession = (sessionData: SessionData) => {
-    // Guardar en cookie para que el middleware pueda leerlo
-    const maxAge = 60 * 60 * 24 * 7; // 1 semana
-    const encodedData = encodeURIComponent(JSON.stringify(sessionData));
-    document.cookie = `sdjr_session=${encodedData}; path=/; max-age=${maxAge}; SameSite=Lax`;
-  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

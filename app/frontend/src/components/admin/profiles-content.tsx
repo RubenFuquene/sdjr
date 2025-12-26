@@ -2,22 +2,23 @@
 
 import { useState } from "react";
 import { Users, Store, UserCog } from "lucide-react";
-import { Vista, Perfil, Proveedor, Usuario, Administrador } from "@/types/admin";
+import { Vista, Proveedor, Usuario, Administrador } from "@/types/admin";
+import { useRoles } from "@/hooks/use-roles";
 import { ProfilesFilters } from "./profiles-filters";
 import { ProfilesTable } from "./profiles-table";
 import { ProvidersTable } from "./providers-table";
 import { UsersTable } from "./users-table";
 import { AdministratorsTable } from "./administrators-table";
+import { TableLoadingState } from "./loading-state";
+import { ErrorState } from "./error-state";
 
 interface ProfilesContentProps {
-  perfiles: Perfil[];
   proveedores: Proveedor[];
   usuarios: Usuario[];
   administradores: Administrador[];
 }
 
 export function ProfilesContent({
-  perfiles,
   proveedores,
   usuarios,
   administradores,
@@ -25,6 +26,9 @@ export function ProfilesContent({
   const [vista, setVista] = useState<Vista>("perfiles");
   const [searchTerm, setSearchTerm] = useState("");
   const [perfilFilter, setPerfilFilter] = useState("todos");
+  
+  // Cargar roles desde API
+  const { roles: perfiles, loading, error, refresh } = useRoles();
 
   const handleSearch = () => {
     console.log("Buscando:", { vista, searchTerm, perfilFilter });
@@ -100,8 +104,21 @@ export function ProfilesContent({
         onSearch={handleSearch}
       />
 
-      {/* Tablas */}
-      {vista === "perfiles" && <ProfilesTable data={perfiles} />}
+      {/* Tablas con estados de loading y error */}
+      {vista === "perfiles" && (
+        <>
+          {loading && <TableLoadingState />}
+          {error && <ErrorState message={error} onRetry={refresh} />}
+          {!loading && !error && perfiles.length === 0 && (
+            <div className="text-center py-12 text-[#6A6A6A]">
+              No se encontraron perfiles
+            </div>
+          )}
+          {!loading && !error && perfiles.length > 0 && (
+            <ProfilesTable data={perfiles} />
+          )}
+        </>
+      )}
       {vista === "proveedores" && <ProvidersTable data={proveedores} />}
       {vista === "usuarios" && <UsersTable data={usuarios} />}
       {vista === "administradores" && <AdministratorsTable data={administradores} />}

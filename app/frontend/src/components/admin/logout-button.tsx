@@ -2,17 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { clearSession } from "@/lib/session";
 
 export function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Dummy logout: limpia cookies de sesión hasta tener el endpoint real.
-    // TODO: Reemplazar por llamada a POST /logout (Laravel) y dejar que el backend maneje las cookies HttpOnly.
-    const cookiesToClear = ["sdjr_session", "sdjr_role", "sdjr_email"];
-    cookiesToClear.forEach((name) => {
-      document.cookie = `${name}=; path=/; max-age=0`;
-    });
+    // Limpiar sesión usando función centralizada
+    // TODO: Reemplazar por llamada a POST /logout (Laravel) cuando esté disponible
+    clearSession();
     router.push("/admin/login");
   };
 
