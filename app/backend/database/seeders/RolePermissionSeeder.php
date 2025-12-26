@@ -89,26 +89,26 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'users.assign_roles_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign roles and permissions to users', 'created_at' => now(), 'updated_at' => now()],
 
             // Administrator Modules
-            ['name' => 'admin_profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin_parametrization.view', 'guard_name' => $guardName, 'description' => 'View admin parametrization module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin_provider_validate.view', 'guard_name' => $guardName, 'description' => 'View admin provider validate module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin_marketing.view', 'guard_name' => $guardName, 'description' => 'View admin marketing module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin_dashboard.view', 'guard_name' => $guardName, 'description' => 'View admin dashboard module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin_support.view', 'guard_name' => $guardName, 'description' => 'View admin support module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.parametrization.view', 'guard_name' => $guardName, 'description' => 'View admin parametrization module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.provider_validate.view', 'guard_name' => $guardName, 'description' => 'View admin provider validate module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.marketing.view', 'guard_name' => $guardName, 'description' => 'View admin marketing module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.dashboard.view', 'guard_name' => $guardName, 'description' => 'View admin dashboard module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.support.view', 'guard_name' => $guardName, 'description' => 'View admin support module', 'created_at' => now(), 'updated_at' => now()],
 
             // PQRS Modules
-            ['name' => 'admin_my_pqrs.view', 'guard_name' => $guardName, 'description' => 'View admin My PQRs module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin_manage_pqrs.view', 'guard_name' => $guardName, 'description' => 'View admin manage PQRs module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.my_pqrs.view', 'guard_name' => $guardName, 'description' => 'View admin My PQRs module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.manage_pqrs.view', 'guard_name' => $guardName, 'description' => 'View admin manage PQRs module', 'created_at' => now(), 'updated_at' => now()],
 
             // Provider Modules
-            ['name' => 'provider_basic_data.view', 'guard_name' => $guardName, 'description' => 'View provider basic data module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider_commerces.view', 'guard_name' => $guardName, 'description' => 'View provider commerces module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider_products.view', 'guard_name' => $guardName, 'description' => 'View provider products module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider_my_account.view', 'guard_name' => $guardName, 'description' => 'View provider my account module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider_my_wallet.view', 'guard_name' => $guardName, 'description' => 'View provider my wallet module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider_dashboard.view', 'guard_name' => $guardName, 'description' => 'View provider dashboard module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider_review.view', 'guard_name' => $guardName, 'description' => 'View provider review module', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider_support.view', 'guard_name' => $guardName, 'description' => 'View provider support module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.basic_data.view', 'guard_name' => $guardName, 'description' => 'View provider basic data module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerces.view', 'guard_name' => $guardName, 'description' => 'View provider commerces module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.view', 'guard_name' => $guardName, 'description' => 'View provider products module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.my_account.view', 'guard_name' => $guardName, 'description' => 'View provider my account module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.my_wallet.view', 'guard_name' => $guardName, 'description' => 'View provider my wallet module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.dashboard.view', 'guard_name' => $guardName, 'description' => 'View provider dashboard module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.review.view', 'guard_name' => $guardName, 'description' => 'View provider review module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.support.view', 'guard_name' => $guardName, 'description' => 'View provider support module', 'created_at' => now(), 'updated_at' => now()],
 
             // Commerces Modules
             ['name' => 'commerces.index', 'guard_name' => $guardName, 'description' => 'List commerces', 'created_at' => now(), 'updated_at' => now()],
