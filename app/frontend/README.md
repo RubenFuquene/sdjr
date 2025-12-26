@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Sumass Frontend
 
-## Getting Started
+Frontend unificado para panel administrativo, panel de proveedores y app del cliente. Construido con Next.js 16 (App Router) + React 19, Tailwind v4 y TypeScript estricto.
 
-First, run the development server:
+## Desarrollo local (Docker first)
+
+1. `cd app/infra`
+2. `docker-compose up -d`
+3. Frontend disponible en [http://localhost:3000](http://localhost:3000)
+
+Comandos útiles (siempre desde `app/infra/`):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker-compose exec frontend npm run lint
+docker-compose exec frontend npm run type-check
+docker-compose exec frontend npm run test
+docker-compose exec frontend npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> No ejecutes `npm run dev` ni installs en el host; todo ocurre dentro del contenedor `frontend`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables relevantes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NEXT_PUBLIC_API_URL`: apunta al backend Laravel en Docker (`http://backend:8000` en contenedor, `http://localhost:8000` desde el host).
 
-## Learn More
+## Estructura clave
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/frontend/
+├── public/
+├── src/
+│   ├── app/              # Rutas App Router agrupadas por rol
+│   ├── components/
+│   │   └── admin/
+│   │       ├── layout/   # Shells y layouts protegidos
+│   │       ├── shared/   # Componentes atómicos reutilizables
+│   │       ├── management/
+│   │       │   ├── perfiles/
+│   │       │   ├── proveedores/
+│   │       │   ├── usuarios/
+│   │       │   └── administradores/
+│   │       ├── parametrizacion/
+│   │       ├── validacion-proveedores/
+│   │       ├── marketing/
+│   │       ├── analytics/
+│   │       └── soporte/
+│   ├── hooks/
+│   ├── lib/
+│   └── types/
+└── ...
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Organización del panel admin
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `layout/`: componentes estructurales como `DashboardShell`.
+- `shared/`: badges, actions, estados vacíos/carga, etc. consumidos por todos los módulos.
+- `management/`: vistas tabulares agrupadas por dominio (Perfiles, Proveedores, Usuarios, Administradores). Cada carpeta contiene filtros, tablas y componentes específicos del módulo.
+- Carpetas vacías (`parametrizacion`, `validacion-proveedores`, `marketing`, `analytics`, `soporte`) sirven como anclas para las próximas entregas y mantienen el IA del sidebar.
+- Barrel `components/admin/index.ts` re-exporta los módulos principales para evitar imports frágiles.
 
-## Deploy on Vercel
+## Diseño y assets
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Paleta y tokens oficiales en `design-reference/src/COLORES_ACTUALIZADOS.md`.
+- Componentes de referencia exportados desde Figma en `design-reference/src/components/`.
+- Assets (logos, ilustraciones) disponibles en `design-reference/src/assets/` y deben copiarse a `public/brand/` cuando se utilicen.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Buenas prácticas
+
+- Preferir Server Components y data fetching directo desde los endpoints Laravel.
+- Marcar `"use client"` solo cuando exista interacción o estado local de UI.
+- Mantener los estilos alineados con las medidas del diseño (alturas, radios, sombras).
+- Agregar loading/error states (`loading.tsx`, `error.tsx` o componentes compartidos) para cada vista que llame a la API.
+
+Para más contexto revisa `docs/architecture.md` y `docs/development.md`.

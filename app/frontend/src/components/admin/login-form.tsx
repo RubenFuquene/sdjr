@@ -4,7 +4,6 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import type { SessionData } from "@/types/auth";
-import { mapLaravelRoleToRole } from "@/lib/roles";
 import { persistSession } from "@/lib/session";
 
 type LoginFormProps = {

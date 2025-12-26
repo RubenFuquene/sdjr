@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getRoles, ApiError } from "@/lib/api";
 import { Perfil, RoleFromAPI } from "@/types/admin";
 
@@ -45,7 +45,7 @@ export function useRoles(perPage: number = 15): UseRolesReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -64,11 +64,11 @@ export function useRoles(perPage: number = 15): UseRolesReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, [perPage]);
 
   useEffect(() => {
     fetchRoles();
-  }, [perPage]);
+  }, [fetchRoles]);
 
   return {
     roles,

@@ -1,4 +1,4 @@
-import { ProfilesContent } from "@/components/admin/profiles-content";
+import { ProfilesContent } from "@/components/admin";
 import { mockProveedores, mockUsuarios, mockAdministradores } from "@/lib/mocks/admin";
 
 export const metadata = {

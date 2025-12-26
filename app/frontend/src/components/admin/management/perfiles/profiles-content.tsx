@@ -1,0 +1,127 @@
+"use client";
+
+import { useState } from "react";
+import { Users, Store, UserCog } from "lucide-react";
+import { Vista, Proveedor, Usuario, Administrador } from "@/types/admin";
+import { useRoles } from "@/hooks/use-roles";
+import { ProfilesFilters } from "./profiles-filters";
+import { ProfilesTable } from "./profiles-table";
+import { ProvidersTable } from "@/components/admin/management/proveedores/providers-table";
+import { UsersTable } from "@/components/admin/management/usuarios/users-table";
+import { AdministratorsTable } from "@/components/admin/management/administradores/administrators-table";
+import { TableLoadingState } from "@/components/admin/shared/loading-state";
+import { ErrorState } from "@/components/admin/shared/error-state";
+
+interface ProfilesContentProps {
+  proveedores: Proveedor[];
+  usuarios: Usuario[];
+  administradores: Administrador[];
+}
+
+export function ProfilesContent({
+  proveedores,
+  usuarios,
+  administradores,
+}: ProfilesContentProps) {
+  const [vista, setVista] = useState<Vista>("perfiles");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [perfilFilter, setPerfilFilter] = useState("todos");
+  
+  // Cargar roles desde API
+  const { roles: perfiles, loading, error, refresh } = useRoles();
+
+  const handleSearch = () => {
+    console.log("Buscando:", { vista, searchTerm, perfilFilter });
+    // TODO: Implementar lógica de filtrado real
+  };
+
+  const handleVistaChange = (newVista: Vista) => {
+    setVista(newVista);
+    setSearchTerm("");
+    setPerfilFilter("todos");
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Tabs */}
+      <div className="bg-white rounded-[18px] shadow-sm p-4 border border-slate-100">
+        <div className="flex flex-wrap gap-4">
+          <button
+            onClick={() => handleVistaChange("perfiles")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "perfiles"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            Perfiles
+          </button>
+          <button
+            onClick={() => handleVistaChange("proveedores")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "proveedores"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <Store className="w-5 h-5" />
+            Proveedores
+          </button>
+          <button
+            onClick={() => handleVistaChange("usuarios")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "usuarios"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            Usuarios
+          </button>
+          <button
+            onClick={() => handleVistaChange("administradores")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "administradores"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <UserCog className="w-5 h-5" />
+            Administradores
+          </button>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <ProfilesFilters
+        vista={vista}
+        searchTerm={searchTerm}
+        perfilFilter={perfilFilter}
+        perfiles={perfiles}
+        onSearchChange={setSearchTerm}
+        onPerfilChange={setPerfilFilter}
+        onSearch={handleSearch}
+      />
+
+      {/* Tablas con estados de loading y error */}
+      {vista === "perfiles" && (
+        <>
+          {loading && <TableLoadingState />}
+          {error && <ErrorState message={error} onRetry={refresh} />}
+          {!loading && !error && perfiles.length === 0 && (
+            <div className="text-center py-12 text-[#6A6A6A]">
+              No se encontraron perfiles
+            </div>
+          )}
+          {!loading && !error && perfiles.length > 0 && (
+            <ProfilesTable data={perfiles} />
+          )}
+        </>
+      )}
+      {vista === "proveedores" && <ProvidersTable data={proveedores} />}
+      {vista === "usuarios" && <UsersTable data={usuarios} />}
+      {vista === "administradores" && <AdministratorsTable data={administradores} />}
+    </div>
+  );
+}
