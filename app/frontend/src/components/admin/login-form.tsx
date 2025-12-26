@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
+import type { SessionData } from "@/types/auth";
+import { mapLaravelRoleToRole } from "@/lib/roles";
 
 type LoginFormProps = {
   // Optional hook for future customization; expected to be passed from a Client Component only
@@ -25,33 +27,11 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const persistSession = (userData: any, token?: string) => {
-    // Crear datos de sesión basados en la respuesta de la API
-    const sessionData = {
-      userId: userData.id?.toString() || "unknown",
-      email: userData.email || "",
-      role: mapLaravelRoleToRole(userData.rol),
-      name: userData.name,
-      last_name: userData.last_name,
-      token: token
-    };
-    
+  const persistSession = (sessionData: SessionData) => {
     // Guardar en cookie para que el middleware pueda leerlo
     const maxAge = 60 * 60 * 24 * 7; // 1 semana
     const encodedData = encodeURIComponent(JSON.stringify(sessionData));
     document.cookie = `sdjr_session=${encodedData}; path=/; max-age=${maxAge}; SameSite=Lax`;
-  };
-
-  const mapLaravelRoleToRole = (laravelRole: string) => {
-    switch (laravelRole) {
-      case "provider":
-        return "provider";
-      case "customer":
-        return "app";
-      case "admin":
-      default:
-        return "admin";
-    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -60,35 +40,34 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
     setLoading(true);
     try {
       let redirectTo = "/admin/dashboard";
-      let userData: any = null;
-      let token: string | undefined;
+      let sessionData: SessionData;
 
       if (onSubmit) {
         await onSubmit({ email, password });
         // Para onSubmit personalizado, crear datos básicos
-        userData = {
-          id: "unknown",
+        sessionData = {
+          userId: "unknown",
           email: email,
-          rol: "admin",
+          role: "admin",
           name: email.split('@')[0],
           last_name: ''
         };
       } else {
         const result = await login({ email, password });
-        token = result.token;
         redirectTo = result.redirectTo ?? redirectTo;
+        
         // Usar datos del usuario de la respuesta de la API
-        userData = result.user || {
-          id: "unknown", 
+        sessionData = result.user || {
+          userId: "unknown", 
           email: email,
-          rol: redirectTo.includes('/admin/') ? 'admin' : 
-               redirectTo.includes('/provider/') ? 'provider' : 'customer',
+          role: "admin",
           name: email.split('@')[0],
-          last_name: ''
+          last_name: '',
+          token: result.token
         };
       }
 
-      persistSession(userData, token);
+      persistSession(sessionData);
 
       router.push(redirectTo);
     } catch (err) {

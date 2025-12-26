@@ -1,3 +1,8 @@
+import type { LoginResponse, SessionData } from "@/types/auth";
+import { mapLaravelRoleToRole, getDashboardPath } from "@/lib/roles";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type LoginPayload = {
   email: string;
   password: string;
@@ -6,16 +11,9 @@ type LoginPayload = {
 export type LoginResult = {
   ok: true;
   redirectTo?: string;
-  user?: {
-    id: string;
-    email: string;
-    rol: string;
-    name?: string;
-    last_name?: string;
-  };
+  user?: SessionData;
   token?: string;
 };
-
 
 export async function login({ email, password }: LoginPayload): Promise<LoginResult> {
   if (!email || !password) {
@@ -24,7 +22,7 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
 
   // Conectar con el endpoint real de Laravel
   try {
-    const response = await fetch("http://localhost:8000/api/v1/login", {
+    const response = await fetch(`${API_URL}/api/v1/login`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -45,7 +43,7 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
       throw new Error(errorData?.message || "Error del servidor");
     }
 
-    const data = await response.json();
+    const data: LoginResponse = await response.json();
     
     // Verificar que la respuesta tenga el formato esperado
     if (data?.message === "Login successful" && data?.data) {
@@ -53,25 +51,23 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
       
       // Determinar rol del usuario (por ahora asumir admin si no hay roles)
       const userRole = user.roles && user.roles.length > 0 ? user.roles[0] : "admin";
+      const role = mapLaravelRoleToRole(userRole);
+      const redirectTo = getDashboardPath(role);
       
-      // Determinar redirección según el rol del usuario
-      let redirectTo = "/admin/dashboard";
-      if (userRole === "provider") {
-        redirectTo = "/provider/dashboard";
-      } else if (userRole === "customer") {
-        redirectTo = "/app/dashboard";
-      }
+      // Construir SessionData tipada
+      const sessionData: SessionData = {
+        userId: user.id?.toString() || "unknown",
+        email: user.email || "",
+        role: role,
+        name: user.name,
+        last_name: user.last_name,
+        token: data.token
+      };
       
       return { 
         ok: true, 
         redirectTo,
-        user: {
-          id: user.id?.toString() || "unknown",
-          email: user.email || "",
-          rol: userRole,
-          name: user.name,
-          last_name: user.last_name
-        },
+        user: sessionData,
         token: data.token
       };
     }

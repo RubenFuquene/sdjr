@@ -1,16 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import type { Role, SessionData } from "@/types/auth";
 
-export type Role = "admin" | "provider" | "app";
-
-type Session = {
-  userId: string;
-  email: string;
-  role: Role;
-  name?: string;
-  last_name?: string;
-  token?: string;
-};
+// Alias para compatibilidad interna
+type Session = SessionData;
 
 const BYPASS_AUTH = process.env.NEXT_PUBLIC_BYPASS_AUTH === "true";
 
@@ -58,21 +51,6 @@ async function fetchSession(): Promise<Session | null> {
   }
 }
 
-/**
- * Map Laravel role to frontend role
- */
-function mapLaravelRoleToRole(laravelRole: string): Role {
-  switch (laravelRole) {
-    case "provider":
-      return "provider";
-    case "customer":
-      return "app";
-    case "admin":
-    default:
-      return "admin";
-  }
-}
-
 export async function getSession(): Promise<Session | null> {
   return fetchSession();
 }
@@ -94,8 +72,7 @@ export async function getSessionOrRedirect(requiredRole: Role, redirectTo?: stri
 function buildLoginUrl(role: Role, redirectTo?: string) {
   const loginPath = LOGIN_PATH_BY_ROLE[role];
   if (!redirectTo) return loginPath;
-
-  const url = new URL(loginPath, "http://localhost");
-  url.searchParams.set("redirectTo", redirectTo);
-  return `${url.pathname}?${url.searchParams.toString()}`;
+  
+  // Construcción relativa sin necesidad de base URL
+  return `${loginPath}?redirectTo=${encodeURIComponent(redirectTo)}`;
 }
