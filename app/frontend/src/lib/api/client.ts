@@ -47,7 +47,7 @@ export function getAuthHeaders(): HeadersInit {
 }
 
 /**
- * Wrapper de fetch con manejo de errores centralizado
+ * Wrapper fetch con manejo de errores centralizado
  * Usado por todos los módulos de API
  */
 export async function fetchWithErrorHandling<T>(
