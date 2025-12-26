@@ -1,0 +1,110 @@
+"use client";
+
+import { useState } from "react";
+import { Users, Store, UserCog } from "lucide-react";
+import { Vista, Perfil, Proveedor, Usuario, Administrador } from "@/types/admin";
+import { ProfilesFilters } from "./profiles-filters";
+import { ProfilesTable } from "./profiles-table";
+import { ProvidersTable } from "./providers-table";
+import { UsersTable } from "./users-table";
+import { AdministratorsTable } from "./administrators-table";
+
+interface ProfilesContentProps {
+  perfiles: Perfil[];
+  proveedores: Proveedor[];
+  usuarios: Usuario[];
+  administradores: Administrador[];
+}
+
+export function ProfilesContent({
+  perfiles,
+  proveedores,
+  usuarios,
+  administradores,
+}: ProfilesContentProps) {
+  const [vista, setVista] = useState<Vista>("perfiles");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [perfilFilter, setPerfilFilter] = useState("todos");
+
+  const handleSearch = () => {
+    console.log("Buscando:", { vista, searchTerm, perfilFilter });
+    // TODO: Implementar lógica de filtrado real
+  };
+
+  const handleVistaChange = (newVista: Vista) => {
+    setVista(newVista);
+    setSearchTerm("");
+    setPerfilFilter("todos");
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Tabs */}
+      <div className="bg-white rounded-[18px] shadow-sm p-4 border border-slate-100">
+        <div className="flex flex-wrap gap-4">
+          <button
+            onClick={() => handleVistaChange("perfiles")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "perfiles"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            Perfiles
+          </button>
+          <button
+            onClick={() => handleVistaChange("proveedores")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "proveedores"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <Store className="w-5 h-5" />
+            Proveedores
+          </button>
+          <button
+            onClick={() => handleVistaChange("usuarios")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "usuarios"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            Usuarios
+          </button>
+          <button
+            onClick={() => handleVistaChange("administradores")}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
+              vista === "administradores"
+                ? "bg-[#4B236A] text-white shadow-lg"
+                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+            }`}
+          >
+            <UserCog className="w-5 h-5" />
+            Administradores
+          </button>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <ProfilesFilters
+        vista={vista}
+        searchTerm={searchTerm}
+        perfilFilter={perfilFilter}
+        perfiles={perfiles}
+        onSearchChange={setSearchTerm}
+        onPerfilChange={setPerfilFilter}
+        onSearch={handleSearch}
+      />
+
+      {/* Tablas */}
+      {vista === "perfiles" && <ProfilesTable data={perfiles} />}
+      {vista === "proveedores" && <ProvidersTable data={proveedores} />}
+      {vista === "usuarios" && <UsersTable data={usuarios} />}
+      {vista === "administradores" && <AdministratorsTable data={administradores} />}
+    </div>
+  );
+}

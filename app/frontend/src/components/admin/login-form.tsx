@@ -80,11 +80,11 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-text)]">
-        <span>{labels.emailLabel}</span>
-        <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-white px-3 py-3 text-[var(--color-text)] shadow-sm focus-within:border-[var(--color-brand)] focus-within:ring-2 focus-within:ring-[color:var(--color-brand)]/10">
-          <MailIcon className="h-4 w-4 text-[var(--color-muted)]" />
+    <form className="space-y-5" onSubmit={handleSubmit}>
+      <label className="block">
+        <span className="block text-[var(--color-text)] mb-2">{labels.emailLabel}</span>
+        <div className="relative">
+          <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-brand)]" />
           <input
             required
             type="email"
@@ -93,15 +93,15 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={labels.emailPlaceholder}
-            className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-muted)]"
+            className="w-full h-[50px] pl-11 pr-4 border border-[var(--color-border)] rounded-[14px] text-[#1A1A1A] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
           />
         </div>
       </label>
 
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-text)]">
-        <span>{labels.passwordLabel}</span>
-        <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-white px-3 py-3 text-[var(--color-text)] shadow-sm focus-within:border-[var(--color-brand)] focus-within:ring-2 focus-within:ring-[color:var(--color-brand)]/10">
-          <LockIcon className="h-4 w-4 text-[var(--color-muted)]" />
+      <label className="block">
+        <span className="block text-[var(--color-text)] mb-2">{labels.passwordLabel}</span>
+        <div className="relative">
+          <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-brand)]" />
           <input
             required
             type="password"
@@ -110,15 +110,15 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={labels.passwordPlaceholder}
-            className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-muted)]"
+            className="w-full h-[50px] pl-11 pr-4 border border-[var(--color-border)] rounded-[14px] text-[#1A1A1A] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
           />
         </div>
       </label>
 
-      <div className="flex justify-end text-xs text-[var(--color-muted)]">
-        <span aria-disabled="true" className="cursor-not-allowed">
+      <div className="text-right">
+        <a href="#" className="text-[var(--color-brand)] hover:text-[var(--color-brand-600)] transition text-sm">
           {labels.forgot}
-        </span>
+        </a>
       </div>
 
       {error ? (
@@ -130,7 +130,7 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="mt-1 inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--color-brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)] disabled:cursor-not-allowed disabled:opacity-80"
+        className="w-full h-[52px] bg-[var(--color-brand)] text-white rounded-xl hover:bg-[var(--color-brand-600)] transition shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-80"
       >
         {loading ? `${labels.submit}...` : labels.submit}
       </button>

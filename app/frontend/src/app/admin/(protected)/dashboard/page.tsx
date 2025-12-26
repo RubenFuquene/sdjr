@@ -1,25 +1,37 @@
-import { DashboardTabs } from "@/components/admin/dashboard-tabs";
+import { ProfilesContent } from "@/components/admin/profiles-content";
+import { mockPerfiles, mockProveedores, mockUsuarios, mockAdministradores } from "@/lib/mocks/admin";
 
 export const metadata = {
-  title: "Dashboard | Admin | Sumass",
+  title: "Perfiles | Admin | Sumass",
 };
 
-export default function AdminDashboardPage() {
-  // TODO: reemplazar dataset dummy por fetch Server Component al endpoint real y renderizar la tabla de perfiles.
+/**
+ * Página principal del dashboard administrativo
+ * Vista Perfiles con 4 tabs: Perfiles, Proveedores, Usuarios, Administradores
+ * Basado en diseño Figma - Perfiles.tsx
+ */
+export default async function AdminDashboardPage() {
+  // TODO: Reemplazar mocks por fetch a API Laravel
+  // const perfiles = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/profiles`);
+  // const proveedores = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/providers`);
+  // const usuarios = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users`);
+  // const administradores = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/administrators`);
+
   return (
-    <div className="text-[var(--color-text)]">
-      <section className="mx-auto flex max-w-6xl flex-col gap-4 px-1 py-2 md:px-2">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-semibold">Gestión de Perfiles</h2>
-          <p className="text-sm text-[var(--color-muted)]">Administra roles, permisos y usuarios del sistema.</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-[#1A1A1A]">Gestión de Perfiles</h1>
+        <p className="text-sm text-[#6A6A6A] mt-1">
+          Administra perfiles, proveedores, usuarios y administradores del sistema
+        </p>
+      </div>
 
-        <DashboardTabs />
-
-        <div className="rounded-xl border border-dashed border-[var(--color-border)] bg-white px-4 py-8 text-center text-sm text-[var(--color-muted)]">
-          Tabla dummy pendiente: aquí se renderizará la lista de perfiles con badges y acciones cuando avancemos al paso 4.
-        </div>
-      </section>
+      <ProfilesContent
+        perfiles={mockPerfiles}
+        proveedores={mockProveedores}
+        usuarios={mockUsuarios}
+        administradores={mockAdministradores}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -20,29 +21,10 @@ export function LogoutButton() {
       type="button"
       onClick={handleLogout}
       aria-label="Cerrar sesión"
-      className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-[var(--color-muted)] transition hover:text-[var(--color-brand)] hover:shadow-sm"
+      title="Cerrar sesión"
+      className="p-2 text-[#4B236A] hover:bg-red-500/20 hover:text-red-600 rounded-xl transition"
     >
-      <LogoutIcon className="h-5 w-5" />
+      <LogOut className="w-5 h-5" />
     </button>
-  );
-}
-
-function LogoutIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M15 12H4" />
-      <path d="m11 8-4 4 4 4" />
-      <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
-    </svg>
   );
 }

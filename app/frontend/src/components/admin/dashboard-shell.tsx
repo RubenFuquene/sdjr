@@ -2,14 +2,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { ReactNode } from "react";
 import { LogoutButton } from "@/components/admin/logout-button";
+import { LayoutDashboard, Users, Settings, ShieldCheck, Megaphone, Headphones, Bell, User, BarChart3 } from "lucide-react";
 
 const navItems = [
-  { label: "Perfiles", href: "/admin/dashboard" },
-  { label: "Parametrización", href: "/admin/settings" },
-  { label: "Validación de Proveedores", href: "/admin/providers" },
-  { label: "Marketing", href: "/admin/marketing" },
-  { label: "Dashboard", href: "/admin/analytics" },
-  { label: "Soporte", href: "/admin/support" },
+  { label: "Perfiles", href: "/admin/dashboard", icon: Users },
+  { label: "Parametrización", href: "/admin/settings", icon: Settings },
+  { label: "Validación de Proveedores", href: "/admin/providers", icon: ShieldCheck },
+  { label: "Marketing", href: "/admin/marketing", icon: Megaphone },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { label: "Soporte", href: "/admin/support", icon: Headphones },
 ];
 
 type DashboardShellProps = {
@@ -19,27 +20,33 @@ type DashboardShellProps = {
 
 export function DashboardShell({ children, activePath = "/admin/dashboard" }: DashboardShellProps) {
   return (
-    <div className="flex min-h-screen bg-[#f4f7e6] text-[var(--color-text)]">
-      <aside className="hidden w-[230px] flex-col border-r border-[var(--color-border)] bg-[#e8efc8] px-4 py-6 md:flex">
-        <div className="flex items-center gap-3 px-2 pb-6">
-          <Image src="/brand/logo-su.svg" alt="Sumass" width={36} height={36} />
+    <div className="flex min-h-screen bg-gray-50 text-[var(--color-text)]">
+      <aside className="hidden w-64 flex-col border-r border-[#C8D86D] bg-[#DDE8BB] px-4 py-6 md:flex shadow-xl">
+        <div className="flex items-center gap-3 px-2 pb-6 border-b border-[#C8D86D]">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1">
+            <Image src="/brand/logo-sumass.png" alt="Sumass" width={48} height={48} className="w-full h-full object-contain" />
+          </div>
           <div className="leading-tight">
-            <p className="text-sm font-semibold text-[var(--color-text)]">Sumass</p>
-            <p className="text-xs text-[var(--color-muted)]">Tu Sumass al planeta</p>
+            <h1 className="text-sm font-semibold text-[#1A1A1A]">Sumass</h1>
+            <p className="text-xs text-[#4B236A]">Tu Sumass al planeta</p>
           </div>
         </div>
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-2">
           {navItems.map((item) => {
             const isActive = activePath.startsWith(item.href);
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-full px-4 py-2 text-sm font-medium transition hover:bg-white hover:text-[var(--color-brand)] ${
-                  isActive ? "bg-[var(--color-brand)] text-white shadow-sm" : "text-[var(--color-text)]"
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                  isActive
+                    ? "bg-[#4B236A] text-white shadow-lg"
+                    : "text-[#1A1A1A]/80 hover:bg-[#C8D86D]"
                 }`}
               >
-                <span>{item.label}</span>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="text-left">{item.label}</span>
               </Link>
             );
           })}
@@ -47,26 +54,21 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex flex-col gap-4 border-b border-[var(--color-border)] bg-[#e8efc8] px-4 py-3 md:flex-row md:items-center md:justify-between md:px-6">
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold text-[var(--color-text)]">Bienvenido, Administrador</p>
-            <p className="text-xs text-[var(--color-muted)]">Gestiona tu plataforma desde aquí</p>
+        <header className="flex flex-col gap-4 border-b border-[#C8D86D] bg-[#DDE8BB] px-6 py-4 md:flex-row md:items-center md:justify-between shadow-sm">
+          <div>
+            <h2 className="text-base font-semibold text-[#1A1A1A]">Bienvenido, Administrador</h2>
+            <p className="text-sm text-[#6A6A6A]">Gestiona tu plataforma desde aquí</p>
           </div>
-          <div className="flex items-center gap-2 md:gap-3">
-            <IconButton ariaLabel="Notificaciones">
-              <BellIcon className="h-5 w-5" />
-            </IconButton>
-            <IconButton ariaLabel="Ayuda">
-              <HelpIcon className="h-5 w-5" />
-            </IconButton>
-            <div className="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-2 shadow-sm">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand)] text-sm font-semibold text-white">
-                A
+          <div className="flex items-center gap-4">
+            <button className="relative p-2 text-[#4B236A] hover:bg-[#C8D86D] rounded-xl transition">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#4B236A] rounded-full"></span>
+            </button>
+            <div className="flex items-center gap-3 px-4 py-2 bg-white/50 rounded-xl border border-[#C8D86D]">
+              <div className="w-8 h-8 bg-[#4B236A] rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
               </div>
-              <div className="leading-tight">
-                <p className="text-sm font-semibold text-[var(--color-text)]">Admin</p>
-                <p className="text-xs text-[var(--color-muted)]">Administrador</p>
-              </div>
+              <span className="text-sm font-medium text-[#1A1A1A]">Admin</span>
             </div>
             <LogoutButton />
           </div>
@@ -82,74 +84,25 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
 
 function MobileNav({ activePath }: { activePath: string }) {
   return (
-    <nav className="flex items-center gap-2 overflow-x-auto border-b border-[var(--color-border)] bg-white px-4 py-2 md:hidden">
+    <nav className="flex items-center gap-2 overflow-x-auto border-b border-[#C8D86D] bg-white px-4 py-2 md:hidden">
       {navItems.map((item) => {
         const isActive = activePath.startsWith(item.href);
+        const Icon = item.icon;
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition ${
+            className={`whitespace-nowrap flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
               isActive
-                ? "bg-[var(--color-brand)] text-white shadow-sm"
-                : "border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+                ? "bg-[#4B236A] text-white shadow-sm"
+                : "border border-[#E0E0E0] text-[#1A1A1A] hover:border-[#4B236A] hover:text-[#4B236A]"
             }`}
           >
+            <Icon className="w-4 h-4" />
             {item.label}
           </Link>
         );
       })}
     </nav>
-  );
-}
-
-function IconButton({ children, ariaLabel }: { children: ReactNode; ariaLabel: string }) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-[var(--color-muted)] transition hover:text-[var(--color-brand)] hover:shadow-sm"
-    >
-      {children}
-    </button>
-  );
-}
-
-function BellIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M14 20a2 2 0 1 1-4 0" />
-      <path d="M6 9a6 6 0 1 1 12 0v4.5l1.5 2.5H4.5L6 13.5Z" />
-    </svg>
-  );
-}
-
-function HelpIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 16v.01" />
-      <path d="M10.5 9a1.5 1.5 0 0 1 3 0c0 .5-.25.9-.65 1.2l-.7.5c-.4.3-.65.7-.65 1.2V13" />
-    </svg>
   );
 }

@@ -21,6 +21,78 @@ sdjr/
 - Backend: REST API con Laravel Eloquent
 - Infra: Docker local + Vercel producción
 
+## 🎨 Referencia de Diseño (Figma)
+
+**Ubicación del código exportado de Figma**: `design-reference/`
+
+### Archivos de Referencia Clave
+```
+design-reference/
+├── src/
+│   ├── COLORES_ACTUALIZADOS.md       # Paleta oficial de colores Sumass
+│   ├── components/
+│   │   └── LoginAdmin.tsx            # Referencia de login
+│   └── assets/
+│       └── *.png                     # Logos y assets
+```
+
+### Paleta de Colores Oficial (Figma)
+
+**Colores Principales:**
+- `#4B236A` - Púrpura Berenjena (primary)
+- `#5D2B7D` - Púrpura hover
+- `#DDE8BB` - Verde Tomatillo Claro (backgrounds)
+- `#C8D86D` - Verde Tomatillo (borders, hover)
+
+**Colores de Texto:**
+- `#1A1A1A` - Texto principal
+- `#6A6A6A` - Texto secundario/muted
+
+**Colores UI:**
+- `#E0E0E0` - Borders
+- `#F7F7F7` - Backgrounds alternos
+- `#FFFFFF` - Cards y surfaces
+
+### Especificaciones de Componentes (Figma)
+
+**Botones Primarios:**
+- Altura: `h-[52px]`
+- Background: `bg-[#4B236A]`
+- Hover: `hover:bg-[#5D2B7D]`
+- Radius: `rounded-xl`
+- Sombra: `shadow-lg hover:shadow-xl`
+
+**Inputs:**
+- Altura: `h-[50px]`
+- Radius: `rounded-[14px]`
+- Border: `border-[#E0E0E0]`
+- Focus ring: `ring-[#4B236A]`
+
+**Cards:**
+- Radius: `rounded-[18px]`
+- Padding: `p-8` (32px en desktop)
+- Sombra: `shadow-2xl` (login), `shadow-sm` (general)
+
+**Degradado Login:**
+```css
+bg-gradient-to-br from-[#DDE8BB] via-[#C8D86D] to-[#4B236A]
+```
+
+### Workflow de Implementación desde Figma
+
+1. **Consultar siempre** `design-reference/src/COLORES_ACTUALIZADOS.md` antes de aplicar colores
+2. **Verificar componentes** en `design-reference/src/components/` para especificaciones exactas
+3. **Copiar assets** desde `design-reference/src/assets/` a `app/frontend/public/brand/`
+4. **Aplicar medidas exactas**: heights, radius, padding según especificaciones
+5. **Mantener consistencia**: usar los mismos valores en toda la aplicación
+
+### Reglas de Diseño
+
+- ❌ NO usar Tailwind defaults (`rounded-lg`, `h-12`) si Figma especifica otro valor
+- ✅ Usar valores exactos de Figma (`rounded-[18px]`, `h-[52px]`)
+- ✅ Verificar `COLORES_ACTUALIZADOS.md` para cada color
+- ✅ Mantener consistencia en sombras, transiciones y spacing
+
 ## 🐳 CRÍTICO: Entorno de Desarrollo Docker
 
 **TODOS los servicios se ejecutan en Docker Compose en desarrollo.**
