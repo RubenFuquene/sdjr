@@ -25,7 +25,7 @@ class RoleStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('roles.create') ?? false;
+        return $this->user()?->can('admin.roles.create') ?? false;
     }
 
     public function rules(): array

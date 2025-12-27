@@ -22,10 +22,10 @@ class LegalRepresentativeFeatureTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->create();
         $permissions = [
-            'legal_representatives.create',
-            'legal_representatives.view',
-            'legal_representatives.update',
-            'legal_representatives.delete',
+            'provider.legal_representatives.create',
+            'provider.legal_representatives.view',
+            'provider.legal_representatives.update',
+            'provider.legal_representatives.delete',
         ];
         foreach ($permissions as $perm) {
             Permission::findOrCreate($perm, 'sanctum');

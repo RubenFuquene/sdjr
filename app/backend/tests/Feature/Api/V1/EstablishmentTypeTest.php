@@ -19,16 +19,16 @@ class EstablishmentTypeTest extends TestCase
     {
         parent::setUp();
         // Crear permisos necesarios con guard sanctum
-        Permission::findOrCreate('establishment_types.create', 'sanctum');
-        Permission::findOrCreate('establishment_types.update', 'sanctum');
-        Permission::findOrCreate('establishment_types.view', 'sanctum');
-        Permission::findOrCreate('establishment_types.delete', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.create', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.update', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.view', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.delete', 'sanctum');
     }
 
     public function test_user_can_create_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.create');
+        $user->givePermissionTo('provider.establishment_types.create');
         $this->actingAs($user, 'sanctum');
 
         $payload = EstablishmentType::factory()->make()->toArray();
@@ -40,7 +40,7 @@ class EstablishmentTypeTest extends TestCase
     public function test_user_can_view_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.view');
+        $user->givePermissionTo('provider.establishment_types.view');
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
@@ -52,7 +52,7 @@ class EstablishmentTypeTest extends TestCase
     public function test_user_can_update_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.update');
+        $user->givePermissionTo('provider.establishment_types.update');
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
@@ -65,7 +65,7 @@ class EstablishmentTypeTest extends TestCase
     public function test_user_can_delete_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.delete');
+        $user->givePermissionTo('provider.establishment_types.delete');
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();

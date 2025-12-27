@@ -19,16 +19,16 @@ class CommerceTest extends TestCase
     {
         parent::setUp();
         // Crear permisos necesarios con guard sanctum
-        Permission::findOrCreate('commerces.create', 'sanctum');
-        Permission::findOrCreate('commerces.update', 'sanctum');
-        Permission::findOrCreate('commerces.view', 'sanctum');
-        Permission::findOrCreate('commerces.delete', 'sanctum');
+        Permission::findOrCreate('provider.commerces.create', 'sanctum');
+        Permission::findOrCreate('provider.commerces.update', 'sanctum');
+        Permission::findOrCreate('provider.commerces.view', 'sanctum');
+        Permission::findOrCreate('provider.commerces.delete', 'sanctum');
     }
 
     public function test_user_can_create_commerce()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('commerces.create');
+        $user->givePermissionTo('provider.commerces.create');
         $this->actingAs($user, 'sanctum');
 
         $payload = Commerce::factory()->make()->toArray();
@@ -41,7 +41,7 @@ class CommerceTest extends TestCase
     public function test_user_can_view_commerce()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('commerces.view');
+        $user->givePermissionTo('provider.commerces.view');
         $this->actingAs($user, 'sanctum');
 
         $commerce = Commerce::factory()->create();
@@ -54,7 +54,7 @@ class CommerceTest extends TestCase
     public function test_user_can_update_commerce()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('commerces.update');
+        $user->givePermissionTo('provider.commerces.update');
         $this->actingAs($user, 'sanctum');
 
         $commerce = Commerce::factory()->create();
@@ -69,7 +69,7 @@ class CommerceTest extends TestCase
     public function test_user_can_delete_commerce()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('commerces.delete');
+        $user->givePermissionTo('provider.commerces.delete');
         $this->actingAs($user, 'sanctum');
 
         $commerce = Commerce::factory()->create();

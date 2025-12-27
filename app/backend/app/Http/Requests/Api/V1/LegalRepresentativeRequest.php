@@ -25,7 +25,7 @@ class LegalRepresentativeRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'legal_representatives.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'provider.legal_representatives.' . ($action === 'store' ? 'create' : 'update');
         return $this->user()?->can($permission) ?? false;
     }
 

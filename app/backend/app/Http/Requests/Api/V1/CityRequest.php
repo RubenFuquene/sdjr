@@ -20,7 +20,7 @@ class CityRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'cities.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.cities.' . ($action === 'store' ? 'create' : 'update');
         return $this->user()?->can($permission) ?? false;
     }
 

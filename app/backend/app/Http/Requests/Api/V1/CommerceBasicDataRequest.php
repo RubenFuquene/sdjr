@@ -18,7 +18,7 @@ class CommerceBasicDataRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('commerces.create') ?? false;
+        return $this->user()?->can('provider.commerces.create') ?? false;
     }
 
     public function rules(): array

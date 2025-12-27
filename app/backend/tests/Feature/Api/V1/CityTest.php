@@ -31,9 +31,9 @@ class CityTest extends TestCase
      */
     public function test_index_returns_cities()
     {
-        Permission::firstOrCreate(['name' => 'cities.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.cities.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('cities.index');
+        $user->givePermissionTo('admin.cities.index');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -67,9 +67,9 @@ class CityTest extends TestCase
      */
     public function test_store_creates_city()
     {
-        Permission::firstOrCreate(['name' => 'cities.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.cities.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('cities.create');
+        $user->givePermissionTo('admin.cities.create');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -111,9 +111,9 @@ class CityTest extends TestCase
      */
     public function test_show_returns_city()
     {
-        Permission::firstOrCreate(['name' => 'cities.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.cities.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('cities.show');
+        $user->givePermissionTo('admin.cities.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -147,9 +147,9 @@ class CityTest extends TestCase
      */
     public function test_update_updates_city()
     {
-        Permission::firstOrCreate(['name' => 'cities.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.cities.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('cities.update');
+        $user->givePermissionTo('admin.cities.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -197,9 +197,9 @@ class CityTest extends TestCase
      */
     public function test_destroy_deletes_city()
     {
-        Permission::firstOrCreate(['name' => 'cities.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.cities.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('cities.delete');
+        $user->givePermissionTo('admin.cities.delete');
         Sanctum::actingAs($user);
 
         $country = Country::create([

@@ -19,7 +19,7 @@ class PermissionStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('permissions.create') ?? false;
+        return $this->user()?->can('admin.permissions.create') ?? false;
     }
 
     public function rules(): array

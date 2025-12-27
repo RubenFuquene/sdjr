@@ -30,9 +30,9 @@ class DepartmentTest extends TestCase
      */
     public function test_index_returns_departments()
     {
-        Permission::firstOrCreate(['name' => 'departments.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.departments.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.index');
+        $user->givePermissionTo('admin.departments.index');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -60,9 +60,9 @@ class DepartmentTest extends TestCase
      */
     public function test_store_creates_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.departments.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.create');
+        $user->givePermissionTo('admin.departments.create');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -98,9 +98,9 @@ class DepartmentTest extends TestCase
      */
     public function test_show_returns_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.departments.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.show');
+        $user->givePermissionTo('admin.departments.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -129,9 +129,9 @@ class DepartmentTest extends TestCase
      */
     public function test_update_updates_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.departments.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.update');
+        $user->givePermissionTo('admin.departments.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -167,9 +167,9 @@ class DepartmentTest extends TestCase
      */
     public function test_destroy_deletes_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.departments.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.delete');
+        $user->givePermissionTo('admin.departments.delete');
         Sanctum::actingAs($user);
 
         $country = Country::create([

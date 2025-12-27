@@ -10,7 +10,7 @@ class CityIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('cities.index') ?? false;
+        return $this->user()?->can('admin.cities.index') ?? false;
     }
 
     public function rules(): array

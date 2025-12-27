@@ -30,7 +30,7 @@ class CommerceRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'commerces.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'provider.commerces.' . ($action === 'store' ? 'create' : 'update');
         return $this->user()?->can($permission) ?? false;
     }
 
