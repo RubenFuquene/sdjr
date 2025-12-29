@@ -26,9 +26,9 @@ class CityTest extends TestCase
     }
 
     /**
-     * Test that the index endpoint returns a list of cities.
+     * Verifica que el endpoint index retorne la lista de ciudades correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso, una ciudad y valida que la respuesta contenga la ciudad creada.
      */
     public function test_index_returns_cities()
     {
@@ -62,9 +62,9 @@ class CityTest extends TestCase
     }
 
     /**
-     * Test that the store endpoint creates a new city.
+     * Verifica que el endpoint store cree una nueva ciudad correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso, un departamento y envía los datos para crear una ciudad, validando la respuesta y la base de datos.
      */
     public function test_store_creates_city()
     {
@@ -106,9 +106,9 @@ class CityTest extends TestCase
     }
 
     /**
-     * Test that the show endpoint returns a specific city.
+     * Verifica que el endpoint show retorne la información de una ciudad específica.
      *
-     * @return void
+     * Crea una ciudad y valida que la respuesta contenga los datos correctos.
      */
     public function test_show_returns_city()
     {
@@ -142,9 +142,9 @@ class CityTest extends TestCase
     }
 
     /**
-     * Test that the update endpoint updates an existing city.
+     * Verifica que el endpoint update actualice correctamente una ciudad existente.
      *
-     * @return void
+     * Crea una ciudad, envía datos de actualización y valida la respuesta y la base de datos.
      */
     public function test_update_updates_city()
     {
@@ -192,9 +192,9 @@ class CityTest extends TestCase
     }
 
     /**
-     * Test that the destroy endpoint deletes a city.
+     * Verifica que el endpoint destroy elimine correctamente una ciudad.
      *
-     * @return void
+     * Crea una ciudad, la elimina y valida que ya no exista en la base de datos.
      */
     public function test_destroy_deletes_city()
     {
@@ -229,9 +229,9 @@ class CityTest extends TestCase
     }
 
     /**
-     * Test that unauthenticated users cannot access the endpoints.
+     * Verifica que un usuario no autenticado no pueda acceder a los endpoints de ciudades.
      *
-     * @return void
+     * Intenta acceder al endpoint index sin autenticación y espera un 401.
      */
     public function test_unauthenticated_user_cannot_access()
     {

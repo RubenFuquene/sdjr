@@ -25,9 +25,9 @@ class DepartmentTest extends TestCase
     }
 
     /**
-     * Test that the index endpoint returns a list of departments.
+     * Verifica que el endpoint index retorne la lista de departamentos correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso y un departamento, valida la cantidad y la respuesta.
      */
     public function test_index_returns_departments()
     {
@@ -55,9 +55,9 @@ class DepartmentTest extends TestCase
     }
 
     /**
-     * Test that the store endpoint creates a new department.
+     * Verifica que el endpoint store cree un nuevo departamento correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso, envía los datos y valida la respuesta y la base de datos.
      */
     public function test_store_creates_department()
     {

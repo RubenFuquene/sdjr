@@ -17,7 +17,6 @@ class AuditLogTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
     public function authenticated_user_can_list_audit_logs(): void
     {
         $user = User::factory()->create();
@@ -33,14 +32,12 @@ class AuditLogTest extends TestCase
         ]);
     }
 
-    /** @test */
     public function unauthenticated_user_cannot_list_audit_logs(): void
     {
         $response = $this->getJson('/api/v1/audit-logs');
         $response->assertUnauthorized();
     }
 
-    /** @test */
     public function authenticated_user_can_view_a_single_audit_log(): void
     {
         $user = User::factory()->create();
@@ -55,7 +52,6 @@ class AuditLogTest extends TestCase
         ]);
     }
 
-    /** @test */
     public function not_found_for_nonexistent_audit_log(): void
     {
         $user = User::factory()->create();

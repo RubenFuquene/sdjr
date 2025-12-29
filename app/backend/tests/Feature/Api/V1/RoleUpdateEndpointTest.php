@@ -14,7 +14,10 @@ class RoleUpdateEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    
+    /**
+     * Prueba que un usuario autenticado puede actualizar un rol existente correctamente.
+     */
     public function it_updates_a_role()
     {
         $user = User::factory()->create();
@@ -35,7 +38,10 @@ class RoleUpdateEndpointTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+    /**
+     * Prueba que el endpoint retorna 404 al intentar actualizar un rol inexistente.
+     */
     public function it_returns_404_for_nonexistent_role_on_update()
     {
         $user = User::factory()->create();

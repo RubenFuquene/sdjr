@@ -14,7 +14,10 @@ class PermissionEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    
+    /**
+     * Prueba que el endpoint retorna todos los permisos correctamente para un usuario autenticado.
+     */
     public function it_returns_all_permissions()
     {
         $user = User::factory()->create();
@@ -37,7 +40,10 @@ class PermissionEndpointTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+    /**
+     * Prueba que se requiere autenticación para consultar los permisos.
+     */
     public function it_requires_authentication()
     {
         $response = $this->getJson('/api/v1/permissions');

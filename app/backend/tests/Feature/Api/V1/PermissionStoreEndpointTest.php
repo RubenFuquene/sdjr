@@ -14,7 +14,10 @@ class PermissionStoreEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    
+    /**
+     * Prueba que un usuario autenticado y con permiso puede crear un nuevo permiso.
+     */
     public function it_creates_a_permission()
     {
         Permission::firstOrCreate(['name' => 'admin.permissions.create', 'guard_name' => 'sanctum']);
@@ -34,7 +37,10 @@ class PermissionStoreEndpointTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+    /**
+     * Prueba que se requiere autenticación para crear un permiso.
+     */
     public function it_requires_authentication()
     {
         $payload = [

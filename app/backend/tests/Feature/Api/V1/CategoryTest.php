@@ -16,6 +16,11 @@ class CategoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Verifica que el endpoint index retorne la lista de categorías correctamente.
+     *
+     * Crea un usuario con permiso y varias categorías, valida la estructura y cantidad de la respuesta.
+     */
     public function test_index_returns_categories(): void
     {
         Permission::firstOrCreate(['name' => 'admin.categories.index', 'guard_name' => 'sanctum']);
@@ -35,6 +40,11 @@ class CategoryTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
+    /**
+     * Verifica que el endpoint store cree una nueva categoría correctamente.
+     *
+     * Crea un usuario con permiso, envía los datos y valida la respuesta y la base de datos.
+     */
     public function test_store_creates_category(): void
     {
         Permission::firstOrCreate(['name' => 'admin.categories.create', 'guard_name' => 'sanctum']);

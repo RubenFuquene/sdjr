@@ -17,6 +17,9 @@ class NeighborhoodTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Prueba que el endpoint index retorna los barrios correctamente.
+     */
     public function test_index_returns_neighborhoods(): void
     {
         Permission::firstOrCreate(['name' => 'admin.neighborhoods.index', 'guard_name' => 'sanctum']);
@@ -31,6 +34,9 @@ class NeighborhoodTest extends TestCase
             ->assertJsonPath('data.0.code', 'NB0001');
     }
 
+    /**
+     * Prueba que el endpoint store crea un barrio correctamente.
+     */
     public function test_store_creates_neighborhood(): void
     {
         Permission::firstOrCreate(['name' => 'admin.neighborhoods.create', 'guard_name' => 'sanctum']);
@@ -56,6 +62,9 @@ class NeighborhoodTest extends TestCase
         ]);
     }
 
+    /**
+     * Prueba que el endpoint show retorna el detalle de un barrio correctamente.
+     */
     public function test_show_returns_neighborhood(): void
     {
         Permission::firstOrCreate(['name' => 'admin.neighborhoods.show', 'guard_name' => 'sanctum']);
@@ -70,6 +79,9 @@ class NeighborhoodTest extends TestCase
             ->assertJsonPath('data.code', 'NB0003');
     }
 
+    /**
+     * Prueba que el endpoint update actualiza un barrio correctamente.
+     */
     public function test_update_updates_neighborhood(): void
     {
         Permission::firstOrCreate(['name' => 'admin.neighborhoods.update', 'guard_name' => 'sanctum']);
@@ -96,6 +108,9 @@ class NeighborhoodTest extends TestCase
         ]);
     }
 
+    /**
+     * Prueba que el endpoint destroy elimina (soft delete) un barrio correctamente.
+     */
     public function test_destroy_deletes_neighborhood(): void
     {
         Permission::firstOrCreate(['name' => 'admin.neighborhoods.delete', 'guard_name' => 'sanctum']);

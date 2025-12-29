@@ -24,9 +24,9 @@ class CountryTest extends TestCase
     }
 
     /**
-     * Test that the index endpoint returns a list of countries.
+     * Verifica que el endpoint index retorne la lista de países correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso y varios países, valida la cantidad y la respuesta.
      */
     public function test_index_returns_countries()
     {
@@ -53,9 +53,9 @@ class CountryTest extends TestCase
     }
 
     /**
-     * Test that the store endpoint creates a new country.
+     * Verifica que el endpoint store cree un nuevo país correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso, envía los datos y valida la respuesta y la base de datos.
      */
     public function test_store_creates_country()
     {
