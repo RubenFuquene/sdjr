@@ -20,7 +20,8 @@ class DepartmentRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'admin.departments.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.departments.'.($action === 'store' ? 'create' : 'update');
+
         return $this->user()?->can($permission) ?? false;
     }
 
@@ -33,28 +34,25 @@ class DepartmentRequest extends FormRequest
      *      description="ID of the country",
      *      example="9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
      * )
-     *
      * @OA\Property(
      *      property="name",
      *      title="name",
      *      description="Name of the department",
      *      example="Cundinamarca"
      * )
-     *
      * @OA\Property(
      *      property="status",
      *      title="status",
      *      description="Status of the department (A: Active, I: Inactive)",
      *      example="A"
      * )
-     *
      * @OA\Property(
      *      property="code",
      *      title="code",
      *      description="Unique code for the department (6 alphanumeric characters)",
      *      example="DEP001"
      * )
-     * 
+     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array

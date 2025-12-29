@@ -7,8 +7,8 @@ namespace App\Http\Middleware;
 use App\Models\AuditLog;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuditMiddleware
@@ -16,8 +16,6 @@ class AuditMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -25,16 +23,14 @@ class AuditMiddleware
         $start = microtime(true);
         $response = $next($request);
         $this->logAudit($request, $response, $start);
+
         return $response;
     }
 
     /**
      * Log the audit data to the database.
      *
-     * @param Request $request
-     * @param Response $response
-     * @param float $start
-     * @return void
+     * @param  Response  $response
      */
     protected function logAudit(Request $request, $response, float $start): void
     {
@@ -47,7 +43,7 @@ class AuditMiddleware
                 'endpoint' => $request->path(),
                 'payload' => json_encode($payload),
                 'response_code' => $response->getStatusCode(),
-                'response_time' => (int)((microtime(true) - $start) * 1000),
+                'response_time' => (int) ((microtime(true) - $start) * 1000),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -62,9 +58,6 @@ class AuditMiddleware
 
     /**
      * Sanitize sensitive fields from payload.
-     *
-     * @param array $payload
-     * @return array
      */
     protected function sanitizePayload(array $payload): array
     {
@@ -76,6 +69,7 @@ class AuditMiddleware
                 $value = $this->sanitizePayload($value);
             }
         }
+
         return $payload;
     }
 }

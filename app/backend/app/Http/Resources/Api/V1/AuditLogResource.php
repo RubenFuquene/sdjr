@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="AuditLogResource",
  *     title="Audit Log Resource",
  *     description="Audit log entry resource",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="user_id", type="integer", nullable=true, example=5, description="ID del usuario autenticado o null"),
  *     @OA\Property(property="method", type="string", example="POST", description="Método HTTP usado"),

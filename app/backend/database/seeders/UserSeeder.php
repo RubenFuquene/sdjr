@@ -11,15 +11,11 @@ use Illuminate\Support\Facades\Hash;
  *
  * Seeder responsible for populating the users table.
  * Creates a default admin user and a set of random users for testing.
- *
- * @package Database\Seeders
  */
 class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run(): void
     {

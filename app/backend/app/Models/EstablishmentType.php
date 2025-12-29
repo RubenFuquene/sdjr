@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @OA\Schema(
  *     schema="EstablishmentType",
  *     title="EstablishmentType",
  *     description="Establishment type model",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Restaurante"),
  *     @OA\Property(property="code", type="string", example="REST"),
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class EstablishmentType extends Model
 {
-    use HasFactory, SoftDeletes, SanitizesTextAttributes;
+    use HasFactory, SanitizesTextAttributes, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -40,6 +41,13 @@ class EstablishmentType extends Model
     ];
 
     // Sanitización de campos de texto
-    public function setNameAttribute($value) { $this->attributes['name'] = $this->sanitizeText($value); }
-    public function setCodeAttribute($value) { $this->attributes['code'] = trim($value); }
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = $this->sanitizeText($value);
+    }
+
+    public function setCodeAttribute($value)
+    {
+        $this->attributes['code'] = trim($value);
+    }
 }

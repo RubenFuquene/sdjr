@@ -28,8 +28,8 @@ class AuditLogTest extends TestCase
         $response->assertOk();
         $response->assertJsonStructure([
             '*' => [
-                'id', 'user_id', 'method', 'endpoint', 'payload', 'response_code', 'response_time', 'ip_address', 'user_agent', 'created_at', 'updated_at'
-            ]
+                'id', 'user_id', 'method', 'endpoint', 'payload', 'response_code', 'response_time', 'ip_address', 'user_agent', 'created_at', 'updated_at',
+            ],
         ]);
     }
 
@@ -47,7 +47,7 @@ class AuditLogTest extends TestCase
         $log = AuditLog::factory()->create();
         Sanctum::actingAs($user);
 
-        $response = $this->getJson('/api/v1/audit-logs/' . $log->id);
+        $response = $this->getJson('/api/v1/audit-logs/'.$log->id);
         $response->assertOk();
         $response->assertJsonFragment([
             'id' => $log->id,

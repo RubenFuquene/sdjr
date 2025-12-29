@@ -18,7 +18,7 @@ class LegalRepresentativeServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new LegalRepresentativeService();
+        $this->service = new LegalRepresentativeService;
     }
 
     public function test_store_and_show_legal_representative(): void

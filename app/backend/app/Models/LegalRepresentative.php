@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Traits\SanitizesTextAttributes;
 
 /**
  * @OA\Schema(
  *     schema="LegalRepresentative",
  *     title="LegalRepresentative",
  *     description="Legal representative model",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="commerce_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Juan"),
@@ -31,7 +32,7 @@ use App\Models\Traits\SanitizesTextAttributes;
  */
 class LegalRepresentative extends Model
 {
-    use HasFactory, SoftDeletes, SanitizesTextAttributes;
+    use HasFactory, SanitizesTextAttributes, SoftDeletes;
 
     protected $fillable = [
         'commerce_id',
@@ -52,10 +53,24 @@ class LegalRepresentative extends Model
         'deleted_at' => 'datetime',
     ];
 
-    public function commerce() { return $this->belongsTo(Commerce::class); }
+    public function commerce()
+    {
+        return $this->belongsTo(Commerce::class);
+    }
 
     // Sanitización de campos de texto
-    public function setNameAttribute($value) { $this->attributes['name'] = $this->capitalizeText($value); }
-    public function setLastNameAttribute($value) { $this->attributes['last_name'] = $this->capitalizeText($value); }
-    public function setEmailAttribute($value) { $this->attributes['email'] = $this->sanitizeEmail($value); }
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = $this->capitalizeText($value);
+    }
+
+    public function setLastNameAttribute($value)
+    {
+        $this->attributes['last_name'] = $this->capitalizeText($value);
+    }
+
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = $this->sanitizeEmail($value);
+    }
 }

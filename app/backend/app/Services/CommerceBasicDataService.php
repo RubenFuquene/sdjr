@@ -15,8 +15,6 @@ class CommerceBasicDataService
     /**
      * Store commerce with related legal representatives and documents in a transaction.
      *
-     * @param array $data
-     * @return Commerce
      * @throws Throwable
      */
     public function store(array $data): Commerce
@@ -25,14 +23,14 @@ class CommerceBasicDataService
             $commerceData = $data['commerce'];
             $commerce = Commerce::create($commerceData);
 
-            if (!empty($data['legal_representatives'])) {
+            if (! empty($data['legal_representatives'])) {
                 foreach ($data['legal_representatives'] as $lr) {
                     $lr['commerce_id'] = $commerce->id;
                     LegalRepresentative::create($lr);
                 }
             }
 
-            if (!empty($data['commerce_documents'])) {
+            if (! empty($data['commerce_documents'])) {
                 foreach ($data['commerce_documents'] as $doc) {
                     $doc['commerce_id'] = $commerce->id;
                     CommerceDocument::create($doc);

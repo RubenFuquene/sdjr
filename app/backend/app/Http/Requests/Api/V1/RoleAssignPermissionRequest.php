@@ -3,19 +3,22 @@
 declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
-use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
  *     schema="RoleAssignPermissionRequest",
  *     required={"permissions"},
+ *
  *     @OA\Property(
  *         property="permissions",
  *         type="array",
  *         description="Array of permission names to assign",
+ *
  *         @OA\Items(type="string", example="users.create")
  *     ),
+ *
  *     @OA\Property(
  *         property="sync",
  *         type="boolean",

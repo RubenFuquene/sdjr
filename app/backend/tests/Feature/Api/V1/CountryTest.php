@@ -2,19 +2,19 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Constants\Constant;
 use App\Models\Country;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use Faker\Generator;
-use App\Constants\Constant;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class CountryTest extends TestCase
 {
     use RefreshDatabase;
+
     protected Generator $faker;
 
     protected function setUp(): void
@@ -38,12 +38,12 @@ class CountryTest extends TestCase
         Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
         Country::create([
             'name' => 'Peru',
             'code' => 'PE5678',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
 
         $response = $this->getJson('/api/v1/countries');
@@ -67,7 +67,7 @@ class CountryTest extends TestCase
         $data = [
             'name' => 'Argentina',
             'code' => 'AR0001',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
 
         $response = $this->postJson('/api/v1/countries', $data);
@@ -98,7 +98,7 @@ class CountryTest extends TestCase
         $country = Country::create([
             'name' => 'Chile',
             'code' => 'CL9999',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->getJson("/api/v1/countries/{$country->id}");
@@ -123,12 +123,12 @@ class CountryTest extends TestCase
         $country = Country::create([
             'name' => 'Brazil',
             'code' => 'BR0001',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $data = [
             'name' => 'Brasil',
             'code' => 'BR0002',
-            'status' => Constant::STATUS_INACTIVE
+            'status' => Constant::STATUS_INACTIVE,
         ];
 
         $response = $this->putJson("/api/v1/countries/{$country->id}", $data);
@@ -154,7 +154,7 @@ class CountryTest extends TestCase
         $country = Country::create([
             'name' => 'Uruguay',
             'code' => 'UY0001',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->deleteJson("/api/v1/countries/{$country->id}");

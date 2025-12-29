@@ -13,10 +13,8 @@ class CorsService
 {
     /**
      * Log CORS request for monitoring purposes
-     * 
-     * @param Request $request
-     * @param string $status (allowed|blocked)
-     * @return void
+     *
+     * @param  string  $status  (allowed|blocked)
      */
     public static function logCorsRequest(Request $request, string $status = 'allowed'): void
     {
@@ -28,7 +26,7 @@ class CorsService
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'status' => $status,
-                'timestamp' => now()->toISOString()
+                'timestamp' => now()->toISOString(),
             ];
 
             if ($status === 'blocked') {
@@ -43,18 +41,15 @@ class CorsService
 
     /**
      * Check if origin is allowed based on environment configuration
-     * 
-     * @param string|null $origin
-     * @return bool
      */
     public static function isOriginAllowed(?string $origin): bool
     {
-        if (!$origin) {
+        if (! $origin) {
             return false;
         }
 
         $allowedOrigins = explode(',', env('CORS_ALLOWED_ORIGINS', ''));
-        
+
         // Check exact match
         if (in_array($origin, $allowedOrigins)) {
             return true;
@@ -65,7 +60,7 @@ class CorsService
             $patterns = [
                 'http://localhost:*',
                 'http://127.0.0.1:*',
-                'https://*.vercel.app'
+                'https://*.vercel.app',
             ];
 
             foreach ($patterns as $pattern) {
@@ -80,17 +75,13 @@ class CorsService
 
     /**
      * Check if origin matches a pattern
-     * 
-     * @param string $origin
-     * @param string $pattern
-     * @return bool
      */
     private static function matchesPattern(string $origin, string $pattern): bool
     {
         // Convert pattern to regex
         $regex = str_replace(['*', '.'], ['.*', '\.'], $pattern);
-        $regex = '/^' . $regex . '$/i';
-        
+        $regex = '/^'.$regex.'$/i';
+
         return preg_match($regex, $origin) === 1;
     }
 }

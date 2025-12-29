@@ -8,8 +8,8 @@ use App\Models\Commerce;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class CommerceTest extends TestCase
 {
@@ -45,7 +45,7 @@ class CommerceTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         $commerce = Commerce::factory()->create();
-        $response = $this->getJson('/api/v1/commerces/' . $commerce->id);
+        $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
         $response->assertOk();
         $response->assertJsonPath('status', true);
         $response->assertJsonPath('data.id', $commerce->id);
@@ -60,7 +60,7 @@ class CommerceTest extends TestCase
         $commerce = Commerce::factory()->create();
         $payload = $commerce->toArray();
         $payload['name'] = 'Nuevo Nombre';
-        $response = $this->putJson('/api/v1/commerces/' . $commerce->id, $payload);
+        $response = $this->putJson('/api/v1/commerces/'.$commerce->id, $payload);
         $response->assertOk();
         $response->assertJsonPath('status', true);
         $response->assertJsonPath('data.name', 'Nuevo nombre');
@@ -73,7 +73,7 @@ class CommerceTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         $commerce = Commerce::factory()->create();
-        $response = $this->deleteJson('/api/v1/commerces/' . $commerce->id);
+        $response = $this->deleteJson('/api/v1/commerces/'.$commerce->id);
         $response->assertStatus(204);
         $this->assertSoftDeleted('commerces', ['id' => $commerce->id]);
     }

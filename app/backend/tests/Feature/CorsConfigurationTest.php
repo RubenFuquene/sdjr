@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
  * CORS Configuration Tests
- * 
+ *
  * Tests CORS functionality according to the specifications
  */
 class CorsConfigurationTest extends TestCase
@@ -18,7 +17,7 @@ class CorsConfigurationTest extends TestCase
     public function test_cors_configuration_file_exists(): void
     {
         $corsConfig = config('cors');
-        
+
         $this->assertIsArray($corsConfig);
         $this->assertArrayHasKey('paths', $corsConfig);
         $this->assertArrayHasKey('allowed_methods', $corsConfig);
@@ -56,7 +55,7 @@ class CorsConfigurationTest extends TestCase
         app('config')->set('app.env', 'production');
         app('config')->set('cors.allowed_origins_patterns', []);
         app('config')->set('cors.allowed_origins', []);
-        
+
         $response = $this->withHeaders([
             'Origin' => 'http://malicious-site.com',
         ])->get('/api/v1/countries');
@@ -77,7 +76,7 @@ class CorsConfigurationTest extends TestCase
         ])->get('/api/v1/countries');
 
         $response->assertHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-        
+
         // Verify exposed headers
         $exposedHeaders = $response->headers->get('Access-Control-Expose-Headers');
         if ($exposedHeaders) {
@@ -91,11 +90,11 @@ class CorsConfigurationTest extends TestCase
     public function test_cors_configuration_values(): void
     {
         $corsConfig = config('cors');
-        
+
         // Test paths
         $this->assertContains('api/*', $corsConfig['paths']);
         $this->assertContains('sanctum/csrf-cookie', $corsConfig['paths']);
-        
+
         // Test allowed methods
         $allowedMethods = $corsConfig['allowed_methods'];
         $this->assertContains('GET', $allowedMethods);
@@ -103,16 +102,16 @@ class CorsConfigurationTest extends TestCase
         $this->assertContains('PUT', $allowedMethods);
         $this->assertContains('DELETE', $allowedMethods);
         $this->assertContains('OPTIONS', $allowedMethods);
-        
+
         // Test allowed headers
         $allowedHeaders = $corsConfig['allowed_headers'];
         $this->assertContains('Authorization', $allowedHeaders);
         $this->assertContains('Content-Type', $allowedHeaders);
         $this->assertContains('X-CSRF-TOKEN', $allowedHeaders);
-        
+
         // Test max age
         $this->assertEquals(86400, $corsConfig['max_age']);
-        
+
         // Test credentials support
         $this->assertTrue($corsConfig['supports_credentials']);
     }
@@ -127,12 +126,12 @@ class CorsConfigurationTest extends TestCase
         app('config')->set('cors.allowed_origins_patterns', [
             'http://localhost:*',
             'http://127.0.0.1:*',
-            'https://*.vercel.app'
+            'https://*.vercel.app',
         ]);
-        
+
         $corsConfig = config('cors');
         $patterns = $corsConfig['allowed_origins_patterns'];
-        
+
         $this->assertContains('http://localhost:*', $patterns);
         $this->assertContains('http://127.0.0.1:*', $patterns);
         $this->assertContains('https://*.vercel.app', $patterns);

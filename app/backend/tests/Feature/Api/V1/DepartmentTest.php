@@ -2,19 +2,20 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Constants\Constant;
 use App\Models\Country;
 use App\Models\Department;
 use App\Models\User;
+use Faker\Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
-use Faker\Generator;
-use App\Constants\Constant;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class DepartmentTest extends TestCase
 {
     use RefreshDatabase;
+
     protected Generator $faker;
 
     protected function setUp(): void
@@ -38,13 +39,13 @@ class DepartmentTest extends TestCase
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
         Department::create([
             'country_id' => $country->id,
             'name' => 'Cundinamarca',
             'code' => 'DEP001',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
 
         $response = $this->getJson('/api/v1/departments');
@@ -68,13 +69,13 @@ class DepartmentTest extends TestCase
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
         $data = [
             'country_id' => $country->id,
             'name' => 'Antioquia',
             'code' => 'DEP002',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
 
         $response = $this->postJson('/api/v1/departments', $data);
@@ -106,13 +107,13 @@ class DepartmentTest extends TestCase
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $department = Department::create([
             'country_id' => $country->id,
             'name' => 'Valle del Cauca',
             'code' => 'DEP003',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->getJson("/api/v1/departments/{$department->id}");
@@ -137,19 +138,19 @@ class DepartmentTest extends TestCase
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $department = Department::create([
             'country_id' => $country->id,
             'name' => 'Atlantico',
             'code' => 'DEP004',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $data = [
             'country_id' => $country->id,
             'name' => 'Atlántico',
             'code' => 'DEP005',
-            'status' => Constant::STATUS_INACTIVE
+            'status' => Constant::STATUS_INACTIVE,
         ];
 
         $response = $this->putJson("/api/v1/departments/{$department->id}", $data);
@@ -175,13 +176,13 @@ class DepartmentTest extends TestCase
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $department = Department::create([
             'country_id' => $country->id,
             'name' => 'Bolivar',
             'code' => 'DEP006',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->deleteJson("/api/v1/departments/{$department->id}");

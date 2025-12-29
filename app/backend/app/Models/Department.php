@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Traits\SanitizesTextAttributes;
 
 class Department extends Model
 {
@@ -18,6 +18,7 @@ class Department extends Model
         'name',
         'status',
     ];
+
     /**
      * Sanitize code before saving.
      */
@@ -28,8 +29,6 @@ class Department extends Model
 
     /**
      * Get the country that owns the department.
-     *
-     * @return BelongsTo
      */
     public function country(): BelongsTo
     {
@@ -38,8 +37,6 @@ class Department extends Model
 
     /**
      * Get the cities for the department.
-     *
-     * @return HasMany
      */
     public function cities(): HasMany
     {

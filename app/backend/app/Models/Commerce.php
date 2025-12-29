@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @OA\Schema(
  *     schema="Commerce",
  *     title="Commerce",
  *     description="Commerce model",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="owner_user_id", type="integer", example=1),
  *     @OA\Property(property="department_id", type="integer", example=1),
@@ -36,7 +36,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Commerce extends Model
 {
-    use HasFactory, SoftDeletes, SanitizesTextAttributes;
+    use HasFactory, SanitizesTextAttributes, SoftDeletes;
 
     protected $fillable = [
         'owner_user_id',
@@ -51,7 +51,7 @@ class Commerce extends Model
         'phone',
         'email',
         'is_active',
-        'is_verified',        
+        'is_verified',
     ];
 
     protected $casts = [
@@ -63,16 +63,54 @@ class Commerce extends Model
     ];
 
     // Relaciones
-    public function ownerUser() { return $this->belongsTo(User::class, 'owner_user_id'); }
-    public function department() { return $this->belongsTo(Department::class); }
-    public function city() { return $this->belongsTo(City::class); }
-    public function neighborhood() { return $this->belongsTo(Neighborhood::class); }
-    public function legalRepresentatives() { return $this->hasMany(LegalRepresentative::class); }
-    public function commerceDocuments() { return $this->hasMany(CommerceDocument::class); }
+    public function ownerUser()
+    {
+        return $this->belongsTo(User::class, 'owner_user_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function neighborhood()
+    {
+        return $this->belongsTo(Neighborhood::class);
+    }
+
+    public function legalRepresentatives()
+    {
+        return $this->hasMany(LegalRepresentative::class);
+    }
+
+    public function commerceDocuments()
+    {
+        return $this->hasMany(CommerceDocument::class);
+    }
 
     // Sanitización de campos de texto
-    public function setNameAttribute($value) { $this->attributes['name'] = $this->sanitizeText($value); }
-    public function setDescriptionAttribute($value) { $this->attributes['description'] = $this->sanitizeText($value); }
-    public function setAddressAttribute($value) { $this->attributes['address'] = $this->sanitizeText($value); }
-    public function setEmailAttribute($value) { $this->attributes['email'] = $this->sanitizeEmail($value); }
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = $this->sanitizeText($value);
+    }
+
+    public function setDescriptionAttribute($value)
+    {
+        $this->attributes['description'] = $this->sanitizeText($value);
+    }
+
+    public function setAddressAttribute($value)
+    {
+        $this->attributes['address'] = $this->sanitizeText($value);
+    }
+
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = $this->sanitizeEmail($value);
+    }
 }

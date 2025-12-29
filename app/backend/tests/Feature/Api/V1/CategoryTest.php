@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
+use App\Constants\Constant;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
-use App\Constants\Constant;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class CategoryTest extends TestCase
 {
@@ -52,8 +52,8 @@ class CategoryTest extends TestCase
                 'status',
                 'message',
                 'data' => [
-                    'id', 'name', 'icon', 'status', 'created_at', 'updated_at'
-                ]
+                    'id', 'name', 'icon', 'status', 'created_at', 'updated_at',
+                ],
             ]);
         $response->assertJsonPath('data.name', 'Test category');
         $this->assertDatabaseHas('categories', ['name' => 'Test category']);
@@ -72,8 +72,8 @@ class CategoryTest extends TestCase
                 'status',
                 'message',
                 'data' => [
-                    'id', 'name', 'icon', 'status', 'created_at', 'updated_at'
-                ]
+                    'id', 'name', 'icon', 'status', 'created_at', 'updated_at',
+                ],
             ]);
         $response->assertJsonPath('data.name', 'Unique category');
     }
@@ -92,8 +92,8 @@ class CategoryTest extends TestCase
                 'status',
                 'message',
                 'data' => [
-                    'id', 'name', 'icon', 'status', 'created_at', 'updated_at'
-                ]
+                    'id', 'name', 'icon', 'status', 'created_at', 'updated_at',
+                ],
             ]);
         $response->assertJsonPath('data.name', 'New name');
         $this->assertDatabaseHas('categories', ['name' => 'New name']);

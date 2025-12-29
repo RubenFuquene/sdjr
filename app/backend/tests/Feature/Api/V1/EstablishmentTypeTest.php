@@ -8,8 +8,8 @@ use App\Models\EstablishmentType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class EstablishmentTypeTest extends TestCase
 {
@@ -44,7 +44,7 @@ class EstablishmentTypeTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
-        $response = $this->getJson('/api/v1/establishment-types/' . $type->id);
+        $response = $this->getJson('/api/v1/establishment-types/'.$type->id);
         $response->assertOk();
         $response->assertJsonPath('data.id', $type->id);
     }
@@ -57,7 +57,7 @@ class EstablishmentTypeTest extends TestCase
 
         $type = EstablishmentType::factory()->create();
         $payload = ['name' => 'Nuevo Tipo', 'code' => 'NEWCODE'];
-        $response = $this->putJson('/api/v1/establishment-types/' . $type->id, $payload);
+        $response = $this->putJson('/api/v1/establishment-types/'.$type->id, $payload);
         $response->assertOk();
         $response->assertJsonPath('data.name', 'Nuevo tipo');
     }
@@ -69,7 +69,7 @@ class EstablishmentTypeTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
-        $response = $this->deleteJson('/api/v1/establishment-types/' . $type->id);
+        $response = $this->deleteJson('/api/v1/establishment-types/'.$type->id);
         $response->assertNoContent();
         $this->assertSoftDeleted('establishment_types', ['id' => $type->id]);
     }

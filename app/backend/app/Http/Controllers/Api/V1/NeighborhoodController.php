@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use Throwable;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\NeighborhoodRequest;
+use App\Http\Resources\Api\V1\NeighborhoodResource;
 use App\Models\Neighborhood;
-use Illuminate\Http\Request;
+use App\Services\NeighborhoodService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Services\NeighborhoodService;
-use App\Http\Resources\Api\V1\NeighborhoodResource;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\Api\V1\NeighborhoodRequest;
+use Throwable;
 
 /**
  * @OA\Tag(
@@ -24,7 +24,7 @@ use App\Http\Requests\Api\V1\NeighborhoodRequest;
 class NeighborhoodController extends Controller
 {
     use ApiResponseTrait;
-    
+
     private NeighborhoodService $neighborhoodService;
 
     public function __construct(NeighborhoodService $service)
@@ -40,6 +40,7 @@ class NeighborhoodController extends Controller
      *     summary="List neighborhoods",
      *     description="Get paginated list of neighborhoods",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -48,9 +49,10 @@ class NeighborhoodController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $perPage = (int)($request->get('per_page', 15));            
+            $perPage = (int) ($request->get('per_page', 15));
             $neighborhoods = $this->neighborhoodService->getPaginated($perPage);
             $resource = NeighborhoodResource::collection($neighborhoods);
+
             return $this->paginatedResponse($neighborhoods, $resource, 'Neighborhoods retrieved successfully');
         } catch (Throwable $e) {
             return $this->errorResponse('Error fetching neighborhoods', Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -65,7 +67,9 @@ class NeighborhoodController extends Controller
      *     summary="Create neighborhood",
      *     description="Store a new neighborhood",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/NeighborhoodRequest")),
+     *
      *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/NeighborhoodResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -76,6 +80,7 @@ class NeighborhoodController extends Controller
     {
         try {
             $neighborhood = $this->neighborhoodService->store($request->validated());
+
             return $this->successResponse(new NeighborhoodResource($neighborhood), 'Neighborhood created successfully', Response::HTTP_CREATED);
         } catch (Throwable $e) {
             return $this->errorResponse('Error creating neighborhood', Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -90,7 +95,9 @@ class NeighborhoodController extends Controller
      *     summary="Show neighborhood",
      *     description="Get a specific neighborhood",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/NeighborhoodResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -101,6 +108,7 @@ class NeighborhoodController extends Controller
     {
         try {
             $neighborhood = $this->neighborhoodService->show($id);
+
             return $this->successResponse(new NeighborhoodResource($neighborhood), 'Neighborhood retrieved successfully');
         } catch (Throwable $e) {
             return $this->errorResponse('Neighborhood not found', Response::HTTP_NOT_FOUND);
@@ -115,8 +123,11 @@ class NeighborhoodController extends Controller
      *     summary="Update neighborhood",
      *     description="Update a specific neighborhood",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/NeighborhoodRequest")),
+     *
      *     @OA\Response(response=200, description="Updated", @OA\JsonContent(ref="#/components/schemas/NeighborhoodResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -128,6 +139,7 @@ class NeighborhoodController extends Controller
     {
         try {
             $neighborhood = $this->neighborhoodService->update($neighborhood_id, $request->validated());
+
             return $this->successResponse(new NeighborhoodResource($neighborhood), 'Neighborhood updated successfully');
         } catch (Throwable $e) {
             return $this->errorResponse('Error updating neighborhood', Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -142,7 +154,9 @@ class NeighborhoodController extends Controller
      *     summary="Delete neighborhood",
      *     description="Delete a specific neighborhood",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=204, description="No Content"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -153,6 +167,7 @@ class NeighborhoodController extends Controller
     {
         try {
             $this->neighborhoodService->destroy($neighborhood_id);
+
             return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (Throwable $e) {
             return response()->json(['success' => false, 'message' => 'Error deleting neighborhood'], Response::HTTP_INTERNAL_SERVER_ERROR);

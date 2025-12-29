@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Limpiar caché de permisos        
+        // Limpiar caché de permisos
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $guardName = 'sanctum';
@@ -71,7 +71,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.roles.update', 'guard_name' => $guardName, 'description' => 'Permission to update roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.roles.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.roles.assign_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign permissions to roles', 'created_at' => now(), 'updated_at' => now()],
-            
+
             ['name' => 'admin.permissions.index', 'guard_name' => $guardName, 'description' => 'List permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.permissions.create', 'guard_name' => $guardName, 'description' => 'Create permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.permissions.show', 'guard_name' => $guardName, 'description' => 'View permissions', 'created_at' => now(), 'updated_at' => now()],
@@ -162,11 +162,11 @@ class RolePermissionSeeder extends Seeder
         }
 
         // Asignar permisos a roles
-        $role = Role::where('name', 'superadmin')->first();        
+        $role = Role::where('name', 'superadmin')->first();
         $role->givePermissionTo(Permission::all());
 
         // Asignar rol a un usuario específico
         $user = User::first();
-        $user->assignRole('superadmin'); 
+        $user->assignRole('superadmin');
     }
 }

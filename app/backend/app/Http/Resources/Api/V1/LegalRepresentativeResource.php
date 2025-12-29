@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
 
-use App\Http\Resources\Api\V1\CommerceResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @OA\Schema(
  *     schema="LegalRepresentativeResource",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="commerce_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Juan"),

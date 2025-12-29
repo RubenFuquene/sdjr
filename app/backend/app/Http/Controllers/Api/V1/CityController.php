@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CityRequest;
 use App\Http\Resources\Api\V1\CityResource;
 use App\Services\CityService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -19,6 +19,7 @@ use App\Traits\ApiResponseTrait;
 class CityController extends Controller
 {
     use ApiResponseTrait;
+
     protected CityService $cityService;
 
     public function __construct(CityService $cityService)
@@ -36,11 +37,14 @@ class CityController extends Controller
      *      summary="Get list of cities",
      *      description="Returns list of cities",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=401,
      *          description="Unauthenticated",
@@ -60,6 +64,7 @@ class CityController extends Controller
             $status = $request->validatedStatus();
             $cities = $this->cityService->getPaginated($perPage, $status);
             $resource = CityResource::collection($cities);
+
             return $this->paginatedResponse($cities, $resource, 'Cities retrieved successfully');
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving cities', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -76,15 +81,20 @@ class CityController extends Controller
      *      summary="Store new city",
      *      description="Returns city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=400,
      *          description="Bad Request"
@@ -99,13 +109,13 @@ class CityController extends Controller
      *      )
      * )
      *
-     * @param CityRequest $request
      * @return CityResource
      */
     public function store(CityRequest $request): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->create($request->validated());
+
             return $this->successResponse(new CityResource($city), 'City created successfully', 201);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error creating city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -122,20 +132,25 @@ class CityController extends Controller
      *      summary="Get city information",
      *      description="Returns city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          description="City id",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(
      *              type="string"
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=400,
      *          description="Bad Request"
@@ -153,17 +168,15 @@ class CityController extends Controller
      *          description="Resource Not Found"
      *      )
      * )
-     *
-     * @param string $id
-     * @return CityResource|JsonResponse
      */
     public function show(string $id): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (!$city) {
+            if (! $city) {
                 return $this->errorResponse('City not found', 404);
             }
+
             return $this->successResponse(new CityResource($city), 'City retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -180,24 +193,31 @@ class CityController extends Controller
      *      summary="Update existing city",
      *      description="Returns updated city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          description="City id",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(
      *              type="string"
      *          )
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=400,
      *          description="Bad Request"
@@ -215,19 +235,16 @@ class CityController extends Controller
      *          description="Resource Not Found"
      *      )
      * )
-     *
-     * @param CityRequest $request
-     * @param string $id
-     * @return CityResource|JsonResponse
      */
     public function update(CityRequest $request, string $id): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (!$city) {
+            if (! $city) {
                 return $this->errorResponse('City not found', 404);
             }
             $updatedCity = $this->cityService->update($city, $request->validated());
+
             return $this->successResponse(new CityResource($updatedCity), 'City updated successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error updating city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -244,22 +261,28 @@ class CityController extends Controller
      *      summary="Delete existing city",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          description="City id",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(
      *              type="string"
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(property="message", type="string", example="City deleted successfully")
      *          )
      *       ),
+     *
      *      @OA\Response(
      *          response=401,
      *          description="Unauthenticated",
@@ -273,18 +296,16 @@ class CityController extends Controller
      *          description="Resource Not Found"
      *      )
      * )
-     *
-     * @param string $id
-     * @return JsonResponse
      */
     public function destroy(string $id): JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (!$city) {
+            if (! $city) {
                 return $this->errorResponse('City not found', 404);
             }
             $this->cityService->delete($city);
+
             return $this->noContentResponse();
         } catch (\Throwable $e) {
             return $this->errorResponse('Error deleting city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);

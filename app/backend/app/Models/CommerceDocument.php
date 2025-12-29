@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @OA\Schema(
  *     schema="CommerceDocument",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="commerce_id", type="integer", example=1),
  *     @OA\Property(property="verified_by_id", type="integer", example=1),

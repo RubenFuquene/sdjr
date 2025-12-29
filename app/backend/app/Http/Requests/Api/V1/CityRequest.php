@@ -20,7 +20,8 @@ class CityRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'admin.cities.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.cities.'.($action === 'store' ? 'create' : 'update');
+
         return $this->user()?->can($permission) ?? false;
     }
 
@@ -33,21 +34,18 @@ class CityRequest extends FormRequest
      *      description="ID of the department",
      *      example="9d21b3a0-5e1a-4b3a-9b3a-1b3a05e1a4b3"
      * )
-     *
      * @OA\Property(
      *      property="name",
      *      title="name",
      *      description="Name of the city",
      *      example="Bogota"
      * )
-     *
      * @OA\Property(
      *      property="status",
      *      title="status",
      *      description="Status of the city (A: Active, I: Inactive)",
      *      example="A"
      * )
-     * 
      * @OA\Property(
      *      property="code",
      *      title="code",
@@ -58,7 +56,7 @@ class CityRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {        
+    {
         return [
             'department_id' => 'required|exists:departments,id',
             'name' => 'required|string|max:255',
@@ -66,5 +64,4 @@ class CityRequest extends FormRequest
             'status' => 'nullable|integer|in:0,1',
         ];
     }
-
 }

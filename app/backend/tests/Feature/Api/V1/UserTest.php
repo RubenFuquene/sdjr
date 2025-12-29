@@ -27,9 +27,9 @@ class UserTest extends TestCase
         $response->assertJsonStructure([
             'data' => [
                 '*' => [
-                    'id', 'name', 'last_name', 'email', 'phone', 'roles', 'status', 'created_at', 'updated_at'
-                ]
-            ]
+                    'id', 'name', 'last_name', 'email', 'phone', 'roles', 'status', 'created_at', 'updated_at',
+                ],
+            ],
         ]);
     }
 
@@ -71,7 +71,7 @@ class UserTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/v1/users/' . $user->id);
+        $response = $this->getJson('/api/v1/users/'.$user->id);
         $response->assertOk();
         $response->assertJsonFragment(['id' => $user->id]);
     }
@@ -86,7 +86,7 @@ class UserTest extends TestCase
         Sanctum::actingAs($admin);
 
         $data = ['name' => 'Updated Name', 'last_name' => 'Updated LastName'];
-        $response = $this->putJson('/api/v1/users/' . $user->id, $data);
+        $response = $this->putJson('/api/v1/users/'.$user->id, $data);
         $response->assertOk();
         $response->assertJsonFragment(['name' => 'Updated Name']);
     }
@@ -100,7 +100,7 @@ class UserTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($admin);
 
-        $response = $this->deleteJson('/api/v1/users/' . $user->id);
+        $response = $this->deleteJson('/api/v1/users/'.$user->id);
         $response->assertNoContent();
         $this->assertSoftDeleted('users', ['id' => $user->id]);
     }

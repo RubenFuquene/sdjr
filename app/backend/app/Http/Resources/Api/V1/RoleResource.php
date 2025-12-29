@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="RoleResource",
  *     title="Role Resource",
  *     description="Role resource response",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Admin"),
  *     @OA\Property(property="description", type="string", example="Administrator role with full permissions"),

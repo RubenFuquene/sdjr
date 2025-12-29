@@ -1,22 +1,21 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CityController;
+use App\Http\Controllers\Api\V1\CommerceBasicDataController;
+use App\Http\Controllers\Api\V1\CommerceController;
+use App\Http\Controllers\Api\V1\CountryController;
+use App\Http\Controllers\Api\V1\DepartmentController;
+use App\Http\Controllers\Api\V1\EstablishmentTypeController;
+use App\Http\Controllers\Api\V1\NeighborhoodController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\UserController;
-use App\Http\Controllers\Api\V1\CountryController;
-use App\Http\Controllers\Api\V1\AuditLogController;
-use App\Http\Controllers\Api\V1\CategoryController;
-use App\Http\Controllers\Api\V1\CommerceController;
-use App\Http\Controllers\Api\V1\DepartmentController;
-use App\Http\Controllers\Api\V1\NeighborhoodController;
-use App\Http\Controllers\Api\V1\CommerceBasicDataController;
-use App\Http\Controllers\Api\V1\EstablishmentTypeController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    
+
     // Authentication routes
     Route::post('login', [AuthController::class, 'login']);
 
@@ -34,7 +33,7 @@ Route::prefix('v1')->group(function () {
         // User Management routes
         Route::apiResource('users', UserController::class);
         Route::patch('users/{user}/status', [UserController::class, 'updateStatus']);
-        
+
         // Role and Permission Management routes
         Route::get('roles', [RoleController::class, 'index']);
         Route::post('roles', [RoleController::class, 'store']);
@@ -47,9 +46,9 @@ Route::prefix('v1')->group(function () {
         Route::get('audit-logs/{id}', [AuditLogController::class, 'show']);
 
         // Commerce routes
-        Route::apiResource('commerces', CommerceController::class);        
+        Route::apiResource('commerces', CommerceController::class);
         Route::post('commerces/basic', [CommerceBasicDataController::class, 'store']);
-        
+
         // Legal Representative routes
         Route::apiResource('legal-representatives', \App\Http\Controllers\Api\V1\LegalRepresentativeController::class);
     });

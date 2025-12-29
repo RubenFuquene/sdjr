@@ -7,13 +7,12 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\EstablishmentTypeRequest;
 use App\Http\Resources\Api\V1\EstablishmentTypeResource;
-use App\Models\EstablishmentType;
 use App\Services\EstablishmentTypeService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
-use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -24,6 +23,7 @@ use App\Traits\ApiResponseTrait;
 class EstablishmentTypeController extends Controller
 {
     use ApiResponseTrait;
+
     private EstablishmentTypeService $establishmentTypeService;
 
     public function __construct(EstablishmentTypeService $establishmentTypeService)
@@ -39,15 +39,19 @@ class EstablishmentTypeController extends Controller
      *     summary="Get list of establishment types",
      *     description="Returns paginated list of establishment types.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(type="object",
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/EstablishmentTypeResource")),
      *             @OA\Property(property="meta", type="object"),
      *             @OA\Property(property="links", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
@@ -56,11 +60,13 @@ class EstablishmentTypeController extends Controller
     {
         try {
             $perPage = request('per_page', 15);
-            $types = $this->establishmentTypeService->paginate((int)$perPage);
+            $types = $this->establishmentTypeService->paginate((int) $perPage);
             $resource = EstablishmentTypeResource::collection($types);
+
             return $this->paginatedResponse($types, $resource, 'Establishment types retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error listing establishment types', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error listing establishment types', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -73,15 +79,20 @@ class EstablishmentTypeController extends Controller
      *     summary="Create a new establishment type",
      *     description="Creates a new establishment type.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(ref="#/components/schemas/EstablishmentTypeRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Establishment type created successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/EstablishmentTypeResource")
      *     ),
+     *
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -91,9 +102,11 @@ class EstablishmentTypeController extends Controller
     {
         try {
             $type = $this->establishmentTypeService->store($request->validated());
+
             return $this->successResponse(new EstablishmentTypeResource($type), 'Establishment type created successfully', Response::HTTP_CREATED);
         } catch (\Throwable $e) {
             Log::error('Error creating establishment type', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error creating establishment type', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -106,12 +119,16 @@ class EstablishmentTypeController extends Controller
      *     summary="Get an establishment type",
      *     description="Returns a single establishment type.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/EstablishmentTypeResource")
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=404, description="Not Found")
@@ -123,6 +140,7 @@ class EstablishmentTypeController extends Controller
             return $this->successResponse(new EstablishmentTypeResource($this->establishmentTypeService->show($establishmentType_id)), 'Establishment type retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error showing establishment type', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error showing establishment type', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -135,16 +153,22 @@ class EstablishmentTypeController extends Controller
      *     summary="Update an establishment type",
      *     description="Updates an establishment type.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(ref="#/components/schemas/EstablishmentTypeRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Establishment type updated successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/EstablishmentTypeResource")
      *     ),
+     *
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -155,9 +179,11 @@ class EstablishmentTypeController extends Controller
     {
         try {
             $type = $this->establishmentTypeService->update($establishmentType_id, $request->validated());
+
             return $this->successResponse(new EstablishmentTypeResource($type), 'Establishment type updated successfully');
         } catch (\Throwable $e) {
             Log::error('Error updating establishment type', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error updating establishment type', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -170,7 +196,9 @@ class EstablishmentTypeController extends Controller
      *     summary="Delete an establishment type",
      *     description="Deletes an establishment type (soft delete).",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=204, description="Establishment type deleted successfully"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -181,9 +209,11 @@ class EstablishmentTypeController extends Controller
     {
         try {
             $this->establishmentTypeService->delete($establishmentType_id);
+
             return $this->successResponse(null, 'Establishment type deleted successfully', Response::HTTP_NO_CONTENT);
         } catch (\Throwable $e) {
             Log::error('Error deleting establishment type', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error deleting establishment type', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }

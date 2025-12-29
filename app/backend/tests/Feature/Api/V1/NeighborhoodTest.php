@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use App\Models\Neighborhood;
+use App\Constants\Constant;
 use App\Models\City;
+use App\Models\Neighborhood;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
-use App\Constants\Constant;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class NeighborhoodTest extends TestCase
 {

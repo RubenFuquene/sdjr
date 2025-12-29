@@ -23,7 +23,7 @@ class DepartmentIndexRequest extends FormRequest
 
     public function validatedPerPage(): int
     {
-        return (int)($this->input('per_page', 15));
+        return (int) ($this->input('per_page', 15));
     }
 
     public function validatedStatus(): string

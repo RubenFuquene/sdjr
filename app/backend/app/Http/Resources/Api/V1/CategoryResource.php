@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="CategoryResource",
  *     title="Category Resource",
  *     description="Category resource response",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Alimentos"),
  *     @OA\Property(property="icon", type="string", example="icon.png"),

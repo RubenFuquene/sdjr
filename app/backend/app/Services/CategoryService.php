@@ -11,9 +11,6 @@ class CategoryService
 {
     /**
      * Get paginated categories.
-     *
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
     {
@@ -21,14 +18,12 @@ class CategoryService
         if ($status !== 'all') {
             $query->where('status', $status);
         }
+
         return $query->paginate($perPage);
     }
 
     /**
      * Create a new category.
-     *
-     * @param array $data
-     * @return Category
      */
     public function create(array $data): Category
     {
@@ -37,9 +32,6 @@ class CategoryService
 
     /**
      * Find a category by ID.
-     *
-     * @param string $id
-     * @return Category|null
      */
     public function find(string $id): ?Category
     {
@@ -48,22 +40,16 @@ class CategoryService
 
     /**
      * Update a category.
-     *
-     * @param Category $category
-     * @param array $data
-     * @return Category
      */
     public function update(Category $category, array $data): Category
     {
         $category->update($data);
+
         return $category;
     }
 
     /**
      * Delete a category.
-     *
-     * @param Category $category
-     * @return bool
      */
     public function delete(Category $category): bool
     {

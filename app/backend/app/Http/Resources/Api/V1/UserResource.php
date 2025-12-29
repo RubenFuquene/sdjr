@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="UserResource",
  *     title="User Resource",
  *     description="User resource representation",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Juan"),
  *     @OA\Property(property="last_name", type="string", example="Pérez"),

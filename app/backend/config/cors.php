@@ -16,25 +16,25 @@ return [
 
     'paths' => [
         'api/*',
-        'sanctum/csrf-cookie'
+        'sanctum/csrf-cookie',
     ],
 
     'allowed_methods' => [
         'GET',
-        'POST', 
+        'POST',
         'PUT',
         'PATCH',
         'DELETE',
-        'OPTIONS'
+        'OPTIONS',
     ],
 
-    'allowed_origins' => env('CORS_ALLOWED_ORIGINS') ? 
+    'allowed_origins' => env('CORS_ALLOWED_ORIGINS') ?
         explode(',', env('CORS_ALLOWED_ORIGINS')) : [],
 
     'allowed_origins_patterns' => env('APP_ENV') === 'local' ? [
         'http://localhost:*',
         'http://127.0.0.1:*',
-        'https://*.vercel.app'
+        'https://*.vercel.app',
     ] : [],
 
     'allowed_headers' => [
@@ -43,13 +43,13 @@ return [
         'Content-Type',
         'X-Requested-With',
         'X-CSRF-TOKEN',
-        'X-Socket-Id'
+        'X-Socket-Id',
     ],
 
     'exposed_headers' => [
         'X-Total-Count',
         'X-Rate-Limit-Remaining',
-        'X-Rate-Limit-Limit'
+        'X-Rate-Limit-Limit',
     ],
 
     'max_age' => (int) env('CORS_MAX_AGE', 86400),

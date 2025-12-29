@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Exception;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleService
 {
     /**
      * Get paginated roles with permissions and user count.
      *
-     * @param int $perPage
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function getPaginatedWithPermissionsAndUserCount(int $perPage = 15)
@@ -28,9 +27,6 @@ class RoleService
     /**
      * Create a new role and assign permissions.
      *
-     * @param string $name
-     * @param array $permissions
-     * @return Role
      * @throws Exception
      */
     public function createRole(string $name, string $description, array $permissions = []): Role
@@ -41,10 +37,11 @@ class RoleService
                 'name' => $name,
                 'description' => $description,
             ]);
-            if (!empty($permissions)) {
+            if (! empty($permissions)) {
                 $role->syncPermissions($permissions);
             }
             DB::commit();
+
             return $role;
         } catch (Exception $e) {
             DB::rollBack();
@@ -56,8 +53,6 @@ class RoleService
     /**
      * Create a new permission.
      *
-     * @param string $name
-     * @return Permission
      * @throws Exception
      */
     public function createPermission(string $name, string $description): Permission
@@ -76,30 +71,21 @@ class RoleService
     /**
      * Assign roles and permissions to a user.
      *
-     * @param User $user
-     * @param array $roles
-     * @param array $permissions
-     * @return void
      * @throws Exception
      */
     /**
      * Assign roles and permissions to a user, with sync or give option.
      *
-     * @param User $user
-     * @param array $roles
-     * @param array $permissions
-     * @param bool $sync
-     * @return void
      * @throws Exception
      */
     public function assignToUser(User $user, array $roles = [], array $permissions = [], bool $sync = true): void
     {
         DB::beginTransaction();
         try {
-            if (!empty($roles)) {
+            if (! empty($roles)) {
                 $sync ? $user->syncRoles($roles) : $user->assignRole($roles);
             }
-            if (!empty($permissions)) {
+            if (! empty($permissions)) {
                 $sync ? $user->syncPermissions($permissions) : $user->givePermissionTo($permissions);
             }
             DB::commit();
@@ -113,18 +99,11 @@ class RoleService
     /**
      * Assign permissions to a role.
      *
-     * @param Role $role
-     * @param array $permissions
-     * @return void
      * @throws Exception
      */
     /**
      * Assign permissions to a role, with sync or give option.
      *
-     * @param Role $role
-     * @param array $permissions
-     * @param bool $sync
-     * @return void
      * @throws Exception
      */
     public function assignPermissionsToRole(Role $role, array $permissions, bool $sync = true): void
