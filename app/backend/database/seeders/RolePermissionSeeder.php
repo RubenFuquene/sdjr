@@ -89,6 +89,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.users.assign_roles_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign roles and permissions to users', 'created_at' => now(), 'updated_at' => now()],
             // Administrator Modules
             ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.profiles.create', 'guard_name' => $guardName, 'description' => 'Create admin profiles module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.parametrization.view', 'guard_name' => $guardName, 'description' => 'View admin parametrization module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.provider_validate.view', 'guard_name' => $guardName, 'description' => 'View admin provider validate module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.marketing.view', 'guard_name' => $guardName, 'description' => 'View admin marketing module', 'created_at' => now(), 'updated_at' => now()],

@@ -4,9 +4,11 @@ import { TableActions } from "@/components/admin/shared/table-actions";
 
 interface ProfilesTableProps {
   data: Perfil[];
+  onView?: (perfil: Perfil) => void;
+  onEdit?: (perfil: Perfil) => void;
 }
 
-export function ProfilesTable({ data }: ProfilesTableProps) {
+export function ProfilesTable({ data, onView, onEdit }: ProfilesTableProps) {
   return (
     <div className="bg-white rounded-[18px] shadow-sm border border-slate-100 overflow-hidden">
       <div className="overflow-x-auto">
@@ -70,7 +72,13 @@ export function ProfilesTable({ data }: ProfilesTableProps) {
                   <StatusBadge activo={perfil.activo} />
                 </td>
                 <td className="px-6 py-4">
-                  <TableActions itemId={perfil.id} itemName={perfil.nombre} activo={perfil.activo} />
+                  <TableActions 
+                    itemId={perfil.id} 
+                    itemName={perfil.nombre} 
+                    activo={perfil.activo}
+                    onView={onView ? () => onView(perfil) : undefined}
+                    onEdit={onEdit ? () => onEdit(perfil) : undefined}
+                  />
                 </td>
               </tr>
             ))}

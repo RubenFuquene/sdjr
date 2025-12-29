@@ -7,9 +7,13 @@ Lista de endpoints faltantes en el backend Laravel que necesitamos para completa
 ## Endpoints Existentes con Bugs
 
 ### GET /api/v1/roles
+
+Endpoint no devuelve estado del rol (Nuevo bug)
+
 **Problema**: El campo `users_count` siempre devuelve 0, no cuenta correctamente los usuarios asignados a cada rol
 **Query params**: `per_page` (paginación)
 **Respuesta actual**:
+
 ```json
 {
   "data": [
@@ -23,7 +27,9 @@ Lista de endpoints faltantes en el backend Laravel que necesitamos para completa
   ]
 }
 ```
+
 **Respuesta esperada**:
+
 ```json
 {
   "data": [
@@ -88,9 +94,53 @@ Lista de endpoints faltantes en el backend Laravel que necesitamos para completa
 }
 ```
 
+### 4. GET /api/v1/permissions
+
+**Propósito**: Obtener todos los permisos disponibles del sistema
+**Necesario**: Para formulario de creación de roles (árbol dinámico de permisos)
+**Query params**: Ninguno
+**Respuesta esperada**:
+
+```json
+{
+  "data": [
+    {
+      "name": "admin.roles.create",
+      "description": "Create roles"
+    },
+    {
+      "name": "admin.roles.view", 
+      "description": "View roles"
+    },
+    {
+      "name": "admin.roles.edit",
+      "description": "Edit roles"
+    },
+    {
+      "name": "admin.roles.delete",
+      "description": "Delete roles"
+    },
+    {
+      "name": "admin.users.create",
+      "description": "Create users"
+    },
+    {
+      "name": "admin.countries.create",
+      "description": "Create countries"
+    },
+    {
+      "name": "provider.basic_data.view",
+      "description": "View provider basic data"
+    }
+  ]
+}
+```
+
+**Nota**: Debe devolver todos los permisos del RolePermissionSeeder con estructura actual (3 niveles)
+
 ## Endpoints de Gestión (Panel Admin)
 
-### 4. GET /api/v1/providers
+### 5. GET /api/v1/providers
 
 **Propósito**: Listar proveedores con filtros y paginación
 **Necesario**: Para tabla de proveedores en dashboard
@@ -123,13 +173,6 @@ Lista de endpoints faltantes en el backend Laravel que necesitamos para completa
 }
 ```
 
-### 5. GET /api/v1/users
-
-**Propósito**: Listar usuarios del sistema
-**Necesario**: Para tabla de usuarios en dashboard
-**Query params**: `page`, `per_page`, `search`, `role`, `status`
-**Respuesta esperada**: Similar a providers, con campos de usuario
-
 ### 6. GET /api/v1/administrators
 
 **Propósito**: Listar administradores del sistema
@@ -150,12 +193,6 @@ Lista de endpoints faltantes en el backend Laravel que necesitamos para completa
 - PUT /api/v1/providers/{id}
 - DELETE /api/v1/providers/{id}
 
-### Users
-
-- POST /api/v1/users
-- PUT /api/v1/users/{id}
-- DELETE /api/v1/users/{id}
-
 ### Administrators
 
 - POST /api/v1/administrators
@@ -172,7 +209,7 @@ Lista de endpoints faltantes en el backend Laravel que necesitamos para completa
 
 ## Prioridad de Implementación
 
-1. **Alta**: /me/permissions, /logout (para sistema de permisos)
+1. **Alta**: /api/v1/permissions, /me/permissions, /logout (para sistema de permisos y formulario roles)
 2. **Media**: /me, /providers, /users, /administrators (para completar dashboard)
 3. **Baja**: Endpoints CRUD (para futuras funcionalidades)
 

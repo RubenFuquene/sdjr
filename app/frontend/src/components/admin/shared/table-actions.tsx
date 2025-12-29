@@ -6,27 +6,55 @@ interface TableActionsProps {
   itemId: number;
   itemName: string;
   activo?: boolean;
+  onView?: () => void;
+  onEdit?: () => void;
+  onToggle?: () => void;
+  onDelete?: () => void;
 }
 
-export function TableActions({ itemId, itemName, activo = true }: TableActionsProps) {
+export function TableActions({ 
+  itemId, 
+  itemName, 
+  activo = true,
+  onView,
+  onEdit,
+  onToggle,
+  onDelete
+}: TableActionsProps) {
   const handleView = () => {
-    console.log("Ver:", itemId, itemName);
-    // TODO: Implementar modal de vista
+    if (onView) {
+      onView();
+    } else {
+      console.log("Ver:", itemId, itemName);
+      // TODO: Implementar modal de vista
+    }
   };
 
   const handleEdit = () => {
-    console.log("Editar:", itemId, itemName);
-    // TODO: Implementar modal de edición
+    if (onEdit) {
+      onEdit();
+    } else {
+      console.log("Editar:", itemId, itemName);
+      // TODO: Implementar modal de edición
+    }
   };
 
   const handleToggle = () => {
-    console.log("Toggle status:", itemId, itemName, !activo);
-    // TODO: Implementar cambio de estado
+    if (onToggle) {
+      onToggle();
+    } else {
+      console.log("Toggle status:", itemId, itemName, !activo);
+      // TODO: Implementar cambio de estado
+    }
   };
 
   const handleDelete = () => {
-    console.log("Eliminar:", itemId, itemName);
-    // TODO: Implementar confirmación y eliminación
+    if (onDelete) {
+      onDelete();
+    } else {
+      console.log("Eliminar:", itemId, itemName);
+      // TODO: Implementar confirmación y eliminación
+    }
   };
 
   return (
