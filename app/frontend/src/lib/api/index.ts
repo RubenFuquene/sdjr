@@ -3,7 +3,7 @@
  * Centraliza todas las exportaciones de la API para imports limpios
  * 
  * Usage:
- * import { login, getRoles, ApiError } from '@/lib/api';
+ * import { login, getRoles, ApiError } from '@/lib/api/index';
  */
 
 // Core utilities

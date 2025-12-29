@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/api";
+import { login } from "@/lib/api/index";
 import type { SessionData } from "@/types/auth";
 import { persistSession } from "@/lib/session";
 

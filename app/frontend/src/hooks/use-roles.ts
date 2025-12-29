@@ -6,7 +6,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getRoles, ApiError } from "@/lib/api";
+import { getRoles, ApiError } from "@/lib/api/index";
 import { Perfil, RoleFromAPI } from "@/types/admin";
 
 interface UseRolesReturn {
