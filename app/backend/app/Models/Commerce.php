@@ -62,53 +62,105 @@ class Commerce extends Model
         'deleted_at' => 'datetime',
     ];
 
-    // Relaciones
+    /**
+     * Get the owner user of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function ownerUser()
     {
         return $this->belongsTo(User::class, 'owner_user_id');
     }
 
+    /**
+     * Get the department of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function department()
     {
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * Get the city of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function city()
     {
         return $this->belongsTo(City::class);
     }
 
+    /**
+     * Get the neighborhood of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function neighborhood()
     {
         return $this->belongsTo(Neighborhood::class);
     }
 
+    /**
+     * Get the legal representatives of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function legalRepresentatives()
     {
         return $this->hasMany(LegalRepresentative::class);
     }
 
+    /**
+     * Get the commerce documents of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function commerceDocuments()
     {
         return $this->hasMany(CommerceDocument::class);
     }
 
-    // Sanitización de campos de texto
+    /**
+     * Set and sanitize the name attribute.
+     *
+     * @param string|null $value
+     * @return void
+     */
     public function setNameAttribute($value)
     {
         $this->attributes['name'] = $this->sanitizeText($value);
     }
 
+    /**
+     * Set and sanitize the description attribute.
+     *
+     * @param string|null $value
+     * @return void
+     */
     public function setDescriptionAttribute($value)
     {
         $this->attributes['description'] = $this->sanitizeText($value);
     }
 
+    /**
+     * Set and sanitize the address attribute.
+     *
+     * @param string|null $value
+     * @return void
+     */
     public function setAddressAttribute($value)
     {
         $this->attributes['address'] = $this->sanitizeText($value);
     }
 
+    /**
+     * Set and sanitize the email attribute.
+     *
+     * @param string|null $value
+     * @return void
+     */
     public function setEmailAttribute($value)
     {
         $this->attributes['email'] = $this->sanitizeEmail($value);

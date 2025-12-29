@@ -66,4 +66,28 @@ class CommerceService
     {
         return Commerce::findOrFail($commerce_id);
     }
+
+    /**
+     * Get paginated commerces with filters: page, per_page, search, status
+     */
+    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        $query = Commerce::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%")
+                  ->orWhere('tax_id', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('phone', 'like', "%$search%");
+            });
+        }
+
+        if (!is_null($status)) {
+            $query->where('is_active', $status);
+        }
+
+        return $query->paginate($perPage, ['*'], 'page', $page);
+    }
 }
