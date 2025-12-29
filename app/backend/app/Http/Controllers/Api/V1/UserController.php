@@ -281,9 +281,39 @@ class UserController extends Controller
 
             return $this->successResponse(new UserResource($updatedUser), 'User status updated successfully');
         } catch (\Throwable $e) {
-            \Log::error('Error updating user status', ['id' => $user?->id, 'error' => $e->getMessage()]);
+            Log::error('Error updating user status', ['id' => $user?->id, 'error' => $e->getMessage()]);
 
             return $this->errorResponse('Error updating user status', 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/administrators",
+     *     operationId="getAdministrators",
+     *     tags={"Users"},
+     *     summary="Get list of administrator users",
+     *     description="Returns a list of users with the administrator role.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/UserResource"))
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function administrators(): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $users = User::with('roles')->get()->filter(
+                fn ($user) => $user->roles->whereIn('name', ['superadmin', 'admin'])->toArray()
+            );
+            return $this->successResponse(UserResource::collection($users), 'Administrators retrieved successfully', Response::HTTP_OK);
+        } catch (\Throwable $e) {
+            Log::error('Error listing administrators', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Error listing administrators', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
 }
