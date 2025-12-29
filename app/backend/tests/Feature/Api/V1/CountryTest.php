@@ -2,19 +2,19 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Constants\Constant;
 use App\Models\Country;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use Faker\Generator;
-use App\Constants\Constant;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class CountryTest extends TestCase
 {
     use RefreshDatabase;
+
     protected Generator $faker;
 
     protected function setUp(): void
@@ -30,20 +30,20 @@ class CountryTest extends TestCase
      */
     public function test_index_returns_countries()
     {
-        Permission::firstOrCreate(['name' => 'countries.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.countries.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('countries.index');
+        $user->givePermissionTo('admin.countries.index');
         Sanctum::actingAs($user);
 
         Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
         Country::create([
             'name' => 'Peru',
             'code' => 'PE5678',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
 
         $response = $this->getJson('/api/v1/countries');
@@ -59,15 +59,15 @@ class CountryTest extends TestCase
      */
     public function test_store_creates_country()
     {
-        Permission::firstOrCreate(['name' => 'countries.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.countries.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('countries.create');
+        $user->givePermissionTo('admin.countries.create');
         Sanctum::actingAs($user);
 
         $data = [
             'name' => 'Argentina',
             'code' => 'AR0001',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
 
         $response = $this->postJson('/api/v1/countries', $data);
@@ -90,15 +90,15 @@ class CountryTest extends TestCase
      */
     public function test_show_returns_country()
     {
-        Permission::firstOrCreate(['name' => 'countries.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.countries.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('countries.show');
+        $user->givePermissionTo('admin.countries.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Chile',
             'code' => 'CL9999',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->getJson("/api/v1/countries/{$country->id}");
@@ -115,20 +115,20 @@ class CountryTest extends TestCase
      */
     public function test_update_updates_country()
     {
-        Permission::firstOrCreate(['name' => 'countries.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.countries.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('countries.update');
+        $user->givePermissionTo('admin.countries.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Brazil',
             'code' => 'BR0001',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $data = [
             'name' => 'Brasil',
             'code' => 'BR0002',
-            'status' => Constant::STATUS_INACTIVE
+            'status' => Constant::STATUS_INACTIVE,
         ];
 
         $response = $this->putJson("/api/v1/countries/{$country->id}", $data);
@@ -146,15 +146,15 @@ class CountryTest extends TestCase
      */
     public function test_destroy_deletes_country()
     {
-        Permission::firstOrCreate(['name' => 'countries.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.countries.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('countries.delete');
+        $user->givePermissionTo('admin.countries.delete');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Uruguay',
             'code' => 'UY0001',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->deleteJson("/api/v1/countries/{$country->id}");

@@ -10,8 +10,6 @@ class DepartmentService
 {
     /**
      * Get all departments.
-     *
-     * @return Collection
      */
     public function getAll(): Collection
     {
@@ -20,9 +18,6 @@ class DepartmentService
 
     /**
      * Get paginated departments.
-     *
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
     {
@@ -30,14 +25,12 @@ class DepartmentService
         if ($status !== 'all') {
             $query->where('status', $status);
         }
+
         return $query->paginate($perPage);
     }
 
     /**
      * Create a new department.
-     *
-     * @param array $data
-     * @return Department
      */
     public function create(array $data): Department
     {
@@ -46,9 +39,6 @@ class DepartmentService
 
     /**
      * Find a department by ID.
-     *
-     * @param string $id
-     * @return Department|null
      */
     public function find(string $id): ?Department
     {
@@ -57,22 +47,16 @@ class DepartmentService
 
     /**
      * Update a department.
-     *
-     * @param Department $department
-     * @param array $data
-     * @return Department
      */
     public function update(Department $department, array $data): Department
     {
         $department->update($data);
+
         return $department;
     }
 
     /**
      * Delete a department.
-     *
-     * @param Department $department
-     * @return bool
      */
     public function delete(Department $department): bool
     {

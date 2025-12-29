@@ -9,6 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * @OA\Schema(
  *     schema="CommerceBasicDataRequest",
+ *
  *     @OA\Property(property="commerce", ref="#/components/schemas/CommerceRequest"),
  *     @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeRequest")),
  *     @OA\Property(property="commerce_documents", type="array", @OA\Items(ref="#/components/schemas/CommerceDocument"))
@@ -18,7 +19,7 @@ class CommerceBasicDataRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('commerces.create') ?? false;
+        return $this->user()?->can('provider.commerces.create') ?? false;
     }
 
     public function rules(): array

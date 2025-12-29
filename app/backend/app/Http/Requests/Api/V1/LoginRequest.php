@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     title="Login Request",
  *     description="Login request body data",
  *     required={"email", "password"},
+ *
  *     @OA\Property(
  *         property="email",
  *         type="string",

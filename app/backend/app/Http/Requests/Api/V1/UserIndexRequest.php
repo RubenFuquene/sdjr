@@ -10,7 +10,7 @@ class UserIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('users.index') ?? false;
+        return $this->user()?->can('admin.users.index') ?? false;
     }
 
     public function rules(): array
@@ -22,6 +22,6 @@ class UserIndexRequest extends FormRequest
 
     public function validatedPerPage(): int
     {
-        return (int)($this->input('per_page', 15));
+        return (int) ($this->input('per_page', 15));
     }
 }

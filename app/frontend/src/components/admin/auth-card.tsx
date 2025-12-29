@@ -9,13 +9,16 @@ type AuthCardProps = {
 
 export function AuthCard({ title, subtitle, children }: AuthCardProps) {
   return (
-    <div className="w-full max-w-md rounded-2xl bg-white px-6 py-8 shadow-login-card sm:px-8 sm:py-10">
-      <div className="flex flex-col items-center gap-2 text-center text-[var(--color-text)]">
-        <Logo />
-        <h1 className="text-xl font-semibold">{title}</h1>
+    <div className="w-full max-w-md rounded-[18px] bg-white px-8 py-8 shadow-2xl">
+      <div className="mb-8 flex flex-col items-center gap-3 text-center">
+        {/* Logo container - Figma spec */}
+        <div className="inline-block bg-white p-4 rounded-[18px] mb-4">
+          <Logo />
+        </div>
+        <h1 className="text-xl font-semibold text-[var(--color-text)]">{title}</h1>
         {subtitle ? <p className="text-sm text-[var(--color-muted)]">{subtitle}</p> : null}
       </div>
-      <div className="mt-8">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
@@ -23,11 +26,11 @@ export function AuthCard({ title, subtitle, children }: AuthCardProps) {
 function Logo() {
   return (
     <Image
-      src="/brand/logo-su.svg"
+      src="/brand/logo-sumass.png"
       alt="Sumass"
-      width={82}
-      height={82}
-      className="h-[82px] w-[82px]"
+      width={96}
+      height={96}
+      className="h-24 w-24 object-contain"
       priority
     />
   );

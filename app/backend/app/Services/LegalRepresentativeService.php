@@ -17,9 +17,6 @@ class LegalRepresentativeService
 {
     /**
      * Get paginated list of legal representatives.
-     *
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
@@ -29,8 +26,6 @@ class LegalRepresentativeService
     /**
      * Store a new legal representative.
      *
-     * @param array $data
-     * @return LegalRepresentative
      * @throws Throwable
      */
     public function store(array $data): LegalRepresentative
@@ -43,8 +38,6 @@ class LegalRepresentativeService
     /**
      * Show a legal representative by id.
      *
-     * @param int $id
-     * @return LegalRepresentative
      * @throws ModelNotFoundException
      */
     public function show(int $id): LegalRepresentative
@@ -55,9 +48,6 @@ class LegalRepresentativeService
     /**
      * Update a legal representative.
      *
-     * @param int $id
-     * @param array $data
-     * @return LegalRepresentative
      * @throws Throwable
      */
     public function update(int $id, array $data): LegalRepresentative
@@ -65,6 +55,7 @@ class LegalRepresentativeService
         return DB::transaction(function () use ($id, $data) {
             $legalRepresentative = LegalRepresentative::findOrFail($id);
             $legalRepresentative->update($data);
+
             return $legalRepresentative->fresh(['commerce']);
         });
     }
@@ -72,8 +63,6 @@ class LegalRepresentativeService
     /**
      * Delete a legal representative (soft delete).
      *
-     * @param int $id
-     * @return void
      * @throws Throwable
      */
     public function destroy(int $id): void

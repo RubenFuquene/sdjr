@@ -1,22 +1,32 @@
 @import "tailwindcss";
 
 /* Design tokens compartidos para admin / provider / app */
+/* Basados en especificaciones exactas de Figma (COLORES_ACTUALIZADOS.md) */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 
-  /* Brand */
-  --color-brand-purple: #4b1d6b;
-  --color-brand-purple-600: #5a2a78;
-  --color-brand-lime: #dfeea0;
-  --color-brand-lime-500: #bcd459;
+  /* Brand - Púrpura Berenjena */
+  --color-brand-purple: #4B236A;
+  --color-brand-purple-600: #5D2B7D;
+  
+  /* Brand - Verde Tomatillo */
+  --color-brand-lime: #DDE8BB;
+  --color-brand-lime-500: #C8D86D;
 
-  /* Neutrales */
+  /* Neutrales - Figma Spec */
   --color-surface: #ffffff;
-  --color-text: #3b3b3b;
-  --color-muted: #6b7280;
-  --color-border: #e5e7eb;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #6A6A6A;
+  --color-muted: #6A6A6A;
+  --color-border: #E0E0E0;
+  --color-background-alt: #F7F7F7;
   --color-shadow: 0 24px 80px rgba(35, 24, 54, 0.18);
+  
+  /* Dashboard - Alias para claridad */
+  --color-sidebar-bg: #DDE8BB;
+  --color-sidebar-border: #C8D86D;
+  --color-dashboard-bg: #F9FAFB;
 }
 
 @theme inline {
@@ -46,8 +56,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Degradado del login - Figma spec */
 .bg-login-gradient {
-  background: radial-gradient(120% 120% at 20% 20%, #f3f8ce 0%, #dfeea0 40%, #bcd459 55%, #5a2a78 100%);
+  background: linear-gradient(135deg, #DDE8BB 0%, #C8D86D 50%, #4B236A 100%);
 }
 
 .shadow-login-card {

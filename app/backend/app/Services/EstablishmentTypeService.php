@@ -13,8 +13,6 @@ class EstablishmentTypeService
 {
     /**
      * Get paginated establishment types
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
@@ -23,8 +21,7 @@ class EstablishmentTypeService
 
     /**
      * Store a new establishment type
-     * @param array $data
-     * @return EstablishmentType
+     *
      * @throws Throwable
      */
     public function store(array $data): EstablishmentType
@@ -36,9 +33,7 @@ class EstablishmentTypeService
 
     /**
      * Update an establishment type
-     * @param int $establishmentType_id
-     * @param array $data
-     * @return EstablishmentType
+     *
      * @throws Throwable
      */
     public function update(int $establishmentType_id, array $data): EstablishmentType
@@ -46,14 +41,14 @@ class EstablishmentTypeService
         return DB::transaction(function () use ($establishmentType_id, $data) {
             $establishmentType = EstablishmentType::findOrFail($establishmentType_id);
             $establishmentType->update($data);
+
             return $establishmentType->refresh();
         });
     }
 
     /**
      * Delete an establishment type
-     * @param int $establishmentType_id
-     * @return void
+     *
      * @throws Throwable
      */
     public function delete(int $establishmentType_id): void
@@ -66,8 +61,6 @@ class EstablishmentTypeService
 
     /**
      * Show an establishment type
-     * @param int $establishmentType_id
-     * @return EstablishmentType
      */
     public function show(int $establishmentType_id): EstablishmentType
     {

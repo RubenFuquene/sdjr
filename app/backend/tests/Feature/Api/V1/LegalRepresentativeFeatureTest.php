@@ -22,13 +22,13 @@ class LegalRepresentativeFeatureTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->create();
         $permissions = [
-            'legal_representatives.create',
-            'legal_representatives.view',
-            'legal_representatives.update',
-            'legal_representatives.delete',
+            'provider.legal_representatives.create',
+            'provider.legal_representatives.view',
+            'provider.legal_representatives.update',
+            'provider.legal_representatives.delete',
         ];
         foreach ($permissions as $perm) {
-            Permission::findOrCreate($perm);
+            Permission::findOrCreate($perm, 'sanctum');
         }
         $this->user->givePermissionTo($permissions);
     }
@@ -39,9 +39,9 @@ class LegalRepresentativeFeatureTest extends TestCase
         LegalRepresentative::factory()->count(2)->create();
         $response = $this->getJson('/api/v1/legal-representatives');
         $response->assertOk()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonStructure([
-                'success', 'data', 'meta'
+                'status', 'data', 'meta',
             ]);
     }
 
@@ -61,7 +61,7 @@ class LegalRepresentativeFeatureTest extends TestCase
         ];
         $response = $this->postJson('/api/v1/legal-representatives', $payload);
         $response->assertCreated()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonPath('data.name', 'Juan');
     }
 
@@ -69,9 +69,9 @@ class LegalRepresentativeFeatureTest extends TestCase
     {
         $this->actingAs($this->user);
         $legal = LegalRepresentative::factory()->create();
-        $response = $this->getJson('/api/v1/legal-representatives/' . $legal->id);
+        $response = $this->getJson('/api/v1/legal-representatives/'.$legal->id);
         $response->assertOk()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonPath('data.id', $legal->id);
     }
 
@@ -89,9 +89,9 @@ class LegalRepresentativeFeatureTest extends TestCase
             'phone' => '3109876543',
             'is_primary' => false,
         ];
-        $response = $this->putJson('/api/v1/legal-representatives/' . $legal->id, $payload);
+        $response = $this->putJson('/api/v1/legal-representatives/'.$legal->id, $payload);
         $response->assertOk()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonPath('data.name', 'Carlos');
     }
 
@@ -99,7 +99,7 @@ class LegalRepresentativeFeatureTest extends TestCase
     {
         $this->actingAs($this->user);
         $legal = LegalRepresentative::factory()->create();
-        $response = $this->deleteJson('/api/v1/legal-representatives/' . $legal->id);
+        $response = $this->deleteJson('/api/v1/legal-representatives/'.$legal->id);
         $response->assertNoContent();
         $this->assertSoftDeleted('legal_representatives', ['id' => $legal->id]);
     }

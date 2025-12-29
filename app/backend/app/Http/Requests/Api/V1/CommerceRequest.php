@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *     schema="CommerceRequest",
  *     required={"owner_user_id","department_id","city_id","neighborhood_id","name","tax_id","tax_id_type","address"},
+ *
  *     @OA\Property(property="owner_user_id", type="integer", example=1),
  *     @OA\Property(property="department_id", type="integer", example=1),
  *     @OA\Property(property="city_id", type="integer", example=1),
@@ -30,7 +31,8 @@ class CommerceRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'commerces.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'provider.commerces.'.($action === 'store' ? 'create' : 'update');
+
         return $this->user()?->can($permission) ?? false;
     }
 
@@ -52,6 +54,7 @@ class CommerceRequest extends FormRequest
             'is_active' => ['boolean'],
             'is_verified' => ['boolean'],
         ];
+
         return $rules;
     }
 }

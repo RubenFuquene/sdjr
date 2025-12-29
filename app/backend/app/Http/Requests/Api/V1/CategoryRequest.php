@@ -19,7 +19,8 @@ class CategoryRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'categories.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.categories.'.($action === 'store' ? 'create' : 'update');
+
         return $this->user()?->can($permission) ?? false;
     }
 

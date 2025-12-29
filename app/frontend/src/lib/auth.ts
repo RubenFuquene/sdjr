@@ -1,16 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import type { Role, SessionData } from "@/types/auth";
+import { getSessionFromServerCookies } from "@/lib/session";
 
-export type Role = "admin" | "provider" | "app";
+// Alias para compatibilidad interna
+type Session = SessionData;
 
-type Session = {
-  userId: string;
-  email: string;
-  role: Role;
-};
-
-const SESSION_COOKIE = "sdjr_session";
-const ROLE_COOKIE = "sdjr_role";
 const BYPASS_AUTH = process.env.NEXT_PUBLIC_BYPASS_AUTH === "true";
 
 const LOGIN_PATH_BY_ROLE: Record<Role, string> = {
@@ -19,31 +14,21 @@ const LOGIN_PATH_BY_ROLE: Record<Role, string> = {
   app: "/app/login",
 };
 
-// -------------------------------------------------------------
-// Dummies de sesión/rol (quitar al conectar backend real)
-//  - BYPASS_AUTH=true => siempre retorna sesión admin de prueba
-//  - Cookie sdjr_session presente => sesión válida con rol de cookie
-//  - Sin cookie => null (redirige a login)
-// -------------------------------------------------------------
-
 /**
- * Dev-only stub. Replace with a real call to `/api/me` when backend is ready.
- * Expected shape: { userId, email, role }
+ * Fetch user session - simplified version for current implementation
  */
 async function fetchSession(): Promise<Session | null> {
   if (BYPASS_AUTH) {
     return { userId: "demo", email: "demo@sumass.com", role: "admin" };
   }
 
-  // Next.js 14/React 19: cookies() es async; debemos await para evitar errores de sync dynamic API.
-  const cookieStore = await cookies();
-  const hasSession = cookieStore.has(SESSION_COOKIE);
-  if (!hasSession) return null;
-
-  // TODO: Reemplazar con decodificación real de token o fetch a `/api/me`.
-  const role = (cookieStore.get(ROLE_COOKIE)?.value as Role | undefined) ?? "admin";
-  const email = cookieStore.get("sdjr_email")?.value ?? "user@sumass.com";
-  return { userId: "unknown", email, role };
+  try {
+    const cookieStore = await cookies();
+    return await getSessionFromServerCookies(cookieStore);
+  } catch (error) {
+    console.error("Error fetching session:", error);
+    return null;
+  }
 }
 
 export async function getSession(): Promise<Session | null> {
@@ -67,8 +52,7 @@ export async function getSessionOrRedirect(requiredRole: Role, redirectTo?: stri
 function buildLoginUrl(role: Role, redirectTo?: string) {
   const loginPath = LOGIN_PATH_BY_ROLE[role];
   if (!redirectTo) return loginPath;
-
-  const url = new URL(loginPath, "http://localhost");
-  url.searchParams.set("redirectTo", redirectTo);
-  return `${url.pathname}?${url.searchParams.toString()}`;
+  
+  // Construcción relativa
+  return `${loginPath}?redirectTo=${encodeURIComponent(redirectTo)}`;
 }

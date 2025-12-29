@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Api\V1\LegalRepresentativeResource;
 
 /**
  * @OA\Schema(
  *     schema="CommerceResource",
  *     title="Commerce Resource",
  *     description="Commerce resource representation",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="owner_user_id", type="integer", example=1),
  *     @OA\Property(property="department_id", type="integer", example=1),
@@ -26,7 +26,7 @@ use App\Http\Resources\Api\V1\LegalRepresentativeResource;
  *     @OA\Property(property="phone", type="string", example="3001234567"),
  *     @OA\Property(property="email", type="string", example="info@comercial.com"),
  *     @OA\Property(property="is_active", type="boolean", example=true),
- *     @OA\Property(property="is_verified", type="boolean", example=false), 
+ *     @OA\Property(property="is_verified", type="boolean", example=false),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-12-15T12:34:56Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-12-15T12:34:56Z")
  * )
@@ -50,7 +50,7 @@ class CommerceResource extends JsonResource
             'phone' => $this->phone,
             'email' => $this->email,
             'is_active' => $this->is_active,
-            'is_verified' => $this->is_verified,            
+            'is_verified' => $this->is_verified,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

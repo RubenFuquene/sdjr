@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Traits\SanitizesTextAttributes;
 
 /**
  * @OA\Schema(
  *     schema="Category",
  *     title="Category",
  *     description="Category model",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Alimentos"),
  *     @OA\Property(property="icon", type="string", example="icon.png"),

@@ -10,7 +10,7 @@ class DepartmentIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('departments.index') ?? false;
+        return $this->user()?->can('admin.departments.index') ?? false;
     }
 
     public function rules(): array
@@ -23,7 +23,7 @@ class DepartmentIndexRequest extends FormRequest
 
     public function validatedPerPage(): int
     {
-        return (int)($this->input('per_page', 15));
+        return (int) ($this->input('per_page', 15));
     }
 
     public function validatedStatus(): string

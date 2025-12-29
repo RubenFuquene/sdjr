@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 
 export default function AdminError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -19,9 +20,12 @@ export default function AdminError({ error, reset }: { error: Error & { digest?:
           >
             Reintentar
           </button>
-          <a href="/" className="text-sm font-medium text-[var(--color-brand)] underline decoration-[var(--color-brand)] decoration-1 underline-offset-2">
+          <Link
+            href="/"
+            className="text-sm font-medium text-[var(--color-brand)] underline decoration-[var(--color-brand)] decoration-1 underline-offset-2"
+          >
             Ir al inicio
-          </a>
+          </Link>
         </div>
       </div>
     </div>

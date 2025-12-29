@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DepartmentRequest;
 use App\Http\Resources\Api\V1\DepartmentResource;
 use App\Services\DepartmentService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -19,6 +19,7 @@ use App\Traits\ApiResponseTrait;
 class DepartmentController extends Controller
 {
     use ApiResponseTrait;
+
     protected DepartmentService $departmentService;
 
     public function __construct(DepartmentService $departmentService)
@@ -36,11 +37,14 @@ class DepartmentController extends Controller
      *      summary="Get list of departments",
      *      description="Returns list of departments",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=401,
      *          description="Unauthenticated",
@@ -60,6 +64,7 @@ class DepartmentController extends Controller
             $status = $request->validatedStatus();
             $departments = $this->departmentService->getPaginated($perPage, $status);
             $resource = DepartmentResource::collection($departments);
+
             return $this->paginatedResponse($departments, $resource, 'Departments retrieved successfully');
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving departments', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -76,15 +81,20 @@ class DepartmentController extends Controller
      *      summary="Store new department",
      *      description="Returns department data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=400,
      *          description="Bad Request"
@@ -99,13 +109,13 @@ class DepartmentController extends Controller
      *      )
      * )
      *
-     * @param DepartmentRequest $request
      * @return DepartmentResource
      */
     public function store(DepartmentRequest $request): DepartmentResource|JsonResponse
     {
         try {
             $department = $this->departmentService->create($request->validated());
+
             return $this->successResponse(new DepartmentResource($department), 'Department created successfully', 201);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error creating department', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -122,20 +132,25 @@ class DepartmentController extends Controller
      *      summary="Get department information",
      *      description="Returns department data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          description="Department id",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(
      *              type="string"
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=400,
      *          description="Bad Request"
@@ -153,17 +168,15 @@ class DepartmentController extends Controller
      *          description="Resource Not Found"
      *      )
      * )
-     *
-     * @param string $id
-     * @return DepartmentResource|JsonResponse
      */
     public function show(string $id): DepartmentResource|JsonResponse
     {
         try {
             $department = $this->departmentService->find($id);
-            if (!$department) {
+            if (! $department) {
                 return $this->errorResponse('Department not found', 404);
             }
+
             return $this->successResponse(new DepartmentResource($department), 'Department retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving department', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -180,24 +193,31 @@ class DepartmentController extends Controller
      *      summary="Update existing department",
      *      description="Returns updated department data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          description="Department id",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(
      *              type="string"
      *          )
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
      *       ),
+     *
      *      @OA\Response(
      *          response=400,
      *          description="Bad Request"
@@ -215,19 +235,16 @@ class DepartmentController extends Controller
      *          description="Resource Not Found"
      *      )
      * )
-     *
-     * @param DepartmentRequest $request
-     * @param string $id
-     * @return DepartmentResource|JsonResponse
      */
     public function update(DepartmentRequest $request, string $id): DepartmentResource|JsonResponse
     {
         try {
             $department = $this->departmentService->find($id);
-            if (!$department) {
+            if (! $department) {
                 return $this->errorResponse('Department not found', 404);
             }
             $updatedDepartment = $this->departmentService->update($department, $request->validated());
+
             return $this->successResponse(new DepartmentResource($updatedDepartment), 'Department updated successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error updating department', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -244,22 +261,28 @@ class DepartmentController extends Controller
      *      summary="Delete existing department",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          description="Department id",
      *          required=true,
      *          in="path",
+     *
      *          @OA\Schema(
      *              type="string"
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(property="message", type="string", example="Department deleted successfully")
      *          )
      *       ),
+     *
      *      @OA\Response(
      *          response=401,
      *          description="Unauthenticated",
@@ -273,18 +296,16 @@ class DepartmentController extends Controller
      *          description="Resource Not Found"
      *      )
      * )
-     *
-     * @param string $id
-     * @return JsonResponse
      */
     public function destroy(string $id): JsonResponse
     {
         try {
             $department = $this->departmentService->find($id);
-            if (!$department) {
+            if (! $department) {
                 return $this->errorResponse('Department not found', 404);
             }
             $this->departmentService->delete($department);
+
             return $this->noContentResponse();
         } catch (\Throwable $e) {
             return $this->errorResponse('Error deleting department', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);

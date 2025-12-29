@@ -8,8 +8,8 @@ use App\Models\EstablishmentType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class EstablishmentTypeTest extends TestCase
 {
@@ -18,17 +18,17 @@ class EstablishmentTypeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Crear permisos necesarios
-        Permission::findOrCreate('establishment_types.create');
-        Permission::findOrCreate('establishment_types.update');
-        Permission::findOrCreate('establishment_types.view');
-        Permission::findOrCreate('establishment_types.delete');
+        // Crear permisos necesarios con guard sanctum
+        Permission::findOrCreate('provider.establishment_types.create', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.update', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.view', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.delete', 'sanctum');
     }
 
     public function test_user_can_create_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.create');
+        $user->givePermissionTo('provider.establishment_types.create');
         $this->actingAs($user, 'sanctum');
 
         $payload = EstablishmentType::factory()->make()->toArray();
@@ -40,11 +40,11 @@ class EstablishmentTypeTest extends TestCase
     public function test_user_can_view_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.view');
+        $user->givePermissionTo('provider.establishment_types.view');
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
-        $response = $this->getJson('/api/v1/establishment-types/' . $type->id);
+        $response = $this->getJson('/api/v1/establishment-types/'.$type->id);
         $response->assertOk();
         $response->assertJsonPath('data.id', $type->id);
     }
@@ -52,12 +52,12 @@ class EstablishmentTypeTest extends TestCase
     public function test_user_can_update_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.update');
+        $user->givePermissionTo('provider.establishment_types.update');
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
         $payload = ['name' => 'Nuevo Tipo', 'code' => 'NEWCODE'];
-        $response = $this->putJson('/api/v1/establishment-types/' . $type->id, $payload);
+        $response = $this->putJson('/api/v1/establishment-types/'.$type->id, $payload);
         $response->assertOk();
         $response->assertJsonPath('data.name', 'Nuevo tipo');
     }
@@ -65,11 +65,11 @@ class EstablishmentTypeTest extends TestCase
     public function test_user_can_delete_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('establishment_types.delete');
+        $user->givePermissionTo('provider.establishment_types.delete');
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
-        $response = $this->deleteJson('/api/v1/establishment-types/' . $type->id);
+        $response = $this->deleteJson('/api/v1/establishment-types/'.$type->id);
         $response->assertNoContent();
         $this->assertSoftDeleted('establishment_types', ['id' => $type->id]);
     }

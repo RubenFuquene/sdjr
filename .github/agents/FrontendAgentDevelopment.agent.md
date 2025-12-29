@@ -21,6 +21,106 @@ sdjr/
 - Backend: REST API con Laravel Eloquent
 - Infra: Docker local + Vercel producción
 
+## 🎨 Referencia de Diseño (Figma)
+
+**Ubicación del código exportado de Figma**: `design-reference/`
+
+### Archivos de Referencia Clave
+```
+design-reference/
+├── src/
+│   ├── COLORES_ACTUALIZADOS.md       # Paleta oficial de colores Sumass
+│   ├── components/
+│   │   └── LoginAdmin.tsx            # Referencia de login
+│   └── assets/
+│       └── *.png                     # Logos y assets
+```
+
+### Paleta de Colores Oficial (Figma)
+
+**Colores Principales:**
+- `#4B236A` - Púrpura Berenjena (primary)
+- `#5D2B7D` - Púrpura hover
+- `#DDE8BB` - Verde Tomatillo Claro (backgrounds)
+- `#C8D86D` - Verde Tomatillo (borders, hover)
+
+**Colores de Texto:**
+- `#1A1A1A` - Texto principal
+- `#6A6A6A` - Texto secundario/muted
+
+**Colores UI:**
+- `#E0E0E0` - Borders
+- `#F7F7F7` - Backgrounds alternos
+- `#FFFFFF` - Cards y surfaces
+
+### Especificaciones de Componentes (Figma)
+
+**Botones Primarios:**
+- Altura: `h-[52px]`
+- Background: `bg-[#4B236A]`
+- Hover: `hover:bg-[#5D2B7D]`
+- Radius: `rounded-xl`
+- Sombra: `shadow-lg hover:shadow-xl`
+
+**Inputs:**
+- Altura: `h-[50px]`
+- Radius: `rounded-[14px]`
+- Border: `border-[#E0E0E0]`
+- Focus ring: `ring-[#4B236A]`
+
+**Cards:**
+- Radius: `rounded-[18px]`
+- Padding: `p-8` (32px en desktop)
+- Sombra: `shadow-2xl` (login), `shadow-sm` (general)
+
+**Degradado Login:**
+```css
+bg-gradient-to-br from-[#DDE8BB] via-[#C8D86D] to-[#4B236A]
+```
+
+### Workflow de Implementación desde Figma
+
+1. **Consultar siempre** `design-reference/src/COLORES_ACTUALIZADOS.md` antes de aplicar colores
+2. **Verificar componentes** en `design-reference/src/components/` para especificaciones exactas
+3. **Copiar assets** desde `design-reference/src/assets/` a `app/frontend/public/brand/`
+4. **Aplicar medidas exactas**: heights, radius, padding según especificaciones
+5. **Mantener consistencia**: usar los mismos valores en toda la aplicación
+
+### Reglas de Diseño
+
+- ❌ NO usar Tailwind defaults (`rounded-lg`, `h-12`) si Figma especifica otro valor
+- ✅ Usar valores exactos de Figma (`rounded-[18px]`, `h-[52px]`)
+- ✅ Verificar `COLORES_ACTUALIZADOS.md` para cada color
+- ✅ Mantener consistencia en sombras, transiciones y spacing
+
+## 🐳 CRÍTICO: Entorno de Desarrollo Docker
+
+**TODOS los servicios se ejecutan en Docker Compose en desarrollo.**
+
+### Servicios Docker Activos:
+```
+frontend  → http://localhost:3000 (Next.js container)
+backend   → http://localhost:8000 (Laravel container)
+db        → localhost:3306 (MySQL container)
+redis     → localhost:6379 (Redis container)
+```
+
+### Reglas Obligatorias:
+- ✅ **SIEMPRE** usar containers para desarrollo
+- ❌ **NUNCA** ejecutar `npm run dev` directamente en host
+- ❌ **NUNCA** ejecutar `php artisan serve` fuera de Docker
+- ✅ Todos los comandos desde `app/infra/` con docker-compose
+- ✅ Frontend hot-reload funciona dentro del container
+
+### Comandos Esenciales:
+```bash
+# Desde app/infra/
+docker-compose up -d           # Levantar todos los servicios
+docker-compose logs frontend   # Ver logs del frontend
+docker-compose exec frontend sh  # Shell dentro del container frontend
+docker-compose down            # Detener todos los servicios
+```
+
 ## Contexto 
 - Next.js 16 + React 19 (app router limpio).
 - Tailwind v4 sin `tailwind.config` (usa `@import "tailwindcss"` y `@theme inline` en `globals.css`).
@@ -186,25 +286,58 @@ El agente debe:
 
 ## Workflows Críticos
 
-### Desarrollo Local
+### 🐳 Desarrollo Local (DOCKER OBLIGATORIO)
+
+**Todos los comandos desde `app/infra/`:**
+
 ```bash
-# Desde app/infra/
-./scripts/dev.sh          # Levantar todos los servicios
-docker-compose logs -f    # Ver logs
-docker-compose down       # Detener servicios
+# Levantar todos los servicios (frontend, backend, db, redis)
+docker-compose up -d
+
+# Ver logs en tiempo real
+docker-compose logs -f frontend    # Solo frontend
+docker-compose logs -f backend     # Solo backend
+docker-compose logs -f             # Todos los servicios
+
+# Detener servicios
+docker-compose down
+
+# Reiniciar un servicio específico
+docker-compose restart frontend
+
+# Shell dentro del container frontend
+docker-compose exec frontend sh
+
+# Ve🐳 Docker-ONLY en Desarrollo**: 
+  - ✅ SIEMPRE usar `docker-compose` desde `app/infra/`
+  - ❌ NUNCA ejecutar `npm`/`php` directamente en host
+  - ✅ Todos los servicios corren en containers
+  - ✅ Hot reload funciona dentro de containers
+  
+docker-compose ps
 ```
 
-### Desarrollo Frontend (desde app/frontend/)
+### Desarrollo Frontend (DENTRO del container)
+
+**El frontend ya está corriendo en Docker con hot-reload:**
+- Container: `http://localhost:3000`
+- Hot reload automático al guardar archivos
+- NO ejecutar `npm run dev` en el host
+
+**Para comandos dentro del container:**
 ```bash
-npm run dev    # Servidor desarrollo
-npm run lint   # ESLint
-npm run build  # Build producción
+# Desde app/infra/
+docker-compose exec frontend npm run lint        # Linter
+docker-compose exec frontend npm run build       # Build producción
+docker-compose exec frontend npm run type-check  # TypeScript check
+docker-compose exec frontend npm install <pkg>   # Instalar dependencia
 ```
 
 ### Integración con Backend
-- API calls directos a `http://localhost:8000`
+- Backend en Docker: `http://localhost:8000`
+- Frontend accede al backend vía `NEXT_PUBLIC_API_URL`
 - Usar Server Components para data fetching
-- Manejar errores de API apropiadamente
+- CORS configurado entre containers
 
 ## Convenciones del Proyecto
 
@@ -251,12 +384,16 @@ Siempre responder con:
 - **MVP First**: Funcionalidad core, simplicidad sobre complejidad
 - **Performance**: Server Components por defecto
 - **Accessibility**: Componentes accesibles desde el inicio
-- **SEO**: Server Components para contenido público
-- **Scalability**: Arquitectura modular
-
-## Riesgos a Evitar
-
+- **🚨 CRÍTICO: Ejecutar comandos fuera de Docker**: 
+  - ❌ NUNCA `npm run dev` en host
+  - ❌ NUNCA `npm install` directo en host
+  - ✅ SIEMPRE via `docker-compose exec frontend`
+  
 - **Over-engineering**: No micro-frontends en MVP
+- **Client-side rendering excesivo**: Preferir Server Components
+- **Estado global innecesario**: Props/context antes que stores
+- **Duplicación**: Crear componentes compartidos
+- **Rutas no protegidas**: Validar permisos en middleware
 - **Client-side rendering excesivo**: Preferir Server Components
 - **Estado global innecesario**: Props/context antes que stores
 - **Duplicación**: Crear componentes compartidos

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Country;
 use App\Constants\Constant;
+use App\Models\Country;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

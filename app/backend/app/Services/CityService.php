@@ -10,8 +10,6 @@ class CityService
 {
     /**
      * Get all cities.
-     *
-     * @return Collection
      */
     public function getAll(): Collection
     {
@@ -20,9 +18,6 @@ class CityService
 
     /**
      * Get paginated cities.
-     *
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
     {
@@ -30,14 +25,12 @@ class CityService
         if ($status !== 'all') {
             $query->where('status', $status);
         }
+
         return $query->paginate($perPage);
     }
 
     /**
      * Create a new city.
-     *
-     * @param array $data
-     * @return City
      */
     public function create(array $data): City
     {
@@ -46,9 +39,6 @@ class CityService
 
     /**
      * Find a city by ID.
-     *
-     * @param string $id
-     * @return City|null
      */
     public function find(string $id): ?City
     {
@@ -57,22 +47,16 @@ class CityService
 
     /**
      * Update a city.
-     *
-     * @param City $city
-     * @param array $data
-     * @return City
      */
     public function update(City $city, array $data): City
     {
         $city->update($data);
+
         return $city;
     }
 
     /**
      * Delete a city.
-     *
-     * @param City $city
-     * @return bool
      */
     public function delete(City $city): bool
     {

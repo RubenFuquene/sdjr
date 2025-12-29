@@ -19,7 +19,7 @@ class CommerceDocumentFactory extends Factory
             'verified_by_id' => User::factory(),
             'uploaded_by_id' => User::factory(),
             'document_type' => $this->faker->randomElement(['ID_CARD', 'LICENSE', 'OTHER']),
-            'file_path' => '/tmp/' . $this->faker->uuid() . '.pdf',
+            'file_path' => '/tmp/'.$this->faker->uuid().'.pdf',
             'mime_type' => 'application/pdf',
             'verified' => $this->faker->boolean(20),
             'uploaded_at' => now(),

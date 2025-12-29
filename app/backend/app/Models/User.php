@@ -3,22 +3,26 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, SanitizesTextAttributes, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SanitizesTextAttributes, SoftDeletes;
 
     // Sanctum guard name
     protected string $guard_name = 'sanctum';
-    protected function getDefaultGuardName(): string { return $this->guard_name; }
+
+    protected function getDefaultGuardName(): string
+    {
+        return $this->guard_name;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -57,6 +61,7 @@ class User extends Authenticatable
             'phone' => 'string',
         ];
     }
+
     /**
      * Sanitize last_name before saving.
      */
@@ -88,5 +93,4 @@ class User extends Authenticatable
     {
         $this->attributes['name'] = $this->capitalizeText($value);
     }
-    
 }
