@@ -61,6 +61,6 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 ## Ejecución
 
 - Ejecuta los contenedores de Docker `docker compose up`
-- Ingresa al contender Backend-infra-1 `docker exect -it backend-infra-1 bash`
+- Ingresa al contender Backend-infra-1 `docker exec -it backend-infra-1 bash`
 - Ejecuta las migraciones, seeders y tests `php artisan migrate:fresh --seed && php artisan test`
-- Renueva la documentación `L5-swagger:generate`
+- Renueva la documentación `php artisan L5-swagger:generate`

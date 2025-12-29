@@ -134,7 +134,7 @@ ensure_sqlite_file_if_needed() {
 
 run_migrations() {
     echo "Running migrations..."
-    php artisan migrate --force --no-interaction
+    php artisan migrate:fresh --force --no-interaction
 }
 
 start_server() {

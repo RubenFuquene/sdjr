@@ -657,6 +657,299 @@
                 ]
             }
         },
+        "/api/v1/commerces/basic": {
+            "post": {
+                "tags": [
+                    "CommercesBasic"
+                ],
+                "summary": "Create commerce with legal representatives and documents",
+                "operationId": "44a98aa10d4e910ab9be11d259108976",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "commerce": {
+                                        "$ref": "#/components/schemas/CommerceRequest"
+                                    },
+                                    "legal_representatives": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/LegalRepresentativeRequest"
+                                        }
+                                    },
+                                    "commerce_documents": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/CommerceDocument"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceBasicDataResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerces": {
+            "get": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "Get list of commerces",
+                "description": "Returns paginated list of commerces.",
+                "operationId": "getCommercesList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CommerceResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "Create a new commerce",
+                "description": "Creates a new commerce.",
+                "operationId": "storeCommerce",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommerceRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Commerce created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerces/{id}": {
+            "get": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "Get a commerce",
+                "description": "Returns a single commerce.",
+                "operationId": "showCommerce",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "Update a commerce",
+                "description": "Updates a commerce.",
+                "operationId": "updateCommerce",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommerceRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Commerce updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "Delete a commerce",
+                "description": "Deletes a commerce (soft delete).",
+                "operationId": "deleteCommerce",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Commerce deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/countries": {
             "get": {
                 "tags": [
@@ -1147,6 +1440,600 @@
                     },
                     "404": {
                         "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/establishment-types": {
+            "get": {
+                "tags": [
+                    "EstablishmentTypes"
+                ],
+                "summary": "Get list of establishment types",
+                "description": "Returns paginated list of establishment types.",
+                "operationId": "getEstablishmentTypesList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EstablishmentTypeResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "EstablishmentTypes"
+                ],
+                "summary": "Create a new establishment type",
+                "description": "Creates a new establishment type.",
+                "operationId": "storeEstablishmentType",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EstablishmentTypeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Establishment type created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EstablishmentTypeResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/establishment-types/{id}": {
+            "get": {
+                "tags": [
+                    "EstablishmentTypes"
+                ],
+                "summary": "Get an establishment type",
+                "description": "Returns a single establishment type.",
+                "operationId": "showEstablishmentType",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EstablishmentTypeResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "EstablishmentTypes"
+                ],
+                "summary": "Update an establishment type",
+                "description": "Updates an establishment type.",
+                "operationId": "updateEstablishmentType",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EstablishmentTypeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Establishment type updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EstablishmentTypeResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "EstablishmentTypes"
+                ],
+                "summary": "Delete an establishment type",
+                "description": "Deletes an establishment type (soft delete).",
+                "operationId": "deleteEstablishmentType",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Establishment type deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/legal-representatives": {
+            "get": {
+                "tags": [
+                    "LegalRepresentatives"
+                ],
+                "summary": "List legal representatives",
+                "operationId": "db7f393416346227befffceb334b1d04",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LegalRepresentativeResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "LegalRepresentatives"
+                ],
+                "summary": "Create legal representative",
+                "operationId": "f4a13c104a2e5b68381998ec0f3bf609",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LegalRepresentativeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LegalRepresentativeResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/legal-representatives/{id}": {
+            "get": {
+                "tags": [
+                    "LegalRepresentatives"
+                ],
+                "summary": "Show legal representative",
+                "operationId": "13212e73f04c88ae31b26dcf21dae126",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LegalRepresentativeResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "LegalRepresentatives"
+                ],
+                "summary": "Update legal representative",
+                "operationId": "7ba14baa7ce529b2c12e960d586c80b2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LegalRepresentativeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LegalRepresentativeResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "LegalRepresentatives"
+                ],
+                "summary": "Delete legal representative",
+                "operationId": "c223431df3818e63f44c7f96c6bcf609",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout current authenticated user",
+                "description": "Revokes the current user's token and logs out.",
+                "operationId": "logoutUser",
+                "responses": {
+                    "200": {
+                        "description": "Successful logout",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully logged out"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get current authenticated user info",
+                "description": "Returns id, name, email, roles and permissions of the authenticated user.",
+                "operationId": "getMe",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "roles": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "permissions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/permissions": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get current authenticated user permissions and roles",
+                "description": "Returns permissions and roles of the authenticated user.",
+                "operationId": "getMePermissions",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "roles": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "permissions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -2016,6 +2903,100 @@
                 },
                 "type": "object"
             },
+            "CommerceBasicDataRequest": {
+                "properties": {
+                    "commerce": {
+                        "$ref": "#/components/schemas/CommerceRequest"
+                    },
+                    "legal_representatives": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LegalRepresentativeRequest"
+                        }
+                    },
+                    "commerce_documents": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommerceDocument"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "CommerceRequest": {
+                "required": [
+                    "owner_user_id",
+                    "department_id",
+                    "city_id",
+                    "neighborhood_id",
+                    "name",
+                    "tax_id",
+                    "tax_id_type",
+                    "address"
+                ],
+                "properties": {
+                    "owner_user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "city_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "neighborhood_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Comercial S.A.S"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "example": "Comercio de tecnología"
+                    },
+                    "tax_id": {
+                        "type": "string",
+                        "maxLength": 30,
+                        "example": "900123456"
+                    },
+                    "tax_id_type": {
+                        "type": "string",
+                        "maxLength": 10,
+                        "example": "NIT"
+                    },
+                    "address": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Calle 123 #45-67"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "3001234567"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "info@comercial.com"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "is_verified": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
             "CountryRequest": {
                 "title": "Country Request",
                 "description": "Country request body data",
@@ -2096,6 +3077,80 @@
                             "type": "mixed"
                         },
                         "example": "DEP001"
+                    }
+                },
+                "type": "object"
+            },
+            "EstablishmentTypeRequest": {
+                "required": [
+                    "name",
+                    "code"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Restaurante"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "REST"
+                    }
+                },
+                "type": "object"
+            },
+            "LegalRepresentativeRequest": {
+                "required": [
+                    "commerce_id",
+                    "name",
+                    "last_name",
+                    "document",
+                    "document_type"
+                ],
+                "properties": {
+                    "commerce_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Juan"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Pérez"
+                    },
+                    "document": {
+                        "type": "string",
+                        "maxLength": 30,
+                        "example": "1234567890"
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "enum": [
+                            "CC",
+                            "CE",
+                            "NIT",
+                            "PAS"
+                        ],
+                        "example": "CC"
+                    },
+                    "email": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "juan.perez@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "3001234567"
+                    },
+                    "is_primary": {
+                        "type": "boolean",
+                        "example": true
                     }
                 },
                 "type": "object"
@@ -2479,6 +3534,134 @@
                     "name": "CityResource"
                 }
             },
+            "CommerceBasicDataResource": {
+                "properties": {
+                    "commerce": {
+                        "$ref": "#/components/schemas/CommerceResource"
+                    },
+                    "legal_representatives": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LegalRepresentativeResource"
+                        }
+                    },
+                    "commerce_documents": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommerceDocumentResource"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "CommerceDocumentResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "example": "ID_CARD"
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "/uploads/doc.pdf"
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "example": "application/pdf"
+                    },
+                    "verified": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "uploaded_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "CommerceResource": {
+                "title": "Commerce Resource",
+                "description": "Commerce resource representation",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "owner_user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "city_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "neighborhood_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "legal_representatives": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LegalRepresentativeResource"
+                        }
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Comercial S.A.S"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Comercio de tecnología"
+                    },
+                    "tax_id": {
+                        "type": "string",
+                        "example": "900123456"
+                    },
+                    "tax_id_type": {
+                        "type": "string",
+                        "example": "NIT"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "Calle 123 #45-67"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "3001234567"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "info@comercial.com"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "is_verified": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
             "CountryResource": {
                 "title": "Country Resource",
                 "description": "Country resource representation",
@@ -2592,27 +3775,80 @@
                     "name": "DepartmentResource"
                 }
             },
-            "NeighborhoodResource": {
+            "EstablishmentTypeResource": {
+                "title": "EstablishmentType Resource",
+                "description": "EstablishmentType resource representation",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "example": 1
                     },
-                    "city_id": {
+                    "name": {
+                        "type": "string",
+                        "example": "Restaurante"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "REST"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
+            "LegalRepresentativeResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_id": {
                         "type": "integer",
                         "example": 1
                     },
                     "name": {
                         "type": "string",
-                        "example": "Chapinero"
+                        "example": "Juan"
                     },
-                    "code": {
+                    "last_name": {
                         "type": "string",
-                        "example": "NB0001"
+                        "example": "Pérez"
+                    },
+                    "document": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "example": "CC"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "juan.perez@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "3001234567"
+                    },
+                    "is_primary": {
+                        "type": "boolean",
+                        "example": true
                     },
                     "status": {
                         "type": "string",
-                        "example": "A"
+                        "example": "1"
                     },
                     "created_at": {
                         "type": "string",
@@ -2621,9 +3857,78 @@
                     "updated_at": {
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "commerce": {
+                        "$ref": "#/components/schemas/CommerceResource"
                     }
                 },
                 "type": "object"
+            },
+            "NeighborhoodResource": {
+                "title": "Neighborhood Resource",
+                "description": "Neighborhood resource representation",
+                "properties": {
+                    "id": {
+                        "title": "id",
+                        "description": "Neighborhood ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "city_id": {
+                        "title": "city_id",
+                        "description": "City ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "Neighborhood name",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "Chapinero"
+                    },
+                    "status": {
+                        "title": "status",
+                        "description": "Neighborhood status",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "A"
+                    },
+                    "city": {
+                        "$ref": "#/components/schemas/CityResource"
+                    },
+                    "created_at": {
+                        "title": "created_at",
+                        "description": "Created at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "title": "updated_at",
+                        "description": "Updated at timestamp",
+                        "type": "array",
+                        "items": {
+                            "type": "mixed"
+                        },
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "NeighborhoodResource"
+                }
             },
             "RoleResource": {
                 "title": "Role Resource",
@@ -2792,6 +4097,236 @@
                     }
                 },
                 "type": "object"
+            },
+            "Commerce": {
+                "title": "Commerce",
+                "description": "Commerce model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "owner_user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "city_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "neighborhood_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Comercial S.A.S"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Comercio de tecnología"
+                    },
+                    "tax_id": {
+                        "type": "string",
+                        "example": "900123456"
+                    },
+                    "tax_id_type": {
+                        "type": "string",
+                        "example": "NIT"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "Calle 123 #45-67"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "3001234567"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "info@comercial.com"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "is_verified": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null
+                    }
+                },
+                "type": "object"
+            },
+            "CommerceDocument": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "verified_by_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "uploaded_by_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "example": "ID_CARD"
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "/uploads/doc.pdf"
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "example": "application/pdf"
+                    },
+                    "verified": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "uploaded_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "EstablishmentType": {
+                "title": "EstablishmentType",
+                "description": "Establishment type model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Restaurante"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "REST"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null
+                    }
+                },
+                "type": "object"
+            },
+            "LegalRepresentative": {
+                "title": "LegalRepresentative",
+                "description": "Legal representative model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Juan"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Pérez"
+                    },
+                    "document": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "enum": [
+                            "CC",
+                            "CE",
+                            "NIT",
+                            "PAS"
+                        ],
+                        "example": "CC"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "juan.perez@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "3001234567"
+                    },
+                    "is_primary": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-15T12:34:56Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -2817,12 +4352,32 @@
             "description": "API Endpoints of Cities"
         },
         {
+            "name": "CommercesBasic",
+            "description": "Endpoints to create commerce with nested basic data"
+        },
+        {
+            "name": "Commerces",
+            "description": "API Endpoints of Commerces"
+        },
+        {
             "name": "Countries",
             "description": "API Endpoints of Countries"
         },
         {
             "name": "Departments",
             "description": "API Endpoints of Departments"
+        },
+        {
+            "name": "EstablishmentTypes",
+            "description": "API Endpoints of Establishment Types"
+        },
+        {
+            "name": "LegalRepresentatives",
+            "description": "API Endpoints for Legal Representatives"
+        },
+        {
+            "name": "Neighborhoods",
+            "description": "API Endpoints of Neighborhoods"
         },
         {
             "name": "Roles",
@@ -2841,8 +4396,8 @@
             "description": "AuditLogs"
         },
         {
-            "name": "Neighborhoods",
-            "description": "Neighborhoods"
+            "name": "Auth",
+            "description": "Auth"
         }
     ]
 }
