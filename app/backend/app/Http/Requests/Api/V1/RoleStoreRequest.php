@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Schema(
@@ -37,11 +38,19 @@ class RoleStoreRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'name' => ['required', 'string', 'max:50', 'unique:roles,name'],
+        $rules = [
             'description' => ['required', 'string', 'max:255'],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string', 'exists:permissions,name'],
         ];
+
+        // Para actualizaciones, excluir el registro actual de la validación de unicidad
+        if ($this->isMethod('put') || $this->isMethod('patch')) {
+            $rules['name'] = ['required', 'string', 'max:50', Rule::unique('roles', 'name')->ignore($this->route('id'))];
+        } else {
+            $rules['name'] = ['required', 'string', 'max:50', 'unique:roles,name'];
+        }
+
+        return $rules;
     }
 }

@@ -28,10 +28,10 @@ function mapRoleToPerfil(role: RoleFromAPI): Perfil {
     descripcion: role.description,
     permisosAdmin: permissionsEntries
       .filter(([key]) => key.startsWith("admin."))
-      .map(([, value]) => value),
+      .map(([key, value]) => ({ name: key, description: value })),
     permisosProveedor: permissionsEntries
       .filter(([key]) => key.startsWith("provider."))
-      .map(([, value]) => value),
+      .map(([key, value]) => ({ name: key, description: value })),
     usuarios: role.users_count,
     activo: true, // Backend no envía este campo, asumimos true
   };
