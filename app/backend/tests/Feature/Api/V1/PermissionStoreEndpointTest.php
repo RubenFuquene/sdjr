@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class PermissionStoreEndpointTest extends TestCase
 {
@@ -21,16 +21,16 @@ class PermissionStoreEndpointTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo('admin.permissions.create');
         Sanctum::actingAs($user);
-        
+
         $payload = [
             'name' => 'test.permission',
-            'description' => 'Permiso de prueba'
+            'description' => 'Permiso de prueba',
         ];
         $response = $this->postJson('/api/v1/permissions', $payload);
         $response->assertCreated()
             ->assertJsonFragment([
                 'name' => 'test.permission',
-                'description' => 'Permiso de prueba'
+                'description' => 'Permiso de prueba',
             ]);
     }
 
@@ -39,7 +39,7 @@ class PermissionStoreEndpointTest extends TestCase
     {
         $payload = [
             'name' => 'test.permission',
-            'description' => 'Permiso de prueba'
+            'description' => 'Permiso de prueba',
         ];
         $response = $this->postJson('/api/v1/permissions', $payload);
         $response->assertUnauthorized();

@@ -31,6 +31,7 @@ class RoleStoreRequest extends FormRequest
         } elseif ($this->isMethod('put') || $this->isMethod('patch')) {
             return $this->user()?->can('admin.roles.update') ?? false;
         }
+
         return false;
     }
 

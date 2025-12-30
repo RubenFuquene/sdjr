@@ -22,6 +22,17 @@ bootstrap_env_file() {
     fi
 }
 
+get_app_environment() {
+    # Try environment variable first, then .env file
+    if [ ! -z "$APP_ENV" ]; then
+        echo "$APP_ENV"
+    elif [ -f "$ENV_FILE" ]; then
+        grep "^APP_ENV=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '"'\''' || echo "local"
+    else
+        echo "local"
+    fi
+}
+
 configure_database_from_url() {
     local url="$1"
     [ -z "$url" ] && return 1
@@ -155,6 +166,16 @@ run_migrations() {
     fi
 }
 
+run_seeders() {
+    # Only run seeders if explicitly enabled
+    if [ "${ENABLE_SEEDING:-false}" = "true" ]; then
+        echo "Running database seeders..."
+        php artisan db:seed --force --no-interaction
+    else
+        echo "Seeding disabled (set ENABLE_SEEDING=true to enable)"
+    fi
+}
+
 start_server() {
     local port=${PORT:-8000}
     echo "Starting Laravel server on 0.0.0.0:$port..."
@@ -180,6 +201,7 @@ main() {
     ensure_sqlite_file_if_needed
     wait_for_database
     run_migrations
+    run_seeders
     start_server
 }
 

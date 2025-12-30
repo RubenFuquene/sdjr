@@ -23,7 +23,7 @@ class LogoutEndpointTest extends TestCase
 
         $response->assertOk()
             ->assertJson([
-                'message' => 'Successfully logged out'
+                'message' => 'Successfully logged out',
             ]);
     }
 

@@ -125,7 +125,7 @@ class Commerce extends Model
     /**
      * Set and sanitize the name attribute.
      *
-     * @param string|null $value
+     * @param  string|null  $value
      * @return void
      */
     public function setNameAttribute($value)
@@ -136,7 +136,7 @@ class Commerce extends Model
     /**
      * Set and sanitize the description attribute.
      *
-     * @param string|null $value
+     * @param  string|null  $value
      * @return void
      */
     public function setDescriptionAttribute($value)
@@ -147,7 +147,7 @@ class Commerce extends Model
     /**
      * Set and sanitize the address attribute.
      *
-     * @param string|null $value
+     * @param  string|null  $value
      * @return void
      */
     public function setAddressAttribute($value)
@@ -158,7 +158,7 @@ class Commerce extends Model
     /**
      * Set and sanitize the email attribute.
      *
-     * @param string|null $value
+     * @param  string|null  $value
      * @return void
      */
     public function setEmailAttribute($value)

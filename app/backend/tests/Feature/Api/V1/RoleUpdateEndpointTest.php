@@ -27,9 +27,9 @@ class RoleUpdateEndpointTest extends TestCase
         $payload = [
             'name' => 'editor-updated',
             'description' => 'Updated description',
-            'permissions' => []
+            'permissions' => [],
         ];
-        $response = $this->putJson('/api/v1/roles/' . $role->id, $payload);
+        $response = $this->putJson('/api/v1/roles/'.$role->id, $payload);
         $response->assertOk()
             ->assertJsonFragment([
                 'name' => 'editor-updated',
@@ -51,7 +51,7 @@ class RoleUpdateEndpointTest extends TestCase
         $response = $this->putJson('/api/v1/roles/9999', [
             'name' => 'notfound',
             'description' => 'notfound',
-            'permissions' => []
+            'permissions' => [],
         ]);
         $response->assertStatus(404)
             ->assertJsonFragment([
