@@ -12,13 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Global middleware
+        // Global middleware - CORS debe estar primero
         $middleware->use([
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
 
         // API middleware group
         $middleware->group('api', [
+            \Illuminate\Http\Middleware\HandleCors::class,
             \App\Http\Middleware\AuditMiddleware::class,
         ]);
     })
