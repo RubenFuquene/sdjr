@@ -133,8 +133,17 @@ ensure_sqlite_file_if_needed() {
 }
 
 run_migrations() {
-    echo "Running migrations..."
-    php artisan migrate --force --no-interaction
+    # Determine application environment, preferring the current environment
+    # variable and falling back to the value in the .env file if needed.
+    local app_env="${APP_ENV:-$(grep '^APP_ENV=' "$ENV_FILE" | cut -d '=' -f2)}"
+
+    if [ "$app_env" = "production" ]; then
+        echo "Production environment detected, running non-destructive migrations..."
+        php artisan migrate --force --no-interaction
+    else
+        echo "Non-production environment detected, running fresh migrations with seed..."
+        php artisan migrate:fresh --force --no-interaction
+    fi
 }
 
 start_server() {
