@@ -91,6 +91,14 @@ determine_wait_requirement() {
     fi
 }
 
+get_app_environment() {
+    # Get APP_ENV from environment variable or .env file
+    # Handles quoted values and whitespace
+    local env_value="${APP_ENV:-$(grep '^APP_ENV=' "$ENV_FILE" 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs)}"
+    # Convert to lowercase for case-insensitive comparison
+    echo "$env_value" | tr '[:upper:]' '[:lower:]'
+}
+
 wait_for_database() {
     if [ "$DB_WAIT_REQUIRED" -ne 1 ]; then
         return
@@ -133,8 +141,18 @@ ensure_sqlite_file_if_needed() {
 }
 
 run_migrations() {
-    echo "Running migrations..."
-    php artisan migrate --force --no-interaction
+    # Determine application environment, preferring the current environment
+    # variable and falling back to the value in the .env file if needed.
+    local app_env=$(get_app_environment)
+
+    # Support common production environment names (production, prod)
+    if [[ "$app_env" == "production" || "$app_env" == "prod" ]]; then
+        echo "Production environment detected, running non-destructive migrations..."
+        php artisan migrate --force --no-interaction
+    else
+        echo "Non-production environment detected, running fresh migrations..."
+        php artisan migrate:fresh --force --no-interaction
+    fi
 }
 
 start_server() {
