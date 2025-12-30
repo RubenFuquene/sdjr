@@ -19,7 +19,7 @@ class AdministratorsEndpointTest extends TestCase
      *
      * Crea un usuario admin y uno normal, autentica como admin y valida que solo el admin esté en la respuesta.
      */
-    public function it_returns_administrator_users()
+    public function test_it_returns_administrator_users()
     {
         $adminRole = Role::create(['name' => 'admin']);
         $admin = User::factory()->create();
@@ -39,7 +39,7 @@ class AdministratorsEndpointTest extends TestCase
      *
      * Intenta acceder sin autenticación y espera un 401.
      */
-    public function it_requires_authentication()
+    public function test_it_requires_authentication()
     {
         $response = $this->getJson('/api/v1/administrators');
         $response->assertUnauthorized();

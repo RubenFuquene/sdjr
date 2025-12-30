@@ -14,7 +14,7 @@ class LogoutTest extends TestCase
     /**
      * Prueba que un usuario autenticado puede cerrar sesión correctamente.
      */
-    public function it_logs_out_authenticated_user()
+    public function test_it_logs_out_authenticated_user()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
@@ -31,7 +31,7 @@ class LogoutTest extends TestCase
     /**
      * Prueba que se requiere autenticación para cerrar sesión.
      */
-    public function it_requires_authentication()
+    public function test_it_requires_authentication()
     {
         $response = $this->postJson('/api/v1/logout');
         $response->assertUnauthorized();

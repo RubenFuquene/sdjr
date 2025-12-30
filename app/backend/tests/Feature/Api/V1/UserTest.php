@@ -17,7 +17,7 @@ class UserTest extends TestCase
     /**
      * Prueba que un usuario autenticado y con permiso puede listar usuarios.
      */
-    public function authenticated_user_can_list_users(): void
+    public function test_authenticated_user_can_list_users(): void
     {
         \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
@@ -40,7 +40,7 @@ class UserTest extends TestCase
     /**
      * Prueba que un usuario no autenticado no puede listar usuarios.
      */
-    public function unauthenticated_user_cannot_list_users(): void
+    public function test_unauthenticated_user_cannot_list_users(): void
     {
         $response = $this->getJson('/api/v1/users');
         $response->assertUnauthorized();
@@ -50,7 +50,7 @@ class UserTest extends TestCase
     /**
      * Prueba que un usuario autenticado y con permiso puede crear un usuario.
      */
-    public function authenticated_user_can_create_user(): void
+    public function test_authenticated_user_can_create_user(): void
     {
         \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.create', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
@@ -75,7 +75,7 @@ class UserTest extends TestCase
     /**
      * Prueba que un usuario autenticado y con permiso puede ver el detalle de un usuario.
      */
-    public function authenticated_user_can_view_single_user(): void
+    public function test_authenticated_user_can_view_single_user(): void
     {
         \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.show', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
@@ -92,7 +92,7 @@ class UserTest extends TestCase
     /**
      * Prueba que un usuario autenticado y con permiso puede actualizar un usuario.
      */
-    public function authenticated_user_can_update_user(): void
+    public function test_authenticated_user_can_update_user(): void
     {
         \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.update', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
@@ -110,7 +110,7 @@ class UserTest extends TestCase
     /**
      * Prueba que un usuario autenticado y con permiso puede eliminar (soft delete) un usuario.
      */
-    public function authenticated_user_can_delete_user(): void
+    public function test_authenticated_user_can_delete_user(): void
     {
         \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.delete', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
