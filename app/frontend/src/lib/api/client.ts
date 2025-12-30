@@ -58,6 +58,8 @@ export async function fetchWithErrorHandling<T>(
 
   try {
     const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'include',
       ...options,
       headers: {
         ...getAuthHeaders(),
