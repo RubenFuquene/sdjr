@@ -59,8 +59,12 @@ class CommerceController extends Controller
     public function index(): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $perPage = request('per_page', 15);
-            $commerces = $this->commerceService->paginate((int) $perPage);
+            $perPage = (int) request('per_page', 15);
+            $page = (int) request('page', 1);
+            $search = request('search');
+            $status = request('status');
+
+            $commerces = $this->commerceService->paginateWithFilters($perPage, $page, $search, $status);
             $resource = CommerceResource::collection($commerces);
 
             return $this->paginatedResponse($commerces, $resource, 'Commerces retrieved successfully');

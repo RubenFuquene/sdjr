@@ -8,9 +8,9 @@ Lista de endpoints faltantes en el backend Laravel que necesitamos para completa
 
 ### GET /api/v1/roles
 
-Endpoint no devuelve estado del rol (Nuevo bug)
+Endpoint no devuelve estado del rol (Nuevo bug) -> Solucionado ✅
 
-**Problema**: El campo `users_count` siempre devuelve 0, no cuenta correctamente los usuarios asignados a cada rol
+**Problema**: El campo `users_count` siempre devuelve 0, no cuenta correctamente los usuarios asignados a cada rol -> ⚠️ sigue en validación, no logro listar en el mismo endpoint los usuarios que cuentan con el rol ⚠️
 **Query params**: `per_page` (paginación)
 **Respuesta actual**:
 
@@ -46,7 +46,7 @@ Endpoint no devuelve estado del rol (Nuevo bug)
 
 ## Endpoints de Autenticación
 
-### 1. GET /api/v1/me
+### 1. GET /api/v1/me -> Implementado ✅
 
 **Propósito**: Obtener información del usuario actualmente autenticado
 **¿Necesario?**: Útil para mostrar info del usuario en el header/sidebar, verificar sesión activa
@@ -62,7 +62,7 @@ Endpoint no devuelve estado del rol (Nuevo bug)
 }
 ```
 
-### 2. GET /api/v1/me/permissions
+### 2. GET /api/v1/me/permissions -> Implementado ✅
 
 **Propósito**: Obtener permisos específicos del usuario autenticado
 **Necesario**: Para el sistema de permisos frontend (Zustand store)
@@ -81,7 +81,7 @@ Endpoint no devuelve estado del rol (Nuevo bug)
 }
 ```
 
-### 3. POST /api/v1/logout
+### 3. POST /api/v1/logout -> Implementado ✅
 
 **Propósito**: Destruir la sesión del usuario
 **Necesario**: Para logout seguro desde frontend
@@ -94,7 +94,7 @@ Endpoint no devuelve estado del rol (Nuevo bug)
 }
 ```
 
-### 4. GET /api/v1/permissions
+### 4. GET /api/v1/permissions -> Implementado ✅
 
 **Propósito**: Obtener todos los permisos disponibles del sistema
 **Necesario**: Para formulario de creación de roles (árbol dinámico de permisos)
@@ -140,7 +140,7 @@ Endpoint no devuelve estado del rol (Nuevo bug)
 
 ## Endpoints de Gestión (Panel Admin)
 
-### 5. GET /api/v1/providers
+### 5. GET /api/v1/providers -> El endpoint se llama Commerces (api/v1/commerces) -> Implementado ✅
 
 **Propósito**: Listar proveedores con filtros y paginación
 **Necesario**: Para tabla de proveedores en dashboard
@@ -173,7 +173,7 @@ Endpoint no devuelve estado del rol (Nuevo bug)
 }
 ```
 
-### 6. GET /api/v1/administrators
+### 6. GET /api/v1/administrators -> Implementado ✅
 
 **Propósito**: Listar administradores del sistema
 **Necesario**: Para tabla de administradores en dashboard
@@ -184,38 +184,38 @@ Endpoint no devuelve estado del rol (Nuevo bug)
 
 ### Roles
 
-- PUT /api/v1/roles/{id} (actualizar)
-- DELETE /api/v1/roles/{id} (eliminar)
+- PUT /api/v1/roles/{id} (actualizar) -> ✅
+- DELETE /api/v1/roles/{id} (eliminar) -> ❌ Los roles no se pueden eliminar naturalmente en la librería de Spatie
 
 ### Providers
 
-- POST /api/v1/providers
-- PUT /api/v1/providers/{id}
-- DELETE /api/v1/providers/{id}
+- POST /api/v1/providers -> api/v1/commerces ✅
+- PUT /api/v1/providers/{id} -> api/v1/commerces/{id} ✅
+- DELETE /api/v1/providers/{id} -> api/v1/commerces/{id} ✅ 
 
 ### Administrators
 
-- POST /api/v1/administrators
-- PUT /api/v1/administrators/{id}
-- DELETE /api/v1/administrators/{id}
+- POST /api/v1/administrators -> ✅
+- PUT /api/v1/administrators/{id} -> Se tiene un endpoint para actualizar el rol de cualquier usuario api/v1/users/{user_id}/assign-roles-permissions ✅
+- DELETE /api/v1/administrators/{id} -> Los roles no se eliminan, para quitar un rol al usuario se debe enviar el rol vacío [] ✅
 
 ## Consideraciones Técnicas
 
-- **Autenticación**: Todos requieren Bearer token
-- **Paginación**: Usar Laravel pagination estándar
-- **Filtros**: Implementar search básico por nombre/email
-- **Estados**: Campo `activo` para soft delete lógico
-- **Permisos**: Validar permisos en backend antes de operaciones
+- **Autenticación**: Todos requieren Bearer token ✅
+- **Paginación**: Usar Laravel pagination estándar ✅
+- **Filtros**: Implementar search básico por nombre/email ✅
+- **Estados**: Campo `activo` para soft delete lógico ✅ 
+- **Permisos**: Validar permisos en backend antes de operaciones ✅
 
 ## Prioridad de Implementación
 
-1. **Alta**: /api/v1/permissions, /me/permissions, /logout (para sistema de permisos y formulario roles)
-2. **Media**: /me, /providers, /users, /administrators (para completar dashboard)
-3. **Baja**: Endpoints CRUD (para futuras funcionalidades)
+1. **Alta**: /api/v1/permissions, /me/permissions, /logout (para sistema de permisos y formulario roles) ✅
+2. **Media**: /me, /providers, /users, /administrators (para completar dashboard) ✅
+3. **Baja**: Endpoints CRUD (para futuras funcionalidades) ✅
 
 ## Notas para Jerson
 
-- Mantener consistencia con el endpoint `/api/v1/roles` existente
-- Usar resource classes para responses
-- Implementar validation con Form Requests
-- Agregar tests para cada endpoint
+- Mantener consistencia con el endpoint `/api/v1/roles` existente ✅
+- Usar resource classes para responses ✅
+- Implementar validation con Form Requests ✅ 
+- Agregar tests para cada endpoint ✅

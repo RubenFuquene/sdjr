@@ -37,11 +37,11 @@ class CommerceResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'owner_user_id' => $this->owner_user_id,
-            'department_id' => $this->department_id,
-            'city_id' => $this->city_id,
-            'neighborhood_id' => $this->neighborhood_id,
-            'legal_representatives' => LegalRepresentativeResource::collection($this->whenLoaded('legalRepresentatives')),
+            'owner_user' => new UserResource($this->ownerUser),
+            'department' => new DepartmentResource($this->department),
+            'city' => new CityResource($this->city),
+            'neighborhood' => new NeighborhoodResource($this->neighborhood),
+            'legal_representatives' => new LegalRepresentativeResourceCollection($this->legalRepresentatives),
             'name' => $this->name,
             'description' => $this->description,
             'tax_id' => $this->tax_id,
