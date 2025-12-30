@@ -10,7 +10,14 @@ export const mockPerfiles: Perfil[] = [
     id: 1,
     nombre: "Super Administrador",
     descripcion: "Acceso completo a todas las funcionalidades",
-    permisosAdmin: ["Perfiles", "Parametrización", "Validación de Proveedores", "Marketing", "Dashboard", "Soporte"],
+    permisosAdmin: [
+      { name: "admin.profiles.view", description: "Ver perfiles" },
+      { name: "admin.parametrization.view", description: "Ver parametrización" },
+      { name: "admin.provider_validate.view", description: "Validar proveedores" },
+      { name: "admin.marketing.view", description: "Ver marketing" },
+      { name: "admin.dashboard.view", description: "Ver dashboard" },
+      { name: "admin.support.view", description: "Ver soporte" }
+    ],
     permisosProveedor: [],
     usuarios: 2,
     activo: true,
@@ -19,7 +26,10 @@ export const mockPerfiles: Perfil[] = [
     id: 2,
     nombre: "Administrador de Marketing",
     descripcion: "Gestión de campañas y promociones",
-    permisosAdmin: ["Dashboard", "Marketing"],
+    permisosAdmin: [
+      { name: "admin.dashboard.view", description: "Ver dashboard" },
+      { name: "admin.marketing.view", description: "Ver marketing" }
+    ],
     permisosProveedor: [],
     usuarios: 5,
     activo: true,
@@ -29,7 +39,15 @@ export const mockPerfiles: Perfil[] = [
     nombre: "Proveedor Completo",
     descripcion: "Acceso completo para proveedores",
     permisosAdmin: [],
-    permisosProveedor: ["Datos Básicos", "Sucursales", "Productos", "Mi Cuenta", "Mi Billetera", "Dashboard", "Soporte"],
+    permisosProveedor: [
+      { name: "provider.basic_data.view", description: "Ver datos básicos" },
+      { name: "provider.commerces.view", description: "Ver sucursales" },
+      { name: "provider.products.view", description: "Ver productos" },
+      { name: "provider.my_account.view", description: "Ver mi cuenta" },
+      { name: "provider.my_wallet.view", description: "Ver mi billetera" },
+      { name: "provider.dashboard.view", description: "Ver dashboard" },
+      { name: "provider.support.view", description: "Ver soporte" }
+    ],
     usuarios: 15,
     activo: true,
   },
