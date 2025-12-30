@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\PermissionStoreRequest;
-use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
-use App\Http\Requests\Api\V1\RoleStoreRequest;
-use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
-use App\Http\Resources\Api\V1\RoleResource;
 use App\Models\User;
 use App\Services\RoleService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\RoleResource;
+use App\Http\Requests\Api\V1\RoleStoreRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\Api\V1\RoleUpdateRequest;
+use App\Http\Requests\Api\V1\PermissionStoreRequest;
+use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
+use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * @OA\Tag(
@@ -284,7 +285,7 @@ class RoleController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/RoleStoreRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/RoleUpdateRequest")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -297,7 +298,7 @@ class RoleController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function update(RoleStoreRequest $request, int $id): JsonResponse
+    public function update(RoleUpdateRequest $request, int $id): JsonResponse
     {
         try {
             $role = Role::find($id);
