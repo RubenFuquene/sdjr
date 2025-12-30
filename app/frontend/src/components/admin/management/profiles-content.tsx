@@ -6,6 +6,7 @@ import { Vista, Proveedor, Usuario, Administrador, Perfil } from "@/types/admin"
 import { CreateRoleRequest } from "@/types/role-form-types";
 import { adaptPermissions } from "@/components/admin/adapters/permission-adapter";
 import { useRoles } from "@/hooks/use-roles";
+import { createRole, updateRole } from "@/lib/api/roles";
 import { ProfilesFilters } from "./profiles-filters";
 import { ProfilesTable } from "./profiles/profiles-table";
 import { ProvidersTable } from "@/components/admin/management/providers/providers-table";
@@ -39,12 +40,13 @@ export function ProfilesContent({
 
   // Función para adaptar Perfil a formato del modal
   const adaptProfileToRole = (perfil: Perfil) => {
-    // Combinar permisos de admin y proveedor (3 niveles)
-    const allPermissions3Levels = [...perfil.permisosAdmin, ...perfil.permisosProveedor];
+    // Combinar permisos de admin y proveedor (manteniendo name y description)
+    const allPermissions = [...perfil.permisosAdmin, ...perfil.permisosProveedor];
     
-    // Convertir a permisos de 4 niveles para el árbol interno del modal
-    const mockPermissions = allPermissions3Levels.map(perm => ({ name: perm, description: perm }));
-    const adapted4Levels = adaptPermissions(mockPermissions);
+    console.log("el perfil adaptado es:", perfil);
+    
+    // Los permisos ya tienen la estructura correcta { name, description }
+    const adapted4Levels = adaptPermissions(allPermissions);
     
     return {
       id: perfil.id,
@@ -91,25 +93,32 @@ export function ProfilesContent({
   const handleCreateRole = async (roleData: CreateRoleRequest) => {
     try {
       if (modalMode === 'edit' && selectedRole) {
-        // TODO: Implementar llamada real a API PUT /api/v1/roles/{id}
+        // Llamada real a API PUT /api/v1/roles/{id}
         console.log('🚀 Editando rol:', roleData, 'ID:', selectedRole.id);
+        await updateRole(selectedRole.id, {
+          name: roleData.name,
+          description: roleData.description,
+          permissions: roleData.permissions
+        });
       } else {
-        // TODO: Implementar llamada real a API POST /api/v1/roles
+        // Llamada real a API POST /api/v1/roles
         console.log('🚀 Creando rol:', roleData);
+        await createRole({
+          name: roleData.name,
+          description: roleData.description,
+          permissions: roleData.permissions
+        });
       }
-      
-      // Simular llamada API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       console.log('✅ Rol', modalMode === 'edit' ? 'editado' : 'creado', 'exitosamente');
-      
+
       // Refrescar la lista de roles
       refresh();
-      
+
       // Cerrar modal
       setIsRoleModalOpen(false);
       setSelectedRole(undefined);
-      
+
     } catch (error) {
       console.error('❌ Error al', modalMode === 'edit' ? 'editar' : 'crear', 'rol:', error);
       throw error; // Re-lanzar para que el modal maneje el error
@@ -140,7 +149,7 @@ export function ProfilesContent({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       {/* Header con título, descripción y acciones dinámicas */}
       <PageHeader>
         <PageHeader.Content>
