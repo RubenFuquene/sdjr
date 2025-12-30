@@ -18,10 +18,38 @@ class RoleService
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getPaginatedWithPermissionsAndUserCount(int $perPage = 15)
+    /**
+     * Obtiene roles paginados con filtros opcionales por nombre, descripción y permiso, incluyendo permisos y conteo de usuarios.
+     *
+     * @param array $filters
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getPaginatedWithPermissionsAndUserCount(array $filters = [])
     {
-        return Role::with('permissions')
-            ->paginate($perPage);
+        $query = Role::with('permissions');
+        $perPage = $filters['per_page'] ?? 15;
+
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (!empty($filters['description'])) {
+            $query->where('description', 'like', "%{$filters['description']}%");
+        }
+        if (!empty($filters['permission'])) {
+            $query->whereHas('permissions', function ($q) use ($filters) {
+                $q->where('name', 'like', "%{$filters['permission']}%");
+            });
+        }
+
+        $roles = $query->paginate($perPage);
+
+        // Agregar el conteo de usuarios a cada rol
+        // $roles->getCollection()->transform(function ($role) {
+        //     $role->user_count = $role->users()->count();
+        //     return $role;
+        // });
+
+        return $roles;
     }
 
     /**

@@ -73,15 +73,18 @@ class RoleController extends Controller
      */
     public function index(): AnonymousResourceCollection|JsonResponse
     {
-        try {
-            $perPage = request('per_page', 15);
-            $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount((int) $perPage);
+        try {             
+            $filters = [
+                'name' => request('name'),
+                'description' => request('description'),
+                'permission' => request('permission'),
+                'per_page' => request('per_page', 15),
+            ];
+            $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount($filters);
             $resource = RoleResource::collection($roles);
-
             return $this->paginatedResponse($roles, $resource, 'Roles retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error listing roles', ['error' => $e->getMessage().' Line: '.$e->getLine()]);
-
             return $this->errorResponse('Error listing roles', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
