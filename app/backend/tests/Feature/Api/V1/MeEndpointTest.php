@@ -17,7 +17,7 @@ class MeEndpointTest extends TestCase
     /** @test */
     public function it_returns_authenticated_user_info()
     {
-        Role::create(['name' => 'superadmin']);
+        Role::create(['name' => 'superadmin', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();        
         $user->assignRole('superadmin');
         Sanctum::actingAs($user);
@@ -49,7 +49,7 @@ class MeEndpointTest extends TestCase
     /** @test */
     public function it_returns_authenticated_user_permissions_and_roles()
     {
-        Role::create(['name' => 'superadmin']);
+        Role::create(['name' => 'superadmin', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
         $user->assignRole('superadmin');
         Sanctum::actingAs($user);

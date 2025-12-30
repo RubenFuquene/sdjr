@@ -17,9 +17,13 @@ class RoleUpdateEndpointTest extends TestCase
     /** @test */
     public function it_updates_a_role()
     {
+        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'admin.roles.update', 'guard_name' => 'sanctum']);
+        $role = \Spatie\Permission\Models\Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
+        $role->givePermissionTo($permission);
         $user = User::factory()->create();
+        $user->assignRole('admin');
         Sanctum::actingAs($user);
-        $role = Role::create(['name' => 'editor', 'description' => 'Edit role']);
+        $role = Role::create(['name' => 'editor', 'description' => 'Edit role', 'guard_name' => 'sanctum']);
         $payload = [
             'name' => 'editor-updated',
             'description' => 'Updated description',
@@ -38,7 +42,11 @@ class RoleUpdateEndpointTest extends TestCase
     /** @test */
     public function it_returns_404_for_nonexistent_role_on_update()
     {
+        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'admin.roles.update', 'guard_name' => 'sanctum']);
+        $role = \Spatie\Permission\Models\Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
+        $role->givePermissionTo($permission);
         $user = User::factory()->create();
+        $user->assignRole('admin');
         Sanctum::actingAs($user);
         $response = $this->putJson('/api/v1/roles/9999', [
             'name' => 'notfound',

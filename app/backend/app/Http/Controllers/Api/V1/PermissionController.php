@@ -40,9 +40,8 @@ class PermissionController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $permissions = Permission::all();
-            $resource = PermissionResource::collection($permissions);
-            return $this->successResponse($resource, 'Permissions retrieved successfully', 200);
+            $permissions = Permission::all()->pluck('name')->toArray();
+            return $this->successResponse(['permissions' => $permissions], 'Permissions retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving permissions', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
         }

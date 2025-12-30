@@ -26,7 +26,12 @@ class RoleStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.roles.create') ?? false;
+        if ($this->isMethod('post')) {
+            return $this->user()?->can('admin.roles.create') ?? false;
+        } elseif ($this->isMethod('put') || $this->isMethod('patch')) {
+            return $this->user()?->can('admin.roles.update') ?? false;
+        }
+        return false;
     }
 
     public function rules(): array

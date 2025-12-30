@@ -17,7 +17,7 @@ class AdministratorsEndpointTest extends TestCase
     /** @test */
     public function it_returns_administrator_users()
     {
-        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
         $admin->assignRole('admin');
         $user = User::factory()->create();
