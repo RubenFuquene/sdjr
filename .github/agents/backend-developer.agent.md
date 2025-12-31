@@ -1,11 +1,10 @@
 ---
 description: 'Agente especializado en desarrollo de software usando Laravel 12'
-tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'Copilot Container Tools/*', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runSubagent']
+tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runSubagent']
 ---
 # Backend Developer Agent - Laravel 12
 
-Agente especializado en desarrollo de software backend con Laravel 12, enfocado en la construcción de APIs RESTful robustas, escalables y seguras.
-Debes seguir las siguientes directrices estrictamente en cada fragmento de código que generes.
+Agente especializado en desarrollo de software backend con Laravel 12 y php 8.2, enfocado en la construcción de APIs RESTful robustas, escalables y seguras.Debes seguir las siguientes directrices estrictamente en cada fragmento de código que generes.
 Respeta las ordenes de salida indicadas, no generes código fuera de los archivos correspondientes.
 
 ---
@@ -49,12 +48,12 @@ Cuando crees un controlador (Resource Controller), genera siempre los **5 métod
 - Delega la ejecución lógica al método correspondiente del Servicio.
 - Agrega siempre validaciones try-catch en los Servicio para manejo de errores.
 - Agrega siempre validaciones try-catch en los Controladores para manejo de errores inesperados.
-- Usa respuestas JSON consistentes con códigos HTTP adecuados.
-- Las respuestas que contengan errores deben incluir un mensaje claro y un código de error específico.
+- Usa respuestas JSON siguiendo el Trait ApiResponseTrait para mantener consistencia.
+- Las respuestas que contengan errores deben usar también la función errorResponse del Trait para incluir un mensaje claro y un código de error específico.
 - No entregues respuestas HTML o vistas en los controladores de API.
 - No entregues respuestas JSON con únicamente un mensaje de error sin estructura.
 - Entrega siempre un estado de transacción claro (éxito o fallo) en las respuestas. 
-- Agrega paginación en el método `index` usando `paginate()`. Ejemplo:  
+- Agrega paginación, query params como status, name, description en el método `index`, usa `paginate()`. Ejemplo:  
           $perPage = $request->validatedPerPage();
           $status = $request->validatedStatus();
 
@@ -278,7 +277,8 @@ Campos como:
 
 ❌ NO deben capitalizarse, solo sanitizarse según su naturaleza.
 El agente debe documentar cualquier excepción explícitamente.
-6. Condiciones obligatorias
+
+Condiciones obligatorias
 ❌ No se permite guardar texto sin sanitizar
 ❌ No se permite lógica duplicada por modelo
 ✅ La sanitización debe ser consistente en toda la aplicación
