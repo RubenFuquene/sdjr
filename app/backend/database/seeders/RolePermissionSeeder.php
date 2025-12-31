@@ -57,6 +57,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.categories.update', 'guard_name' => $guardName, 'description' => 'Permission to update categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.categories.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete categories', 'created_at' => now(), 'updated_at' => now()],
 
+            ['name' => 'admin.banks.index', 'guard_name' => $guardName, 'description' => 'List banks', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.banks.create', 'guard_name' => $guardName, 'description' => 'Create banks', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.banks.show', 'guard_name' => $guardName, 'description' => 'View banks', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.banks.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit banks', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.banks.update', 'guard_name' => $guardName, 'description' => 'Permission to update banks', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.banks.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete banks', 'created_at' => now(), 'updated_at' => now()],
+            
             ['name' => 'admin.establishments.index', 'guard_name' => $guardName, 'description' => 'List establishments', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.establishments.create', 'guard_name' => $guardName, 'description' => 'Create establishments', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.establishments.show', 'guard_name' => $guardName, 'description' => 'View establishments', 'created_at' => now(), 'updated_at' => now()],
@@ -87,6 +94,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.users.update', 'guard_name' => $guardName, 'description' => 'Permission to update permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.users.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.users.assign_roles_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign roles and permissions to users', 'created_at' => now(), 'updated_at' => now()],
+            
             // Administrator Modules
             ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.create', 'guard_name' => $guardName, 'description' => 'Create admin profiles module', 'created_at' => now(), 'updated_at' => now()],

@@ -25,6 +25,9 @@ Route::prefix('v1')->group(function () {
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
+        
+        // Bank Management routes
+        Route::apiResource('banks', \App\Http\Controllers\Api\V1\BankController::class);
 
         // Parametrization routes
         Route::apiResource('countries', CountryController::class);

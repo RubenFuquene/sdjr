@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             NeighborhoodSeeder::class,
             CommerceSeeder::class,
             LegalRepresentativeSeeder::class,
+            BankSeeder::class,
         ]);
     }
 }
