@@ -64,6 +64,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.banks.update', 'guard_name' => $guardName, 'description' => 'Permission to update banks', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.banks.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete banks', 'created_at' => now(), 'updated_at' => now()],
             
+            ['name' => 'admin.support_statuses.index', 'guard_name' => $guardName, 'description' => 'List support statuses', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.support_statuses.create', 'guard_name' => $guardName, 'description' => 'Create support statuses', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.support_statuses.show', 'guard_name' => $guardName, 'description' => 'View support statuses', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.support_statuses.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit support statuses', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.support_statuses.update', 'guard_name' => $guardName, 'description' => 'Permission to update support statuses', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.support_statuses.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete support statuses', 'created_at' => now(), 'updated_at' => now()],
+
             ['name' => 'admin.establishments.index', 'guard_name' => $guardName, 'description' => 'List establishments', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.establishments.create', 'guard_name' => $guardName, 'description' => 'Create establishments', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.establishments.show', 'guard_name' => $guardName, 'description' => 'View establishments', 'created_at' => now(), 'updated_at' => now()],

@@ -26,6 +26,9 @@ Route::prefix('v1')->group(function () {
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
         
+        // Support Status Management routes
+        Route::apiResource('support-statuses', \App\Http\Controllers\Api\V1\SupportStatusController::class);
+        
         // Bank Management routes
         Route::apiResource('banks', \App\Http\Controllers\Api\V1\BankController::class);
 
