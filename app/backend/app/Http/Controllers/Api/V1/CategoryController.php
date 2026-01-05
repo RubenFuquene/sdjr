@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CategoryIndexRequest;
 use App\Http\Requests\Api\V1\CategoryRequest;
+use App\Http\Requests\Api\V1\DeleteCategoryRequest;
+use App\Http\Requests\Api\V1\IndexCategoryRequest;
+use App\Http\Requests\Api\V1\ShowCategoryRequest;
 use App\Http\Resources\Api\V1\CategoryResource;
-use App\Models\Category;
 use App\Services\CategoryService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -80,7 +81,7 @@ class CategoryController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(CategoryIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(IndexCategoryRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $perPage = $request->validatedPerPage();
@@ -192,7 +193,7 @@ class CategoryController extends Controller
      *      )
      * )
      */
-    public function show(string $id): CategoryResource|JsonResponse
+    public function show(ShowCategoryRequest $request, string $id): CategoryResource|JsonResponse
     {
         try {
             $category = $this->categoryService->find($id);
@@ -320,7 +321,7 @@ class CategoryController extends Controller
      *      )
      * )
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(DeleteCategoryRequest $request, string $id): JsonResponse
     {
         try {
             $category = $this->categoryService->find($id);
