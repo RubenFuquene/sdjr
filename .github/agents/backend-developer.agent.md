@@ -191,7 +191,7 @@ Cada vez que se solicite la implementación de una funcionalidad, debes seguir e
 Genera los archivos en **orden de dependencia**:
 
 ```
-FormRequest → DTO (si aplica) → Service → Controller → API Resource
+FormRequest → Service → Controller → API Resource
 ```
 
 ### 5.4 Paso 4: Pruebas Automatizadas (Testing)
@@ -317,6 +317,7 @@ Todo endpoint DEBE cumplir ambas condiciones:
 Cada endpoint DEBE tener un FormRequest dedicado que:
 - Valide los datos de entrada
 - Valide la autorización del usuario mediante permisos
+- El FormRequest debe seguir la convención de nombre: Acción + Entidad + Request
 
 #### 5.6.4 Método authorize() (obligatorio)
 El agente debe implementar siempre el método authorize() en cada FormRequest.
@@ -351,7 +352,8 @@ Los permisos DEBEN seguir una convención clara y predecible:
 |Endpoint	|Permiso requerido|
 |-----------------  |-------------------
 |POST /users	|users.create|
-|GET /users	|users.view|
+|GET /users	|users.index|
+|GET /users/{id}	|users.show|
 |PUT /users/{id}	|users.update|
 |DELETE /users/{id}	|users.delete|
 
