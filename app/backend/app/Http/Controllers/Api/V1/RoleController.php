@@ -12,11 +12,10 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\RoleResource;
-use App\Http\Requests\Api\V1\RoleStoreRequest;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\Api\V1\RoleUpdateRequest;
-use App\Http\Requests\Api\V1\PermissionStoreRequest;
 use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
+use App\Http\Requests\Api\V1\StoreRoleRequest;
+use App\Http\Requests\Api\V1\UpdateRoleRequest;
 use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -116,7 +115,7 @@ class RoleController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(RoleStoreRequest $request): JsonResponse
+    public function store(StoreRoleRequest $request): JsonResponse
     {
         try {
             $role = $this->roleService->createRole(
@@ -301,7 +300,7 @@ class RoleController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function update(RoleUpdateRequest $request, int $id): JsonResponse
+    public function update(UpdateRoleRequest $request, int $id): JsonResponse
     {
         try {
             $role = Role::find($id);

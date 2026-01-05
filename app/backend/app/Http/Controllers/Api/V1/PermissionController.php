@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Permission;
 use App\Http\Resources\Api\V1\PermissionResource;
-use App\Http\Requests\Api\V1\PermissionStoreRequest;
+use App\Http\Requests\Api\V1\StorePermissionRequest;
 
 class PermissionController extends Controller
 {
@@ -58,7 +58,7 @@ class PermissionController extends Controller
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/PermissionStoreRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/StorePermissionRequest")
      *     ),
      *     @OA\Response(
      *         response=201,
@@ -77,7 +77,7 @@ class PermissionController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(PermissionStoreRequest $request): JsonResponse
+    public function store(StorePermissionRequest $request): JsonResponse
     {
         try {
             $permission = app(RoleService::class)->createPermission(

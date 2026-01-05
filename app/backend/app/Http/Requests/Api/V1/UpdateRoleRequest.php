@@ -21,7 +21,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     )
  * )
  */
-class RoleUpdateRequest extends FormRequest
+class UpdateRoleRequest extends FormRequest
 {
     public function authorize(): bool
     {

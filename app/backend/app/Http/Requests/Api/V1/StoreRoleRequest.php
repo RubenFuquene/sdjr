@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="RoleStoreRequest",
+ *     schema="StoreRoleRequest",
  *     required={"name", "description"},
  *
  *     @OA\Property(property="name", type="string", maxLength=50, example="admin", description="Role name (unique)"),
@@ -22,7 +22,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     )
  * )
  */
-class RoleStoreRequest extends FormRequest
+class StoreRoleRequest extends FormRequest
 {
     public function authorize(): bool
     {

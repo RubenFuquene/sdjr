@@ -93,6 +93,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.permissions.update', 'guard_name' => $guardName, 'description' => 'Permission to update permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.permissions.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete permissions', 'created_at' => now(), 'updated_at' => now()],
 
+            ['name' => 'admin.pqrs_types.index', 'guard_name' => $guardName, 'description' => 'List PQRs types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.pqrs_types.create', 'guard_name' => $guardName, 'description' => 'Create PQRs types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.pqrs_types.show', 'guard_name' => $guardName, 'description' => 'View PQRs types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.pqrs_types.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit PQRs types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.pqrs_types.update', 'guard_name' => $guardName, 'description' => 'Permission to update PQRs types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.pqrs_types.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete PQRs types', 'created_at' => now(), 'updated_at' => now()],
+
             // Users
             ['name' => 'admin.users.index', 'guard_name' => $guardName, 'description' => 'List permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.users.create', 'guard_name' => $guardName, 'description' => 'Create permissions', 'created_at' => now(), 'updated_at' => now()],
