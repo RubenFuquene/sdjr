@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CityRequest;
-use App\Http\Resources\Api\V1\CityResource;
 use App\Services\CityService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\CityRequest;
+use App\Http\Resources\Api\V1\CityResource;
+use App\Http\Requests\Api\V1\DeleteCityRequest;
+use App\Http\Requests\Api\V1\IndexCityRequest;
+use App\Http\Requests\Api\V1\ShowCityRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -57,7 +60,7 @@ class CityController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(\App\Http\Requests\Api\V1\CityIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(IndexCityRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $perPage = $request->validatedPerPage();
@@ -169,14 +172,10 @@ class CityController extends Controller
      *      )
      * )
      */
-    public function show(string $id): CityResource|JsonResponse
+    public function show(ShowCityRequest $request, string $id): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (! $city) {
-                return $this->errorResponse('City not found', 404);
-            }
-
             return $this->successResponse(new CityResource($city), 'City retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -297,7 +296,7 @@ class CityController extends Controller
      *      )
      * )
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(DeleteCityRequest $request, string $id): JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
