@@ -42,7 +42,7 @@ class DepartmentService
      */
     public function find(string $id): ?Department
     {
-        return Department::with('country')->find($id);
+        return Department::with('country')->findOrFail($id);
     }
 
     /**

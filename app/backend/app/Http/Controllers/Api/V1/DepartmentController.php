@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
+use App\Services\DepartmentService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DepartmentRequest;
 use App\Http\Resources\Api\V1\DepartmentResource;
-use App\Services\DepartmentService;
-use App\Traits\ApiResponseTrait;
-use Illuminate\Http\JsonResponse;
+use App\Http\Requests\Api\V1\ShowDepartmentRequest;
+use App\Http\Requests\Api\V1\IndexDepartmentRequest;
+use App\Http\Requests\Api\V1\DeleteDepartmentRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -57,7 +60,7 @@ class DepartmentController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(\App\Http\Requests\Api\V1\DepartmentIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(IndexDepartmentRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $perPage = $request->validatedPerPage();
@@ -169,14 +172,10 @@ class DepartmentController extends Controller
      *      )
      * )
      */
-    public function show(string $id): DepartmentResource|JsonResponse
+    public function show(ShowDepartmentRequest $request, string $id): DepartmentResource|JsonResponse
     {
         try {
             $department = $this->departmentService->find($id);
-            if (! $department) {
-                return $this->errorResponse('Department not found', 404);
-            }
-
             return $this->successResponse(new DepartmentResource($department), 'Department retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving department', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -297,7 +296,7 @@ class DepartmentController extends Controller
      *      )
      * )
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(DeleteDepartmentRequest $request, string $id): JsonResponse
     {
         try {
             $department = $this->departmentService->find($id);

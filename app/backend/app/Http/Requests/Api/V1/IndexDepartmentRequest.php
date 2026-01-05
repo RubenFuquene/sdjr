@@ -6,7 +6,7 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DepartmentIndexRequest extends FormRequest
+class IndexDepartmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
