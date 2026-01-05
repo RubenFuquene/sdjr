@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             LegalRepresentativeSeeder::class,
             BankSeeder::class,
             SupportStatusSeeder::class,
+            PqrsTypeSeeder::class,
         ]);
     }
 }
