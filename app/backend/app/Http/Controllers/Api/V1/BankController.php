@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\BankStoreRequest;
-use App\Http\Requests\Api\V1\BankUpdateRequest;
-use App\Http\Resources\Api\V1\BankResource;
 use App\Services\BankService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\BankResource;
+use App\Http\Requests\Api\V1\ShowBankRequest;
+use App\Http\Requests\Api\V1\IndexBankRequest;
+use App\Http\Requests\Api\V1\StoreBankRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\Api\V1\DeleteBankRequest;
+use App\Http\Requests\Api\V1\UpdateBankRequest;
 
 class BankController extends Controller
 {
@@ -43,11 +45,11 @@ class BankController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexBankRequest $request): JsonResponse
     {
         try {
             $filters = $request->only(['name', 'code', 'status']);
-            $perPage = (int) $request->get('per_page', 15);
+            $perPage = $request->validatedPerPage();
             $banks = $this->bankService->getPaginated($filters, $perPage);
             $resource = BankResource::collection($banks);
             return $this->paginatedResponse($banks, $resource, 'Banks retrieved successfully');
@@ -72,7 +74,7 @@ class BankController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(BankStoreRequest $request): JsonResponse
+    public function store(StoreBankRequest $request): JsonResponse
     {
         try {
             $bank = $this->bankService->store($request->validated());
@@ -98,7 +100,7 @@ class BankController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function show(int $id): JsonResponse
+    public function show(ShowBankRequest $request, int $id): JsonResponse
     {
         try {
             $bank = $this->bankService->find($id);
@@ -128,7 +130,7 @@ class BankController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function update(BankUpdateRequest $request, int $id): JsonResponse
+    public function update(UpdateBankRequest $request, int $id): JsonResponse
     {
         try {
             $bank = $this->bankService->update($id, $request->validated());
@@ -156,7 +158,7 @@ class BankController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(DeleteBankRequest $request, int $id): JsonResponse
     {
         try {
             $this->bankService->delete($id);

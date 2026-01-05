@@ -20,9 +20,9 @@ class BankTest extends TestCase
      */
     public function test_can_list_banks()
     {
-        Permission::findOrCreate('admin.banks.view', 'sanctum');
+        Permission::findOrCreate('admin.banks.index', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.banks.view');
+        $user->givePermissionTo('admin.banks.index');
         Sanctum::actingAs($user);
         Bank::factory()->count(3)->create();
         $response = $this->getJson('/api/v1/banks');
@@ -51,9 +51,9 @@ class BankTest extends TestCase
      */
     public function test_can_show_bank()
     {
-        Permission::findOrCreate('admin.banks.view', 'sanctum');
+        Permission::findOrCreate('admin.banks.index', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.banks.view');
+        $user->givePermissionTo('admin.banks.index');
         Sanctum::actingAs($user);
         $bank = Bank::factory()->create();
         $response = $this->getJson('/api/v1/banks/' . $bank->id);
