@@ -15,7 +15,7 @@ const DUMMY_PERMISSIONS: PermissionFromAPI[] = [
   // Admin - Roles
   { name: 'admin.roles.create', description: 'Crear roles' },
   { name: 'admin.roles.view', description: 'Ver roles' },
-  { name: 'admin.roles.edit', description: 'Editar roles' },
+  { name: 'admin.roles.update', description: 'Editar roles' },
   { name: 'admin.roles.delete', description: 'Eliminar roles' },
   
   // Admin - Users

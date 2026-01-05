@@ -67,7 +67,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.roles.index', 'guard_name' => $guardName, 'description' => 'List roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.roles.create', 'guard_name' => $guardName, 'description' => 'Create roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.roles.show', 'guard_name' => $guardName, 'description' => 'View roles', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.roles.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.roles.update', 'guard_name' => $guardName, 'description' => 'Permission to update roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.roles.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete roles', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.roles.assign_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign permissions to roles', 'created_at' => now(), 'updated_at' => now()],
