@@ -27,6 +27,9 @@ class RoleUpdateEndpointTest extends TestCase
      */
     public function test_it_updates_a_role()
     {
+        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'admin.roles.update', 'guard_name' => 'sanctum']);
+        $role = \Spatie\Permission\Models\Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
+        $role->givePermissionTo($permission);
         $user = User::factory()->create();
         $user->givePermissionTo('admin.profiles.roles.update');
         Sanctum::actingAs($user);
@@ -57,6 +60,9 @@ class RoleUpdateEndpointTest extends TestCase
      */
     public function test_it_returns_404_for_nonexistent_role_on_update()
     {
+        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'admin.roles.update', 'guard_name' => 'sanctum']);
+        $role = \Spatie\Permission\Models\Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
+        $role->givePermissionTo($permission);
         $user = User::factory()->create();
         $user->givePermissionTo('admin.profiles.roles.update');
         Sanctum::actingAs($user);

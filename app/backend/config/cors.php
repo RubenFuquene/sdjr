@@ -44,6 +44,8 @@ return [
         'X-Requested-With',
         'X-CSRF-TOKEN',
         'X-Socket-Id',
+        'Origin',
+        'Cache-Control',
     ],
 
     'exposed_headers' => [

@@ -30,7 +30,7 @@ export function RoleCreationModal({
 
   // Cargar datos del rol en modo edición
   useEffect(() => {
-    if (role && mode === 'edit') {
+    if (role && (mode === 'edit' || mode === 'view')) {
       setFormData({
         name: role.name,
         description: role.description,
@@ -212,25 +212,38 @@ export function RoleCreationModal({
           )}
 
           {/* Actions */}
-          {mode !== 'view' && (
-            <div className="flex justify-end space-x-4 pt-4 border-t border-[#E0E0E0]">
+          <div className="flex justify-end space-x-4 pt-4 border-t border-[#E0E0E0]">
+            {mode === 'view' && (
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
                 className="px-6 h-[52px] border border-[#E0E0E0] text-[#6A6A6A] rounded-xl hover:bg-[#F7F7F7] transition-colors disabled:opacity-50"
               >
-                Cancelar
+                Cerrar
               </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || permissionsLoading}
-                className="px-6 h-[52px] bg-[#4B236A] text-white rounded-xl hover:bg-[#5D2B7D] transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
-              >
-                {isSubmitting ? 'Guardando...' : (mode === 'create' ? 'Crear Rol' : 'Guardar Cambios')}
-              </button>
-            </div>
-          )}
+            )}
+            {/* Botones adicionales (solo en modo edición/creación) */}
+            {mode !== 'view' && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isSubmitting}
+                  className="px-6 h-[52px] border border-[#E0E0E0] text-[#6A6A6A] rounded-xl hover:bg-[#F7F7F7] transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || permissionsLoading}
+                  className="px-6 h-[52px] bg-[#4B236A] text-white rounded-xl hover:bg-[#5D2B7D] transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Guardando...' : (mode === 'create' ? 'Crear Rol' : 'Guardar Cambios')}
+                </button>
+              </>
+            )}
+          </div>
         </form>
       </div>
     </div>

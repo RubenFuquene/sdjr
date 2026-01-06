@@ -24,7 +24,7 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-50 text-[var(--color-text)] overflow-hidden">
+    <div className="flex h-screen bg-gray-50 text-[var(--color-text)]">
       {/* Overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -109,7 +109,7 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
           </div>
         </header>
 
-        <main className="flex-1 bg-white px-4 py-6 md:px-6">{children}</main>
+        <main className="flex-1 bg-white px-4 py-6 md:px-6 overflow-y-auto min-h-0" style={{ scrollbarWidth: 'thin', scrollbarColor: '#C8D86D transparent' }}>{children}</main>
       </div>
     </div>
   );

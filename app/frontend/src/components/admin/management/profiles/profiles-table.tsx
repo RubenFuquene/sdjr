@@ -38,7 +38,7 @@ export function ProfilesTable({ data, onView, onEdit }: ProfilesTableProps) {
                     {perfil.permisosAdmin.length > 0 ? (
                       perfil.permisosAdmin.slice(0, 2).map((permiso, idx) => (
                         <Badge key={idx} variant="permiso">
-                          {permiso}
+                          {permiso.description}
                         </Badge>
                       ))
                     ) : (
@@ -54,7 +54,7 @@ export function ProfilesTable({ data, onView, onEdit }: ProfilesTableProps) {
                     {perfil.permisosProveedor.length > 0 ? (
                       perfil.permisosProveedor.slice(0, 2).map((permiso, idx) => (
                         <Badge key={idx} variant="permiso">
-                          {permiso}
+                          {permiso.description}
                         </Badge>
                       ))
                     ) : (

@@ -46,8 +46,8 @@ export interface RoleFromAPI {
  * RoleFromAPI → Perfil:
  * - name → nombre
  * - description → descripcion
- * - permissions (filtrar por prefijo "admin.") → permisosAdmin
- * - permissions (filtrar por prefijo "provider.") → permisosProveedor
+ * - permissions (filtrar por prefijo "admin.") → permisosAdmin: Array<{name, description}>
+ * - permissions (filtrar por prefijo "provider.") → permisosProveedor: Array<{name, description}>
  * - users_count → usuarios
  * - Nota: Backend no envía campo "activo", se asume true por defecto
  */
@@ -60,8 +60,8 @@ export interface Perfil {
   id: number;
   nombre: string;
   descripcion: string;
-  permisosAdmin: string[];
-  permisosProveedor: string[];
+  permisosAdmin: Array<{ name: string; description: string }>;
+  permisosProveedor: Array<{ name: string; description: string }>;
   usuarios: number;
   activo: boolean;
 }

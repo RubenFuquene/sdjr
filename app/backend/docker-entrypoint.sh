@@ -22,6 +22,17 @@ bootstrap_env_file() {
     fi
 }
 
+get_app_environment() {
+    # Try environment variable first, then .env file
+    if [ ! -z "$APP_ENV" ]; then
+        echo "$APP_ENV"
+    elif [ -f "$ENV_FILE" ]; then
+        grep "^APP_ENV=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '"'\''' || echo "local"
+    else
+        echo "local"
+    fi
+}
+
 configure_database_from_url() {
     local url="$1"
     [ -z "$url" ] && return 1
@@ -91,6 +102,14 @@ determine_wait_requirement() {
     fi
 }
 
+get_app_environment() {
+    # Get APP_ENV from environment variable or .env file
+    # Handles quoted values and whitespace
+    local env_value="${APP_ENV:-$(grep '^APP_ENV=' "$ENV_FILE" 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs)}"
+    # Convert to lowercase for case-insensitive comparison
+    echo "$env_value" | tr '[:upper:]' '[:lower:]'
+}
+
 wait_for_database() {
     if [ "$DB_WAIT_REQUIRED" -ne 1 ]; then
         return
@@ -133,8 +152,28 @@ ensure_sqlite_file_if_needed() {
 }
 
 run_migrations() {
-    echo "Running migrations..."
-    php artisan migrate:fresh --force --no-interaction
+    # Determine application environment, preferring the current environment
+    # variable and falling back to the value in the .env file if needed.
+    local app_env=$(get_app_environment)
+
+    # Support common production environment names (production, prod)
+    if [[ "$app_env" == "production" || "$app_env" == "prod" ]]; then
+        echo "Production environment detected, running non-destructive migrations..."
+        php artisan migrate --force --no-interaction
+    else
+        echo "Non-production environment detected, running fresh migrations..."
+        php artisan migrate:fresh --force --no-interaction
+    fi
+}
+
+run_seeders() {
+    # Only run seeders if explicitly enabled
+    if [ "${ENABLE_SEEDING:-false}" = "true" ]; then
+        echo "Running database seeders..."
+        php artisan db:seed --force --no-interaction
+    else
+        echo "Seeding disabled (set ENABLE_SEEDING=true to enable)"
+    fi
 }
 
 start_server() {
@@ -162,6 +201,7 @@ main() {
     ensure_sqlite_file_if_needed
     wait_for_database
     run_migrations
+    run_seeders
     start_server
 }
 

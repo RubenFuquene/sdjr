@@ -1,6 +1,9 @@
 import { ProfilesContent } from "@/components/admin";
 import { mockProveedores, mockUsuarios, mockAdministradores } from "@/lib/mocks/admin";
 
+// Forzar renderizado dinámico (página usa cookies para autenticación)
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Perfiles | Admin | Sumass",
 };
