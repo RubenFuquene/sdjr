@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
-use App\Http\Requests\Api\V1\StoreRoleRequest;
-use App\Http\Requests\Api\V1\UpdateRoleRequest;
-use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
-use App\Http\Resources\Api\V1\RoleResource;
 use App\Models\User;
+use App\Constants\Constant;
 use App\Services\RoleService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\RoleResource;
+use App\Http\Requests\Api\V1\StoreRoleRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\Api\V1\UpdateRoleRequest;
+use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
+use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * @OA\Tag(
@@ -115,7 +116,8 @@ class RoleController extends Controller
                 'name' => request('name'),
                 'description' => request('description'),
                 'permission' => request('permission'),
-                'per_page' => request('per_page', 15),
+                'status' => request('status', Constant::STATUS_ACTIVE),
+                'per_page' => request('per_page', Constant::DEFAULT_PER_PAGE),
             ];
             $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount($filters);
             $resource = RoleResource::collection($roles);

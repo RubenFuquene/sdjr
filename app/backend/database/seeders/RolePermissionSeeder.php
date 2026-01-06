@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Constants\Constant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -177,10 +178,11 @@ class RolePermissionSeeder extends Seeder
 
         // Crear roles si no existen
         $roles = [
-            ['name' => 'superadmin', 'guard_name' => $guardName, 'description' => 'Super Administrator role'],
-            ['name' => 'admin', 'guard_name' => $guardName, 'description' => 'Administrator role'],
-            ['name' => 'provider', 'guard_name' => $guardName, 'description' => 'Provider role'],
-            ['name' => 'user', 'guard_name' => $guardName, 'description' => 'User role'],
+            ['name' => 'superadmin', 'guard_name' => $guardName, 'description' => 'Super Administrator role', 'status' => Constant::STATUS_ACTIVE],
+            ['name' => 'admin', 'guard_name' => $guardName, 'description' => 'Administrator role', 'status' => Constant::STATUS_ACTIVE],
+            ['name' => 'provider', 'guard_name' => $guardName, 'description' => 'Provider role', 'status' => Constant::STATUS_ACTIVE],
+            ['name' => 'user', 'guard_name' => $guardName, 'description' => 'User role', 'status' => Constant::STATUS_ACTIVE],
+            ['name' => 'guest', 'guard_name' => $guardName, 'description' => 'User role', 'status' => Constant::STATUS_INACTIVE],
         ];
 
         foreach ($roles as $roleData) {

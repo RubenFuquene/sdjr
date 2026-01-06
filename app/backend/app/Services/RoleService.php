@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Constant;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -26,13 +27,16 @@ class RoleService
     public function getPaginatedWithPermissionsAndUserCount(array $filters = [])
     {
         $query = Role::with('permissions');
-        $perPage = $filters['per_page'] ?? 15;
+        $perPage = $filters['per_page'] ?? Constant::DEFAULT_PER_PAGE;
 
         if (! empty($filters['name'])) {
             $query->where('name', 'like', "%{$filters['name']}%");
         }
         if (! empty($filters['description'])) {
             $query->where('description', 'like', "%{$filters['description']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
         if (! empty($filters['permission'])) {
             $query->whereHas('permissions', function ($q) use ($filters) {

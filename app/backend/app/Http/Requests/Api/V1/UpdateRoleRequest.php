@@ -34,6 +34,7 @@ class UpdateRoleRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:50'],
             'description' => ['required', 'string', 'max:255'],
+            'status' => ['sometimes', 'in:0,1'],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string', 'exists:permissions,name'],
         ];

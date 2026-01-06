@@ -30,23 +30,25 @@ class RoleUpdateEndpointTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo('admin.roles.update');
         Sanctum::actingAs($user);
-        $role = Role::create(['name' => 'editor', 'description' => 'Edit role']);
+        $role = Role::create(['name' => 'editor', 'description' => 'Edit role', 'status' => 1]);
         $payload = [
             'name' => 'editor-updated',
             'description' => 'Updated description',
+            'status' => 1,
         ];
         $response = $this->putJson('/api/v1/roles/'.$role->id, $payload);
         $response->assertOk()
             ->assertJsonFragment([
+                'status' => true,
+                'message' => 'Role updated successfully',
                 'data' => [
                     'id' => $role->id,
                     'name' => 'editor-updated',
                     'description' => 'Updated description',
                     'permissions' => [],
+                    'status' => "1",
                     'users_count' => 0,
                 ],
-                'message' => 'Role updated successfully',
-                'status' => true,
             ]);
     }
 
