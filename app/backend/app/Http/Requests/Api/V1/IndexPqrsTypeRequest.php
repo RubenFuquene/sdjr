@@ -25,11 +25,11 @@ class IndexPqrsTypeRequest extends FormRequest
 
     public function validatedPerPage(): int
     {
-        return $this->input('per_page', 15);
+        return intval($this->input('per_page', 15));
     }
 
     public function validatedStatus(): ?string
     {
-        return $this->input('status');
+        return intval($this->input('status')) ?: null;
     }
 }

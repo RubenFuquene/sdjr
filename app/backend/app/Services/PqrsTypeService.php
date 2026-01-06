@@ -19,7 +19,7 @@ class PqrsTypeService
     /**
      * List paginated PqrsTypes with filters
      */
-    public function index(array $filters, int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = PqrsType::query();
         if (! empty($filters['status'])) {

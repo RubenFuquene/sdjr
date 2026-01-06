@@ -51,9 +51,10 @@ class PqrsTypeController extends Controller
         try {
             $filters = $request->only(['status', 'name', 'code']);
             $perPage = $request->validatedPerPage();
-            $result = $this->service->index($filters, $perPage);
+            $pqrs = $this->service->getPaginated($filters, $perPage);
+            $resource = PqrsTypeResource::collection($pqrs);
 
-            return $this->successResponse(PqrsTypeResource::collection($result), 'Pqrs Types retrieved successfully');
+            return $this->paginatedResponse($pqrs, $resource, 'Pqrs Types retrieved successfully');
         } catch (Exception $e) {
             return $this->errorResponse('Error listing Pqrs Types', 500);
         }

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('code', 20)->unique();
             $table->char('status', 1)->default(Constant::STATUS_ACTIVE);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

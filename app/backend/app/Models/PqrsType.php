@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class PqrsType
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PqrsType extends Model
 {
-    use HasFactory, SanitizesTextAttributes;
+    use HasFactory, SanitizesTextAttributes, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
