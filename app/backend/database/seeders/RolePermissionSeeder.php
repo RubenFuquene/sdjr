@@ -100,6 +100,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.pqrs_types.update', 'guard_name' => $guardName, 'description' => 'Permission to update PQRs types', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.pqrs_types.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete PQRs types', 'created_at' => now(), 'updated_at' => now()],
 
+            ['name' => 'admin.priority_types.index', 'guard_name' => $guardName, 'description' => 'List priority types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.priority_types.create', 'guard_name' => $guardName, 'description' => 'Create priority types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.priority_types.show', 'guard_name' => $guardName, 'description' => 'View priority types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.priority_types.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit priority types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.priority_types.update', 'guard_name' => $guardName, 'description' => 'Permission to update priority types', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.priority_types.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete priority types', 'created_at' => now(), 'updated_at' => now()],
+            
             // Users
             ['name' => 'admin.users.index', 'guard_name' => $guardName, 'description' => 'List permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.users.create', 'guard_name' => $guardName, 'description' => 'Create permissions', 'created_at' => now(), 'updated_at' => now()],

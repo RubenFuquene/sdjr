@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             BankSeeder::class,
             SupportStatusSeeder::class,
             PqrsTypeSeeder::class,
+            PriorityTypeSeeder::class,
         ]);
     }
 }
