@@ -19,7 +19,7 @@ class MeEndpointTest extends TestCase
      */
     public function test_it_returns_authenticated_user_info()
     {
-        Role::create(['name' => 'superadmin']);
+        Role::create(['name' => 'superadmin', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
         $user->assignRole('superadmin');
         Sanctum::actingAs($user);
