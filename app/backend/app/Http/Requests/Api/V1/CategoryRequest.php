@@ -16,6 +16,11 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class CategoryRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
@@ -25,9 +30,12 @@ class CategoryRequest extends FormRequest
     }
 
     /**
+     * Get the validation rules that apply to the request.
+     *
      * @OA\Property(property="name", type="string", example="Food")
      * @OA\Property(property="icon", type="string", example="https://example.com/icon.png")
      * @OA\Property(property="status", type="string", example="1")
+     * @return array
      */
     public function rules(): array
     {

@@ -20,6 +20,7 @@ class CountryResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
+     * @param \Illuminate\Http\Request $request
      * @OA\Property(
      *      property="id",
      *      title="id",
@@ -52,7 +53,7 @@ class CountryResource extends JsonResource
      *      example="2023-01-01T00:00:00.000000Z"
      * )
      *
-     * @return array<string, mixed>
+     * @return array
      */
     public function toArray(Request $request): array
     {

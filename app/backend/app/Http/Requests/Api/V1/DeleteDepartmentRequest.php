@@ -8,6 +8,9 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class DeleteDepartmentRequest extends FormRequest
 {
+    /**
+     * @return bool
+     */
     public function authorize(): bool
     {
         return $this->user()?->can('admin.departments.delete') ?? false;

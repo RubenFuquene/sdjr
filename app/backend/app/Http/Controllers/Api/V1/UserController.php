@@ -297,7 +297,7 @@ class UserController extends Controller
 
             return $this->successResponse(new UserResource($updatedUser), 'User status updated successfully');
         } catch (\Throwable $e) {
-            Log::error('Error updating user status', ['id' => $user?->id, 'error' => $e->getMessage()]);
+            Log::error('Error updating user status', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error updating user status', 500);
         }

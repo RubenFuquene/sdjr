@@ -28,6 +28,9 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class CommerceRequest extends FormRequest
 {
+    /**
+     * @return bool
+     */
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
@@ -36,6 +39,9 @@ class CommerceRequest extends FormRequest
         return $this->user()?->can($permission) ?? false;
     }
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         $method = $this->method();

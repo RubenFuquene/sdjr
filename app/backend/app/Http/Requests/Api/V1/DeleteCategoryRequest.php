@@ -8,11 +8,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class DeleteCategoryRequest extends FormRequest
 {
+    /**
+     * @return bool
+     */
     public function authorize(): bool
     {
         return $this->user()?->can('admin.categories.delete') ?? false;
     }
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [];

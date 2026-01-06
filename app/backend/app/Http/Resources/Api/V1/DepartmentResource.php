@@ -63,7 +63,7 @@ class DepartmentResource extends JsonResource
      *      example="2023-01-01T00:00:00.000000Z"
      * )
      *
-     * @return array<string, mixed>
+     * @return array
      */
     public function toArray(Request $request): array
     {

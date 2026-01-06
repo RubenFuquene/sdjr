@@ -22,6 +22,11 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class UserRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
@@ -30,6 +35,11 @@ class UserRequest extends FormRequest
         return $this->user()?->can($permission) ?? false;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
     public function rules(): array
     {
         $method = $this->method();
