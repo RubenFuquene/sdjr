@@ -96,44 +96,30 @@ class CategoryController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created category.
      *
      * @OA\Post(
      *      path="/api/v1/categories",
      *      operationId="storeCategory",
      *      tags={"Categories"},
      *      summary="Store new category",
-     *      description="Returns category data",
+     *      description="Returns created category data",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\RequestBody(
      *          required=true,
-     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
      *      ),
-     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
-     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
-     *       ),
-     *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
      *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
-     *
-     * @return CategoryResource
      */
     public function store(CategoryRequest $request): CategoryResource|JsonResponse
     {
@@ -147,50 +133,31 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified category.
      *
      * @OA\Get(
      *      path="/api/v1/categories/{id}",
-     *      operationId="getCategoryById",
+     *      operationId="showCategory",
      *      tags={"Categories"},
      *      summary="Get category information",
      *      description="Returns category data",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Category id",
-     *          required=true,
      *          in="path",
-     *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          required=true,
+     *          description="Category ID",
+     *          @OA\Schema(type="string")
      *      ),
-     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
-     *       ),
-     *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
      *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function show(ShowCategoryRequest $request, string $id): CategoryResource|JsonResponse
@@ -208,7 +175,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified category.
      *
      * @OA\Put(
      *      path="/api/v1/categories/{id}",
@@ -217,47 +184,28 @@ class CategoryController extends Controller
      *      summary="Update existing category",
      *      description="Returns updated category data",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Category id",
-     *          required=true,
      *          in="path",
-     *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          required=true,
+     *          description="Category ID",
+     *          @OA\Schema(type="string")
      *      ),
-     *
      *      @OA\RequestBody(
      *          required=true,
-     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
      *      ),
-     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
-     *       ),
-     *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
      *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function update(CategoryRequest $request, string $id): CategoryResource|JsonResponse
@@ -276,7 +224,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified category.
      *
      * @OA\Delete(
      *      path="/api/v1/categories/{id}",
@@ -285,40 +233,18 @@ class CategoryController extends Controller
      *      summary="Delete existing category",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Category id",
-     *          required=true,
      *          in="path",
-     *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          required=true,
+     *          description="Category ID",
+     *          @OA\Schema(type="string")
      *      ),
-     *
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *
-     *          @OA\JsonContent(
-     *
-     *              @OA\Property(property="message", type="string", example="Category deleted successfully")
-     *          )
-     *       ),
-     *
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=204, description="No Content"),
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function destroy(DeleteCategoryRequest $request, string $id): JsonResponse

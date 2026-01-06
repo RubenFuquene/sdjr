@@ -43,17 +43,48 @@ class PriorityTypeController extends Controller
      *      summary="Get list of priority types",
      *      description="Returns list of priority types",
      *      security={{"sanctum":{}}},
-     *
+     *      @OA\Parameter(
+     *          name="per_page",
+     *          in="query",
+     *          required=false,
+     *          description="Items per page",
+     *          @OA\Schema(type="integer", default=15)
+     *      ),
+     *      @OA\Parameter(
+     *          name="name",
+     *          in="query",
+     *          required=false,
+     *          description="Filter by name",
+     *          @OA\Schema(type="string")
+     *      ),
+     *      @OA\Parameter(
+     *          name="code",
+     *          in="query",
+     *          required=false,
+     *          description="Filter by code",
+     *          @OA\Schema(type="string")
+     *      ),
+     *      @OA\Parameter(
+     *          name="status",
+     *          in="query",
+     *          required=false,
+     *          description="Filter by status (1=active, 0=inactive)",
+     *          @OA\Schema(type="string")
+     *      ),
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *
-     *          @OA\JsonContent(ref="#/components/schemas/PriorityTypeResource")
-     *       ),
-     *
+     *          @OA\JsonContent(
+     *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PriorityTypeResource")),
+     *              @OA\Property(property="meta", type="object"),
+     *              @OA\Property(property="links", type="object")
+     *          )
+     *      ),
      *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=403, description="Forbidden")
-     *     )
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
+     * )
      */
     public function index(IndexPriorityTypeRequest $request): AnonymousResourceCollection|JsonResponse
     {
@@ -70,32 +101,29 @@ class PriorityTypeController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created priority type.
      *
      * @OA\Post(
      *      path="/api/v1/priority-types",
      *      operationId="storePriorityType",
      *      tags={"PriorityTypes"},
      *      summary="Store new priority type",
-     *      description="Returns priority type data",
+     *      description="Returns created priority type data",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\RequestBody(
      *          required=true,
-     *
      *          @OA\JsonContent(ref="#/components/schemas/StorePriorityTypeRequest")
      *      ),
-     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
-     *
      *          @OA\JsonContent(ref="#/components/schemas/PriorityTypeResource")
-     *       ),
-     *
+     *      ),
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=403, description="Forbidden")
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function store(StorePriorityTypeRequest $request): PriorityTypeResource|JsonResponse
@@ -110,36 +138,31 @@ class PriorityTypeController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified priority type.
      *
      * @OA\Get(
      *      path="/api/v1/priority-types/{id}",
-     *      operationId="getPriorityTypeById",
+     *      operationId="showPriorityType",
      *      tags={"PriorityTypes"},
      *      summary="Get priority type information",
      *      description="Returns priority type data",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Priority type id",
-     *          required=true,
      *          in="path",
-     *
+     *          required=true,
+     *          description="Priority type ID",
      *          @OA\Schema(type="string")
      *      ),
-     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *
      *          @OA\JsonContent(ref="#/components/schemas/PriorityTypeResource")
-     *       ),
-     *
-     *      @OA\Response(response=400, description="Bad Request"),
+     *      ),
+     *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Resource Not Found")
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function show(ShowPriorityTypeRequest $request, string $id): PriorityTypeResource|JsonResponse
@@ -157,7 +180,7 @@ class PriorityTypeController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified priority type.
      *
      * @OA\Put(
      *      path="/api/v1/priority-types/{id}",
@@ -166,33 +189,28 @@ class PriorityTypeController extends Controller
      *      summary="Update existing priority type",
      *      description="Returns updated priority type data",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Priority type id",
-     *          required=true,
      *          in="path",
-     *
+     *          required=true,
+     *          description="Priority type ID",
      *          @OA\Schema(type="string")
      *      ),
-     *
      *      @OA\RequestBody(
      *          required=true,
-     *
      *          @OA\JsonContent(ref="#/components/schemas/UpdatePriorityTypeRequest")
      *      ),
-     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *
      *          @OA\JsonContent(ref="#/components/schemas/PriorityTypeResource")
-     *       ),
-     *
+     *      ),
+     *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Resource Not Found")
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function update(UpdatePriorityTypeRequest $request, string $id): PriorityTypeResource|JsonResponse
@@ -211,7 +229,7 @@ class PriorityTypeController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified priority type.
      *
      * @OA\Delete(
      *      path="/api/v1/priority-types/{id}",
@@ -220,23 +238,18 @@ class PriorityTypeController extends Controller
      *      summary="Delete existing priority type",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Priority type id",
-     *          required=true,
      *          in="path",
-     *
+     *          required=true,
+     *          description="Priority type ID",
      *          @OA\Schema(type="string")
      *      ),
-     *
-     *      @OA\Response(
-     *          response=204,
-     *          description="Successful operation"
-     *       ),
+     *      @OA\Response(response=204, description="No Content"),
+     *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Resource Not Found")
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function destroy(DeletePriorityTypeRequest $request, string $id): JsonResponse
