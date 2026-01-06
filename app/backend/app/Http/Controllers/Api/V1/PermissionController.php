@@ -30,16 +30,20 @@ class PermissionController extends Controller
      *     summary="Get all permissions",
      *     description="Returns a list of all permissions created in the system.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PermissionResource")),
      *             @OA\Property(property="message", type="string"),
      *             @OA\Property(property="status", type="boolean")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=500, description="Internal Server Error")

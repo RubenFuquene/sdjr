@@ -105,15 +105,20 @@ class CategoryController extends Controller
      *      summary="Store new category",
      *      description="Returns created category data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
      *      ),
+     *
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -142,18 +147,23 @@ class CategoryController extends Controller
      *      summary="Get category information",
      *      description="Returns category data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Category ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -184,22 +194,29 @@ class CategoryController extends Controller
      *      summary="Update existing category",
      *      description="Returns updated category data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Category ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
@@ -233,13 +250,16 @@ class CategoryController extends Controller
      *      summary="Delete existing category",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Category ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(response=204, description="No Content"),
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),

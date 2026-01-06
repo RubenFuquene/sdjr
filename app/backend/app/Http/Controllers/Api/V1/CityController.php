@@ -40,29 +40,37 @@ class CityController extends Controller
      *      summary="Get list of cities",
      *      description="Returns list of cities",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="per_page",
      *          in="query",
      *          required=false,
      *          description="Items per page",
+     *
      *          @OA\Schema(type="integer", default=15)
      *      ),
+     *
      *      @OA\Parameter(
      *          name="status",
      *          in="query",
      *          required=false,
      *          description="Filter by status (1=active, 0=inactive)",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CityResource")),
      *              @OA\Property(property="meta", type="object"),
      *              @OA\Property(property="links", type="object")
      *          )
      *      ),
+     *
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
      *      @OA\Response(response=422, description="Unprocessable Entity"),
@@ -95,15 +103,20 @@ class CityController extends Controller
      *      summary="Store new city",
      *      description="Returns created city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
      *      ),
+     *
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -132,18 +145,23 @@ class CityController extends Controller
      *      summary="Get city information",
      *      description="Returns city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="City ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -171,22 +189,29 @@ class CityController extends Controller
      *      summary="Update existing city",
      *      description="Returns updated city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="City ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
@@ -220,13 +245,16 @@ class CityController extends Controller
      *      summary="Delete existing city",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="City ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(response=204, description="No Content"),
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),

@@ -25,8 +25,7 @@ class BankResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
      */
     public function toArray($request): array
     {

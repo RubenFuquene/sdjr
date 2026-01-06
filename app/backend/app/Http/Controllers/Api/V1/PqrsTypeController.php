@@ -43,15 +43,19 @@ class PqrsTypeController extends Controller
      *     summary="List Pqrs Types",
      *     description="Returns paginated list of Pqrs Types",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
      *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
      *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(type="string")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="status", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Pqrs Types retrieved successfully"),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PqrsTypeResource")),
@@ -59,6 +63,7 @@ class PqrsTypeController extends Controller
      *             @OA\Property(property="links", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=422, description="Unprocessable Entity"),
@@ -89,15 +94,20 @@ class PqrsTypeController extends Controller
      *     summary="Create Pqrs Type",
      *     description="Creates a new Pqrs Type",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(ref="#/components/schemas/StorePqrsTypeRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Created",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/PqrsTypeResource")
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=422, description="Validation Error")
@@ -124,12 +134,16 @@ class PqrsTypeController extends Controller
      *     summary="Show Pqrs Type",
      *     description="Returns a single Pqrs Type",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/PqrsTypeResource")
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=404, description="Not Found")
@@ -156,16 +170,22 @@ class PqrsTypeController extends Controller
      *     summary="Update Pqrs Type",
      *     description="Updates an existing Pqrs Type",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(ref="#/components/schemas/UpdatePqrsTypeRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/PqrsTypeResource")
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=422, description="Validation Error")
@@ -192,7 +212,9 @@ class PqrsTypeController extends Controller
      *     summary="Delete Pqrs Type",
      *     description="Deletes a Pqrs Type",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=204, description="No Content"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),

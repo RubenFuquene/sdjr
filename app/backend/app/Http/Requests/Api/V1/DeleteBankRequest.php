@@ -8,17 +8,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class DeleteBankRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return $this->user()?->can('admin.banks.delete') ?? false;
     }
 
-    /**
-     * @return array
-     */
     public function rules(): array
     {
         return [];

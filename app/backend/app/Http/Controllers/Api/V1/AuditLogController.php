@@ -35,11 +35,14 @@ class AuditLogController extends Controller
      *     summary="Get all audit logs",
      *     description="Returns a list of audit logs",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/AuditLogResource"))
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=500, description="Internal Server Error")

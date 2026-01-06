@@ -18,8 +18,6 @@ class CategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -35,7 +33,6 @@ class CategoryRequest extends FormRequest
      * @OA\Property(property="name", type="string", example="Food")
      * @OA\Property(property="icon", type="string", example="https://example.com/icon.png")
      * @OA\Property(property="status", type="string", example="1")
-     * @return array
      */
     public function rules(): array
     {

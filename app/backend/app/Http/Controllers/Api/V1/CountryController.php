@@ -100,15 +100,20 @@ class CountryController extends Controller
      *      summary="Store new country",
      *      description="Returns created country data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CountryRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
      *      ),
+     *
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -137,18 +142,23 @@ class CountryController extends Controller
      *      summary="Get country information",
      *      description="Returns country data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Country ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -179,22 +189,29 @@ class CountryController extends Controller
      *      summary="Update existing country",
      *      description="Returns updated country data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Country ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CountryRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
@@ -228,13 +245,16 @@ class CountryController extends Controller
      *      summary="Delete existing country",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Country ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(response=204, description="No Content"),
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),

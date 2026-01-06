@@ -40,43 +40,55 @@ class DepartmentController extends Controller
      *      summary="Get list of departments",
      *      description="Returns list of departments",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="per_page",
      *          in="query",
      *          required=false,
      *          description="Items per page",
+     *
      *          @OA\Schema(type="integer", default=15)
      *      ),
+     *
      *      @OA\Parameter(
      *          name="name",
      *          in="query",
      *          required=false,
      *          description="Filter by name",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Parameter(
      *          name="code",
      *          in="query",
      *          required=false,
      *          description="Filter by code",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Parameter(
      *          name="status",
      *          in="query",
      *          required=false,
      *          description="Filter by status (1=active, 0=inactive)",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/DepartmentResource")),
      *              @OA\Property(property="meta", type="object"),
      *              @OA\Property(property="links", type="object")
      *          )
      *      ),
+     *
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
      *      @OA\Response(response=422, description="Unprocessable Entity"),
@@ -89,7 +101,7 @@ class DepartmentController extends Controller
     {
         try {
             $filters = $request->only(['name', 'code', 'status']);
-            $perPage = $request->validatedPerPage();            
+            $perPage = $request->validatedPerPage();
             $departments = $this->departmentService->getPaginated($filters, $perPage);
             $resource = DepartmentResource::collection($departments);
 
@@ -109,15 +121,20 @@ class DepartmentController extends Controller
      *      summary="Store new department",
      *      description="Returns created department data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
      *      ),
+     *
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -146,18 +163,23 @@ class DepartmentController extends Controller
      *      summary="Get department information",
      *      description="Returns department data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Department ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),
      *      @OA\Response(response=403, description="Forbidden"),
@@ -185,22 +207,29 @@ class DepartmentController extends Controller
      *      summary="Update existing department",
      *      description="Returns updated department data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Department ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
+     *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
      *      ),
+     *
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=400, description="Bad Request"),
      *      @OA\Response(response=401, description="Unauthenticated"),
@@ -234,13 +263,16 @@ class DepartmentController extends Controller
      *      summary="Delete existing department",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="Department ID",
+     *
      *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\Response(response=204, description="No Content"),
      *      @OA\Response(response=404, description="Resource Not Found"),
      *      @OA\Response(response=401, description="Unauthenticated"),

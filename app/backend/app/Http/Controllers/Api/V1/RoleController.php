@@ -52,44 +52,56 @@ class RoleController extends Controller
      *     summary="Get list of roles",
      *     description="Returns a paginated list of roles with permissions and user count.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         required=false,
      *         description="Items per page",
+     *
      *         @OA\Schema(type="integer", default=15)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="name",
      *         in="query",
      *         required=false,
      *         description="Filter by name",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="description",
      *         in="query",
      *         required=false,
      *         description="Filter by description",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="permission",
      *         in="query",
      *         required=false,
      *         description="Filter by permission",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/RoleResource")),
      *             @OA\Property(property="meta", type="object"),
      *             @OA\Property(property="links", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=422, description="Unprocessable Entity"),

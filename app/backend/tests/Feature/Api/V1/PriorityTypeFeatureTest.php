@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Constants\Constant;
 use App\Models\PriorityType;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class PriorityTypeFeatureTest extends TestCase
 {
@@ -61,7 +61,7 @@ class PriorityTypeFeatureTest extends TestCase
         Sanctum::actingAs($user);
 
         $priorityType = PriorityType::factory()->create(['name' => 'Alta', 'code' => 'HIGH']);
-        $response = $this->getJson('/api/v1/priority-types/' . $priorityType->id);
+        $response = $this->getJson('/api/v1/priority-types/'.$priorityType->id);
         $response->assertStatus(200)
             ->assertJsonPath('data.name', 'Alta')
             ->assertJsonPath('data.code', 'HIGH');
@@ -76,7 +76,7 @@ class PriorityTypeFeatureTest extends TestCase
 
         $priorityType = PriorityType::factory()->create(['name' => 'Alta', 'code' => 'HIGH']);
         $data = ['name' => 'Media'];
-        $response = $this->putJson('/api/v1/priority-types/' . $priorityType->id, $data);
+        $response = $this->putJson('/api/v1/priority-types/'.$priorityType->id, $data);
         $response->assertStatus(200)
             ->assertJsonFragment(['name' => 'Media']);
 
@@ -91,8 +91,8 @@ class PriorityTypeFeatureTest extends TestCase
         Sanctum::actingAs($user);
 
         $priorityType = PriorityType::factory()->create();
-        $response = $this->deleteJson('/api/v1/priority-types/' . $priorityType->id);
-        $response->assertStatus(204);        
+        $response = $this->deleteJson('/api/v1/priority-types/'.$priorityType->id);
+        $response->assertStatus(204);
     }
 
     public function test_store_priority_type_validation_error()
@@ -105,6 +105,7 @@ class PriorityTypeFeatureTest extends TestCase
         $response = $this->postJson('/api/v1/priority-types', []);
         $response->assertStatus(422);
     }
+
     /**
      * Test that unauthenticated users cannot access the endpoints.
      */

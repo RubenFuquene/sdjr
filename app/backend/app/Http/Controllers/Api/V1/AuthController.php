@@ -8,7 +8,7 @@ use App\Http\Resources\Api\V1\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 
- /**
+/**
  * @OA\Tag(
  *     name="Authentication",
  *     description="API Endpoints for User Authentication"

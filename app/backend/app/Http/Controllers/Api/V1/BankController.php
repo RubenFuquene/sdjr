@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteBankRequest;
-use App\Http\Requests\Api\V1\IndexBankRequest;
 use App\Http\Requests\Api\V1\ShowBankRequest;
 use App\Http\Requests\Api\V1\StoreBankRequest;
 use App\Http\Requests\Api\V1\UpdateBankRequest;
@@ -44,15 +43,19 @@ class BankController extends Controller
      *     summary="Get list of banks",
      *     description="Returns a paginated list of banks.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
      *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="status", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Banks retrieved successfully"),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/BankResource")),
@@ -60,6 +63,7 @@ class BankController extends Controller
      *             @OA\Property(property="links", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
@@ -87,18 +91,23 @@ class BankController extends Controller
      *     summary="Get bank information",
      *     description="Returns bank data",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="Bank ID",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/BankResource")
      *     ),
+     *
      *     @OA\Response(response=404, description="Resource Not Found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -130,22 +139,29 @@ class BankController extends Controller
      *     summary="Update existing bank",
      *     description="Returns updated bank data",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="Bank ID",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(ref="#/components/schemas/UpdateBankRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/BankResource")
      *     ),
+     *
      *     @OA\Response(response=404, description="Resource Not Found"),
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -179,13 +195,16 @@ class BankController extends Controller
      *     summary="Delete existing bank",
      *     description="Deletes a record and returns no content",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="Bank ID",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response=204, description="No Content"),
      *     @OA\Response(response=404, description="Resource Not Found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
