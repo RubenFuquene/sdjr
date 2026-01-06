@@ -71,7 +71,6 @@ Los controladores **solo** deben:
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
 | **Inyección de Dependencias** | Usa inyección en constructores o métodos en lugar de Facades estáticas             |
 | **API Resources**              | Usa `JsonResource` para transformar modelos. Nunca devuelvas objetos Eloquent puros |
-| **DTOs**                       | Usa `readonly classes` para pasar datos tipados del Controlador al Servicio         |
 
 ---
 
@@ -474,7 +473,6 @@ Para cualquier método que **NO** sea un endpoint, es **obligatorio** el uso de 
 
 - Documenta todas las funciones públicas y protegidas en Servicios, Modelos, Policies, etc.
 - Documenta los tests unitarios y de feature también.
-- Documenta los DTOs y cualquier clase relevante.
 
 #### 6.2.1 Reglas
 
@@ -669,7 +667,6 @@ app/
 ├── Models/
 ├── Policies/
 ├── Services/
-└── DTOs/
 
 database/
 ├── factories/
