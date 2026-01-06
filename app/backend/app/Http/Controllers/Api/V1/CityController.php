@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Services\CityService;
-use App\Traits\ApiResponseTrait;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CityRequest;
-use App\Http\Resources\Api\V1\CityResource;
 use App\Http\Requests\Api\V1\DeleteCityRequest;
 use App\Http\Requests\Api\V1\IndexCityRequest;
 use App\Http\Requests\Api\V1\ShowCityRequest;
+use App\Http\Resources\Api\V1\CityResource;
+use App\Services\CityService;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -176,6 +176,7 @@ class CityController extends Controller
     {
         try {
             $city = $this->cityService->find($id);
+
             return $this->successResponse(new CityResource($city), 'City retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);

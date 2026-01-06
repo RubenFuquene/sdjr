@@ -55,7 +55,6 @@ class CorsConfigurationTest extends TestCase
         // app('config')->set('app.env', 'production');
         // app('config')->set('cors.allowed_origins_patterns', []);
         // app('config')->set('cors.allowed_origins', []);
-        
 
         // $response = $this->withHeaders([
         //     'Origin' => 'http://malicious-site.com',

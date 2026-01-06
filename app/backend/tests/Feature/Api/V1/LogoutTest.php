@@ -23,11 +23,10 @@ class LogoutTest extends TestCase
 
         $response->assertOk()
             ->assertJson([
-                'message' => 'Successfully logged out'
+                'message' => 'Successfully logged out',
             ]);
     }
 
-    
     /**
      * Prueba que se requiere autenticación para cerrar sesión.
      */

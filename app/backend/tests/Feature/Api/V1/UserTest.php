@@ -13,7 +13,6 @@ class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    
     /**
      * Prueba que un usuario autenticado y con permiso puede listar usuarios.
      */
@@ -36,7 +35,6 @@ class UserTest extends TestCase
         ]);
     }
 
-    
     /**
      * Prueba que un usuario no autenticado no puede listar usuarios.
      */
@@ -46,7 +44,6 @@ class UserTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    
     /**
      * Prueba que un usuario autenticado y con permiso puede crear un usuario.
      */
@@ -71,7 +68,6 @@ class UserTest extends TestCase
         $response->assertJsonFragment(['name' => 'New', 'last_name' => 'User', 'phone' => '3001234567']);
     }
 
-    
     /**
      * Prueba que un usuario autenticado y con permiso puede ver el detalle de un usuario.
      */
@@ -88,7 +84,6 @@ class UserTest extends TestCase
         $response->assertJsonFragment(['id' => $user->id]);
     }
 
-    
     /**
      * Prueba que un usuario autenticado y con permiso puede actualizar un usuario.
      */
@@ -106,7 +101,6 @@ class UserTest extends TestCase
         $response->assertJsonFragment(['name' => 'Updated Name']);
     }
 
-    
     /**
      * Prueba que un usuario autenticado y con permiso puede eliminar (soft delete) un usuario.
      */

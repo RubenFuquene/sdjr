@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\SupportStatus;
-use Exception;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SupportStatusService
 {
@@ -18,18 +16,19 @@ class SupportStatusService
     public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = SupportStatus::query();
-        if (!empty($filters['name'])) {
+        if (! empty($filters['name'])) {
             $query->where('name', 'like', "%{$filters['name']}%");
         }
-        if (!empty($filters['code'])) {
+        if (! empty($filters['code'])) {
             $query->where('code', 'like', "%{$filters['code']}%");
         }
-        if (!empty($filters['color'])) {
+        if (! empty($filters['color'])) {
             $query->where('color', 'like', "%{$filters['color']}%");
         }
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
+
         return $query->paginate($perPage);
     }
 
@@ -43,6 +42,7 @@ class SupportStatusService
 
     /**
      * Get a single support status by ID.
+     *
      * @throws ModelNotFoundException
      */
     public function find(int $id): SupportStatus
@@ -52,17 +52,20 @@ class SupportStatusService
 
     /**
      * Update a support status.
+     *
      * @throws ModelNotFoundException
      */
     public function update(int $id, array $data): SupportStatus
     {
         $status = $this->find($id);
         $status->update($data);
+
         return $status->refresh();
     }
 
     /**
      * Delete a support status (soft delete).
+     *
      * @throws ModelNotFoundException
      */
     public function delete(int $id): void

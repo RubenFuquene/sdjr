@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\PqrsType;
+use Illuminate\Database\Seeder;
 
 class PqrsTypeSeeder extends Seeder
 {

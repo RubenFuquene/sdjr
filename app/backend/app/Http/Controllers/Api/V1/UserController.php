@@ -295,11 +295,14 @@ class UserController extends Controller
      *     summary="Get list of administrator users",
      *     description="Returns a list of users with the administrator role.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/UserResource"))
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
@@ -310,9 +313,11 @@ class UserController extends Controller
             $users = User::with('roles')->get()->filter(
                 fn ($user) => $user->roles->whereIn('name', ['superadmin', 'admin'])->toArray()
             );
+
             return $this->successResponse(UserResource::collection($users), 'Administrators retrieved successfully', Response::HTTP_OK);
         } catch (\Throwable $e) {
             Log::error('Error listing administrators', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error listing administrators', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }

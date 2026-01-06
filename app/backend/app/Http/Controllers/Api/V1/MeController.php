@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\MeRequest;
+use App\Http\Resources\Api\V1\MePermissionsResource;
+use App\Http\Resources\Api\V1\MeResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use App\Http\Resources\Api\V1\MeResource;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\MePermissionsResource;
 
 class MeController extends Controller
 {
@@ -23,11 +23,14 @@ class MeController extends Controller
      *     summary="Get current authenticated user info",
      *     description="Returns id, name, email, roles and permissions of the authenticated user.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="id", type="integer"),
      *             @OA\Property(property="name", type="string"),
      *             @OA\Property(property="email", type="string"),
@@ -35,24 +38,20 @@ class MeController extends Controller
      *             @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated")
      * )
-     *
-     * @param MeRequest $request
-     * @return JsonResponse
      */
     public function authenticatedUser(MeRequest $request): JsonResponse
     {
-        try
-        {
+        try {
             return $this->successResponse(
-                    new MeResource($request->user()),
-                    'User information retrieved successfully',
-                    200
-                );
+                new MeResource($request->user()),
+                'User information retrieved successfully',
+                200
+            );
 
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return $this->errorResponse(['error' => 'Unable to retrieve user information'], 500);
         }
     }
@@ -65,33 +64,32 @@ class MeController extends Controller
      *     summary="Get current authenticated user permissions and roles",
      *     description="Returns permissions and roles of the authenticated user.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="roles", type="array", @OA\Items(type="string")),
      *             @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated")
      * )
-     *
-     * @param MeRequest $request
-     * @return JsonResponse
      */
     public function authenticatedUserPermissions(MeRequest $request): JsonResponse
     {
-        try
-        {
+        try {
             return $this->successResponse(
                 new MePermissionsResource($request->user()),
                 'Permissions and roles retrieved successfully',
                 200
             );
-        }catch (\Exception $e)
-        {
-            return $this->errorResponse(['error' => 'Unable to retrieve user permissions'], 500);   
+        } catch (\Exception $e) {
+            return $this->errorResponse(['error' => 'Unable to retrieve user permissions'], 500);
         }
     }
 }

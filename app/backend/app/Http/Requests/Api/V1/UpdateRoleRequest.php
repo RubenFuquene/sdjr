@@ -17,6 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *         property="permissions",
  *         type="array",
  *         description="Array of permission names",
+ *
  *         @OA\Items(type="string", example="users.create")
  *     )
  * )

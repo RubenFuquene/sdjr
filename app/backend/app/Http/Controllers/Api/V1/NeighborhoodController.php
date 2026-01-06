@@ -167,6 +167,7 @@ class NeighborhoodController extends Controller
     {
         try {
             $this->neighborhoodService->destroy($neighborhood_id);
+
             return $this->noContentResponse(null, Response::HTTP_NO_CONTENT);
         } catch (Throwable $e) {
             return $this->errorResponse('Error deleting neighborhood', Response::HTTP_INTERNAL_SERVER_ERROR);

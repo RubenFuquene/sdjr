@@ -8,8 +8,8 @@ use App\Models\Bank;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class BankTest extends TestCase
 {
@@ -56,7 +56,7 @@ class BankTest extends TestCase
         $user->givePermissionTo('admin.banks.index');
         Sanctum::actingAs($user);
         $bank = Bank::factory()->create();
-        $response = $this->getJson('/api/v1/banks/' . $bank->id);
+        $response = $this->getJson('/api/v1/banks/'.$bank->id);
         $response->assertOk()->assertJsonPath('data.id', $bank->id);
     }
 
@@ -74,7 +74,7 @@ class BankTest extends TestCase
             'name' => 'Banco Actualizado',
             'code' => 'UPDATEDBANK',
         ];
-        $response = $this->putJson('/api/v1/banks/' . $bank->id, $payload);
+        $response = $this->putJson('/api/v1/banks/'.$bank->id, $payload);
         $response->assertOk()->assertJsonPath('data.name', 'Banco actualizado');
     }
 
@@ -88,7 +88,7 @@ class BankTest extends TestCase
         $user->givePermissionTo('admin.banks.delete');
         Sanctum::actingAs($user);
         $bank = Bank::factory()->create();
-        $response = $this->deleteJson('/api/v1/banks/' . $bank->id);
+        $response = $this->deleteJson('/api/v1/banks/'.$bank->id);
         $response->assertNoContent();
         $this->assertSoftDeleted('banks', ['id' => $bank->id]);
     }

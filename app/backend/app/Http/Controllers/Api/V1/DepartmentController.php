@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteDepartmentRequest;
+use App\Http\Requests\Api\V1\DepartmentRequest;
+use App\Http\Requests\Api\V1\IndexDepartmentRequest;
+use App\Http\Requests\Api\V1\ShowDepartmentRequest;
+use App\Http\Resources\Api\V1\DepartmentResource;
+use App\Services\DepartmentService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use App\Services\DepartmentService;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\DepartmentRequest;
-use App\Http\Resources\Api\V1\DepartmentResource;
-use App\Http\Requests\Api\V1\ShowDepartmentRequest;
-use App\Http\Requests\Api\V1\IndexDepartmentRequest;
-use App\Http\Requests\Api\V1\DeleteDepartmentRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -176,6 +176,7 @@ class DepartmentController extends Controller
     {
         try {
             $department = $this->departmentService->find($id);
+
             return $this->successResponse(new DepartmentResource($department), 'Department retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving department', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);

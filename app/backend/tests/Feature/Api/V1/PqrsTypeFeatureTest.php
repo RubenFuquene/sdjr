@@ -1,14 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\PqrsType;
 use App\Constants\Constant;
-use Spatie\Permission\Models\Permission;
+use App\Models\PqrsType;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class PqrsTypeFeatureTest extends TestCase
 {
@@ -56,11 +57,11 @@ class PqrsTypeFeatureTest extends TestCase
         $this->actingAs($user, 'sanctum');
         $payload = [
             'name' => '',
-            'code' => '',            
+            'code' => '',
         ];
         $response = $this->postJson('/api/v1/pqrs-types', $payload);
         $response->assertStatus(422);
-        $json = $response->json();        
+        $json = $response->json();
         $this->assertArrayHasKey('message', $json);
     }
 
@@ -71,7 +72,7 @@ class PqrsTypeFeatureTest extends TestCase
         $user->givePermissionTo('admin.pqrs_types.show');
         $this->actingAs($user, 'sanctum');
         $pqrsType = PqrsType::factory()->create();
-        $response = $this->getJson('/api/v1/pqrs-types/' . $pqrsType->id);
+        $response = $this->getJson('/api/v1/pqrs-types/'.$pqrsType->id);
         $response->assertStatus(200)
             ->assertJsonStructure(['status', 'data']);
         $json = $response->json();
@@ -88,9 +89,9 @@ class PqrsTypeFeatureTest extends TestCase
         $pqrsType = PqrsType::factory()->create();
         $payload = [
             'name' => 'Petición',
-            'code' => 'PETICION',            
+            'code' => 'PETICION',
         ];
-        $response = $this->putJson('/api/v1/pqrs-types/' . $pqrsType->id, $payload);
+        $response = $this->putJson('/api/v1/pqrs-types/'.$pqrsType->id, $payload);
         $response->assertStatus(200)
             ->assertJsonStructure(['status', 'data']);
         $json = $response->json();
@@ -105,7 +106,7 @@ class PqrsTypeFeatureTest extends TestCase
         $user->givePermissionTo('admin.pqrs_types.delete');
         $this->actingAs($user, 'sanctum');
         $pqrsType = PqrsType::factory()->create();
-        $response = $this->deleteJson('/api/v1/pqrs-types/' . $pqrsType->id);
+        $response = $this->deleteJson('/api/v1/pqrs-types/'.$pqrsType->id);
         $response->assertStatus(204);
         $this->assertEmpty($response->getContent());
     }
@@ -116,7 +117,7 @@ class PqrsTypeFeatureTest extends TestCase
         $this->actingAs($user, 'sanctum');
         $response = $this->getJson('/api/v1/pqrs-types');
         $response->assertStatus(403);
-        $json = $response->json();        
+        $json = $response->json();
         $this->assertArrayHasKey('message', $json);
     }
 }

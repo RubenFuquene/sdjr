@@ -63,7 +63,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.banks.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit banks', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.banks.update', 'guard_name' => $guardName, 'description' => 'Permission to update banks', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.banks.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete banks', 'created_at' => now(), 'updated_at' => now()],
-            
+
             ['name' => 'admin.support_statuses.index', 'guard_name' => $guardName, 'description' => 'List support statuses', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.support_statuses.create', 'guard_name' => $guardName, 'description' => 'Create support statuses', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.support_statuses.show', 'guard_name' => $guardName, 'description' => 'View support statuses', 'created_at' => now(), 'updated_at' => now()],
@@ -108,7 +108,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.users.update', 'guard_name' => $guardName, 'description' => 'Permission to update permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.users.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.users.assign_roles_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign roles and permissions to users', 'created_at' => now(), 'updated_at' => now()],
-            
+
             // Administrator Modules
             ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.create', 'guard_name' => $guardName, 'description' => 'Create admin profiles module', 'created_at' => now(), 'updated_at' => now()],

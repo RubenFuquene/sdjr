@@ -77,14 +77,14 @@ class CommerceService
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                  ->orWhere('description', 'like', "%$search%")
-                  ->orWhere('tax_id', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%");
+                    ->orWhere('description', 'like', "%$search%")
+                    ->orWhere('tax_id', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%");
             });
         }
 
-        if (!is_null($status)) {
+        if (! is_null($status)) {
             $query->where('is_active', $status);
         }
 

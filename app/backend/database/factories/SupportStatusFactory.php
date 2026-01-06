@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Constants\Constant;
 use App\Models\SupportStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Constants\Constant;
 
 class SupportStatusFactory extends Factory
 {

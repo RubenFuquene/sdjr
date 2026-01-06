@@ -21,19 +21,20 @@ class LogoutController extends Controller
      *     summary="Logout current authenticated user",
      *     description="Revokes the current user's token and logs out.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful logout",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="message", type="string", example="Successfully logged out")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated")
      * )
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function __invoke(Request $request): JsonResponse
     {
@@ -42,6 +43,7 @@ class LogoutController extends Controller
             if ($user) {
                 $user->currentAccessToken()?->delete();
             }
+
             return $this->successResponse(null, 'Successfully logged out', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Logout failed', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);

@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="BankResource",
  *     title="Bank Resource",
  *     description="Bank resource response",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Banco de Bogotá"),
  *     @OA\Property(property="code", type="string", example="BOGOTA123"),

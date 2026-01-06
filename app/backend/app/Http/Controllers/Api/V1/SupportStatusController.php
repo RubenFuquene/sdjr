@@ -34,11 +34,13 @@ class SupportStatusController extends Controller
      *     summary="Get list of support statuses",
      *     description="Returns a paginated list of support statuses.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="code", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="color", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/SupportStatusResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -51,9 +53,11 @@ class SupportStatusController extends Controller
             $perPage = (int) $request->get('per_page', 15);
             $statuses = $this->supportStatusService->getPaginated($filters, $perPage);
             $resource = SupportStatusResource::collection($statuses);
+
             return $this->paginatedResponse($statuses, $resource, 'Support statuses retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error listing support statuses', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error listing support statuses', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -66,7 +70,9 @@ class SupportStatusController extends Controller
      *     summary="Create a new support status",
      *     description="Creates a new support status.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/SupportStatusStoreRequest")),
+     *
      *     @OA\Response(response=201, description="Support status created successfully", @OA\JsonContent(ref="#/components/schemas/SupportStatusResource")),
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -77,9 +83,11 @@ class SupportStatusController extends Controller
     {
         try {
             $status = $this->supportStatusService->store($request->validated());
+
             return $this->successResponse(new SupportStatusResource($status), 'Support status created successfully', Response::HTTP_CREATED);
         } catch (\Throwable $e) {
             Log::error('Error creating support status', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error creating support status', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -92,7 +100,9 @@ class SupportStatusController extends Controller
      *     summary="Get support status detail",
      *     description="Returns the detail of a support status.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/SupportStatusResource")),
      *     @OA\Response(response=404, description="Support status not found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -103,11 +113,13 @@ class SupportStatusController extends Controller
     {
         try {
             $status = $this->supportStatusService->find($id);
+
             return $this->successResponse(new SupportStatusResource($status), 'Support status retrieved successfully', Response::HTTP_OK);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Support status not found', Response::HTTP_NOT_FOUND);
         } catch (\Throwable $e) {
             Log::error('Error retrieving support status', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error retrieving support status', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -120,8 +132,11 @@ class SupportStatusController extends Controller
      *     summary="Update a support status",
      *     description="Updates the specified support status.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/SupportStatusUpdateRequest")),
+     *
      *     @OA\Response(response=200, description="Support status updated successfully", @OA\JsonContent(ref="#/components/schemas/SupportStatusResource")),
      *     @OA\Response(response=404, description="Support status not found"),
      *     @OA\Response(response=400, description="Bad Request"),
@@ -133,11 +148,13 @@ class SupportStatusController extends Controller
     {
         try {
             $status = $this->supportStatusService->update($id, $request->validated());
+
             return $this->successResponse(new SupportStatusResource($status), 'Support status updated successfully', Response::HTTP_OK);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Support status not found', Response::HTTP_NOT_FOUND);
         } catch (\Throwable $e) {
             Log::error('Error updating support status', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error updating support status', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -150,7 +167,9 @@ class SupportStatusController extends Controller
      *     summary="Delete a support status",
      *     description="Deletes the specified support status (soft delete).",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=204, description="Support status deleted successfully"),
      *     @OA\Response(response=404, description="Support status not found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -161,11 +180,13 @@ class SupportStatusController extends Controller
     {
         try {
             $this->supportStatusService->delete($id);
+
             return response()->json([], Response::HTTP_NO_CONTENT);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Support status not found', Response::HTTP_NOT_FOUND);
         } catch (\Throwable $e) {
             Log::error('Error deleting support status', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error deleting support status', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }

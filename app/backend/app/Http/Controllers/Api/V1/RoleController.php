@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Models\User;
-use App\Services\RoleService;
-use App\Traits\ApiResponseTrait;
-use Illuminate\Http\JsonResponse;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\RoleResource;
-use Symfony\Component\HttpFoundation\Response;
 use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
 use App\Http\Requests\Api\V1\StoreRoleRequest;
 use App\Http\Requests\Api\V1\UpdateRoleRequest;
 use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
+use App\Http\Resources\Api\V1\RoleResource;
+use App\Models\User;
+use App\Services\RoleService;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @OA\Tag(
@@ -72,7 +72,7 @@ class RoleController extends Controller
      */
     public function index(): AnonymousResourceCollection|JsonResponse
     {
-        try {             
+        try {
             $filters = [
                 'name' => request('name'),
                 'description' => request('description'),
@@ -81,9 +81,11 @@ class RoleController extends Controller
             ];
             $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount($filters);
             $resource = RoleResource::collection($roles);
+
             return $this->paginatedResponse($roles, $resource, 'Roles retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error listing roles', ['error' => $e->getMessage().' Line: '.$e->getLine()]);
+
             return $this->errorResponse('Error listing roles', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -241,17 +243,22 @@ class RoleController extends Controller
      *     summary="Get role detail",
      *     description="Returns the detail of a role including its permissions and user count.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/RoleResource")
      *     ),
+     *
      *     @OA\Response(response=404, description="Role not found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -264,9 +271,11 @@ class RoleController extends Controller
             if (! $role) {
                 return $this->errorResponse('Role not found', 404);
             }
+
             return $this->successResponse(new RoleResource($role), 'Role retrieved successfully', 200);
         } catch (\Throwable $e) {
             Log::error('Error retrieving role', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error retrieving role', 500, ['exception' => $e->getMessage()]);
         }
     }
@@ -279,21 +288,28 @@ class RoleController extends Controller
      *     summary="Update a role",
      *     description="Updates the specified role.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(ref="#/components/schemas/RoleUpdateRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Role updated successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/RoleResource")
      *     ),
+     *
      *     @OA\Response(response=404, description="Role not found"),
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -311,9 +327,11 @@ class RoleController extends Controller
             if ($request->has('permissions')) {
                 $role->syncPermissions($request->validated('permissions'));
             }
+
             return $this->successResponse(new RoleResource($role->fresh('permissions')), 'Role updated successfully', 200);
         } catch (\Throwable $e) {
             Log::error('Error updating role', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error updating role', 500, ['exception' => $e->getMessage()]);
         }
     }

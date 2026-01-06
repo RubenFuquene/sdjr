@@ -14,14 +14,13 @@ class MeEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    
     /**
      * Prueba que el endpoint retorna la información del usuario autenticado correctamente.
      */
     public function test_it_returns_authenticated_user_info()
     {
         Role::create(['name' => 'superadmin']);
-        $user = User::factory()->create();        
+        $user = User::factory()->create();
         $user->assignRole('superadmin');
         Sanctum::actingAs($user);
 
@@ -42,7 +41,6 @@ class MeEndpointTest extends TestCase
             ]);
     }
 
-    
     /**
      * Prueba que se requiere autenticación para consultar la información del usuario.
      */
@@ -52,7 +50,6 @@ class MeEndpointTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    
     /**
      * Prueba que el endpoint retorna los roles y permisos del usuario autenticado correctamente.
      */
@@ -78,5 +75,4 @@ class MeEndpointTest extends TestCase
                 'status' => true,
             ]);
     }
-
 }

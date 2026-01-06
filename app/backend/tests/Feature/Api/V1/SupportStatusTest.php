@@ -8,8 +8,8 @@ use App\Models\SupportStatus;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class SupportStatusTest extends TestCase
 {
@@ -57,7 +57,7 @@ class SupportStatusTest extends TestCase
         $user->givePermissionTo('admin.support_statuses.view');
         Sanctum::actingAs($user);
         $status = SupportStatus::factory()->create();
-        $response = $this->getJson('/api/v1/support-statuses/' . $status->id);
+        $response = $this->getJson('/api/v1/support-statuses/'.$status->id);
         $response->assertOk()->assertJsonPath('data.id', $status->id);
     }
 
@@ -76,7 +76,7 @@ class SupportStatusTest extends TestCase
             'code' => 'CLOSED',
             'color' => 'red',
         ];
-        $response = $this->putJson('/api/v1/support-statuses/' . $status->id, $payload);
+        $response = $this->putJson('/api/v1/support-statuses/'.$status->id, $payload);
         $response->assertOk()->assertJsonPath('data.name', 'Cerrado');
     }
 
@@ -90,7 +90,7 @@ class SupportStatusTest extends TestCase
         $user->givePermissionTo('admin.support_statuses.delete');
         Sanctum::actingAs($user);
         $status = SupportStatus::factory()->create();
-        $response = $this->deleteJson('/api/v1/support-statuses/' . $status->id);
+        $response = $this->deleteJson('/api/v1/support-statuses/'.$status->id);
         $response->assertNoContent();
         $this->assertSoftDeleted('support_statuses', ['id' => $status->id]);
     }

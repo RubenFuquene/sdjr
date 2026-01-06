@@ -14,7 +14,6 @@ class PermissionEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    
     /**
      * Prueba que el endpoint retorna todos los permisos correctamente para un usuario autenticado.
      */
@@ -30,7 +29,7 @@ class PermissionEndpointTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
-                    ['name', 'description']
+                    ['name', 'description'],
                 ],
                 'message',
                 'status',
@@ -47,7 +46,6 @@ class PermissionEndpointTest extends TestCase
             ]);
     }
 
-    
     /**
      * Prueba que se requiere autenticación para consultar los permisos.
      */

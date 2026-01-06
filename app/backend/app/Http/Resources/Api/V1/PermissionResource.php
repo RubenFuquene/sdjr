@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="PermissionResource",
  *     title="Permission Resource",
  *     description="Permission resource response",
+ *
  *     @OA\Property(property="name", type="string", example="users.create"),
  *     @OA\Property(property="description", type="string", example="Permite crear usuarios")
  * )

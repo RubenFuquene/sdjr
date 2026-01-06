@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
  *     schema="LegalRepresentativeResourceCollection",
  *     title="Legal Representative Resource Collection",
  *     description="Collection of legal representatives",
+ *
  *     @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeResource"))
  * )
  */
@@ -25,7 +26,7 @@ class LegalRepresentativeResourceCollection extends ResourceCollection
     public function toArray($request): array
     {
         return [
-            $this->collection->map(function ($item) use ($request) {
+            $this->collection->map(function ($item) {
                 return new LegalRepresentativeResource($item);
             }),
         ];

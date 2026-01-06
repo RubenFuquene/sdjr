@@ -4,37 +4,38 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
 use App\Models\User;
-use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
 
 class RoleUpdateEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         // Configurar permisos necesarios para las pruebas
         Permission::firstOrCreate(['name' => 'admin.roles.update', 'guard_name' => 'sanctum']);
     }
+
     /**
      * Prueba que un usuario autenticado puede actualizar un rol existente correctamente.
      */
     public function test_it_updates_a_role()
-    {        
+    {
         $user = User::factory()->create();
         $user->givePermissionTo('admin.roles.update');
         Sanctum::actingAs($user);
         $role = Role::create(['name' => 'editor', 'description' => 'Edit role']);
         $payload = [
             'name' => 'editor-updated',
-            'description' => 'Updated description',            
+            'description' => 'Updated description',
         ];
-        $response = $this->putJson('/api/v1/roles/' . $role->id, $payload);
+        $response = $this->putJson('/api/v1/roles/'.$role->id, $payload);
         $response->assertOk()
             ->assertJsonFragment([
                 'data' => [
@@ -49,7 +50,6 @@ class RoleUpdateEndpointTest extends TestCase
             ]);
     }
 
-    
     /**
      * Prueba que el endpoint retorna 404 al intentar actualizar un rol inexistente.
      */
@@ -61,7 +61,7 @@ class RoleUpdateEndpointTest extends TestCase
         $response = $this->putJson('/api/v1/roles/9999', [
             'name' => 'notfound',
             'description' => 'notfound',
-            'permissions' => []
+            'permissions' => [],
         ]);
         $response->assertStatus(404)
             ->assertJsonFragment([

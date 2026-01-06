@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="SupportStatusResource",
  *     title="Support Status Resource",
  *     description="Support status resource response",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Abierto"),
  *     @OA\Property(property="code", type="string", example="OPEN"),

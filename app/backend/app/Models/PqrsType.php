@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Traits\SanitizesTextAttributes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class PqrsType
@@ -23,6 +24,7 @@ class PqrsType extends Model
 
     /**
      * The attributes that are mass assignable.
+     *
      * @var array<int, string>
      */
     protected $fillable = [
@@ -33,6 +35,7 @@ class PqrsType extends Model
 
     /**
      * The attributes that should be cast.
+     *
      * @var array<string, string>
      */
     protected $casts = [
@@ -44,7 +47,8 @@ class PqrsType extends Model
 
     /**
      * Mutator for name attribute (normalizes text)
-     * @param string $value
+     *
+     * @param  string  $value
      */
     public function setNameAttribute($value): void
     {
@@ -53,7 +57,8 @@ class PqrsType extends Model
 
     /**
      * Mutator for code attribute (only trim, no capitalización)
-     * @param string $value
+     *
+     * @param  string  $value
      */
     public function setCodeAttribute($value): void
     {
