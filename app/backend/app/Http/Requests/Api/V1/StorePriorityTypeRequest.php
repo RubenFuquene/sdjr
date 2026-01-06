@@ -10,7 +10,7 @@ class StorePriorityTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.priority_types.create') ?? false;
+        return $this->user()?->can('admin.params.priority_types.create') ?? false;
     }
 
     public function rules(): array

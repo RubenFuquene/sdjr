@@ -21,7 +21,7 @@ class SupportStatusUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.support_statuses.update') ?? false;
+        return $this->user()?->can('admin.params.support_statuses.update') ?? false;
     }
 
     public function rules(): array

@@ -17,9 +17,9 @@ class PqrsTypeFeatureTest extends TestCase
 
     public function test_index_pqrs_types_success(): void
     {
-        Permission::create(['name' => 'admin.pqrs_types.index', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.params.pqrs_types.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.pqrs_types.index');
+        $user->givePermissionTo('admin.params.pqrs_types.index');
         $this->actingAs($user, 'sanctum');
         PqrsType::factory()->count(3)->create();
         $response = $this->getJson('/api/v1/pqrs-types');
@@ -32,9 +32,9 @@ class PqrsTypeFeatureTest extends TestCase
 
     public function test_store_pqrs_type_success(): void
     {
-        Permission::create(['name' => 'admin.pqrs_types.create', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.params.pqrs_types.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.pqrs_types.create');
+        $user->givePermissionTo('admin.params.pqrs_types.create');
         $this->actingAs($user, 'sanctum');
         $payload = [
             'name' => 'Consulta',
@@ -51,9 +51,9 @@ class PqrsTypeFeatureTest extends TestCase
 
     public function test_store_pqrs_type_validation_error(): void
     {
-        Permission::create(['name' => 'admin.pqrs_types.create', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.params.pqrs_types.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.pqrs_types.create');
+        $user->givePermissionTo('admin.params.pqrs_types.create');
         $this->actingAs($user, 'sanctum');
         $payload = [
             'name' => '',
@@ -67,9 +67,9 @@ class PqrsTypeFeatureTest extends TestCase
 
     public function test_show_pqrs_type_success(): void
     {
-        Permission::create(['name' => 'admin.pqrs_types.show', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.params.pqrs_types.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.pqrs_types.show');
+        $user->givePermissionTo('admin.params.pqrs_types.show');
         $this->actingAs($user, 'sanctum');
         $pqrsType = PqrsType::factory()->create();
         $response = $this->getJson('/api/v1/pqrs-types/'.$pqrsType->id);
@@ -82,9 +82,9 @@ class PqrsTypeFeatureTest extends TestCase
 
     public function test_update_pqrs_type_success(): void
     {
-        Permission::create(['name' => 'admin.pqrs_types.update', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.params.pqrs_types.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.pqrs_types.update');
+        $user->givePermissionTo('admin.params.pqrs_types.update');
         $this->actingAs($user, 'sanctum');
         $pqrsType = PqrsType::factory()->create();
         $payload = [
@@ -101,9 +101,9 @@ class PqrsTypeFeatureTest extends TestCase
 
     public function test_delete_pqrs_type_success(): void
     {
-        Permission::create(['name' => 'admin.pqrs_types.delete', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.params.pqrs_types.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.pqrs_types.delete');
+        $user->givePermissionTo('admin.params.pqrs_types.delete');
         $this->actingAs($user, 'sanctum');
         $pqrsType = PqrsType::factory()->create();
         $response = $this->deleteJson('/api/v1/pqrs-types/'.$pqrsType->id);

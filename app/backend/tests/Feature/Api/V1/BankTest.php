@@ -20,9 +20,9 @@ class BankTest extends TestCase
      */
     public function test_can_list_banks()
     {
-        Permission::findOrCreate('admin.banks.index', 'sanctum');
+        Permission::findOrCreate('admin.params.banks.index', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.banks.index');
+        $user->givePermissionTo('admin.params.banks.index');
         Sanctum::actingAs($user);
         Bank::factory()->count(3)->create();
         $response = $this->getJson('/api/v1/banks');
@@ -34,9 +34,9 @@ class BankTest extends TestCase
      */
     public function test_can_create_bank()
     {
-        Permission::findOrCreate('admin.banks.create', 'sanctum');
+        Permission::findOrCreate('admin.params.banks.create', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.banks.create');
+        $user->givePermissionTo('admin.params.banks.create');
         Sanctum::actingAs($user);
         $payload = [
             'name' => 'Banco de Prueba',
@@ -51,9 +51,9 @@ class BankTest extends TestCase
      */
     public function test_can_show_bank()
     {
-        Permission::findOrCreate('admin.banks.index', 'sanctum');
+        Permission::findOrCreate('admin.params.banks.index', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.banks.index');
+        $user->givePermissionTo('admin.params.banks.index');
         Sanctum::actingAs($user);
         $bank = Bank::factory()->create();
         $response = $this->getJson('/api/v1/banks/'.$bank->id);
@@ -65,9 +65,9 @@ class BankTest extends TestCase
      */
     public function test_can_update_bank()
     {
-        Permission::findOrCreate('admin.banks.update', 'sanctum');
+        Permission::findOrCreate('admin.params.banks.update', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.banks.update');
+        $user->givePermissionTo('admin.params.banks.update');
         Sanctum::actingAs($user);
         $bank = Bank::factory()->create();
         $payload = [
@@ -83,9 +83,9 @@ class BankTest extends TestCase
      */
     public function test_can_delete_bank()
     {
-        Permission::findOrCreate('admin.banks.delete', 'sanctum');
+        Permission::findOrCreate('admin.params.banks.delete', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.banks.delete');
+        $user->givePermissionTo('admin.params.banks.delete');
         Sanctum::actingAs($user);
         $bank = Bank::factory()->create();
         $response = $this->deleteJson('/api/v1/banks/'.$bank->id);

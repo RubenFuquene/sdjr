@@ -21,7 +21,7 @@ class SupportStatusStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.support_statuses.create') ?? false;
+        return $this->user()?->can('admin.params.support_statuses.create') ?? false;
     }
 
     public function rules(): array

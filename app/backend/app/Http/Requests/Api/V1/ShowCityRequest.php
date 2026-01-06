@@ -10,7 +10,7 @@ class ShowCityRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.cities.show') ?? false;
+        return $this->user()?->can('admin.params.cities.show') ?? false;
     }
 
     public function rules(): array

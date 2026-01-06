@@ -28,7 +28,7 @@ class UserRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'admin.users.'.($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.profiles.users.'.($action === 'store' ? 'create' : 'update');
 
         return $this->user()?->can($permission) ?? false;
     }

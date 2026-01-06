@@ -10,7 +10,7 @@ class UpdatePriorityTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.priority_types.update') ?? false;
+        return $this->user()?->can('admin.params.priority_types.update') ?? false;
     }
 
     public function rules(): array

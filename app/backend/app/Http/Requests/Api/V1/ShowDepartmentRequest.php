@@ -10,7 +10,7 @@ class ShowDepartmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.departments.show') ?? false;
+        return $this->user()?->can('admin.params.departments.show') ?? false;
     }
 
     public function rules(): array

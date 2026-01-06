@@ -23,7 +23,7 @@ class StoreBankRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.banks.create') ?? false;
+        return $this->user()?->can('admin.params.banks.create') ?? false;
     }
 
     /**

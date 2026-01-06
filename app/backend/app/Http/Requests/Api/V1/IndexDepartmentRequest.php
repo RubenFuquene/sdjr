@@ -10,7 +10,7 @@ class IndexDepartmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.departments.index') ?? false;
+        return $this->user()?->can('admin.params.departments.index') ?? false;
     }
 
     public function rules(): array

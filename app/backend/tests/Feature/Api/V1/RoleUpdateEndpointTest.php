@@ -19,7 +19,7 @@ class RoleUpdateEndpointTest extends TestCase
     {
         parent::setUp();
         // Configurar permisos necesarios para las pruebas
-        Permission::firstOrCreate(['name' => 'admin.roles.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.profiles.roles.update', 'guard_name' => 'sanctum']);
     }
 
     /**
@@ -28,7 +28,7 @@ class RoleUpdateEndpointTest extends TestCase
     public function test_it_updates_a_role()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.roles.update');
+        $user->givePermissionTo('admin.profiles.roles.update');
         Sanctum::actingAs($user);
         $role = Role::create(['name' => 'editor', 'description' => 'Edit role', 'status' => 1]);
         $payload = [
@@ -58,7 +58,7 @@ class RoleUpdateEndpointTest extends TestCase
     public function test_it_returns_404_for_nonexistent_role_on_update()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.roles.update');
+        $user->givePermissionTo('admin.profiles.roles.update');
         Sanctum::actingAs($user);
         $response = $this->putJson('/api/v1/roles/9999', [
             'name' => 'notfound',

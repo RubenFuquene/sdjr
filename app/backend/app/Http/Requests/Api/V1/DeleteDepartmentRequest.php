@@ -10,7 +10,7 @@ class DeleteDepartmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.departments.delete') ?? false;
+        return $this->user()?->can('admin.params.departments.delete') ?? false;
     }
 
     public function rules(): array

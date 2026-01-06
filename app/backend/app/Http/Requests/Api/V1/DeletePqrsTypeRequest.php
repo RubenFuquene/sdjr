@@ -10,7 +10,7 @@ class DeletePqrsTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.pqrs_types.delete') ?? false;
+        return $this->user()?->can('admin.params.pqrs_types.delete') ?? false;
     }
 
     public function rules(): array

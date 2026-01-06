@@ -10,7 +10,7 @@ class DeletePriorityTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.priority_types.delete') ?? false;
+        return $this->user()?->can('admin.params.priority_types.delete') ?? false;
     }
 
     public function rules(): array

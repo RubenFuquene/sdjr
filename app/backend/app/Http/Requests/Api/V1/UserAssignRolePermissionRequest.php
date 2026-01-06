@@ -38,7 +38,7 @@ class UserAssignRolePermissionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('users.assign_roles_permissions') ?? false;
+        return $this->user()?->can('admin.profiles.users.assign_roles_permissions') ?? false;
     }
 
     public function rules(): array

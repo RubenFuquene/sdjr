@@ -10,7 +10,7 @@ class DeleteCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.categories.delete') ?? false;
+        return $this->user()?->can('admin.params.categories.delete') ?? false;
     }
 
     public function rules(): array

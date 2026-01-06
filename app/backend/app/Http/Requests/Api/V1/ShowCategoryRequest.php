@@ -10,7 +10,7 @@ class ShowCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.categories.show') ?? false;
+        return $this->user()?->can('admin.params.categories.show') ?? false;
     }
 
     public function rules(): array

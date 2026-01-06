@@ -22,9 +22,9 @@ class NeighborhoodTest extends TestCase
      */
     public function test_index_returns_neighborhoods(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.neighborhoods.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.neighborhoods.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.neighborhoods.index');
+        $user->givePermissionTo('admin.params.neighborhoods.index');
         Sanctum::actingAs($user);
         $city = City::factory()->create();
         Neighborhood::factory()->create(['city_id' => $city->id, 'name' => 'Chapinero', 'code' => 'NB0001']);
@@ -39,9 +39,9 @@ class NeighborhoodTest extends TestCase
      */
     public function test_store_creates_neighborhood(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.neighborhoods.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.neighborhoods.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.neighborhoods.create');
+        $user->givePermissionTo('admin.params.neighborhoods.create');
         Sanctum::actingAs($user);
         $city = City::factory()->create();
         $data = [
@@ -67,9 +67,9 @@ class NeighborhoodTest extends TestCase
      */
     public function test_show_returns_neighborhood(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.neighborhoods.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.neighborhoods.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.neighborhoods.show');
+        $user->givePermissionTo('admin.params.neighborhoods.show');
         Sanctum::actingAs($user);
         $city = City::factory()->create();
         $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id, 'name' => 'Teusaquillo', 'code' => 'NB0003']);
@@ -84,9 +84,9 @@ class NeighborhoodTest extends TestCase
      */
     public function test_update_updates_neighborhood(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.neighborhoods.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.neighborhoods.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.neighborhoods.update');
+        $user->givePermissionTo('admin.params.neighborhoods.update');
         Sanctum::actingAs($user);
         $city = City::factory()->create();
         $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id, 'name' => 'San Luis', 'code' => 'NB0004']);
@@ -113,9 +113,9 @@ class NeighborhoodTest extends TestCase
      */
     public function test_destroy_deletes_neighborhood(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.neighborhoods.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.neighborhoods.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.neighborhoods.delete');
+        $user->givePermissionTo('admin.params.neighborhoods.delete');
         Sanctum::actingAs($user);
         $city = City::factory()->create();
         $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id, 'name' => 'El Lago', 'code' => 'NB0006']);

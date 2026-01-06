@@ -10,7 +10,7 @@ class StorePqrsTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.pqrs_types.create') ?? false;
+        return $this->user()?->can('admin.params.pqrs_types.create') ?? false;
     }
 
     public function rules(): array

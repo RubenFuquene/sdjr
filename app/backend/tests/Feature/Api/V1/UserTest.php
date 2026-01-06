@@ -18,9 +18,9 @@ class UserTest extends TestCase
      */
     public function test_authenticated_user_can_list_users(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.index', 'guard_name' => 'sanctum']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.profiles.users.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.users.index');
+        $user->givePermissionTo('admin.profiles.users.index');
         User::factory()->count(3)->create();
         Sanctum::actingAs($user);
 
@@ -49,9 +49,9 @@ class UserTest extends TestCase
      */
     public function test_authenticated_user_can_create_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.create', 'guard_name' => 'sanctum']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.profiles.users.create', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
-        $admin->givePermissionTo('admin.users.create');
+        $admin->givePermissionTo('admin.profiles.users.create');
         Sanctum::actingAs($admin);
 
         $data = [
@@ -73,9 +73,9 @@ class UserTest extends TestCase
      */
     public function test_authenticated_user_can_view_single_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.show', 'guard_name' => 'sanctum']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.profiles.users.show', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
-        $admin->givePermissionTo('admin.users.show');
+        $admin->givePermissionTo('admin.profiles.users.show');
         $user = User::factory()->create();
         Sanctum::actingAs($admin);
 
@@ -89,9 +89,9 @@ class UserTest extends TestCase
      */
     public function test_authenticated_user_can_update_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.update', 'guard_name' => 'sanctum']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.profiles.users.update', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
-        $admin->givePermissionTo('admin.users.update');
+        $admin->givePermissionTo('admin.profiles.users.update');
         $user = User::factory()->create();
         Sanctum::actingAs($admin);
 
@@ -106,9 +106,9 @@ class UserTest extends TestCase
      */
     public function test_authenticated_user_can_delete_user(): void
     {
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.users.delete', 'guard_name' => 'sanctum']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'admin.profiles.users.delete', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
-        $admin->givePermissionTo('admin.users.delete');
+        $admin->givePermissionTo('admin.profiles.users.delete');
         $user = User::factory()->create();
         Sanctum::actingAs($admin);
 

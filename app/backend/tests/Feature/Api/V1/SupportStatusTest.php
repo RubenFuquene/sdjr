@@ -20,9 +20,9 @@ class SupportStatusTest extends TestCase
      */
     public function test_can_list_support_statuses()
     {
-        Permission::findOrCreate('admin.support_statuses.view', 'sanctum');
+        Permission::findOrCreate('admin.params.support_statuses.view', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.support_statuses.view');
+        $user->givePermissionTo('admin.params.support_statuses.view');
         Sanctum::actingAs($user);
         SupportStatus::factory()->count(3)->create();
         $response = $this->getJson('/api/v1/support-statuses');
@@ -34,9 +34,9 @@ class SupportStatusTest extends TestCase
      */
     public function test_can_create_support_status()
     {
-        Permission::findOrCreate('admin.support_statuses.create', 'sanctum');
+        Permission::findOrCreate('admin.params.support_statuses.create', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.support_statuses.create');
+        $user->givePermissionTo('admin.params.support_statuses.create');
         Sanctum::actingAs($user);
         $payload = [
             'name' => 'Abierto',
@@ -52,9 +52,9 @@ class SupportStatusTest extends TestCase
      */
     public function test_can_show_support_status()
     {
-        Permission::findOrCreate('admin.support_statuses.view', 'sanctum');
+        Permission::findOrCreate('admin.params.support_statuses.view', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.support_statuses.view');
+        $user->givePermissionTo('admin.params.support_statuses.view');
         Sanctum::actingAs($user);
         $status = SupportStatus::factory()->create();
         $response = $this->getJson('/api/v1/support-statuses/'.$status->id);
@@ -66,9 +66,9 @@ class SupportStatusTest extends TestCase
      */
     public function test_can_update_support_status()
     {
-        Permission::findOrCreate('admin.support_statuses.update', 'sanctum');
+        Permission::findOrCreate('admin.params.support_statuses.update', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.support_statuses.update');
+        $user->givePermissionTo('admin.params.support_statuses.update');
         Sanctum::actingAs($user);
         $status = SupportStatus::factory()->create();
         $payload = [
@@ -85,9 +85,9 @@ class SupportStatusTest extends TestCase
      */
     public function test_can_delete_support_status()
     {
-        Permission::findOrCreate('admin.support_statuses.delete', 'sanctum');
+        Permission::findOrCreate('admin.params.support_statuses.delete', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.support_statuses.delete');
+        $user->givePermissionTo('admin.params.support_statuses.delete');
         Sanctum::actingAs($user);
         $status = SupportStatus::factory()->create();
         $response = $this->deleteJson('/api/v1/support-statuses/'.$status->id);

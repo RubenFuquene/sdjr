@@ -19,9 +19,9 @@ class PermissionStoreEndpointTest extends TestCase
      */
     public function test_it_creates_a_permission()
     {
-        Permission::firstOrCreate(['name' => 'admin.permissions.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.profiles.permissions.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.permissions.create');
+        $user->givePermissionTo('admin.profiles.permissions.create');
         Sanctum::actingAs($user);
 
         $payload = [

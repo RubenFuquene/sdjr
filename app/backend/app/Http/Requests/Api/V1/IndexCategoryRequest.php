@@ -10,7 +10,7 @@ class IndexCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.categories.index') ?? false;
+        return $this->user()?->can('admin.params.categories.index') ?? false;
     }
 
     public function rules(): array

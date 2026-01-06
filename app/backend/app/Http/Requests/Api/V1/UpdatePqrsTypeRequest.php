@@ -10,7 +10,7 @@ class UpdatePqrsTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.pqrs_types.update') ?? false;
+        return $this->user()?->can('admin.params.pqrs_types.update') ?? false;
     }
 
     public function rules(): array

@@ -10,7 +10,7 @@ class ShowPqrsTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.pqrs_types.show') ?? false;
+        return $this->user()?->can('admin.params.pqrs_types.show') ?? false;
     }
 
     public function rules(): array

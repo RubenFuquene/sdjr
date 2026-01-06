@@ -10,7 +10,7 @@ class DeleteCityRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.cities.delete') ?? false;
+        return $this->user()?->can('admin.params.cities.delete') ?? false;
     }
 
     public function rules(): array

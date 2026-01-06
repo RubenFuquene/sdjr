@@ -10,7 +10,7 @@ class IndexPqrsTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.pqrs_types.index') ?? false;
+        return $this->user()?->can('admin.params.pqrs_types.index') ?? false;
     }
 
     public function rules(): array

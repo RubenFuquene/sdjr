@@ -10,7 +10,7 @@ class DeleteBankRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.banks.delete') ?? false;
+        return $this->user()?->can('admin.params.banks.delete') ?? false;
     }
 
     public function rules(): array

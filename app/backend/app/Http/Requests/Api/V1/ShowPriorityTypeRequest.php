@@ -10,7 +10,7 @@ class ShowPriorityTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.priority_types.show') ?? false;
+        return $this->user()?->can('admin.params.priority_types.show') ?? false;
     }
 
     public function rules(): array

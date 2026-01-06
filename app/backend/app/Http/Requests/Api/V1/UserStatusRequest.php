@@ -10,7 +10,7 @@ class UserStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.users.update') ?? false;
+        return $this->user()?->can('admin.profiles.users.update') ?? false;
     }
 
     public function rules(): array
