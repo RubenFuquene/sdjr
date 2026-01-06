@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\DeleteBankRequest;
-use App\Http\Requests\Api\V1\ShowBankRequest;
-use App\Http\Requests\Api\V1\StoreBankRequest;
-use App\Http\Requests\Api\V1\UpdateBankRequest;
-use App\Http\Resources\Api\V1\BankResource;
 use App\Services\BankService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\BankResource;
+use App\Http\Requests\Api\V1\ShowBankRequest;
+use App\Http\Requests\Api\V1\IndexBankRequest;
+use App\Http\Requests\Api\V1\StoreBankRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\Api\V1\DeleteBankRequest;
+use App\Http\Requests\Api\V1\UpdateBankRequest;
 
 /**
  * @OA\Tag(
@@ -31,6 +32,41 @@ class BankController extends Controller
     public function __construct(BankService $bankService)
     {
         $this->bankService = $bankService;
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/banks",
+     *     operationId="getBanksList",
+     *     tags={"Banks"},
+     *     summary="Get list of banks",
+     *     description="Returns a paginated list of banks.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/BankResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function index(IndexBankRequest $request): JsonResponse
+    {
+        try {
+            $filters = $request->only(['name', 'code', 'status']);
+            $perPage = $request->validatedPerPage();
+            $banks = $this->bankService->getPaginated($filters, $perPage);
+            $resource = BankResource::collection($banks);
+
+            return $this->paginatedResponse($banks, $resource, 'Banks retrieved successfully');
+        } catch (\Throwable $e) {
+            Log::error('Error listing banks', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error listing banks', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
+        }
     }
 
     /**
