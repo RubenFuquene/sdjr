@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Covers;
 use Tests\TestCase;
 
-/**
- * @covers \App\Http\Controllers\Api\V1\AuditLogController
- */
+#[Covers(AuditLogController::class)]
 class AuditLogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function authenticated_user_can_list_audit_logs(): void
+    public function test_authenticated_user_can_list_audit_logs(): void
     {
         $user = User::factory()->create();
         AuditLog::factory()->count(3)->create();
@@ -32,13 +32,13 @@ class AuditLogTest extends TestCase
         ]);
     }
 
-    public function unauthenticated_user_cannot_list_audit_logs(): void
+    public function test_unauthenticated_user_cannot_list_audit_logs(): void
     {
         $response = $this->getJson('/api/v1/audit-logs');
         $response->assertUnauthorized();
     }
 
-    public function authenticated_user_can_view_a_single_audit_log(): void
+    public function test_authenticated_user_can_view_a_single_audit_log(): void
     {
         $user = User::factory()->create();
         $log = AuditLog::factory()->create();
@@ -52,7 +52,7 @@ class AuditLogTest extends TestCase
         ]);
     }
 
-    public function not_found_for_nonexistent_audit_log(): void
+    public function test_not_found_for_nonexistent_audit_log(): void
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
