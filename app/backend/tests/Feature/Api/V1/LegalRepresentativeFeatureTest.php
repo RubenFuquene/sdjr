@@ -33,6 +33,9 @@ class LegalRepresentativeFeatureTest extends TestCase
         $this->user->givePermissionTo($permissions);
     }
 
+    /**
+     * Prueba que un usuario con permisos puede listar los representantes legales.
+     */
     public function test_can_list_legal_representatives(): void
     {
         $this->actingAs($this->user);
@@ -45,6 +48,9 @@ class LegalRepresentativeFeatureTest extends TestCase
             ]);
     }
 
+    /**
+     * Prueba que un usuario con permisos puede crear un representante legal.
+     */
     public function test_can_create_legal_representative(): void
     {
         $this->actingAs($this->user);
@@ -65,6 +71,9 @@ class LegalRepresentativeFeatureTest extends TestCase
             ->assertJsonPath('data.name', 'Juan');
     }
 
+    /**
+     * Prueba que un usuario con permisos puede ver el detalle de un representante legal.
+     */
     public function test_can_show_legal_representative(): void
     {
         $this->actingAs($this->user);
@@ -75,6 +84,9 @@ class LegalRepresentativeFeatureTest extends TestCase
             ->assertJsonPath('data.id', $legal->id);
     }
 
+    /**
+     * Prueba que un usuario con permisos puede actualizar un representante legal.
+     */
     public function test_can_update_legal_representative(): void
     {
         $this->actingAs($this->user);
@@ -95,6 +107,9 @@ class LegalRepresentativeFeatureTest extends TestCase
             ->assertJsonPath('data.name', 'Carlos');
     }
 
+    /**
+     * Prueba que un usuario con permisos puede eliminar (soft delete) un representante legal.
+     */
     public function test_can_delete_legal_representative(): void
     {
         $this->actingAs($this->user);
@@ -104,6 +119,9 @@ class LegalRepresentativeFeatureTest extends TestCase
         $this->assertSoftDeleted('legal_representatives', ['id' => $legal->id]);
     }
 
+    /**
+     * Prueba que un usuario sin permisos no puede crear un representante legal.
+     */
     public function test_cannot_create_without_permission(): void
     {
         $user = User::factory()->create();

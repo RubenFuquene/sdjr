@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
+/**
+ * @OA\Tag(
+ *     name="AuditLogs",
+ *     description="API Endpoints of Audit Logs"
+ * )
+ */
 class AuditLogController extends Controller
 {
     private AuditLogService $auditLogService;
@@ -38,7 +44,8 @@ class AuditLogController extends Controller
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function index(): JsonResponse

@@ -25,15 +25,15 @@ class DepartmentTest extends TestCase
     }
 
     /**
-     * Test that the index endpoint returns a list of departments.
+     * Verifica que el endpoint index retorne la lista de departamentos correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso y un departamento, valida la cantidad y la respuesta.
      */
     public function test_index_returns_departments()
     {
-        Permission::firstOrCreate(['name' => 'admin.departments.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.departments.index');
+        $user->givePermissionTo('admin.params.departments.index');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -55,15 +55,15 @@ class DepartmentTest extends TestCase
     }
 
     /**
-     * Test that the store endpoint creates a new department.
+     * Verifica que el endpoint store cree un nuevo departamento correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso, envía los datos y valida la respuesta y la base de datos.
      */
     public function test_store_creates_department()
     {
-        Permission::firstOrCreate(['name' => 'admin.departments.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.departments.create');
+        $user->givePermissionTo('admin.params.departments.create');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -99,9 +99,9 @@ class DepartmentTest extends TestCase
      */
     public function test_show_returns_department()
     {
-        Permission::firstOrCreate(['name' => 'admin.departments.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.departments.show');
+        $user->givePermissionTo('admin.params.departments.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -130,9 +130,9 @@ class DepartmentTest extends TestCase
      */
     public function test_update_updates_department()
     {
-        Permission::firstOrCreate(['name' => 'admin.departments.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.departments.update');
+        $user->givePermissionTo('admin.params.departments.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -168,9 +168,9 @@ class DepartmentTest extends TestCase
      */
     public function test_destroy_deletes_department()
     {
-        Permission::firstOrCreate(['name' => 'admin.departments.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.departments.delete');
+        $user->givePermissionTo('admin.params.departments.delete');
         Sanctum::actingAs($user);
 
         $country = Country::create([

@@ -8,18 +8,18 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="PermissionStoreRequest",
+ *     schema="StorePermissionRequest",
  *     required={"name", "description"},
  *
  *     @OA\Property(property="name", type="string", maxLength=50, example="users.create", description="Permission name (unique)"),
  *     @OA\Property(property="description", type="string", maxLength=255, example="Permite crear usuarios", description="Permission description")
  * )
  */
-class PermissionStoreRequest extends FormRequest
+class StorePermissionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.permissions.create') ?? false;
+        return $this->user()?->can('admin.profiles.permissions.create') ?? false;
     }
 
     public function rules(): array

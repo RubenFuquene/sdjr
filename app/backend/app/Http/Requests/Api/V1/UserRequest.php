@@ -22,14 +22,20 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class UserRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'admin.users.'.($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.profiles.users.'.($action === 'store' ? 'create' : 'update');
 
         return $this->user()?->can($permission) ?? false;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     */
     public function rules(): array
     {
         $method = $this->method();

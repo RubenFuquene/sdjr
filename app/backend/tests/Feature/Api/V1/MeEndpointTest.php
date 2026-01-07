@@ -14,8 +14,10 @@ class MeEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_returns_authenticated_user_info()
+    /**
+     * Prueba que el endpoint retorna la información del usuario autenticado correctamente.
+     */
+    public function test_it_returns_authenticated_user_info()
     {
         Role::create(['name' => 'superadmin', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
@@ -39,15 +41,19 @@ class MeEndpointTest extends TestCase
             ]);
     }
 
-    /** @test */
-    public function it_requires_authentication()
+    /**
+     * Prueba que se requiere autenticación para consultar la información del usuario.
+     */
+    public function test_it_requires_authentication()
     {
         $response = $this->getJson('/api/v1/me');
         $response->assertUnauthorized();
     }
 
-    /** @test */
-    public function it_returns_authenticated_user_permissions_and_roles()
+    /**
+     * Prueba que el endpoint retorna los roles y permisos del usuario autenticado correctamente.
+     */
+    public function test_it_returns_authenticated_user_permissions_and_roles()
     {
         Role::create(['name' => 'superadmin', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();

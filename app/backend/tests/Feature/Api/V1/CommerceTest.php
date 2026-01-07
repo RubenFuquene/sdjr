@@ -25,6 +25,11 @@ class CommerceTest extends TestCase
         Permission::findOrCreate('provider.commerces.delete', 'sanctum');
     }
 
+    /**
+     * Verifica que un usuario con permiso pueda crear un comercio correctamente.
+     *
+     * Crea un usuario, le asigna el permiso y envía los datos de comercio, validando la respuesta.
+     */
     public function test_user_can_create_commerce()
     {
         $user = User::factory()->create();
@@ -38,6 +43,11 @@ class CommerceTest extends TestCase
         $response->assertJsonPath('data.name', $payload['name']);
     }
 
+    /**
+     * Verifica que un usuario con permiso pueda ver el detalle de un comercio.
+     *
+     * Crea un usuario, le asigna el permiso y consulta un comercio existente, validando la respuesta.
+     */
     public function test_user_can_view_commerce()
     {
         $user = User::factory()->create();
@@ -51,6 +61,11 @@ class CommerceTest extends TestCase
         $response->assertJsonPath('data.id', $commerce->id);
     }
 
+    /**
+     * Verifica que un usuario con permiso pueda actualizar un comercio existente.
+     *
+     * Crea un usuario, le asigna el permiso y actualiza un comercio, validando la respuesta.
+     */
     public function test_user_can_update_commerce()
     {
         $user = User::factory()->create();

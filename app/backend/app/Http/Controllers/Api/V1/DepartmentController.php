@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteDepartmentRequest;
 use App\Http\Requests\Api\V1\DepartmentRequest;
+use App\Http\Requests\Api\V1\IndexDepartmentRequest;
+use App\Http\Requests\Api\V1\ShowDepartmentRequest;
 use App\Http\Resources\Api\V1\DepartmentResource;
 use App\Services\DepartmentService;
 use App\Traits\ApiResponseTrait;
@@ -38,31 +41,68 @@ class DepartmentController extends Controller
      *      description="Returns list of departments",
      *      security={{"sanctum":{}}},
      *
+     *      @OA\Parameter(
+     *          name="per_page",
+     *          in="query",
+     *          required=false,
+     *          description="Items per page",
+     *
+     *          @OA\Schema(type="integer", default=15)
+     *      ),
+     *
+     *      @OA\Parameter(
+     *          name="name",
+     *          in="query",
+     *          required=false,
+     *          description="Filter by name",
+     *
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Parameter(
+     *          name="code",
+     *          in="query",
+     *          required=false,
+     *          description="Filter by code",
+     *
+     *          @OA\Schema(type="string")
+     *      ),
+     *
+     *      @OA\Parameter(
+     *          name="status",
+     *          in="query",
+     *          required=false,
+     *          description="Filter by status (1=active, 0=inactive)",
+     *
+     *          @OA\Schema(type="string")
+     *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
      *
-     *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
-     *       ),
+     *          @OA\JsonContent(
      *
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
+     *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/DepartmentResource")),
+     *              @OA\Property(property="meta", type="object"),
+     *              @OA\Property(property="links", type="object")
+     *          )
      *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
-     *     )
+     *
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
+     * )
      *
      * @return AnonymousResourceCollection
      */
-    public function index(\App\Http\Requests\Api\V1\DepartmentIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(IndexDepartmentRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
+            $filters = $request->only(['name', 'code', 'status']);
             $perPage = $request->validatedPerPage();
-            $status = $request->validatedStatus();
-            $departments = $this->departmentService->getPaginated($perPage, $status);
+            $departments = $this->departmentService->getPaginated($filters, $perPage);
             $resource = DepartmentResource::collection($departments);
 
             return $this->paginatedResponse($departments, $resource, 'Departments retrieved successfully');
@@ -72,14 +112,14 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created department.
      *
      * @OA\Post(
      *      path="/api/v1/departments",
      *      operationId="storeDepartment",
      *      tags={"Departments"},
      *      summary="Store new department",
-     *      description="Returns department data",
+     *      description="Returns created department data",
      *      security={{"sanctum":{}}},
      *
      *      @OA\RequestBody(
@@ -93,23 +133,14 @@ class DepartmentController extends Controller
      *          description="Successful operation",
      *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
-     *       ),
+     *      ),
      *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
-     *
-     * @return DepartmentResource
      */
     public function store(DepartmentRequest $request): DepartmentResource|JsonResponse
     {
@@ -123,11 +154,11 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified department.
      *
      * @OA\Get(
      *      path="/api/v1/departments/{id}",
-     *      operationId="getDepartmentById",
+     *      operationId="showDepartment",
      *      tags={"Departments"},
      *      summary="Get department information",
      *      description="Returns department data",
@@ -135,13 +166,11 @@ class DepartmentController extends Controller
      *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Department id",
-     *          required=true,
      *          in="path",
+     *          required=true,
+     *          description="Department ID",
      *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          @OA\Schema(type="string")
      *      ),
      *
      *      @OA\Response(
@@ -149,33 +178,18 @@ class DepartmentController extends Controller
      *          description="Successful operation",
      *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
-     *       ),
+     *      ),
      *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function show(string $id): DepartmentResource|JsonResponse
+    public function show(ShowDepartmentRequest $request, string $id): DepartmentResource|JsonResponse
     {
         try {
             $department = $this->departmentService->find($id);
-            if (! $department) {
-                return $this->errorResponse('Department not found', 404);
-            }
 
             return $this->successResponse(new DepartmentResource($department), 'Department retrieved successfully', 200);
         } catch (\Throwable $e) {
@@ -184,7 +198,7 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified department.
      *
      * @OA\Put(
      *      path="/api/v1/departments/{id}",
@@ -196,13 +210,11 @@ class DepartmentController extends Controller
      *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Department id",
-     *          required=true,
      *          in="path",
+     *          required=true,
+     *          description="Department ID",
      *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          @OA\Schema(type="string")
      *      ),
      *
      *      @OA\RequestBody(
@@ -216,24 +228,14 @@ class DepartmentController extends Controller
      *          description="Successful operation",
      *
      *          @OA\JsonContent(ref="#/components/schemas/DepartmentResource")
-     *       ),
+     *      ),
      *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function update(DepartmentRequest $request, string $id): DepartmentResource|JsonResponse
@@ -252,7 +254,7 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified department.
      *
      * @OA\Delete(
      *      path="/api/v1/departments/{id}",
@@ -264,40 +266,21 @@ class DepartmentController extends Controller
      *
      *      @OA\Parameter(
      *          name="id",
-     *          description="Department id",
-     *          required=true,
      *          in="path",
+     *          required=true,
+     *          description="Department ID",
      *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          @OA\Schema(type="string")
      *      ),
      *
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *
-     *          @OA\JsonContent(
-     *
-     *              @OA\Property(property="message", type="string", example="Department deleted successfully")
-     *          )
-     *       ),
-     *
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=204, description="No Content"),
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(DeleteDepartmentRequest $request, string $id): JsonResponse
     {
         try {
             $department = $this->departmentService->find($id);

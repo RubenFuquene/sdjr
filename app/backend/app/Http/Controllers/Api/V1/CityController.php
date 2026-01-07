@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CityRequest;
+use App\Http\Requests\Api\V1\DeleteCityRequest;
+use App\Http\Requests\Api\V1\IndexCityRequest;
+use App\Http\Requests\Api\V1\ShowCityRequest;
 use App\Http\Resources\Api\V1\CityResource;
 use App\Services\CityService;
 use App\Traits\ApiResponseTrait;
@@ -38,26 +41,45 @@ class CityController extends Controller
      *      description="Returns list of cities",
      *      security={{"sanctum":{}}},
      *
+     *      @OA\Parameter(
+     *          name="per_page",
+     *          in="query",
+     *          required=false,
+     *          description="Items per page",
+     *
+     *          @OA\Schema(type="integer", default=15)
+     *      ),
+     *
+     *      @OA\Parameter(
+     *          name="status",
+     *          in="query",
+     *          required=false,
+     *          description="Filter by status (1=active, 0=inactive)",
+     *
+     *          @OA\Schema(type="string")
+     *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
      *
-     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
+     *          @OA\JsonContent(
      *
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
+     *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CityResource")),
+     *              @OA\Property(property="meta", type="object"),
+     *              @OA\Property(property="links", type="object")
+     *          )
      *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
-     *     )
+     *
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
+     * )
      *
      * @return AnonymousResourceCollection
      */
-    public function index(\App\Http\Requests\Api\V1\CityIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(IndexCityRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $perPage = $request->validatedPerPage();
@@ -72,14 +94,14 @@ class CityController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created city.
      *
      * @OA\Post(
      *      path="/api/v1/cities",
      *      operationId="storeCity",
      *      tags={"Cities"},
      *      summary="Store new city",
-     *      description="Returns city data",
+     *      description="Returns created city data",
      *      security={{"sanctum":{}}},
      *
      *      @OA\RequestBody(
@@ -93,23 +115,14 @@ class CityController extends Controller
      *          description="Successful operation",
      *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
+     *      ),
      *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
-     *
-     * @return CityResource
      */
     public function store(CityRequest $request): CityResource|JsonResponse
     {
@@ -123,11 +136,11 @@ class CityController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified city.
      *
      * @OA\Get(
      *      path="/api/v1/cities/{id}",
-     *      operationId="getCityById",
+     *      operationId="showCity",
      *      tags={"Cities"},
      *      summary="Get city information",
      *      description="Returns city data",
@@ -135,13 +148,11 @@ class CityController extends Controller
      *
      *      @OA\Parameter(
      *          name="id",
-     *          description="City id",
-     *          required=true,
      *          in="path",
+     *          required=true,
+     *          description="City ID",
      *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          @OA\Schema(type="string")
      *      ),
      *
      *      @OA\Response(
@@ -149,33 +160,18 @@ class CityController extends Controller
      *          description="Successful operation",
      *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
+     *      ),
      *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function show(string $id): CityResource|JsonResponse
+    public function show(ShowCityRequest $request, string $id): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (! $city) {
-                return $this->errorResponse('City not found', 404);
-            }
 
             return $this->successResponse(new CityResource($city), 'City retrieved successfully', 200);
         } catch (\Throwable $e) {
@@ -184,7 +180,7 @@ class CityController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified city.
      *
      * @OA\Put(
      *      path="/api/v1/cities/{id}",
@@ -196,13 +192,11 @@ class CityController extends Controller
      *
      *      @OA\Parameter(
      *          name="id",
-     *          description="City id",
-     *          required=true,
      *          in="path",
+     *          required=true,
+     *          description="City ID",
      *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          @OA\Schema(type="string")
      *      ),
      *
      *      @OA\RequestBody(
@@ -216,24 +210,14 @@ class CityController extends Controller
      *          description="Successful operation",
      *
      *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
+     *      ),
      *
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function update(CityRequest $request, string $id): CityResource|JsonResponse
@@ -252,7 +236,7 @@ class CityController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified city.
      *
      * @OA\Delete(
      *      path="/api/v1/cities/{id}",
@@ -264,40 +248,21 @@ class CityController extends Controller
      *
      *      @OA\Parameter(
      *          name="id",
-     *          description="City id",
-     *          required=true,
      *          in="path",
+     *          required=true,
+     *          description="City ID",
      *
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          @OA\Schema(type="string")
      *      ),
      *
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *
-     *          @OA\JsonContent(
-     *
-     *              @OA\Property(property="message", type="string", example="City deleted successfully")
-     *          )
-     *       ),
-     *
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
+     *      @OA\Response(response=204, description="No Content"),
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(DeleteCityRequest $request, string $id): JsonResponse
     {
         try {
             $city = $this->cityService->find($id);

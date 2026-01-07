@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 
 /**
  * @OA\Schema(
- *     schema="RoleStoreRequest",
+ *     schema="StoreRoleRequest",
  *     required={"name", "description"},
  *
  *     @OA\Property(property="name", type="string", maxLength=50, example="admin", description="Role name (unique)"),
@@ -23,17 +23,11 @@ use Illuminate\Validation\Rule;
  *     )
  * )
  */
-class RoleStoreRequest extends FormRequest
+class StoreRoleRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        if ($this->isMethod('post')) {
-            return $this->user()?->can('admin.roles.create') ?? false;
-        } elseif ($this->isMethod('put') || $this->isMethod('patch')) {
-            return $this->user()?->can('admin.roles.update') ?? false;
-        }
-
-        return false;
+        return $this->user()?->can('admin.profile.roles.create') ?? false;
     }
 
     public function rules(): array

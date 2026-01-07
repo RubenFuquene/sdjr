@@ -14,31 +14,42 @@ class PermissionEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_returns_all_permissions()
+    /**
+     * Prueba que el endpoint retorna todos los permisos correctamente para un usuario autenticado.
+     */
+    public function test_it_returns_all_permissions()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        Permission::create(['name' => 'users.view']);
-        Permission::create(['name' => 'users.edit']);
+        Permission::create(['name' => 'admin.profiles.users.index']);
+        Permission::create(['name' => 'admin.profiles.users.edit']);
 
         $response = $this->getJson('/api/v1/permissions');
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data' => ['permissions'],
+                'data' => [
+                    ['name', 'description'],
+                ],
                 'message',
                 'status',
             ])
             ->assertJsonFragment([
-                'permissions' => ['users.view', 'users.edit'],
+                'name' => 'admin.profiles.users.index',
+            ])
+            ->assertJsonFragment([
+                'name' => 'admin.profiles.users.edit',
+            ])
+            ->assertJsonFragment([
                 'message' => 'Permissions retrieved successfully',
                 'status' => true,
             ]);
     }
 
-    /** @test */
-    public function it_requires_authentication()
+    /**
+     * Prueba que se requiere autenticación para consultar los permisos.
+     */
+    public function test_it_requires_authentication()
     {
         $response = $this->getJson('/api/v1/permissions');
         $response->assertUnauthorized();

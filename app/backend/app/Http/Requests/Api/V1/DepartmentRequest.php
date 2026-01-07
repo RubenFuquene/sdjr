@@ -20,7 +20,7 @@ class DepartmentRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'admin.departments.'.($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.params.departments.'.($action === 'store' ? 'create' : 'update');
 
         return $this->user()?->can($permission) ?? false;
     }
