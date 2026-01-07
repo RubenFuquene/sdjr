@@ -161,14 +161,17 @@ run_migrations() {
         echo "Production environment detected, running non-destructive migrations..."
         php artisan migrate --force --no-interaction
     else
-        echo "Non-production environment detected, running fresh migrations..."
-        php artisan migrate:fresh --force --no-interaction
+        echo "Non-production environment detected, running migrations..."
+        php artisan migrate --force --no-interaction
     fi
 }
 
 run_seeders() {
+    # Read ENABLE_SEEDING from .env file or environment variable
+    local enable_seeding="${ENABLE_SEEDING:-$(grep '^ENABLE_SEEDING=' "$ENV_FILE" 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs)}"
+    
     # Only run seeders if explicitly enabled
-    if [ "${ENABLE_SEEDING:-false}" = "true" ]; then
+    if [ "$enable_seeding" = "true" ]; then
         echo "Running database seeders..."
         php artisan db:seed --force --no-interaction
     else
