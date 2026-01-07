@@ -7,8 +7,11 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
+ * EstablishmentTypeRequest
+ *
  * @OA\Schema(
  *     schema="EstablishmentTypeRequest",
+ *     type="object",
  *     required={"name","code"},
  *
  *     @OA\Property(property="name", type="string", maxLength=255, example="Restaurante"),

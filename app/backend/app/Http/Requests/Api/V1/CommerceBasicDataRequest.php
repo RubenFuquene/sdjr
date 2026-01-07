@@ -7,10 +7,14 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
+ * CommerceBasicDataRequest
+ *
  * @OA\Schema(
  *     schema="CommerceBasicDataRequest",
+ *     type="object",
+ *     description="Request schema for basic commerce data, including commerce, legal representatives, and documents.",
  *
- *     @OA\Property(property="commerce", ref="#/components/schemas/CommerceRequest"),
+ *     @OA\Property(property="commerce", type="array", @OA\Items(ref="#/components/schemas/CommerceRequest")),
  *     @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeRequest")),
  *     @OA\Property(property="commerce_documents", type="array", @OA\Items(ref="#/components/schemas/CommerceDocument"))
  * )

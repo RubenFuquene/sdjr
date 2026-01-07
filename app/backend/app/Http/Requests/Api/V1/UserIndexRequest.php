@@ -6,6 +6,23 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * UserIndexRequest
+ *
+ * @OA\Schema(
+ *     schema="UserIndexRequest",
+ *     type="object",
+ *
+ *     @OA\Property(
+ *         property="per_page",
+ *         type="integer",
+ *         minimum=1,
+ *         maximum=100,
+ *         description="Cantidad de registros por página (default: 15)",
+ *         example=10
+ *     )
+ * )
+ */
 class UserIndexRequest extends FormRequest
 {
     public function authorize(): bool

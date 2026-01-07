@@ -47,7 +47,7 @@ class DepartmentController extends Controller
      *          required=false,
      *          description="Items per page",
      *
-     *          @OA\Schema(type="integer", default=15)
+     *          @OA\Schema(ref="#/components/schemas/IndexDepartmentRequest", property="per_page")
      *      ),
      *
      *      @OA\Parameter(
@@ -56,7 +56,7 @@ class DepartmentController extends Controller
      *          required=false,
      *          description="Filter by name",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/IndexDepartmentRequest", property="name")
      *      ),
      *
      *      @OA\Parameter(
@@ -65,7 +65,7 @@ class DepartmentController extends Controller
      *          required=false,
      *          description="Filter by code",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/IndexDepartmentRequest", property="code")
      *      ),
      *
      *      @OA\Parameter(
@@ -74,7 +74,7 @@ class DepartmentController extends Controller
      *          required=false,
      *          description="Filter by status (1=active, 0=inactive)",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/IndexDepartmentRequest", property="status")
      *      ),
      *
      *      @OA\Response(
@@ -170,7 +170,7 @@ class DepartmentController extends Controller
      *          required=true,
      *          description="Department ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/ShowDepartmentRequest")
      *      ),
      *
      *      @OA\Response(
@@ -270,7 +270,7 @@ class DepartmentController extends Controller
      *          required=true,
      *          description="Department ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/DeleteDepartmentRequest")
      *      ),
      *
      *      @OA\Response(response=204, description="No Content"),

@@ -24,6 +24,15 @@ class MeController extends Controller
      *     description="Returns id, name, email, roles and permissions of the authenticated user.",
      *     security={{"sanctum":{}}},
      *
+     *     @OA\Parameter(
+     *         name="request",
+     *         in="query",
+     *         required=false,
+     *         description="MeRequest query params",
+     *
+     *         @OA\Schema(ref="#/components/schemas/MeRequest")
+     *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -64,6 +73,15 @@ class MeController extends Controller
      *     summary="Get current authenticated user permissions and roles",
      *     description="Returns permissions and roles of the authenticated user.",
      *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="request",
+     *         in="query",
+     *         required=false,
+     *         description="MeRequest query params",
+     *
+     *         @OA\Schema(ref="#/components/schemas/MeRequest")
+     *     ),
      *
      *     @OA\Response(
      *         response=200,

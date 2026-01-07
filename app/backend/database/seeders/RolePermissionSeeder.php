@@ -132,7 +132,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.profiles.admin.update', 'guard_name' => $guardName, 'description' => 'Permission to update admin', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.admin.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete admin', 'created_at' => now(), 'updated_at' => now()],
 
-
             // Administrator Modules
             ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.view', 'guard_name' => $guardName, 'description' => 'View admin parametrization module', 'created_at' => now(), 'updated_at' => now()],

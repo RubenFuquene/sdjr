@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Models\User;
 use App\Constants\Constant;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
+use App\Http\Requests\Api\V1\StoreRoleRequest;
+use App\Http\Requests\Api\V1\UpdateRoleRequest;
+use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
+use App\Http\Resources\Api\V1\RoleResource;
+use App\Models\User;
 use App\Services\RoleService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\RoleResource;
-use App\Http\Requests\Api\V1\StoreRoleRequest;
-use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\Api\V1\UpdateRoleRequest;
-use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
-use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @OA\Tag(
@@ -60,7 +60,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Items per page",
      *
-     *         @OA\Schema(type="integer", default=15)
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="per_page")
      *     ),
      *
      *     @OA\Parameter(
@@ -69,7 +69,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Filter by name",
      *
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="name")
      *     ),
      *
      *     @OA\Parameter(
@@ -78,7 +78,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Filter by description",
      *
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="description")
      *     ),
      *
      *     @OA\Parameter(
@@ -87,7 +87,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Filter by permission",
      *
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="permission")
      *     ),
      *
      *     @OA\Response(
@@ -142,7 +142,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleStoreRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/StoreRoleRequest")
      *     ),
      *
      *     @OA\Response(
@@ -340,7 +340,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleUpdateRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/UpdateRoleRequest")
      *     ),
      *
      *     @OA\Response(

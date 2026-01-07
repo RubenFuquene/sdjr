@@ -6,6 +6,31 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * CountryFilterRequest
+ *
+ * @OA\Schema(
+ *     schema="CountryFilterRequest",
+ *     type="object",
+ *     required={},
+ *
+ *     @OA\Property(
+ *         property="per_page",
+ *         type="integer",
+ *         minimum=1,
+ *         maximum=100,
+ *         description="Number of records per page (default: 15)",
+ *         example=10
+ *     ),
+ *     @OA\Property(
+ *         property="status",
+ *         type="string",
+ *         enum={"0", "1", "all"},
+ *         description="Filter by status: 1 (active), 0 (inactive), all (all records)",
+ *         example="1"
+ *     )
+ * )
+ */
 class CountryFilterRequest extends FormRequest
 {
     public function authorize(): bool

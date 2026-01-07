@@ -6,6 +6,43 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * IndexBankRequest
+ *
+ * @OA\Schema(
+ *     schema="IndexBankRequest",
+ *     type="object",
+ *
+ *     @OA\Property(
+ *         property="name",
+ *         type="string",
+ *         maxLength=100,
+ *         description="Nombre del banco para filtrar.",
+ *         example="Banco Ejemplo"
+ *     ),
+ *     @OA\Property(
+ *         property="code",
+ *         type="string",
+ *         maxLength=20,
+ *         description="Código del banco para filtrar.",
+ *         example="1234"
+ *     ),
+ *     @OA\Property(
+ *         property="status",
+ *         type="string",
+ *         description="Estado del banco (1=activo, 0=inactivo)",
+ *         example="1"
+ *     ),
+ *     @OA\Property(
+ *         property="per_page",
+ *         type="integer",
+ *         minimum=1,
+ *         maximum=100,
+ *         description="Cantidad de registros por página (default: 15)",
+ *         example=10
+ *     )
+ * )
+ */
 class IndexBankRequest extends FormRequest
 {
     public function authorize(): bool

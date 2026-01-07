@@ -50,7 +50,7 @@ class CategoryController extends Controller
      *          description="Cantidad de registros por página (1-100)",
      *          required=false,
      *
-     *          @OA\Schema(type="integer", default=15)
+     *          @OA\Schema(ref="#/components/schemas/IndexCategoryRequest", property="per_page")
      *      ),
      *
      *      @OA\Parameter(
@@ -59,7 +59,7 @@ class CategoryController extends Controller
      *          description="Filtrar por estado: 1=activos, 0=inactivos, all=todos",
      *          required=false,
      *
-     *          @OA\Schema(type="string", enum={"1","0","all"}, default="all")
+     *          @OA\Schema(ref="#/components/schemas/IndexCategoryRequest", property="status")
      *      ),
      *
      *      @OA\Response(
@@ -154,7 +154,7 @@ class CategoryController extends Controller
      *          required=true,
      *          description="Category ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/ShowCategoryRequest")
      *      ),
      *
      *      @OA\Response(
@@ -257,7 +257,7 @@ class CategoryController extends Controller
      *          required=true,
      *          description="Category ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/DeleteCategoryRequest")
      *      ),
      *
      *      @OA\Response(response=204, description="No Content"),
