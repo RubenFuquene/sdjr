@@ -48,65 +48,19 @@ class RoleController extends Controller
     /**
      * @OA\Get(
      *     path="/api/v1/roles",
-     *     operationId="getRolesList",
+     *     operationId="indexRoles",
      *     tags={"Roles"},
-     *     summary="Get list of roles",
-     *     description="Returns a paginated list of roles with permissions and user count.",
+     *     summary="List roles",
+     *     description="Get paginated list of roles. Permite filtrar por name, description, permission y status.",
      *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Items per page",
-     *
-     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="per_page")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="name",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by name",
-     *
-     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="name")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="description",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by description",
-     *
-     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="description")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="permission",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by permission",
-     *
-     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="permission")
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/RoleResource")),
-     *             @OA\Property(property="meta", type="object"),
-     *             @OA\Property(property="links", type="object")
-     *         )
-     *     ),
-     *
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="description", in="query", required=false, description="Filter by description", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="permission", in="query", required=false, description="Filter by permission", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=422, description="Unprocessable Entity"),
-     *     @OA\Response(response=500, description="Internal Server Error")
+     *     @OA\Response(response=403, description="Forbidden")
      * )
      */
     public function index(): AnonymousResourceCollection|JsonResponse

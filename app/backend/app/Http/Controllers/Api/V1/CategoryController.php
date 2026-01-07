@@ -34,52 +34,19 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
      * @OA\Get(
-     *      path="/api/v1/categories",
-     *      operationId="getCategoriesList",
-     *      tags={"Categories"},
-     *      summary="Get list of categories",
-     *      description="Returns list of categories. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
-     *      security={{"sanctum":{}}},
-     *
-     *      @OA\Parameter(
-     *          name="per_page",
-     *          in="query",
-     *          description="Cantidad de registros por página (1-100)",
-     *          required=false,
-     *
-     *          @OA\Schema(ref="#/components/schemas/IndexCategoryRequest", property="per_page")
-     *      ),
-     *
-     *      @OA\Parameter(
-     *          name="status",
-     *          in="query",
-     *          description="Filtrar por estado: 1=activos, 0=inactivos, all=todos",
-     *          required=false,
-     *
-     *          @OA\Schema(ref="#/components/schemas/IndexCategoryRequest", property="status")
-     *      ),
-     *
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *
-     *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
-     *       ),
-     *
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
-     *     )
-     *
-     * @return AnonymousResourceCollection
+     *     path="/api/v1/categories",
+     *     operationId="indexCategories",
+     *     tags={"Categories"},
+     *     summary="List categories",
+     *     description="Get paginated list of categories. Permite filtrar por status.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function index(IndexCategoryRequest $request): AnonymousResourceCollection|JsonResponse
     {

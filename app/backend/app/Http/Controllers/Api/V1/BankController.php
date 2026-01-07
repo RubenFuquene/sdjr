@@ -37,49 +37,16 @@ class BankController extends Controller
     /**
      * @OA\Get(
      *     path="/api/v1/banks",
-     *     operationId="getBanksList",
+     *     operationId="indexBanks",
      *     tags={"Banks"},
-     *     summary="Get list of banks",
-     *     description="Returns a paginated list of banks.",
+     *     summary="List banks",
+     *     description="Get paginated list of banks. Permite filtrar por name, code y status.",
      *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(
-     *         name="name",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by name",
-     *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="name")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="code",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by code",
-     *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="code")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="status",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by status",
-     *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="status")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Items per page",
-     *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="per_page")
-     *     ),
-     *
-     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/BankResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )

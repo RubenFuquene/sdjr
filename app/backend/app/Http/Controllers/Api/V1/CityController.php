@@ -31,53 +31,19 @@ class CityController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
      * @OA\Get(
-     *      path="/api/v1/cities",
-     *      operationId="getCitiesList",
-     *      tags={"Cities"},
-     *      summary="Get list of cities",
-     *      description="Returns list of cities",
-     *      security={{"sanctum":{}}},
-     *
-     *      @OA\Parameter(
-     *          name="per_page",
-     *          in="query",
-     *          required=false,
-     *          description="Items per page",
-     *
-     *          @OA\Schema(ref="#/components/schemas/IndexCityRequest", property="per_page")
-     *      ),
-     *
-     *      @OA\Parameter(
-     *          name="status",
-     *          in="query",
-     *          required=false,
-     *          description="Filter by status (1=active, 0=inactive)",
-     *
-     *          @OA\Schema(ref="#/components/schemas/IndexCityRequest", property="status")
-     *      ),
-     *
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *
-     *          @OA\JsonContent(
-     *
-     *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CityResource")),
-     *              @OA\Property(property="meta", type="object"),
-     *              @OA\Property(property="links", type="object")
-     *          )
-     *      ),
-     *
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=422, description="Unprocessable Entity"),
-     *      @OA\Response(response=500, description="Internal Server Error")
+     *     path="/api/v1/cities",
+     *     operationId="indexCities",
+     *     tags={"Cities"},
+     *     summary="List cities",
+     *     description="Get paginated list of cities. Permite filtrar por status.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
      * )
-     *
-     * @return AnonymousResourceCollection
      */
     public function index(IndexCityRequest $request): AnonymousResourceCollection|JsonResponse
     {

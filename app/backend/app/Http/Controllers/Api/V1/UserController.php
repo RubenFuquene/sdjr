@@ -37,37 +37,25 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/v1/users",
-     *     operationId="getUsersList",
+     *     operationId="indexUsers",
      *     tags={"Users"},
-     *     summary="Get list of users",
-     *     description="Returns list of users with roles and permissions.",
+     *     summary="List users",
+     *     description="Get paginated list of users.",
      *     security={{"sanctum":{}}},
-     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         required=false,
      *         description="Items per page",
-     *
-     *         @OA\Schema(ref="#/components/schemas/UserIndexRequest", property="per_page")
+     *         @OA\Schema(type="integer", example=15)
      *     ),
-     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/UserResource")),
-     *             @OA\Property(property="meta", type="object"),
-     *             @OA\Property(property="links", type="object")
-     *         )
+     *         @OA\JsonContent(type="object")
      *     ),
-     *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=422, description="Unprocessable Entity"),
-     *     @OA\Response(response=500, description="Internal Server Error")
+     *     @OA\Response(response=403, description="Forbidden")
      * )
      */
     public function index(UserIndexRequest $request): AnonymousResourceCollection|JsonResponse
