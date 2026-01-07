@@ -97,7 +97,7 @@ class UserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/UserRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -190,7 +190,7 @@ class UserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/UserRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -344,3 +344,4 @@ class UserController extends Controller
         }
     }
 }
+

@@ -73,7 +73,7 @@ class PermissionController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/StorePermissionRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -110,3 +110,4 @@ class PermissionController extends Controller
         }
     }
 }
+

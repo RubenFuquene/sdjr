@@ -142,7 +142,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleStoreRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -194,7 +194,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/UserAssignRolePermissionRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -247,7 +247,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleAssignPermissionRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -340,7 +340,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleUpdateRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -376,3 +376,4 @@ class RoleController extends Controller
         }
     }
 }
+

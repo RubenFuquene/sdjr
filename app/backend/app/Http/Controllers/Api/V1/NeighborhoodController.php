@@ -68,7 +68,7 @@ class NeighborhoodController extends Controller
      *     description="Store a new neighborhood",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/NeighborhoodRequest")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(type="object")),
      *
      *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/NeighborhoodResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -126,7 +126,7 @@ class NeighborhoodController extends Controller
      *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/NeighborhoodRequest")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(type="object")),
      *
      *     @OA\Response(response=200, description="Updated", @OA\JsonContent(ref="#/components/schemas/NeighborhoodResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -174,3 +174,4 @@ class NeighborhoodController extends Controller
         }
     }
 }
+

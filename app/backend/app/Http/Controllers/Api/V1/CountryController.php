@@ -104,7 +104,7 @@ class CountryController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/CountryRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -202,7 +202,7 @@ class CountryController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/CountryRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -277,3 +277,4 @@ class CountryController extends Controller
         }
     }
 }
+

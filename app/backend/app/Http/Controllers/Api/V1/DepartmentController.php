@@ -125,7 +125,7 @@ class DepartmentController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/DepartmentRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -220,7 +220,7 @@ class DepartmentController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/DepartmentRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -295,3 +295,4 @@ class DepartmentController extends Controller
         }
     }
 }
+

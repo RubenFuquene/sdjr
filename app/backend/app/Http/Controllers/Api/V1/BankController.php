@@ -70,38 +70,42 @@ class BankController extends Controller
     }
 
     /**
-     * Get a paginated list of banks.
+     * Create a new bank.
      *
-     * @OA\Get(
+     * @OA\Post(
      *     path="/api/v1/banks",
-     *     operationId="getBanksList",
+     *     operationId="storeBank",
      *     tags={"Banks"},
-     *     summary="Get list of banks",
-     *     description="Returns a paginated list of banks.",
+     *     summary="Create a new bank",
+     *     description="Creates a new bank in the system.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","code"},
+     *             @OA\Property(property="name", type="string", example="Banco de la Nación"),
+     *             @OA\Property(property="code", type="string", example="BN"),
+     *             @OA\Property(property="status", type="string", example="active")
+     *         )
+     *     ),
      *
      *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
+     *         response=201,
+     *         description="Bank created successfully",
      *
      *         @OA\JsonContent(
      *             type="object",
      *
      *             @OA\Property(property="status", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Banks retrieved successfully"),
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/BankResource")),
-     *             @OA\Property(property="meta", type="object"),
-     *             @OA\Property(property="links", type="object")
+     *             @OA\Property(property="message", type="string", example="Bank created successfully"),
+     *             @OA\Property(property="data", ref="#/components/schemas/BankResource")
      *         )
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Validation error")
      * )
      */
     public function store(StoreBankRequest $request): JsonResponse
@@ -188,7 +192,11 @@ class BankController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/UpdateBankRequest")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Banco de la Nación"),
+     *             @OA\Property(property="code", type="string", example="BN"),
+     *             @OA\Property(property="status", type="string", example="active")
+     *         )
      *     ),
      *
      *     @OA\Response(

@@ -98,7 +98,12 @@ class PqrsTypeController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/StorePqrsTypeRequest")
+     *         @OA\JsonContent(
+     *             required={"name", "code"},
+     *             @OA\Property(property="name", type="string", maxLength=100, example="Queja"),
+     *             @OA\Property(property="code", type="string", maxLength=20, example="Q"),
+     *             @OA\Property(property="status", type="string", maxLength=1, example="1")
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -176,7 +181,11 @@ class PqrsTypeController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/UpdatePqrsTypeRequest")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", maxLength=100, example="Queja Actualizada"),
+     *             @OA\Property(property="code", type="string", maxLength=20, example="QA"),
+     *             @OA\Property(property="status", type="string", maxLength=1, example="1")
+     *         )
      *     ),
      *
      *     @OA\Response(

@@ -109,7 +109,7 @@ class CategoryController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -207,7 +207,7 @@ class CategoryController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -282,3 +282,4 @@ class CategoryController extends Controller
         }
     }
 }
+
