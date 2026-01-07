@@ -53,11 +53,13 @@ class RoleController extends Controller
      *     summary="List roles",
      *     description="Get paginated list of roles. Permite filtrar por name, description, permission y status.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
      *     @OA\Parameter(name="description", in="query", required=false, description="Filter by description", @OA\Schema(type="string")),
      *     @OA\Parameter(name="permission", in="query", required=false, description="Filter by permission", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")

@@ -7,13 +7,13 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-
 /**
  * Class AuditLogRequest
  *
  * @OA\Schema(
  *     schema="AuditLogRequest",
  *     required={"method", "endpoint", "response_code", "response_time"},
+ *
  *     @OA\Property(property="user_id", type="integer", nullable=true, example=1, description="User ID (nullable)"),
  *     @OA\Property(property="method", type="string", maxLength=10, example="POST", description="HTTP method"),
  *     @OA\Property(property="endpoint", type="string", maxLength=255, example="/api/v1/resource", description="Requested endpoint"),
