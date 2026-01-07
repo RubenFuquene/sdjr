@@ -84,7 +84,7 @@
         "/api/v1/login": {
             "post": {
                 "tags": [
-                    "Authentication"
+                    "Auth"
                 ],
                 "summary": "Authenticate user and get token",
                 "operationId": "bae68d1c55329ecb6e41f48285840c8f",
@@ -6464,10 +6464,6 @@
         {
             "name": "AuditLogs",
             "description": "API Endpoints of Audit Logs"
-        },
-        {
-            "name": "Authentication",
-            "description": "API Endpoints for User Authentication"
         },
         {
             "name": "Banks",
