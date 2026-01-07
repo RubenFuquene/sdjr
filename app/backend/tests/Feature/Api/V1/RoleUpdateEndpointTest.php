@@ -49,7 +49,7 @@ class RoleUpdateEndpointTest extends TestCase
                     'name' => 'editor-updated',
                     'description' => 'Updated description',
                     'permissions' => [],
-                    'status' => "1",
+                    'status' => '1',
                     'users_count' => 0,
                 ],
             ]);

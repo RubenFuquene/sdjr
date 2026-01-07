@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteBankRequest;
+use App\Http\Requests\Api\V1\IndexBankRequest;
+use App\Http\Requests\Api\V1\ShowBankRequest;
+use App\Http\Requests\Api\V1\StoreBankRequest;
+use App\Http\Requests\Api\V1\UpdateBankRequest;
+use App\Http\Resources\Api\V1\BankResource;
 use App\Services\BankService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\BankResource;
-use App\Http\Requests\Api\V1\ShowBankRequest;
-use App\Http\Requests\Api\V1\IndexBankRequest;
-use App\Http\Requests\Api\V1\StoreBankRequest;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\Api\V1\DeleteBankRequest;
-use App\Http\Requests\Api\V1\UpdateBankRequest;
 
 /**
  * @OA\Tag(
