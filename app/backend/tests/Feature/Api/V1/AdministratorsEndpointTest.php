@@ -14,8 +14,12 @@ class AdministratorsEndpointTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_returns_administrator_users()
+    /**
+     * Verifica que el endpoint /api/v1/administrators retorne solo los usuarios con rol admin.
+     *
+     * Crea un usuario admin y uno normal, autentica como admin y valida que solo el admin esté en la respuesta.
+     */
+    public function test_it_returns_administrator_users()
     {
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
         $admin = User::factory()->create();
@@ -30,8 +34,12 @@ class AdministratorsEndpointTest extends TestCase
             ->assertJsonMissing(['id' => $user->id]);
     }
 
-    /** @test */
-    public function it_requires_authentication()
+    /**
+     * Verifica que el endpoint /api/v1/administrators requiera autenticación.
+     *
+     * Intenta acceder sin autenticación y espera un 401.
+     */
+    public function test_it_requires_authentication()
     {
         $response = $this->getJson('/api/v1/administrators');
         $response->assertUnauthorized();

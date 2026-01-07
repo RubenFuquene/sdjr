@@ -62,8 +62,6 @@ class CityResource extends JsonResource
      *      description="Updated at timestamp",
      *      example="2023-01-01T00:00:00.000000Z"
      * )
-     *
-     * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {

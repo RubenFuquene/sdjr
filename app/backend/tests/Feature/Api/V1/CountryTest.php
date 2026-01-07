@@ -24,15 +24,15 @@ class CountryTest extends TestCase
     }
 
     /**
-     * Test that the index endpoint returns a list of countries.
+     * Verifica que el endpoint index retorne la lista de países correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso y varios países, valida la cantidad y la respuesta.
      */
     public function test_index_returns_countries()
     {
-        Permission::firstOrCreate(['name' => 'admin.countries.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.countries.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.countries.index');
+        $user->givePermissionTo('admin.params.countries.index');
         Sanctum::actingAs($user);
 
         Country::create([
@@ -53,15 +53,15 @@ class CountryTest extends TestCase
     }
 
     /**
-     * Test that the store endpoint creates a new country.
+     * Verifica que el endpoint store cree un nuevo país correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso, envía los datos y valida la respuesta y la base de datos.
      */
     public function test_store_creates_country()
     {
-        Permission::firstOrCreate(['name' => 'admin.countries.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.countries.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.countries.create');
+        $user->givePermissionTo('admin.params.countries.create');
         Sanctum::actingAs($user);
 
         $data = [
@@ -90,9 +90,9 @@ class CountryTest extends TestCase
      */
     public function test_show_returns_country()
     {
-        Permission::firstOrCreate(['name' => 'admin.countries.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.countries.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.countries.show');
+        $user->givePermissionTo('admin.params.countries.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -115,9 +115,9 @@ class CountryTest extends TestCase
      */
     public function test_update_updates_country()
     {
-        Permission::firstOrCreate(['name' => 'admin.countries.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.countries.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.countries.update');
+        $user->givePermissionTo('admin.params.countries.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
@@ -146,9 +146,9 @@ class CountryTest extends TestCase
      */
     public function test_destroy_deletes_country()
     {
-        Permission::firstOrCreate(['name' => 'admin.countries.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.countries.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.countries.delete');
+        $user->givePermissionTo('admin.params.countries.delete');
         Sanctum::actingAs($user);
 
         $country = Country::create([

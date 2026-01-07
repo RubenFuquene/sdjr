@@ -25,6 +25,9 @@ class EstablishmentTypeTest extends TestCase
         Permission::findOrCreate('provider.establishment_types.delete', 'sanctum');
     }
 
+    /**
+     * Prueba que un usuario con permiso puede crear un tipo de establecimiento.
+     */
     public function test_user_can_create_establishment_type()
     {
         $user = User::factory()->create();
@@ -37,6 +40,9 @@ class EstablishmentTypeTest extends TestCase
         $response->assertJsonPath('data.name', $payload['name']);
     }
 
+    /**
+     * Prueba que un usuario con permiso puede ver el detalle de un tipo de establecimiento.
+     */
     public function test_user_can_view_establishment_type()
     {
         $user = User::factory()->create();
@@ -49,6 +55,9 @@ class EstablishmentTypeTest extends TestCase
         $response->assertJsonPath('data.id', $type->id);
     }
 
+    /**
+     * Prueba que un usuario con permiso puede actualizar un tipo de establecimiento.
+     */
     public function test_user_can_update_establishment_type()
     {
         $user = User::factory()->create();
@@ -62,6 +71,9 @@ class EstablishmentTypeTest extends TestCase
         $response->assertJsonPath('data.name', 'Nuevo tipo');
     }
 
+    /**
+     * Prueba que un usuario con permiso puede eliminar (soft delete) un tipo de establecimiento.
+     */
     public function test_user_can_delete_establishment_type()
     {
         $user = User::factory()->create();
@@ -74,6 +86,9 @@ class EstablishmentTypeTest extends TestCase
         $this->assertSoftDeleted('establishment_types', ['id' => $type->id]);
     }
 
+    /**
+     * Prueba que un usuario sin permiso no puede crear un tipo de establecimiento.
+     */
     public function test_cannot_create_establishment_type_without_permission()
     {
         $user = User::factory()->create();

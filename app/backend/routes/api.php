@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BankController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CityController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
@@ -14,7 +15,10 @@ use App\Http\Controllers\Api\V1\LogoutController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NeighborhoodController;
 use App\Http\Controllers\Api\V1\PermissionController;
+use App\Http\Controllers\Api\V1\PqrsTypeController;
+use App\Http\Controllers\Api\V1\PriorityTypeController;
 use App\Http\Controllers\Api\V1\RoleController;
+use App\Http\Controllers\Api\V1\SupportStatusController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +30,12 @@ Route::prefix('v1')->group(function () {
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
 
+        // Support Status Management routes
+        Route::apiResource('support-statuses', SupportStatusController::class);
+
+        // Bank Management routes
+        Route::apiResource('banks', BankController::class);
+
         // Parametrization routes
         Route::apiResource('countries', CountryController::class);
         Route::apiResource('departments', DepartmentController::class);
@@ -33,6 +43,8 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('neighborhoods', NeighborhoodController::class);
         Route::apiResource('establishment-types', EstablishmentTypeController::class);
+        Route::apiResource('pqrs-types', PqrsTypeController::class);
+        Route::apiResource('priority-types', PriorityTypeController::class);
 
         // User Management routes
         Route::apiResource('users', UserController::class);

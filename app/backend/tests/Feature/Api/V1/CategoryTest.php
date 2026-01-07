@@ -16,11 +16,16 @@ class CategoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Verifica que el endpoint index retorne la lista de categorías correctamente.
+     *
+     * Crea un usuario con permiso y varias categorías, valida la estructura y cantidad de la respuesta.
+     */
     public function test_index_returns_categories(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.categories.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.categories.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.categories.index');
+        $user->givePermissionTo('admin.params.categories.index');
         Sanctum::actingAs($user);
         Category::factory()->count(3)->create();
         $response = $this->getJson('/api/v1/categories');
@@ -35,11 +40,16 @@ class CategoryTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
+    /**
+     * Verifica que el endpoint store cree una nueva categoría correctamente.
+     *
+     * Crea un usuario con permiso, envía los datos y valida la respuesta y la base de datos.
+     */
     public function test_store_creates_category(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.categories.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.categories.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.categories.create');
+        $user->givePermissionTo('admin.params.categories.create');
         Sanctum::actingAs($user);
         $data = [
             'name' => 'Test Category',
@@ -61,9 +71,9 @@ class CategoryTest extends TestCase
 
     public function test_show_returns_category(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.categories.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.categories.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.categories.show');
+        $user->givePermissionTo('admin.params.categories.show');
         Sanctum::actingAs($user);
         $category = Category::factory()->create(['name' => 'Unique Category']);
         $response = $this->getJson("/api/v1/categories/{$category->id}");
@@ -80,9 +90,9 @@ class CategoryTest extends TestCase
 
     public function test_update_updates_category(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.categories.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.categories.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.categories.update');
+        $user->givePermissionTo('admin.params.categories.update');
         Sanctum::actingAs($user);
         $category = Category::factory()->create(['name' => 'Old Name']);
         $data = ['name' => 'New Name', 'icon' => 'newicon.png', 'status' => Constant::STATUS_INACTIVE];
@@ -101,9 +111,9 @@ class CategoryTest extends TestCase
 
     public function test_destroy_deletes_category(): void
     {
-        Permission::firstOrCreate(['name' => 'admin.categories.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.categories.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.categories.delete');
+        $user->givePermissionTo('admin.params.categories.delete');
         Sanctum::actingAs($user);
         $category = Category::factory()->create();
         $response = $this->deleteJson("/api/v1/categories/{$category->id}");

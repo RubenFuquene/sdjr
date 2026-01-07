@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use App\Models\Traits\SanitizesTextAttributes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+/**
+ * Class Bank
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $code
+ * @property string $status
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|Bank query()
+ */
+class Bank extends Model
+{
+    use HasFactory, SanitizesTextAttributes, SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'code',
+        'status',
+    ];
+
+    protected $casts = [
+        'name' => 'string',
+        'code' => 'string',
+        'status' => 'string',
+    ];
+
+    /**
+     * Sanitize and normalize the name attribute.
+     */
+    public function setNameAttribute($value): void
+    {
+        $this->attributes['name'] = $this->sanitizeText($value);
+    }
+
+    /**
+     * Sanitize and normalize the code attribute (solo trim, no capitalizar).
+     */
+    public function setCodeAttribute($value): void
+    {
+        $this->attributes['code'] = trim($value);
+    }
+}

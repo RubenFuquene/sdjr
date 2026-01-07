@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Constants\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
-use App\Http\Requests\Api\V1\RoleStoreRequest;
+use App\Http\Requests\Api\V1\StoreRoleRequest;
+use App\Http\Requests\Api\V1\UpdateRoleRequest;
 use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
 use App\Http\Resources\Api\V1\RoleResource;
 use App\Models\User;
@@ -52,6 +54,42 @@ class RoleController extends Controller
      *     description="Returns a paginated list of roles with permissions and user count.",
      *     security={{"sanctum":{}}},
      *
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Items per page",
+     *
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="name",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by name",
+     *
+     *         @OA\Schema(type="string")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="description",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by description",
+     *
+     *         @OA\Schema(type="string")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="permission",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by permission",
+     *
+     *         @OA\Schema(type="string")
+     *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -66,14 +104,22 @@ class RoleController extends Controller
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Unprocessable Entity"),
+     *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function index(): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $perPage = request('per_page', 15);
-            $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount((int) $perPage);
+            $filters = [
+                'name' => request('name'),
+                'description' => request('description'),
+                'permission' => request('permission'),
+                'status' => request('status', Constant::STATUS_ACTIVE),
+                'per_page' => request('per_page', Constant::DEFAULT_PER_PAGE),
+            ];
+            $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount($filters);
             $resource = RoleResource::collection($roles);
 
             return $this->paginatedResponse($roles, $resource, 'Roles retrieved successfully');
@@ -111,7 +157,7 @@ class RoleController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(RoleStoreRequest $request): JsonResponse
+    public function store(StoreRoleRequest $request): JsonResponse
     {
         try {
             $role = $this->roleService->createRole(
@@ -294,7 +340,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleStoreRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/RoleUpdateRequest")
      *     ),
      *
      *     @OA\Response(
@@ -310,7 +356,7 @@ class RoleController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function update(RoleStoreRequest $request, int $id): JsonResponse
+    public function update(UpdateRoleRequest $request, int $id): JsonResponse
     {
         try {
             $role = Role::find($id);

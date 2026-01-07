@@ -6,11 +6,11 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CityIndexRequest extends FormRequest
+class IndexDepartmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.cities.index') ?? false;
+        return $this->user()?->can('admin.params.departments.index') ?? false;
     }
 
     public function rules(): array

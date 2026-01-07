@@ -17,6 +17,12 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @OA\Tag(
+ *     name="Users",
+ *     description="API Endpoints of Users"
+ * )
+ */
 class UserController extends Controller
 {
     use ApiResponseTrait;
@@ -37,15 +43,31 @@ class UserController extends Controller
      *     description="Returns list of users with roles and permissions.",
      *     security={{"sanctum":{}}},
      *
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Items per page",
+     *
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/UserResource"))
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/UserResource")),
+     *             @OA\Property(property="meta", type="object"),
+     *             @OA\Property(property="links", type="object")
+     *         )
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Unprocessable Entity"),
+     *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function index(UserIndexRequest $request): AnonymousResourceCollection|JsonResponse
@@ -281,7 +303,7 @@ class UserController extends Controller
 
             return $this->successResponse(new UserResource($updatedUser), 'User status updated successfully');
         } catch (\Throwable $e) {
-            Log::error('Error updating user status', ['id' => $user?->id, 'error' => $e->getMessage()]);
+            Log::error('Error updating user status', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error updating user status', 500);
         }
