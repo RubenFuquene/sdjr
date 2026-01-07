@@ -49,7 +49,7 @@ class UserController extends Controller
      *         required=false,
      *         description="Items per page",
      *
-     *         @OA\Schema(type="integer", default=15)
+     *         @OA\Schema(ref="#/components/schemas/UserIndexRequest", property="per_page")
      *     ),
      *
      *     @OA\Response(
@@ -276,11 +276,7 @@ class UserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(
-     *             required={"status"},
-     *
-     *             @OA\Property(property="status", type="string", enum={"0","1"}, description="User status: 1=active, 0=inactive")
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/UserStatusRequest")
      *     ),
      *
      *     @OA\Response(

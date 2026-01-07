@@ -70,14 +70,6 @@ class AuditLogController extends Controller
      *     description="Returns a single audit log entry",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",

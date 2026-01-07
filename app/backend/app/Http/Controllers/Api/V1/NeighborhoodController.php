@@ -41,6 +41,15 @@ class NeighborhoodController extends Controller
      *     description="Get paginated list of neighborhoods",
      *     security={{"sanctum":{}}},
      *
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Items per page",
+     *
+     *         @OA\Schema(ref="#/components/schemas/NeighborhoodRequest", property="per_page")
+     *     ),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -96,7 +105,7 @@ class NeighborhoodController extends Controller
      *     description="Get a specific neighborhood",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(ref="#/components/schemas/NeighborhoodRequest")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/NeighborhoodResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -104,7 +113,7 @@ class NeighborhoodController extends Controller
      *     @OA\Response(response=404, description="Not found")
      * )
      */
-    public function show(int $id): JsonResponse
+    public function show(NeighborhoodRequest $request, int $id): JsonResponse
     {
         try {
             $neighborhood = $this->neighborhoodService->show($id);
@@ -124,7 +133,7 @@ class NeighborhoodController extends Controller
      *     description="Update a specific neighborhood",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(ref="#/components/schemas/NeighborhoodRequest")),
      *
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/NeighborhoodRequest")),
      *
@@ -154,8 +163,6 @@ class NeighborhoodController extends Controller
      *     summary="Delete neighborhood",
      *     description="Delete a specific neighborhood",
      *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
      *     @OA\Response(response=204, description="No Content"),
      *     @OA\Response(response=401, description="Unauthenticated"),

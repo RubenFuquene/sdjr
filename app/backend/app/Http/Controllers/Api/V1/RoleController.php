@@ -60,7 +60,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Items per page",
      *
-     *         @OA\Schema(type="integer", default=15)
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="per_page")
      *     ),
      *
      *     @OA\Parameter(
@@ -69,7 +69,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Filter by name",
      *
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="name")
      *     ),
      *
      *     @OA\Parameter(
@@ -78,7 +78,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Filter by description",
      *
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="description")
      *     ),
      *
      *     @OA\Parameter(
@@ -87,7 +87,7 @@ class RoleController extends Controller
      *         required=false,
      *         description="Filter by permission",
      *
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(ref="#/components/schemas/StoreRoleRequest", property="permission")
      *     ),
      *
      *     @OA\Response(
@@ -142,7 +142,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleStoreRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/StoreRoleRequest")
      *     ),
      *
      *     @OA\Response(
@@ -340,7 +340,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleUpdateRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/UpdateRoleRequest")
      *     ),
      *
      *     @OA\Response(

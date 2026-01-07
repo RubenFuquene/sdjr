@@ -38,12 +38,11 @@ class CommerceBasicDataController extends Controller
      *     summary="Create commerce with legal representatives and documents",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *     @OA\RequestBody(
+     *         required=true,
      *
-     *         @OA\Property(property="commerce", ref="#/components/schemas/CommerceRequest"),
-     *         @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeRequest")),
-     *         @OA\Property(property="commerce_documents", type="array", @OA\Items(ref="#/components/schemas/CommerceDocument"))
-     *     )),
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceBasicDataRequest")
+     *     ),
      *
      *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/CommerceBasicDataResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),

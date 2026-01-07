@@ -35,11 +35,11 @@ class SupportStatusController extends Controller
      *     description="Returns a paginated list of support statuses.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="code", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="color", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(ref="#/components/schemas/SupportStatusStoreRequest", property="name")),
+     *     @OA\Parameter(name="code", in="query", required=false, @OA\Schema(ref="#/components/schemas/SupportStatusStoreRequest", property="code")),
+     *     @OA\Parameter(name="color", in="query", required=false, @OA\Schema(ref="#/components/schemas/SupportStatusStoreRequest", property="color")),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(ref="#/components/schemas/SupportStatusStoreRequest", property="status")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(ref="#/components/schemas/SupportStatusStoreRequest", property="per_page")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/SupportStatusResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
      *     @OA\Response(response=401, description="Unauthenticated"),

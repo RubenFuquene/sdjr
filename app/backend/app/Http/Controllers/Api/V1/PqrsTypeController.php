@@ -44,10 +44,10 @@ class PqrsTypeController extends Controller
      *     description="Returns paginated list of Pqrs Types",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(ref="#/components/schemas/IndexPqrsTypeRequest", property="per_page")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(ref="#/components/schemas/IndexPqrsTypeRequest", property="status")),
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(ref="#/components/schemas/IndexPqrsTypeRequest", property="name")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(ref="#/components/schemas/IndexPqrsTypeRequest", property="code")),
      *
      *     @OA\Response(
      *         response=200,
@@ -135,7 +135,7 @@ class PqrsTypeController extends Controller
      *     description="Returns a single Pqrs Type",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(ref="#/components/schemas/ShowPqrsTypeRequest")),
      *
      *     @OA\Response(
      *         response=200,
@@ -213,7 +213,7 @@ class PqrsTypeController extends Controller
      *     description="Deletes a Pqrs Type",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(ref="#/components/schemas/DeletePqrsTypeRequest")),
      *
      *     @OA\Response(response=204, description="No Content"),
      *     @OA\Response(response=401, description="Unauthenticated"),

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="RoleUpdateRequest",
+ *     schema="UpdateRoleRequest",
  *     required={"name", "description"},
  *
  *     @OA\Property(property="name", type="string", maxLength=50, example="admin", description="Role name (unique)"),

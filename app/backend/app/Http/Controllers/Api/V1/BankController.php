@@ -43,10 +43,41 @@ class BankController extends Controller
      *     description="Returns a paginated list of banks.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="code", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(
+     *         name="name",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by name",
+     *
+     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="name")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="code",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by code",
+     *
+     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="code")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by status",
+     *
+     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="status")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Items per page",
+     *
+     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="per_page")
+     *     ),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/BankResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -70,38 +101,34 @@ class BankController extends Controller
     }
 
     /**
-     * Get a paginated list of banks.
+     * Store a newly created bank.
      *
-     * @OA\Get(
+     * @OA\Post(
      *     path="/api/v1/banks",
-     *     operationId="getBanksList",
+     *     operationId="storeBank",
      *     tags={"Banks"},
-     *     summary="Get list of banks",
-     *     description="Returns a paginated list of banks.",
+     *     summary="Create new bank",
+     *     description="Creates a new bank record.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
      *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="status", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Banks retrieved successfully"),
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/BankResource")),
-     *             @OA\Property(property="meta", type="object"),
-     *             @OA\Property(property="links", type="object")
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/StoreBankRequest")
      *     ),
      *
+     *     @OA\Response(
+     *         response=201,
+     *         description="Bank created successfully",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/BankResource")
+     *     ),
+     *
+     *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Unprocessable Entity"),
+     *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function store(StoreBankRequest $request): JsonResponse
@@ -134,7 +161,7 @@ class BankController extends Controller
      *         required=true,
      *         description="Bank ID",
      *
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(ref="#/components/schemas/ShowBankRequest")
      *     ),
      *
      *     @OA\Response(
@@ -238,7 +265,7 @@ class BankController extends Controller
      *         required=true,
      *         description="Bank ID",
      *
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(ref="#/components/schemas/DeleteBankRequest")
      *     ),
      *
      *     @OA\Response(response=204, description="No Content"),

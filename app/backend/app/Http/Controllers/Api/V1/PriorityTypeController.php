@@ -50,7 +50,7 @@ class PriorityTypeController extends Controller
      *          required=false,
      *          description="Items per page",
      *
-     *          @OA\Schema(type="integer", default=15)
+     *          @OA\Schema(ref="#/components/schemas/IndexPriorityTypeRequest", property="per_page")
      *      ),
      *
      *      @OA\Parameter(
@@ -59,7 +59,7 @@ class PriorityTypeController extends Controller
      *          required=false,
      *          description="Filter by name",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/IndexPriorityTypeRequest", property="name")
      *      ),
      *
      *      @OA\Parameter(
@@ -68,7 +68,7 @@ class PriorityTypeController extends Controller
      *          required=false,
      *          description="Filter by code",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/IndexPriorityTypeRequest", property="code")
      *      ),
      *
      *      @OA\Parameter(
@@ -77,7 +77,7 @@ class PriorityTypeController extends Controller
      *          required=false,
      *          description="Filter by status (1=active, 0=inactive)",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/IndexPriorityTypeRequest", property="status")
      *      ),
      *
      *      @OA\Response(
@@ -171,7 +171,7 @@ class PriorityTypeController extends Controller
      *          required=true,
      *          description="Priority type ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/ShowPriorityTypeRequest")
      *      ),
      *
      *      @OA\Response(
@@ -274,7 +274,7 @@ class PriorityTypeController extends Controller
      *          required=true,
      *          description="Priority type ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/DeletePriorityTypeRequest")
      *      ),
      *
      *      @OA\Response(response=204, description="No Content"),

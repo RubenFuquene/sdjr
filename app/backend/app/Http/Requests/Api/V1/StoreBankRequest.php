@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="BankStoreRequest",
+ *     schema="StoreBankRequest",
  *     required={"name", "code"},
  *
  *     @OA\Property(property="name", type="string", maxLength=100, example="Banco de Bogotá", description="Bank name"),

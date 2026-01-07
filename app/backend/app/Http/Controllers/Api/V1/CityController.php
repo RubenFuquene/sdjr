@@ -47,7 +47,7 @@ class CityController extends Controller
      *          required=false,
      *          description="Items per page",
      *
-     *          @OA\Schema(type="integer", default=15)
+     *          @OA\Schema(ref="#/components/schemas/IndexCityRequest", property="per_page")
      *      ),
      *
      *      @OA\Parameter(
@@ -56,7 +56,7 @@ class CityController extends Controller
      *          required=false,
      *          description="Filter by status (1=active, 0=inactive)",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/IndexCityRequest", property="status")
      *      ),
      *
      *      @OA\Response(
@@ -152,7 +152,7 @@ class CityController extends Controller
      *          required=true,
      *          description="City ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/ShowCityRequest")
      *      ),
      *
      *      @OA\Response(
@@ -252,7 +252,7 @@ class CityController extends Controller
      *          required=true,
      *          description="City ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/DeleteCityRequest")
      *      ),
      *
      *      @OA\Response(response=204, description="No Content"),

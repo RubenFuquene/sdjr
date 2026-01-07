@@ -6,6 +6,15 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * DeleteCityRequest
+ *
+ * @OA\Schema(
+ *     schema="DeleteCityRequest",
+ *     type="object",
+ *     description="Request schema for deleting a city. No body parameters required."
+ * )
+ */
 class DeleteCityRequest extends FormRequest
 {
     public function authorize(): bool
