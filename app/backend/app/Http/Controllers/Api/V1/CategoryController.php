@@ -39,12 +39,11 @@ class CategoryController extends Controller
      *     operationId="indexCategories",
      *     tags={"Categories"},
      *     summary="List categories",
-     *     description="Get paginated list of categories. Permite filtrar por status.",
+     *     description="Get paginated list of categories. Permite filtrar por nombre (name), estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
-     *
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre de la categoría (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos, all=todos", @OA\Schema(type="string", enum={"1","0","all"}, default="all")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -53,9 +52,9 @@ class CategoryController extends Controller
     public function index(IndexCategoryRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $perPage = $request->validatedPerPage();
-            $status = $request->validatedStatus();
-            $categories = $this->categoryService->getPaginated($perPage, $status);
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();                
+            $categories = $this->categoryService->getPaginated($filters, $perPage);
             $resource = CategoryResource::collection($categories);
 
             return $this->paginatedResponse($categories, $resource, 'Categories retrieved successfully');

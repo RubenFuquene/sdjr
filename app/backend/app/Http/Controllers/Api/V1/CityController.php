@@ -36,12 +36,12 @@ class CityController extends Controller
      *     operationId="indexCities",
      *     tags={"Cities"},
      *     summary="List cities",
-     *     description="Get paginated list of cities. Permite filtrar por status.",
+     *     description="Get paginated list of cities. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
-     *
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre de la ciudad (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código de la ciudad", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos, all=todos", @OA\Schema(type="string", enum={"1","0","all"}, default="all")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -50,9 +50,9 @@ class CityController extends Controller
     public function index(IndexCityRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
-            $status = $request->validatedStatus();
-            $cities = $this->cityService->getPaginated($perPage, $status);
+            $cities = $this->cityService->getPaginated($filters, $perPage);
             $resource = CityResource::collection($cities);
 
             return $this->paginatedResponse($cities, $resource, 'Cities retrieved successfully');

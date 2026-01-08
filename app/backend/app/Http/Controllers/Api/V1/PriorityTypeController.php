@@ -55,7 +55,7 @@ class PriorityTypeController extends Controller
     public function index(IndexPriorityTypeRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $filters = $request->only(['name', 'code', 'status']);
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $priorityTypes = $this->priorityTypeService->getPaginated($filters, $perPage);
             $resource = PriorityTypeResource::collection($priorityTypes);

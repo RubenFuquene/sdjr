@@ -36,34 +36,41 @@ class CountryController extends Controller
      *      operationId="getCountriesList",
      *      tags={"Countries"},
      *      summary="Get list of countries",
-     *      description="Returns list of countries. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
+     *      description="Returns list of countries. Permite filtrar por nombre (name), código (code), estado (status: 1=activos, 0=inactivos, all=todos) y número de registros por página (per_page).",
      *      security={{"sanctum":{}}},
-     *
      *      @OA\Parameter(
-     *          name="per_page",
+     *          name="name",
      *          in="query",
-     *          description="Cantidad de registros por página (1-100)",
+     *          description="Filtrar por nombre del país (texto parcial)",
      *          required=false,
-     *
-     *          @OA\Schema(type="integer", default=15)
+     *          @OA\Schema(type="string")
      *      ),
-     *
+     *      @OA\Parameter(
+     *          name="code",
+     *          in="query",
+     *          description="Filtrar por código del país (ISO)",
+     *          required=false,
+     *          @OA\Schema(type="string")
+     *      ),
      *      @OA\Parameter(
      *          name="status",
      *          in="query",
      *          description="Filtrar por estado: 1=activos, 0=inactivos, all=todos",
      *          required=false,
-     *
      *          @OA\Schema(type="string", enum={"1","0","all"}, default="all")
      *      ),
-     *
+     *      @OA\Parameter(
+     *          name="per_page",
+     *          in="query",
+     *          description="Cantidad de registros por página (1-100)",
+     *          required=false,
+     *          @OA\Schema(type="integer", default=15)
+     *      ),
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *
      *          @OA\JsonContent(ref="#/components/schemas/CountryResource")
-     *       ),
-     *
+     *      ),
      *      @OA\Response(
      *          response=401,
      *          description="Unauthenticated",
@@ -72,16 +79,16 @@ class CountryController extends Controller
      *          response=403,
      *          description="Forbidden"
      *      )
-     *     )
+     * )
      *
      * @return AnonymousResourceCollection
-     */
+    */
     public function index(CountryFilterRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
-            $status = $request->validatedStatus();
-            $countries = $this->countryService->getPaginated($perPage, $status);
+            $countries = $this->countryService->getPaginated($filters, $perPage);
             $resource = CountryResource::collection($countries);
 
             return $this->paginatedResponse($countries, $resource, 'Countries retrieved successfully');

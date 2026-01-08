@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\DeleteNeighborhoodRequest;
-use App\Http\Requests\Api\V1\NeighborhoodRequest;
-use App\Http\Requests\Api\V1\ShowNeighborhoodRequest;
-use App\Http\Resources\Api\V1\NeighborhoodResource;
-use App\Services\NeighborhoodService;
+use Throwable;
+use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Services\NeighborhoodService;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
+use App\Http\Requests\Api\V1\NeighborhoodRequest;
+use App\Http\Resources\Api\V1\NeighborhoodResource;
+use App\Http\Requests\Api\V1\ShowNeighborhoodRequest;
+use App\Http\Requests\Api\V1\IndexNeighborhoodRequest;
+use App\Http\Requests\Api\V1\DeleteNeighborhoodRequest;
 
 /**
  * @OA\Tag(
@@ -39,21 +40,23 @@ class NeighborhoodController extends Controller
      *     operationId="indexNeighborhoods",
      *     tags={"Neighborhoods"},
      *     summary="List neighborhoods",
-     *     description="Get paginated list of neighborhoods.",
+     *     description="Get paginated list of neighborhoods. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
-     *
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
-     *
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre del barrio (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del barrio", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos, all=todos", @OA\Schema(type="string", enum={"1","0","all"}, default="all")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexNeighborhoodRequest $request): JsonResponse
     {
         try {
-            $perPage = (int) ($request->get('per_page', 15));
-            $neighborhoods = $this->neighborhoodService->getPaginated($perPage);
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
+            $neighborhoods = $this->neighborhoodService->getPaginated($filters, $perPage);
             $resource = NeighborhoodResource::collection($neighborhoods);
 
             return $this->paginatedResponse($neighborhoods, $resource, 'Neighborhoods retrieved successfully');

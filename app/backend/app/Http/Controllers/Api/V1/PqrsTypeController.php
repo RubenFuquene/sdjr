@@ -55,7 +55,7 @@ class PqrsTypeController extends Controller
     public function index(IndexPqrsTypeRequest $request): JsonResponse
     {
         try {
-            $filters = $request->only(['status', 'name', 'code']);
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $pqrs = $this->service->getPaginated($filters, $perPage);
             $resource = PqrsTypeResource::collection($pqrs);

@@ -52,7 +52,7 @@ class DepartmentController extends Controller
     public function index(IndexDepartmentRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $filters = $request->only(['name', 'code', 'status']);
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $departments = $this->departmentService->getPaginated($filters, $perPage);
             $resource = DepartmentResource::collection($departments);
