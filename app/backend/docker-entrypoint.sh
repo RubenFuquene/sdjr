@@ -176,6 +176,11 @@ run_seeders() {
     fi
 }
 
+generate_documentation() {
+    echo "Generating API documentation..."
+    php artisan l5-swagger:generate
+}
+
 start_server() {
     local port=${PORT:-8000}
     echo "Starting Laravel server on 0.0.0.0:$port..."
@@ -202,6 +207,7 @@ main() {
     wait_for_database
     run_migrations
     run_seeders
+    generate_documentation
     start_server
 }
 

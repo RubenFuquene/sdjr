@@ -12,11 +12,14 @@ class CategoryService
     /**
      * Get paginated categories.
      */
-    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = Category::query();
-        if ($status !== 'all') {
-            $query->where('status', $status);
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
 
         return $query->paginate($perPage);

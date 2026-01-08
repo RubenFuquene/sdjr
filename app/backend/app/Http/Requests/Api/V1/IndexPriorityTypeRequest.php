@@ -47,6 +47,16 @@ class IndexPriorityTypeRequest extends FormRequest
 
     public function validatedPerPage(): int
     {
-        return intval($this->validated('per_page', 15));
+        return (int) ($this->input('per_page', 15));
+    }
+
+    /**
+     * Get validated filters.
+     *
+     * @return array
+     */
+    public function validatedFilters(): array
+    {
+        return $this->only(['name', 'code', 'status']);
     }
 }

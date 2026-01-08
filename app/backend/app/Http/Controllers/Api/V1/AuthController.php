@@ -27,7 +27,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/api/v1/login",
      *     summary="Authenticate user and get token",
-     *     tags={"Authentication"},
+     *     tags={"Auth"},
      *
      *     @OA\RequestBody(
      *         required=true,

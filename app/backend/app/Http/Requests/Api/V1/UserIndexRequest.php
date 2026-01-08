@@ -41,4 +41,14 @@ class UserIndexRequest extends FormRequest
     {
         return (int) ($this->input('per_page', 15));
     }
+
+    /**
+     * Get validated filters.
+     *
+     * @return array
+     */
+    public function validatedFilters(): array
+    {
+        return $this->only(['name', 'last_name', 'phone', 'email', 'status']);
+    }
 }

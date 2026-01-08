@@ -19,11 +19,17 @@ class CountryService
     /**
      * Get paginated countries with optional status filter.
      */
-    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = Country::query();
-        if ($status !== 'all') {
-            $query->where('status', $status);
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (! empty($filters['code'])) {
+            $query->where('code', 'like', "%{$filters['code']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
 
         return $query->paginate($perPage);

@@ -50,8 +50,13 @@ class IndexCategoryRequest extends FormRequest
         return (int) ($this->input('per_page', 15));
     }
 
-    public function validatedStatus(): string
+    /**
+     * Get validated filters.
+     *
+     * @return array
+     */
+    public function validatedFilters(): array
     {
-        return $this->input('status', 'all');
+        return $this->only(['name', 'status']);
     }
 }

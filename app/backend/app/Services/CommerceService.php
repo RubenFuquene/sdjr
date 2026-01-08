@@ -70,7 +70,7 @@ class CommerceService
     /**
      * Get paginated commerces with filters: page, per_page, search, status
      */
-    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null): \Illuminate\Pagination\LengthAwarePaginator
+    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null): LengthAwarePaginator
     {
         $query = Commerce::query();
 

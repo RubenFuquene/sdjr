@@ -14,9 +14,20 @@ class NeighborhoodService
     /**
      * Get paginated list of neighborhoods.
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
-        return Neighborhood::with('city')->paginate($perPage);
+        $query = Neighborhood::with('city');
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (! empty($filters['code'])) {
+            $query->where('code', 'like', "%{$filters['code']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**
