@@ -150,13 +150,13 @@
                     "Banks"
                 ],
                 "summary": "List banks",
-                "description": "Get paginated list of banks. Permite filtrar por name, code y status.",
+                "description": "Get paginated list of banks. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
                 "operationId": "indexBanks",
                 "parameters": [
                     {
                         "name": "name",
                         "in": "query",
-                        "description": "Filter by name",
+                        "description": "Filtrar por nombre del banco (texto parcial)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -165,7 +165,7 @@
                     {
                         "name": "code",
                         "in": "query",
-                        "description": "Filter by code",
+                        "description": "Filtrar por código del banco (ISO)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -174,16 +174,21 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "1",
+                            "enum": [
+                                "1",
+                                "0"
+                            ]
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -427,22 +432,37 @@
                     "Categories"
                 ],
                 "summary": "List categories",
-                "description": "Get paginated list of categories. Permite filtrar por status.",
+                "description": "Get paginated list of categories. Permite filtrar por nombre (name), estado (status) y cantidad por página (per_page).",
                 "operationId": "indexCategories",
                 "parameters": [
                     {
-                        "name": "status",
+                        "name": "name",
                         "in": "query",
-                        "description": "Filter by status",
+                        "description": "Filtrar por nombre de la categoría (texto parcial)",
                         "required": false,
                         "schema": {
                             "type": "string"
                         }
                     },
                     {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -686,22 +706,46 @@
                     "Cities"
                 ],
                 "summary": "List cities",
-                "description": "Get paginated list of cities. Permite filtrar por status.",
+                "description": "Get paginated list of cities. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
                 "operationId": "indexCities",
                 "parameters": [
                     {
-                        "name": "status",
+                        "name": "name",
                         "in": "query",
-                        "description": "Filter by status",
+                        "description": "Filtrar por nombre de la ciudad (texto parcial)",
                         "required": false,
                         "schema": {
                             "type": "string"
                         }
                     },
                     {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Filtrar por código de la ciudad",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -990,13 +1034,37 @@
                     "Commerces"
                 ],
                 "summary": "Get list of commerces",
-                "description": "Returns paginated list of commerces.",
+                "description": "Returns paginated list of commerces. Permite filtrar por término de búsqueda (search), estado (status), cantidad por página (per_page) y número de página (page).",
                 "operationId": "getCommercesList",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Filtrar por término de búsqueda",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1006,29 +1074,11 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
+                        "description": "Número de página",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 1
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Search term",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter by status",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 ],
@@ -1267,17 +1317,25 @@
                     "Countries"
                 ],
                 "summary": "Get list of countries",
-                "description": "Returns list of countries. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
+                "description": "Returns list of countries. Permite filtrar por nombre (name), código (code), estado (status: 1=activos, 0=inactivos, all=todos) y número de registros por página (per_page).",
                 "operationId": "getCountriesList",
                 "parameters": [
                     {
-                        "name": "per_page",
+                        "name": "name",
                         "in": "query",
-                        "description": "Cantidad de registros por página (1-100)",
+                        "description": "Filtrar por nombre del país (texto parcial)",
                         "required": false,
                         "schema": {
-                            "type": "integer",
-                            "default": 15
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Filtrar por código del país (ISO)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     {
@@ -1293,6 +1351,16 @@
                                 "0",
                                 "all"
                             ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de registros por página (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
                         }
                     }
                 ],
@@ -2425,13 +2493,46 @@
                     "Neighborhoods"
                 ],
                 "summary": "List neighborhoods",
-                "description": "Get paginated list of neighborhoods.",
+                "description": "Get paginated list of neighborhoods. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
                 "operationId": "indexNeighborhoods",
                 "parameters": [
                     {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por nombre del barrio (texto parcial)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Filtrar por código del barrio",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -3659,13 +3760,13 @@
                     "SupportStatuses"
                 ],
                 "summary": "List support statuses",
-                "description": "Get paginated list of support statuses. Permite filtrar por name, code, color y status.",
+                "description": "Get paginated list of support statuses. Permite filtrar por nombre (name), código (code), color, estado (status) y cantidad por página (per_page).",
                 "operationId": "indexSupportStatuses",
                 "parameters": [
                     {
                         "name": "name",
                         "in": "query",
-                        "description": "Filter by name",
+                        "description": "Filtrar por nombre del estado de soporte (texto parcial)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -3674,7 +3775,7 @@
                     {
                         "name": "code",
                         "in": "query",
-                        "description": "Filter by code",
+                        "description": "Filtrar por código del estado de soporte",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -3683,7 +3784,7 @@
                     {
                         "name": "color",
                         "in": "query",
-                        "description": "Filter by color",
+                        "description": "Filtrar por color",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -3692,16 +3793,22 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -3924,13 +4031,45 @@
                     "Users"
                 ],
                 "summary": "List users",
-                "description": "Get paginated list of users.",
+                "description": "Get paginated list of users. Permite filtrar por nombre (name), email, estado (status) y cantidad por página (per_page).",
                 "operationId": "indexUsers",
                 "parameters": [
                     {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por nombre de usuario (texto parcial)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "Filtrar por email de usuario",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "1",
+                            "enum": [
+                                "1",
+                                "0"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
