@@ -1,74 +1,31 @@
 /**
- * 🔄 ADAPTADOR TEMPORAL: Conversión 3→4 niveles
+ * 🔄 ADAPTADOR DE PERMISOS: Parser estructura 4 niveles
  * 
- * PROPÓSITO: Permite que frontend use estructura 4 niveles
- *            mientras backend mantiene 3 niveles
+ * PROPÓSITO: Parsea permisos del backend (formato: module.sidebar.entity.action)
+ *            en estructura tipada para uso en frontend
  * 
- * MIGRACIÓN: Eliminar este archivo cuando backend implemente 4 niveles
+ * EJEMPLO: "admin.profiles.roles.edit" → { module: 'admin', sidebar: 'profiles', entity: 'roles', action: 'edit' }
  */
 
 import { PermissionFromAPI, PermissionAdapted } from '../../../types/role-form-types';
 
 /**
- * Adapta permisos de 3 niveles (backend) a 4 niveles (frontend)
+ * Parsea permisos de formato string a estructura tipada de 4 niveles
+ * Backend ya devuelve permisos con estructura: module.sidebar.entity.action
  */
 export function adaptPermissions(permissions: PermissionFromAPI[]): PermissionAdapted[] {
   return permissions.map(permission => {
-    const [module, entity, action] = permission.name.split('.');
-    
-    // 🎯 MAPEO AUTOMÁTICO: entidad → grupo sidebar
-    const sidebarGroup = getSidebarGroupFromEntity(entity);
-    const adaptedName = `${module}.${sidebarGroup}.${entity}.${action}`;
+    const [module, sidebar, entity, action] = permission.name.split('.');
     
     return {
-      name: adaptedName,
+      name: permission.name,
       description: permission.description,
       module,
-      sidebar: sidebarGroup,
+      sidebar,
       entity,
       action
     };
   });
-}
-
-/**
- * Convierte permisos adaptados (4 niveles) de vuelta a originales (3 niveles)
- * Para envío al backend
- */
-export function reverseAdaptPermissions(adaptedNames: string[]): string[] {
-  return adaptedNames.map(adaptedName => {
-    const [module, , entity, action] = adaptedName.split('.');
-    return `${module}.${entity}.${action}`;
-  });
-}
-
-/**
- * 📍 MAPEO TEMPORAL: entidad → grupo sidebar
- * 
- * Se elimina automáticamente cuando backend implemente 4 niveles
- */
-function getSidebarGroupFromEntity(entity: string): string {
-  const entityToSidebarMap: Record<string, string> = {
-    // Grupo Profiles
-    'roles': 'profiles',
-    'users': 'profiles', 
-    'permissions': 'profiles',
-    
-    // Grupo Parametrization
-    'countries': 'parametrization',
-    'departments': 'parametrization',
-    'cities': 'parametrization',
-    'establishments': 'parametrization',
-    
-    // Grupo Marketing
-    'campaigns': 'marketing',
-    
-    // Módulos directos
-    'dashboard': 'dashboard',
-    'support': 'support'
-  };
-  
-  return entityToSidebarMap[entity] || entity;
 }
 
 /**

@@ -21,7 +21,6 @@ interface UseRolesReturn {
  */
 function mapRoleToPerfil(role: RoleFromAPI): Perfil {
   const permissionsEntries = Object.entries(role.permissions);
-  
   return {
     id: role.id,
     nombre: role.name,
@@ -33,7 +32,7 @@ function mapRoleToPerfil(role: RoleFromAPI): Perfil {
       .filter(([key]) => key.startsWith("provider."))
       .map(([key, value]) => ({ name: key, description: value })),
     usuarios: role.users_count,
-    activo: true, // Backend no envía este campo, asumimos true
+    activo: role.status === "1",
   };
 }
 
@@ -52,7 +51,7 @@ export function useRoles(perPage: number = 15): UseRolesReturn {
 
       const response = await getRoles(perPage);
       const mappedRoles = response.data.map(mapRoleToPerfil);
-      
+
       setRoles(mappedRoles);
     } catch (err) {
       if (err instanceof ApiError) {

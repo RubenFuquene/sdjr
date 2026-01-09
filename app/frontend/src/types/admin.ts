@@ -37,6 +37,7 @@ export interface RoleFromAPI {
   name: string;
   description: string;
   permissions: Record<string, string>; // { "users.create": "Crear usuarios" }
+  status: string;
   users_count: number;
 }
 

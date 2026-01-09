@@ -1,16 +1,16 @@
 /**
- * Hook para gestión de permisos con adaptador integrado
- * Fetches permisos de BD y aplica adaptador temporal 3→4 niveles
+ * Hook para gestión de permisos
+ * Fetches permisos de BD y aplica adaptador para estructura de 4 niveles
  */
 
 import { useState, useEffect, useMemo } from 'react';
 import { PermissionFromAPI, PermissionAdapted, PermissionTree } from '../types/role-form-types';
+import { getPermissions } from '../lib/api/permissions';
 import { adaptPermissions } from '../components/admin/adapters/permission-adapter';
 import { buildPermissionTree } from '../utils/permission-tree-builder';
-import { fetchDummyPermissions } from '../lib/dummy-permissions';
 
 export interface UsePermissionsReturn {
-  /** Permisos adaptados a 4 niveles */
+  /** Permisos con estructura de 4 niveles del backend */
   permissions: PermissionAdapted[];
   /** Árbol de permisos 4 niveles para navegación */
   permissionTree: PermissionTree;
@@ -23,7 +23,7 @@ export interface UsePermissionsReturn {
 }
 
 /**
- * Hook principal para gestión de permisos con adaptador integrado
+ * Hook principal para gestión de permisos
  */
 export function usePermissions(): UsePermissionsReturn {
   const [rawPermissions, setRawPermissions] = useState<PermissionFromAPI[]>([]);
@@ -35,13 +35,7 @@ export function usePermissions(): UsePermissionsReturn {
       setLoading(true);
       setError(null);
       
-      // 🚨 TEMPORAL: Usar dummy data
-      // TODO: Reemplazar con:
-      // const response = await fetch('/api/v1/permissions');
-      // const data = await response.json();
-      // setRawPermissions(data.data || data);
-      
-      const data = await fetchDummyPermissions();
+      const data = await getPermissions();
       setRawPermissions(data);
       
     } catch (err) {
@@ -55,13 +49,13 @@ export function usePermissions(): UsePermissionsReturn {
     fetchPermissions();
   }, []);
 
-  // 🔄 Aplicar adaptador temporal (3→4 niveles)
+  // Aplicar adaptador para transformar a estructura de 4 niveles
   const adaptedPermissions = useMemo(() => {
     if (rawPermissions.length === 0) return [];
     return adaptPermissions(rawPermissions);
   }, [rawPermissions]);
 
-  // Construir árbol 4 niveles
+  // Construir árbol 4 niveles desde permisos adaptados
   const permissionTree = useMemo(() => {
     if (adaptedPermissions.length === 0) return {};
     return buildPermissionTree(adaptedPermissions);
