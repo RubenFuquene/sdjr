@@ -48,8 +48,8 @@ class CommerceBasicDataService
             $commerceData = $data['commerce'];
             $commerce = Commerce::create($commerceData);
 
-            if (! empty($data['legal_representatives'])) {
-                $legalRepresentativeData = $data['legal_representatives'];
+            if (! empty($data['legal_representative'])) {
+                $legalRepresentativeData = $data['legal_representative'];
                 $legalRepresentativeData['commerce_id'] = $commerce->id;
                 $this->legalRepresentativeService->store($legalRepresentativeData);
             }

@@ -28,8 +28,8 @@ class CommercePayoutMethodServiceTest extends TestCase
     {
         $service = new CommercePayoutMethodService();
         $method = CommercePayoutMethod::factory()->create();
-        $updated = $service->update($method, ['account_name' => 'Test Name']);
-        $this->assertEquals('Test Name', $updated->account_name);
+        $updated = $service->update($method, ['account_number' => '123456789']);
+        $this->assertEquals('123456789', $updated->account_number);
     }
 
     public function test_delete_method(): void
