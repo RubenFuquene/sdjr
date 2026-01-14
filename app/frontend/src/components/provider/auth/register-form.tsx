@@ -89,7 +89,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Campo Nombre */}
       <div className="space-y-2">
-        <Label htmlFor="name" className="text-[#1A1A1A]">
+        <Label htmlFor="name" className="text-[#1A1A1A] font-semibold">
           Nombre del Negocio
         </Label>
         <div className="relative">
@@ -118,7 +118,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       {/* Campo Email */}
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-[#1A1A1A]">
+        <Label htmlFor="email" className="text-[#1A1A1A] font-semibold">
           Correo Electrónico
         </Label>
         <div className="relative">
@@ -147,7 +147,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       {/* Campo Contraseña */}
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-[#1A1A1A]">
+        <Label htmlFor="password" className="text-[#1A1A1A] font-semibold">
           Contraseña
         </Label>
         <div className="relative">
@@ -176,7 +176,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       {/* Campo Confirmar Contraseña */}
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword" className="text-[#1A1A1A]">
+        <Label htmlFor="confirmPassword" className="text-[#1A1A1A] font-semibold">
           Confirmar Contraseña
         </Label>
         <div className="relative">
