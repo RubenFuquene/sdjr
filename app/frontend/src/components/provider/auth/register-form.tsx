@@ -73,7 +73,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
     try {
       // Usar el hook para registro
-      const sessionData = await handleRegister(
+      const { redirectTo } = await handleRegister(
         formData.name,
         formData.email,
         formData.password
@@ -81,7 +81,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       
       // Registro exitoso - redirigir al dashboard
       onSuccess?.();
-      router.push(sessionData.role === "provider" ? "/provider/dashboard" : "/app/dashboard");
+      router.push(redirectTo);
     } catch {
       // El error ya está en el estado del hook (mostrado en UI)
       // No hacemos nada aquí, el componente lo renderiza

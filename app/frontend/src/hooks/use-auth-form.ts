@@ -17,8 +17,8 @@ import type { SessionData } from "@/types/auth";
  */
 
 interface UseAuthFormReturn {
-  handleLogin: (email: string, password: string) => Promise<SessionData>;
-  handleRegister: (name: string, email: string, password: string) => Promise<SessionData>;
+  handleLogin: (email: string, password: string) => Promise<{ redirectTo: string; user: SessionData }>;
+  handleRegister: (name: string, email: string, password: string) => Promise<{ redirectTo: string; user: SessionData }>;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -46,9 +46,12 @@ export function useAuthForm(): UseAuthFormReturn {
 
   /**
    * Maneja login del usuario
-   * Retorna SessionData si es exitoso, throws Error si falla
+   * Retorna { redirectTo, user } si es exitoso, throws Error si falla
    */
-  const handleLogin = async (email: string, password: string): Promise<SessionData> => {
+  const handleLogin = async (
+    email: string,
+    password: string
+  ): Promise<{ redirectTo: string; user: SessionData }> => {
     setLoading(true);
     setError(null);
 
@@ -83,7 +86,10 @@ export function useAuthForm(): UseAuthFormReturn {
       // Persistir sesión
       persistSession(result.user);
 
-      return result.user;
+      return {
+        redirectTo: result.redirectTo || "/app/dashboard",
+        user: result.user,
+      };
     } catch (err) {
       // Extraer mensaje de error
       const message = err instanceof Error ? err.message : "Error desconocido";
@@ -96,7 +102,7 @@ export function useAuthForm(): UseAuthFormReturn {
 
   /**
    * Maneja registro de nuevo proveedor
-   * Retorna SessionData si es exitoso, throws Error si falla
+   * Retorna { redirectTo, user } si es exitoso, throws Error si falla
    * 
    * 🚨 NOTA: Requiere que backend haya implementado POST /api/v1/providers/register
    * Si aún no está implementado, fallará con mensaje claro.
@@ -105,7 +111,7 @@ export function useAuthForm(): UseAuthFormReturn {
     name: string,
     email: string,
     password: string
-  ): Promise<SessionData> => {
+  ): Promise<{ redirectTo: string; user: SessionData }> => {
     setLoading(true);
     setError(null);
 
@@ -146,7 +152,10 @@ export function useAuthForm(): UseAuthFormReturn {
       // Persistir sesión
       persistSession(result.user);
 
-      return result.user;
+      return {
+        redirectTo: result.redirectTo || "/provider/dashboard",
+        user: result.user,
+      };
     } catch (err) {
       // Extraer mensaje de error
       const message = err instanceof Error ? err.message : "Error desconocido";

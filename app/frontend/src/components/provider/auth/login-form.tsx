@@ -28,10 +28,10 @@ export function LoginForm() {
 
     try {
       // Usar el hook para login
-      const sessionData = await handleLogin(email, password);
+      const { redirectTo } = await handleLogin(email, password);
       
       // Login exitoso - redirigir al dashboard
-      router.push(sessionData.role === "provider" ? "/provider/dashboard" : "/app/dashboard");
+      router.push(redirectTo);
     } catch {
       // El error ya está en el estado del hook (mostrado en UI)
       // No hacemos nada aquí, el componente lo renderiza
