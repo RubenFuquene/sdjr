@@ -30,3 +30,15 @@ export {
   getAdministrators 
 } from "./users";
 export type { ApiSuccess } from "./users";
+
+// Location (Geolocalización)
+export {
+  getCountries,
+  getCountry,
+  getDepartments,
+  getDepartment,
+  getCities,
+  getCity,
+  getNeighborhoods,
+  getNeighborhood
+} from "./location";
