@@ -52,8 +52,6 @@ class IndexCityRequest extends FormRequest
 
     /**
      * Get validated filters.
-     *
-     * @return array
      */
     public function validatedFilters(): array
     {

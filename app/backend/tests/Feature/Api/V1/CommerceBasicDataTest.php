@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
 use App\Models\Bank;
 use App\Models\City;
-use App\Models\User;
 use App\Models\Department;
 use App\Models\Neighborhood;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class CommerceBasicDataTest extends TestCase
 {
@@ -69,7 +69,7 @@ class CommerceBasicDataTest extends TestCase
                     'verified' => false,
                     'uploaded_at' => now()->toDateString(),
                     'verified_at' => null,
-                ]
+                ],
             ],
             'my_account' => [
                 'type' => 'bank',
@@ -78,7 +78,7 @@ class CommerceBasicDataTest extends TestCase
                 'account_number' => '1234567890',
                 'owner_id' => $user->id,
                 'is_primary' => true,
-            ]
+            ],
         ];
 
         $response = $this->postJson('/api/v1/commerces/basic', $payload);
@@ -118,7 +118,7 @@ class CommerceBasicDataTest extends TestCase
                 'account_number' => '1234567890',
                 'owner_id' => $user->id,
                 'is_primary' => true,
-            ]
+            ],
         ];
         $response = $this->postJson('/api/v1/commerces/basic', $payload);
         $response->assertForbidden();

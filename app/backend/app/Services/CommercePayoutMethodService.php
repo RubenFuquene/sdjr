@@ -15,8 +15,6 @@ class CommercePayoutMethodService
     /**
      * Get paginated payout methods with filters.
      *
-     * @param array $filters
-     * @param int $perPage
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function getPaginated(array $filters, int $perPage)
@@ -45,8 +43,6 @@ class CommercePayoutMethodService
     /**
      * Store a new payout method.
      *
-     * @param array $data
-     * @return CommercePayoutMethod
      * @throws Throwable
      */
     public function store(array $data): CommercePayoutMethod
@@ -56,9 +52,6 @@ class CommercePayoutMethodService
 
     /**
      * Find a payout method by ID.
-     *
-     * @param int $id
-     * @return CommercePayoutMethod|null
      */
     public function find(int $id): ?CommercePayoutMethod
     {
@@ -67,22 +60,17 @@ class CommercePayoutMethodService
 
     /**
      * Update a payout method.
-     *
-     * @param CommercePayoutMethod $method
-     * @param array $data
-     * @return CommercePayoutMethod
      */
     public function update(CommercePayoutMethod $method, array $data): CommercePayoutMethod
     {
         $method->update($data);
+
         return $method;
     }
 
     /**
      * Delete a payout method.
      *
-     * @param CommercePayoutMethod $method
-     * @return bool|null
      * @throws Throwable
      */
     public function delete(CommercePayoutMethod $method): ?bool

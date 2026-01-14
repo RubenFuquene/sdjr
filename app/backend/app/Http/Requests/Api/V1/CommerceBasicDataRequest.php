@@ -62,7 +62,7 @@ class CommerceBasicDataRequest extends FormRequest
             'commerce_documents.*.verified' => ['boolean'],
             'commerce_documents.*.uploaded_at' => ['nullable', 'date'],
             'commerce_documents.*.verified_at' => ['nullable', 'date'],
-            
+
             'my_account.type' => ['required', 'string', 'max:15'],
             'my_account.account_type' => ['required', 'string', 'max:50'],
             'my_account.bank_id' => ['required', 'exists:banks,id'],

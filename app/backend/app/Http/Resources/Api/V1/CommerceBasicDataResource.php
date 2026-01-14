@@ -27,7 +27,7 @@ class CommerceBasicDataResource extends JsonResource
         $commerce = $this->resource;
 
         return [
-            'commerce' => new CommerceResource($commerce),         
+            'commerce' => new CommerceResource($commerce),
             'commerce_documents' => CommerceDocumentResource::collection($this->whenLoaded('commerceDocuments')),
             'my_account' => CommercePayoutMethodResource::collection($this->whenLoaded('myAccount')),
         ];

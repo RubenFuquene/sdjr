@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use Throwable;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteNeighborhoodRequest;
+use App\Http\Requests\Api\V1\IndexNeighborhoodRequest;
+use App\Http\Requests\Api\V1\NeighborhoodRequest;
+use App\Http\Requests\Api\V1\ShowNeighborhoodRequest;
+use App\Http\Resources\Api\V1\NeighborhoodResource;
+use App\Services\NeighborhoodService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Services\NeighborhoodService;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\Api\V1\NeighborhoodRequest;
-use App\Http\Resources\Api\V1\NeighborhoodResource;
-use App\Http\Requests\Api\V1\ShowNeighborhoodRequest;
-use App\Http\Requests\Api\V1\IndexNeighborhoodRequest;
-use App\Http\Requests\Api\V1\DeleteNeighborhoodRequest;
+use Throwable;
 
 /**
  * @OA\Tag(
@@ -42,10 +41,12 @@ class NeighborhoodController extends Controller
      *     summary="List neighborhoods",
      *     description="Get paginated list of neighborhoods. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre del barrio (texto parcial)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del barrio", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")

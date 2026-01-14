@@ -23,5 +23,4 @@ class Constant
     public const ACCOUNT_TYPE_CHECKING = 'checking';
 
     public const ACCOUNT_TYPE_OTHER = 'other';
-    
 }

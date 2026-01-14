@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Throwable;
 use App\Models\Commerce;
 use Illuminate\Support\Facades\DB;
-use App\Services\CommerceDocumentService;
-use App\Services\LegalRepresentativeService;
+use Throwable;
 
 class CommerceBasicDataService
 {
@@ -32,9 +30,9 @@ class CommerceBasicDataService
      */
     public function __construct()
     {
-        $this->legalRepresentativeService = new LegalRepresentativeService();
-        $this->commerceDocumentService = new CommerceDocumentService();
-        $this->myAccountService = new CommercePayoutMethodService();
+        $this->legalRepresentativeService = new LegalRepresentativeService;
+        $this->commerceDocumentService = new CommerceDocumentService;
+        $this->myAccountService = new CommercePayoutMethodService;
     }
 
     /**
@@ -60,7 +58,7 @@ class CommerceBasicDataService
                 $this->commerceDocumentService->store($commerceDocumentsData);
             }
 
-            if( ! empty($data['my_account'])){
+            if (! empty($data['my_account'])) {
                 $myAccountData = $data['my_account'];
                 $myAccountData['commerce_id'] = $commerce->id;
                 $this->myAccountService->store($myAccountData);

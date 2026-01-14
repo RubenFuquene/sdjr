@@ -11,8 +11,6 @@ class IndexCommerceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -21,23 +19,19 @@ class IndexCommerceRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         return [
-            'search'   => ['nullable', 'string', 'max:100'],
-            'status'   => ['nullable', Rule::in(['1', '0', 'all'])],
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', Rule::in(['1', '0', 'all'])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'page'     => ['nullable', 'integer', 'min:1'],
+            'page' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
     /**
      * Get validated perPage value or default.
-     *
-     * @return int
      */
     public function validatedPerPage(): int
     {
@@ -46,8 +40,6 @@ class IndexCommerceRequest extends FormRequest
 
     /**
      * Get validated page value or default.
-     *
-     * @return int
      */
     public function validatedPage(): int
     {
@@ -56,8 +48,6 @@ class IndexCommerceRequest extends FormRequest
 
     /**
      * Get validated filters.
-     *
-     * @return array
      */
     public function validatedFilters(): array
     {

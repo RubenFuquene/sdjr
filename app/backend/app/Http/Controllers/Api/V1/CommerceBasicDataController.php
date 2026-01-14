@@ -11,7 +11,6 @@ use App\Services\CommerceBasicDataService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Nette\Utils\Json;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -55,7 +54,7 @@ class CommerceBasicDataController extends Controller
     {
         try {
             $payload = $request->validated();
-            $commerce = $this->commerceBasicDataService->store($payload);            
+            $commerce = $this->commerceBasicDataService->store($payload);
 
             return $this->successResponse(new CommerceBasicDataResource($commerce), 'Commerce basic data created successfully', Response::HTTP_CREATED);
         } catch (Throwable $e) {

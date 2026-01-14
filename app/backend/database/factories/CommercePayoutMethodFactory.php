@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\CommercePayoutMethod;
-use App\Models\Commerce;
+use App\Constants\Constant;
 use App\Models\Bank;
+use App\Models\Commerce;
+use App\Models\CommercePayoutMethod;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Constants\Constant;
 
 class CommercePayoutMethodFactory extends Factory
 {

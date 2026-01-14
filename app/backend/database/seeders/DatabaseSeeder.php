@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Commerce;
 use App\Models\SeederControl;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;

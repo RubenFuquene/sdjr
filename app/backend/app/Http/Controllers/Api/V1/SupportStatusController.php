@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use Illuminate\Http\Request;
-use App\Traits\ApiResponseTrait;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Services\SupportStatusService;
-use Symfony\Component\HttpFoundation\Response;
-use App\Http\Resources\Api\V1\SupportStatusResource;
 use App\Http\Requests\Api\V1\IndexSupportStatusRequest;
 use App\Http\Requests\Api\V1\SupportStatusStoreRequest;
 use App\Http\Requests\Api\V1\SupportStatusUpdateRequest;
+use App\Http\Resources\Api\V1\SupportStatusResource;
+use App\Services\SupportStatusService;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class SupportStatusController extends Controller
 {
@@ -35,11 +35,13 @@ class SupportStatusController extends Controller
      *     summary="List support statuses",
      *     description="Get paginated list of support statuses. Permite filtrar por nombre (name), código (code), color, estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre del estado de soporte (texto parcial)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del estado de soporte", @OA\Schema(type="string")),
      *     @OA\Parameter(name="color", in="query", required=false, description="Filtrar por color", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")

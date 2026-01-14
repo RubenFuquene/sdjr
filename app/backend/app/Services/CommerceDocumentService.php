@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\CommerceDocument;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
 /**
@@ -17,8 +16,6 @@ class CommerceDocumentService
     /**
      * Store a new commerce document.
      *
-     * @param array $data
-     * @return CommerceDocument
      * @throws Throwable
      */
     public function store(array $data): CommerceDocument
@@ -28,9 +25,6 @@ class CommerceDocumentService
 
     /**
      * Get all documents for a commerce.
-     *
-     * @param int $commerceId
-     * @return Collection
      */
     public function getByCommerceId(int $commerceId): Collection
     {
@@ -39,9 +33,6 @@ class CommerceDocumentService
 
     /**
      * Find a document by ID.
-     *
-     * @param int $id
-     * @return CommerceDocument|null
      */
     public function find(int $id): ?CommerceDocument
     {
@@ -50,22 +41,17 @@ class CommerceDocumentService
 
     /**
      * Update a commerce document.
-     *
-     * @param CommerceDocument $document
-     * @param array $data
-     * @return CommerceDocument
      */
     public function update(CommerceDocument $document, array $data): CommerceDocument
     {
         $document->update($data);
+
         return $document;
     }
 
     /**
      * Delete a commerce document.
      *
-     * @param CommerceDocument $document
-     * @return bool|null
      * @throws Throwable
      */
     public function delete(CommerceDocument $document): ?bool

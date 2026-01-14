@@ -15,7 +15,7 @@ class CommercePayoutMethodServiceTest extends TestCase
 
     public function test_store_method(): void
     {
-        $service = new CommercePayoutMethodService();
+        $service = new CommercePayoutMethodService;
         $data = CommercePayoutMethod::factory()->make()->toArray();
         $data['commerce_id'] = 1;
         $data['owner_id'] = 1;
@@ -26,7 +26,7 @@ class CommercePayoutMethodServiceTest extends TestCase
 
     public function test_update_method(): void
     {
-        $service = new CommercePayoutMethodService();
+        $service = new CommercePayoutMethodService;
         $method = CommercePayoutMethod::factory()->create();
         $updated = $service->update($method, ['account_number' => '123456789']);
         $this->assertEquals('123456789', $updated->account_number);
@@ -34,7 +34,7 @@ class CommercePayoutMethodServiceTest extends TestCase
 
     public function test_delete_method(): void
     {
-        $service = new CommercePayoutMethodService();
+        $service = new CommercePayoutMethodService;
         $method = CommercePayoutMethod::factory()->create();
         $result = $service->delete($method);
         $this->assertTrue($result);

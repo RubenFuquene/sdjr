@@ -64,11 +64,9 @@ class IndexPqrsTypeRequest extends FormRequest
     {
         return (int) ($this->input('per_page', 15));
     }
-    
+
     /**
      * Get validated filters.
-     *
-     * @return array
      */
     public function validatedFilters(): array
     {

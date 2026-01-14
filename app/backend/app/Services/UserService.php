@@ -34,7 +34,7 @@ class UserService
     public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = User::with('roles', 'permissions');
-        
+
         if (! empty($filters['name'])) {
             $query->where('name', 'like', "%{$filters['name']}%");
         }
@@ -50,7 +50,7 @@ class UserService
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-        
+
         return $query->paginate($perPage);
     }
 
