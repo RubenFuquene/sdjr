@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, Lock, User, Check } from "lucide-react";
+import { useAuthForm } from "@/hooks/use-auth-form";
 import { Button } from "@/components/provider/ui/button";
 import { Input } from "@/components/provider/ui/input";
 import { Label } from "@/components/provider/ui/label";
@@ -12,14 +14,15 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
+  const router = useRouter();
+  const { handleRegister, loading, error, clearError } = useAuthForm();
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   // Validaciones
@@ -50,7 +53,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       [name]: value,
     }));
     // Limpiar error cuando el usuario empieza a escribir
-    if (error) setError("");
+    if (error) clearError();
   };
 
   const handleBlur = (fieldName: string) => {
@@ -62,26 +65,26 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError();
     
     if (!isFormValid) {
-      setError("Por favor completa todos los campos correctamente.");
       return;
     }
 
-    setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Register attempt:", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-      // Aquí iría la lógica de registro real
+      // Usar el hook para registro
+      const sessionData = await handleRegister(
+        formData.name,
+        formData.email,
+        formData.password
+      );
+      
+      // Registro exitoso - redirigir al dashboard
       onSuccess?.();
+      router.push(sessionData.role === "provider" ? "/provider/dashboard" : "/app/dashboard");
     } catch {
-      setError("Error al registrarse. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
+      // El error ya está en el estado del hook (mostrado en UI)
+      // No hacemos nada aquí, el componente lo renderiza
     }
   };
 

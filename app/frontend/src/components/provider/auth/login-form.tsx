@@ -1,49 +1,40 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, Lock } from "lucide-react";
+import { useAuthForm } from "@/hooks/use-auth-form";
 import { Button } from "@/components/provider/ui/button";
 import { Input } from "@/components/provider/ui/input";
 import { Label } from "@/components/provider/ui/label";
 import { cn } from "@/components/provider/ui/utils";
 
 export function LoginForm() {
+  const router = useRouter();
+  const { handleLogin, loading, error, clearError } = useAuthForm();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    clearError();
 
     // Validación básica
     if (!email || !password) {
-      setError("Por favor completa todos los campos");
+      // El hook muestra el error en su estado, pero podríamos validar aquí también
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Por favor ingresa un correo válido");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
-      return;
-    }
-
-    setLoading(true);
-
-    // Simulación de login - en futuro se conectará a API Laravel
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Login attempt:", { email, password });
-      // Aquí iría la lógica de autenticación real
+      // Usar el hook para login
+      const sessionData = await handleLogin(email, password);
+      
+      // Login exitoso - redirigir al dashboard
+      router.push(sessionData.role === "provider" ? "/provider/dashboard" : "/app/dashboard");
     } catch {
-      setError("Error al iniciar sesión. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
+      // El error ya está en el estado del hook (mostrado en UI)
+      // No hacemos nada aquí, el componente lo renderiza
     }
   };
 

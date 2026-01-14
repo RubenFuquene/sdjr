@@ -6,6 +6,53 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 
 ## Pendientes
 
+### 0) POST /api/v1/providers/register (CRÍTICO)
+
+**🚨 CRÍTICO para MVP Provider Panel**
+
+- **Propósito:** Endpoint público para registro de nuevos proveedores (sin requerir autenticación)
+- **Diferencia con POST /api/v1/users:**
+  - `POST /api/v1/users` requiere Sanctum y permisos admin
+  - `POST /api/v1/providers/register` es público, especializado para proveedores
+- **Validaciones esperadas:**
+  - `name` (string, requerido, min 2 chars)
+  - `email` (string, requerido, valid email, **único en tabla users**)
+  - `password` (string, requerido, min 6 chars)
+  - Email no debe existir en sistema (422 si duplicado)
+  - Validar contra spam/bot (rate limiting recomendado)
+- **Proceso esperado:**
+  1. Crear usuario con rol `provider` o `user` automáticamente
+  2. Generar token Sanctum para sesión inmediata
+  3. Responder con `LoginResponse` (mismo formato que `/api/v1/login`)
+- **Respuesta exitosa (200 OK):**
+  ```json
+  {
+    "message": "Provider registered successfully",
+    "data": {
+      "id": 1,
+      "name": "Mi Tienda",
+      "email": "provider@example.com",
+      "roles": ["provider"],
+      "status": "A"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+  ```
+- **Errores esperados:**
+  - 422 Unprocessable Entity: email duplicado o validaciones fallidas
+  - 429 Too Many Requests: rate limiting
+  - 500 Internal Server Error: fallo del servidor
+- **No requiere autenticación:** Header `Authorization` no necesario
+- **Headers esperados:**
+  ```json
+  {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  }
+  ```
+
+---
+
 ### 1) PATCH /api/v1/roles//status (nuevo)
 
 - Propuesta: endpoint dedicado para activar/inactivar rol.
@@ -78,176 +125,6 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
   2. O cambiar a `find()` y validar manualmente si el registro existe antes de intentar eliminarlo.
 - **Respuesta actual correcta (cuando existe):** 204 No Content.
 - **Impacto:** El frontend muestra error genérico al usuario en lugar de mensaje claro "Proveedor no encontrado".
-
-## ✅ Validación de Endpoints - Users
-
-**✅ Validado:** 2026-01-14
-
-### Endpoints Disponibles
-
-Todos los endpoints necesarios para gestión de usuarios están **implementados y disponibles** en Laravel:
-
-#### 1. GET /api/v1/users (list)
-- **Estado:** ✅ Implementado
-- **Controller:** `UserController@index`
-- **Método:** GET
-- **Autenticación:** Sanctum
-- **Query params:**
-  - `search` - Búsqueda por nombre, apellido o email
-  - `role` - Filtrar por rol (nombre del rol)
-  - `status` - Filtrar por estado ('A' activo, 'I' inactivo)
-  - `per_page` - Paginación (default 15)
-  - `page` - Número de página
-- **Respuesta:** Paginada con `UserResource[]`
-- **Estructura del recurso:**
-  ```json
-  {
-    "id": 1,
-    "name": "Juan",
-    "last_name": "Pérez",
-    "email": "juan.perez@example.com",
-    "phone": "3001234567",
-    "roles": ["admin", "user"],
-    "status": "A",
-    "created_at": "2023-01-01T12:00:00Z",
-    "updated_at": "2023-01-01T12:00:00Z"
-  }
-  ```
-
-#### 2. GET /api/v1/users/{id} (show)
-- **Estado:** ✅ Implementado
-- **Controller:** `UserController@show`
-- **Método:** GET
-- **Autenticación:** Sanctum
-- **Parámetros:** `user_id` (int)
-- **Respuesta:** `UserResource` con datos completos del usuario
-
-#### 3. POST /api/v1/users (store)
-- **Estado:** ✅ Implementado
-- **Controller:** `UserController@store`
-- **Método:** POST
-- **Autenticación:** Sanctum
-- **Request:** `UserRequest` con validaciones
-- **Respuesta:** 201 Created con `UserResource`
-
-#### 4. PUT /api/v1/users/{id} (update)
-- **Estado:** ✅ Implementado
-- **Controller:** `UserController@update`
-- **Método:** PUT
-- **Autenticación:** Sanctum
-- **Parámetros:** `user_id` (int)
-- **Request:** `UserRequest` con validaciones
-- **Respuesta:** 200 OK con `UserResource` actualizado
-
-#### 5. DELETE /api/v1/users/{id} (destroy)
-- **Estado:** ✅ Implementado
-- **Controller:** `UserController@destroy`
-- **Método:** DELETE
-- **Autenticación:** Sanctum
-- **Parámetros:** `user_id` (int)
-- **Respuesta:** 200 OK (soft delete)
-- **Nota:** Usa soft deletes (`SoftDeletes` trait)
-
-#### 6. PATCH /api/v1/users/{id}/status (toggle)
-- **Estado:** ✅ Implementado
-- **Controller:** `UserController@updateStatus`
-- **Método:** PATCH
-- **Autenticación:** Sanctum
-- **Parámetros:** `user_id` (int)
-- **Request:** `UserStatusRequest`
-- **Body esperado:**
-  ```json
-  {
-    "status": "A" // 'A' para activo, 'I' para inactivo
-  }
-  ```
-- **Respuesta:** 200 OK con `UserResource` actualizado
-
-#### 7. GET /api/v1/administrators (list admins)
-- **Estado:** ✅ Implementado (bonus)
-- **Controller:** `UserController@administrators`
-- **Método:** GET
-- **Autenticación:** Sanctum
-- **Descripción:** Endpoint especial para obtener solo usuarios administradores
-- **Respuesta:** Paginada con `UserResource[]` filtrados por rol admin
-
-### Modelo de Datos Backend
-
-**Tabla:** `users`
-
-**Campos:**
-- `id` (int, PK)
-- `name` (string) - Nombre del usuario
-- `last_name` (string) - Apellido del usuario
-- `email` (string, unique) - Email del usuario
-- `phone` (string) - Teléfono/celular
-- `password` (string, hashed) - Contraseña hasheada
-- `status` (string) - Estado: 'A' (activo) o 'I' (inactivo)
-- `email_verified_at` (timestamp, nullable)
-- `remember_token` (string, nullable)
-- `created_at` (timestamp)
-- `updated_at` (timestamp)
-- `deleted_at` (timestamp, nullable) - Soft delete
-
-**Relaciones:**
-- `roles` - Spatie Permission (many-to-many)
-- `permissions` - Spatie Permission (many-to-many)
-
-**Sanitización automática:**
-- `name` → Capitalizado
-- `last_name` → Capitalizado
-- `email` → Lowercase + trim
-- `phone` → Limpiado (solo dígitos)
-
-### Mapeo Frontend ↔ Backend
-
-**Frontend (Usuario type):**
-```typescript
-interface Usuario {
-  id: number;
-  nombres: string;      // ← Backend: name
-  apellidos: string;    // ← Backend: last_name
-  celular: string;      // ← Backend: phone
-  email: string;        // ← Backend: email
-  perfil: string;       // ← Backend: roles[0] (primer rol)
-  activo: boolean;      // ← Backend: status === 'A'
-}
-```
-
-**Backend (UserResource):**
-```json
-{
-  "id": 1,
-  "name": "Juan",
-  "last_name": "Pérez",
-  "email": "juan@example.com",
-  "phone": "3001234567",
-  "roles": ["admin", "user"],
-  "status": "A",
-  "created_at": "2023-01-01T12:00:00Z",
-  "updated_at": "2023-01-01T12:00:00Z"
-}
-```
-
-### Conclusión
-
-✅ **Todos los endpoints necesarios están implementados y funcionales.**
-
-**Lista de verificación:**
-- ✅ GET /api/v1/users (list con paginación y filtros)
-- ✅ GET /api/v1/users/{id} (show individual)
-- ✅ POST /api/v1/users (create)
-- ✅ PUT /api/v1/users/{id} (update)
-- ✅ DELETE /api/v1/users/{id} (soft delete)
-- ✅ PATCH /api/v1/users/{id}/status (toggle estado)
-- ✅ GET /api/v1/administrators (bonus para admins)
-
-**Próximos pasos:**
-1. ✅ Task #7 completada - Endpoints validados
-2. ⏳ Task #4 - Crear módulo API `/lib/api/users.ts` con adaptadores
-3. ⏳ Task #2 - Crear hook `useUserManagement` usando la API
-
----
 
 ## Notas
 
