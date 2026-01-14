@@ -55,7 +55,7 @@ export function LoginForm() {
           Correo Electrónico
         </Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6A6A6A]" />
+          <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             id="email"
             type="email"
@@ -63,7 +63,7 @@ export function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={cn(
-              "pl-10 h-[50px] rounded-[14px] border-[#E0E0E0]",
+              "pl-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
               "focus:border-[#4B236A] focus:ring-2 focus:ring-[#4B236A]/20"
             )}
             disabled={loading}
@@ -77,7 +77,7 @@ export function LoginForm() {
           Contraseña
         </Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6A6A6A]" />
+          <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             id="password"
             type="password"
@@ -85,7 +85,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={cn(
-              "pl-10 h-[50px] rounded-[14px] border-[#E0E0E0]",
+              "pl-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
               "focus:border-[#4B236A] focus:ring-2 focus:ring-[#4B236A]/20"
             )}
             disabled={loading}

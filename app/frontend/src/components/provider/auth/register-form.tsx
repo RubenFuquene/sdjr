@@ -93,7 +93,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           Nombre del Negocio
         </Label>
         <div className="relative">
-          <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6A6A6A]" />
+          <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             id="name"
             name="name"
@@ -104,7 +104,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             onBlur={() => handleBlur("name")}
             disabled={loading}
             className={cn(
-              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A]",
+              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
               touched.name && !isNameValid && "border-red-300 bg-red-50"
             )}
           />
@@ -122,7 +122,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           Correo Electrónico
         </Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6A6A6A]" />
+          <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             id="email"
             name="email"
@@ -133,7 +133,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             onBlur={() => handleBlur("email")}
             disabled={loading}
             className={cn(
-              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A]",
+              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
               touched.email && !isEmailValid && "border-red-300 bg-red-50"
             )}
           />
@@ -151,7 +151,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           Contraseña
         </Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6A6A6A]" />
+          <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             id="password"
             name="password"
@@ -162,7 +162,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             onBlur={() => handleBlur("password")}
             disabled={loading}
             className={cn(
-              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A]",
+              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
               touched.password && !isPasswordValid && "border-red-300 bg-red-50"
             )}
           />
@@ -180,7 +180,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           Confirmar Contraseña
         </Label>
         <div className="relative">
-          <Check className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6A6A6A]" />
+          <Check className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             id="confirmPassword"
             name="confirmPassword"
@@ -191,7 +191,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             onBlur={() => handleBlur("confirmPassword")}
             disabled={loading}
             className={cn(
-              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A]",
+              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
               touched.confirmPassword && !isConfirmPasswordValid && "border-red-300 bg-red-50"
             )}
           />
