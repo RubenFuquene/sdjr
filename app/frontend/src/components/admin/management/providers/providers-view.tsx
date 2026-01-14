@@ -14,12 +14,15 @@
 
 import { useState, useCallback, ReactNode, useMemo, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import { ProveedorListItem, Proveedor, Perfil } from '@/types/admin';
+import { ProveedorListItem, Proveedor, Perfil, CommerceFromAPI } from '@/types/admin';
+import { getCommerceById, updateCommerce, ApiError } from '@/lib/api/index';
+import { commerceToProveedor, proveedorToBackendPayload } from '@/types/provider.adapters';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { ProvidersTable } from './providers-table';
 import { ProfilesFilters } from '../profiles-filters';
 import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
+import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
 import { ProviderVisualizationModal } from '@/components/admin/modals';
 
 /**
@@ -54,6 +57,13 @@ export function ProvidersView({
   const [selectedProvider, setSelectedProvider] = useState<Proveedor | null>(null);
   const [isLoadingProvider, setIsLoadingProvider] = useState(false);
 
+  // Estado del confirmation dialog para eliminar
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    provider: ProveedorListItem | null;
+  }>({ isOpen: false, provider: null });
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Opciones de perfiles (únicos) derivadas de los proveedores
   const perfiles = useMemo(() => {
     const unique = Array.from(new Set(commerceManagement.commerces.map((p) => p.perfil).filter(Boolean)));
@@ -66,22 +76,10 @@ export function ProvidersView({
   const handleViewProvider = useCallback(async (proveedor: ProveedorListItem) => {
     try {
       setIsLoadingProvider(true);
-      // TODO: Fetch proveedor completo desde API
-      // const fullProvider = await getCommerce(proveedor.id);
-      
-      // Por ahora, convertir ProveedorListItem a Proveedor con datos mock
-      const fullProvider: Proveedor = {
-        ...proveedor,
-        nit: '900123456-7',
-        tipoEstablecimiento: 'Comercial',
-        departamento: '',
-        ciudad: '',
-        barrio: '',
-        direccion: '',
-        verificado: false,
-        documentos: [],
-        sucursales: [],
-      };
+      // Fetch proveedor completo desde API
+      const response = await getCommerceById(proveedor.id);
+      const commerce: CommerceFromAPI = response.data;
+      const fullProvider: Proveedor = commerceToProveedor(commerce);
       
       setSelectedProvider(fullProvider);
       setModalMode('view');
@@ -99,22 +97,10 @@ export function ProvidersView({
   const handleEditProvider = useCallback(async (proveedor: ProveedorListItem) => {
     try {
       setIsLoadingProvider(true);
-      // TODO: Fetch proveedor completo desde API
-      // const fullProvider = await getCommerce(proveedor.id);
-      
-      // Por ahora, convertir ProveedorListItem a Proveedor con datos mock
-      const fullProvider: Proveedor = {
-        ...proveedor,
-        nit: '900123456-7',
-        tipoEstablecimiento: 'Comercial',
-        departamento: '',
-        ciudad: '',
-        barrio: '',
-        direccion: '',
-        verificado: false,
-        documentos: [],
-        sucursales: [],
-      };
+      // Fetch proveedor completo desde API
+      const response = await getCommerceById(proveedor.id);
+      const commerce: CommerceFromAPI = response.data;
+      const fullProvider: Proveedor = commerceToProveedor(commerce);
       
       setSelectedProvider(fullProvider);
       setModalMode('edit');
@@ -138,15 +124,35 @@ export function ProvidersView({
   }, [commerceManagement]);
 
   /**
-   * Elimina proveedor
+   * Abre el dialog de confirmación para eliminar
    */
-  const handleDeleteProvider = useCallback(async (proveedor: ProveedorListItem) => {
+  const handleDeleteProvider = useCallback((proveedor: ProveedorListItem) => {
+    setDeleteDialog({ isOpen: true, provider: proveedor });
+  }, []);
+
+  /**
+   * Confirma y ejecuta la eliminación del proveedor
+   */
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteDialog.provider) return;
+
     try {
-      await commerceManagement.handleDelete(proveedor.id);
+      setIsDeleting(true);
+      await commerceManagement.handleDelete(deleteDialog.provider.id);
+      setDeleteDialog({ isOpen: false, provider: null });
     } catch (error) {
       console.error('Error al eliminar proveedor:', error);
+    } finally {
+      setIsDeleting(false);
     }
-  }, [commerceManagement]);
+  }, [deleteDialog.provider, commerceManagement]);
+
+  /**
+   * Cancela la eliminación
+   */
+  const handleCancelDelete = useCallback(() => {
+    setDeleteDialog({ isOpen: false, provider: null });
+  }, []);
 
   /**
    * Busca proveedores con los filtros actuales
@@ -213,9 +219,11 @@ export function ProvidersView({
    */
   const handleSaveModal = useCallback(async (updatedProvider: Proveedor) => {
     try {
-      // TODO: Implementar guardado real con API
-      console.log('Guardar proveedor:', updatedProvider);
-      await commerceManagement.handleUpdate(updatedProvider.id, updatedProvider);
+      // Guardado real con API
+      const payload = proveedorToBackendPayload(updatedProvider);
+      const response = await updateCommerce(updatedProvider.id, payload);
+      console.log('Proveedor actualizado:', response.message || 'OK');
+      await commerceManagement.refresh();
       setIsModalOpen(false);
       setSelectedProvider(null);
     } catch (error) {
@@ -274,6 +282,27 @@ export function ProvidersView({
         perfiles={perfiles as Perfil[]}
         onClose={handleCloseModal}
         onSave={handleSaveModal}
+      />
+
+      {/* Dialog de Confirmación de Eliminación */}
+      <ConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        title="¿Eliminar proveedor?"
+        description={
+          deleteDialog.provider ? (
+            <>
+              Esta acción eliminará permanentemente a{' '}
+              <strong className="text-[#1A1A1A]">{deleteDialog.provider.nombreComercial}</strong>.
+              {' '}No se puede deshacer.
+            </>
+          ) : null
+        }
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onClose={handleCancelDelete}
       />
     </>
   );

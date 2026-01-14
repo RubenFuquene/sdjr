@@ -33,3 +33,59 @@ export async function getCommerces({
     `/api/v1/commerces?${params.toString()}`
   );
 }
+
+// ============================================
+// Detail & Update endpoints
+// ============================================
+
+/**
+ * Estructura genérica de respuesta simple del backend (no paginada)
+ * successResponse: { status: true, message?: string, data: T }
+ */
+export interface ApiSuccess<T> {
+  status: boolean;
+  message?: string;
+  data: T;
+}
+
+/**
+ * GET /api/v1/commerces/{id}
+ * Obtiene el detalle de un comercio/proveedor
+ */
+export async function getCommerceById(id: number): Promise<ApiSuccess<CommerceFromAPI>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
+    `/api/v1/commerces/${id}`
+  );
+}
+
+/**
+ * PUT /api/v1/commerces/{id}
+ * Actualiza un comercio/proveedor
+ * Payload debe seguir la estructura esperada por CommerceRequest
+ */
+export async function updateCommerce(
+  id: number,
+  payload: Record<string, unknown>
+): Promise<ApiSuccess<CommerceFromAPI>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
+    `/api/v1/commerces/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+/**
+ * DELETE /api/v1/commerces/{id}
+ * Elimina un comercio/proveedor (soft delete)
+ * Retorna 204 No Content en caso de éxito
+ */
+export async function deleteCommerce(id: number): Promise<void> {
+  await fetchWithErrorHandling<void>(
+    `/api/v1/commerces/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
+}

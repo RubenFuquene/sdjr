@@ -27,7 +27,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getCommerces, ApiError } from "@/lib/api/index";
+import { getCommerces, deleteCommerce, ApiError } from "@/lib/api/index";
 import type { ProveedorListItem, Proveedor } from "@/types/admin";
 import { commerceToProveedorListItem } from "@/types/provider.adapters";
 
@@ -225,13 +225,13 @@ export function useCommerceManagement() {
 
   /**
    * Elimina un comercio
-   * TODO: DELETE /api/v1/commerces/{id} cuando endpoint esté disponible
+   * DELETE /api/v1/commerces/{id}
    */
   const handleDelete = useCallback(async (id: number): Promise<void> => {
     try {
       console.log('🚀 Eliminando comercio:', id);
       
-      // TODO: await deleteCommerce(id);
+      await deleteCommerce(id);
       console.log('✅ Comercio eliminado exitosamente');
       
       // Refrescar lista
