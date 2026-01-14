@@ -1,23 +1,10 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "SDJR API",
-        "description": "API documentation for SDJR application",
-        "contact": {
-            "email": "admin@sdjr.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "title": "API Base Controller",
+        "description": "Controlador base para la API. No expone endpoints directamente.",
         "version": "1.0.0"
     },
-    "servers": [
-        {
-            "url": "/api/v1",
-            "description": "API v1"
-        }
-    ],
     "paths": {
         "/api/v1/audit-logs": {
             "get": {
@@ -66,16 +53,6 @@
                 "summary": "Get audit log by ID",
                 "description": "Returns a single audit log entry",
                 "operationId": "getAuditLogById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -107,7 +84,7 @@
         "/api/v1/login": {
             "post": {
                 "tags": [
-                    "Authentication"
+                    "Auth"
                 ],
                 "summary": "Authenticate user and get token",
                 "operationId": "bae68d1c55329ecb6e41f48285840c8f",
@@ -116,7 +93,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/LoginRequest"
                             }
                         }
                     }
@@ -172,13 +149,14 @@
                 "tags": [
                     "Banks"
                 ],
-                "summary": "Get list of banks",
-                "description": "Returns a paginated list of banks.",
-                "operationId": "getBanksList",
+                "summary": "List banks",
+                "description": "Get paginated list of banks. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
+                "operationId": "indexBanks",
                 "parameters": [
                     {
                         "name": "name",
                         "in": "query",
+                        "description": "Filtrar por nombre del banco (texto parcial)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -187,6 +165,7 @@
                     {
                         "name": "code",
                         "in": "query",
+                        "description": "Filtrar por código del banco (ISO)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -195,17 +174,25 @@
                     {
                         "name": "status",
                         "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "1",
+                            "enum": [
+                                "1",
+                                "0"
+                            ]
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 15
                         }
                     }
                 ],
@@ -215,20 +202,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/BankResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -251,33 +224,15 @@
                 "tags": [
                     "Banks"
                 ],
-                "summary": "Create a new bank",
-                "description": "Creates a new bank in the system.",
+                "summary": "Create new bank",
+                "description": "Creates a new bank record.",
                 "operationId": "storeBank",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "name",
-                                    "code"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Banco de la Nación"
-                                    },
-                                    "code": {
-                                        "type": "string",
-                                        "example": "BN"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "active"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/StoreBankRequest"
                             }
                         }
                     }
@@ -288,23 +243,13 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Bank created successfully"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/BankResource"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/BankResource"
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request"
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -313,7 +258,10 @@
                         "description": "Forbidden"
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -338,7 +286,7 @@
                         "description": "Bank ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/components/schemas/ShowBankRequest"
                         }
                     }
                 ],
@@ -395,21 +343,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Banco de la Nación"
-                                    },
-                                    "code": {
-                                        "type": "string",
-                                        "example": "BN"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "active"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/UpdateBankRequest"
                             }
                         }
                     }
@@ -464,7 +398,7 @@
                         "description": "Bank ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/components/schemas/DeleteBankRequest"
                         }
                     }
                 ],
@@ -497,18 +431,17 @@
                 "tags": [
                     "Categories"
                 ],
-                "summary": "Get list of categories",
-                "description": "Returns list of categories. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
-                "operationId": "getCategoriesList",
+                "summary": "List categories",
+                "description": "Get paginated list of categories. Permite filtrar por nombre (name), estado (status) y cantidad por página (per_page).",
+                "operationId": "indexCategories",
                 "parameters": [
                     {
-                        "name": "per_page",
+                        "name": "name",
                         "in": "query",
-                        "description": "Cantidad de registros por página (1-100)",
+                        "description": "Filtrar por nombre de la categoría (texto parcial)",
                         "required": false,
                         "schema": {
-                            "type": "integer",
-                            "default": 15
+                            "type": "string"
                         }
                     },
                     {
@@ -525,6 +458,16 @@
                                 "all"
                             ]
                         }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
                     }
                 ],
                 "responses": {
@@ -533,7 +476,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CategoryResource"
+                                    "type": "object"
                                 }
                             }
                         }
@@ -563,7 +506,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CategoryRequest"
                             }
                         }
                     }
@@ -617,7 +560,7 @@
                         "description": "Category ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ShowCategoryRequest"
                         }
                     }
                 ],
@@ -674,7 +617,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CategoryRequest"
                             }
                         }
                     }
@@ -729,7 +672,7 @@
                         "description": "Category ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/DeleteCategoryRequest"
                         }
                     }
                 ],
@@ -762,27 +705,51 @@
                 "tags": [
                     "Cities"
                 ],
-                "summary": "Get list of cities",
-                "description": "Returns list of cities",
-                "operationId": "getCitiesList",
+                "summary": "List cities",
+                "description": "Get paginated list of cities. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
+                "operationId": "indexCities",
                 "parameters": [
                     {
-                        "name": "per_page",
+                        "name": "name",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Filtrar por nombre de la ciudad (texto parcial)",
                         "required": false,
                         "schema": {
-                            "type": "integer",
-                            "default": 15
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Filtrar por código de la ciudad",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status (1=active, 0=inactive)",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
                         }
                     }
                 ],
@@ -792,20 +759,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/CityResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -816,12 +769,6 @@
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -842,7 +789,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CityRequest"
                             }
                         }
                     }
@@ -896,7 +843,7 @@
                         "description": "City ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ShowCityRequest"
                         }
                     }
                 ],
@@ -953,7 +900,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CityRequest"
                             }
                         }
                     }
@@ -1008,7 +955,7 @@
                         "description": "City ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/DeleteCityRequest"
                         }
                     }
                 ],
@@ -1048,24 +995,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "properties": {
-                                    "commerce": {
-                                        "$ref": "#/components/schemas/CommerceRequest"
-                                    },
-                                    "legal_representatives": {
-                                        "type": "array",
-                                        "items": {
-                                            "$ref": "#/components/schemas/LegalRepresentativeRequest"
-                                        }
-                                    },
-                                    "commerce_documents": {
-                                        "type": "array",
-                                        "items": {
-                                            "$ref": "#/components/schemas/CommerceDocument"
-                                        }
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/CommerceBasicDataRequest"
                             }
                         }
                     }
@@ -1104,13 +1034,37 @@
                     "Commerces"
                 ],
                 "summary": "Get list of commerces",
-                "description": "Returns paginated list of commerces.",
+                "description": "Returns paginated list of commerces. Permite filtrar por término de búsqueda (search), estado (status), cantidad por página (per_page) y número de página (page).",
                 "operationId": "getCommercesList",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Filtrar por término de búsqueda",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1120,29 +1074,11 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
+                        "description": "Número de página",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 1
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Search term",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter by status",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 ],
@@ -1202,7 +1138,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CommerceRequest"
                             }
                         }
                     }
@@ -1302,7 +1238,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CommerceRequest"
                             }
                         }
                     }
@@ -1381,17 +1317,25 @@
                     "Countries"
                 ],
                 "summary": "Get list of countries",
-                "description": "Returns list of countries. Permite filtrar por número de páginas (per_page) y estado (status: 1=activos, 0=inactivos, all=todos).",
+                "description": "Returns list of countries. Permite filtrar por nombre (name), código (code), estado (status: 1=activos, 0=inactivos, all=todos) y número de registros por página (per_page).",
                 "operationId": "getCountriesList",
                 "parameters": [
                     {
-                        "name": "per_page",
+                        "name": "name",
                         "in": "query",
-                        "description": "Cantidad de registros por página (1-100)",
+                        "description": "Filtrar por nombre del país (texto parcial)",
                         "required": false,
                         "schema": {
-                            "type": "integer",
-                            "default": 15
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Filtrar por código del país (ISO)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     {
@@ -1407,6 +1351,16 @@
                                 "0",
                                 "all"
                             ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de registros por página (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
                         }
                     }
                 ],
@@ -1446,7 +1400,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CountryRequest"
                             }
                         }
                     }
@@ -1557,7 +1511,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/CountryRequest"
                             }
                         }
                     }
@@ -1645,20 +1599,10 @@
                 "tags": [
                     "Departments"
                 ],
-                "summary": "Get list of departments",
-                "description": "Returns list of departments",
-                "operationId": "getDepartmentsList",
+                "summary": "List departments",
+                "description": "Get paginated list of departments. Permite filtrar por name, code y status.",
+                "operationId": "indexDepartments",
                 "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    },
                     {
                         "name": "name",
                         "in": "query",
@@ -1680,10 +1624,20 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status (1=active, 0=inactive)",
+                        "description": "Filter by status",
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
                         }
                     }
                 ],
@@ -1693,20 +1647,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/DepartmentResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -1717,12 +1657,6 @@
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -1743,7 +1677,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/DepartmentRequest"
                             }
                         }
                     }
@@ -1797,7 +1731,7 @@
                         "description": "Department ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ShowDepartmentRequest"
                         }
                     }
                 ],
@@ -1854,7 +1788,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/DepartmentRequest"
                             }
                         }
                     }
@@ -1909,7 +1843,7 @@
                         "description": "Department ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/DeleteDepartmentRequest"
                         }
                     }
                 ],
@@ -1995,7 +1929,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/EstablishmentTypeRequest"
                             }
                         }
                     }
@@ -2095,7 +2029,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/EstablishmentTypeRequest"
                             }
                         }
                     }
@@ -2228,7 +2162,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/LegalRepresentativeRequest"
                             }
                         }
                     }
@@ -2326,7 +2260,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/LegalRepresentativeRequest"
                             }
                         }
                     }
@@ -2442,6 +2376,17 @@
                 "summary": "Get current authenticated user info",
                 "description": "Returns id, name, email, roles and permissions of the authenticated user.",
                 "operationId": "getMe",
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "query",
+                        "description": "MeRequest query params",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/MeRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -2495,6 +2440,17 @@
                 "summary": "Get current authenticated user permissions and roles",
                 "description": "Returns permissions and roles of the authenticated user.",
                 "operationId": "getMePermissions",
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "query",
+                        "description": "MeRequest query params",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/MeRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -2537,8 +2493,53 @@
                     "Neighborhoods"
                 ],
                 "summary": "List neighborhoods",
-                "description": "Get paginated list of neighborhoods",
+                "description": "Get paginated list of neighborhoods. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
                 "operationId": "indexNeighborhoods",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por nombre del barrio (texto parcial)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Filtrar por código del barrio",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -2575,7 +2576,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/NeighborhoodRequest"
                             }
                         }
                     }
@@ -2620,6 +2621,7 @@
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Neighborhood ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2666,7 +2668,7 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/components/schemas/NeighborhoodRequest"
                         }
                     }
                 ],
@@ -2675,7 +2677,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/NeighborhoodRequest"
                             }
                         }
                     }
@@ -2721,6 +2723,7 @@
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Neighborhood ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2809,7 +2812,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/StorePermissionRequest"
                             }
                         }
                     }
@@ -2871,19 +2874,10 @@
                 "tags": [
                     "PqrsTypes"
                 ],
-                "summary": "List Pqrs Types",
-                "description": "Returns paginated list of Pqrs Types",
-                "operationId": "getPqrsTypes",
+                "summary": "List PQRS Types",
+                "description": "Get paginated list of PQRS Types. Permite filtrar por status, name y code.",
+                "operationId": "indexPqrsTypes",
                 "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
                     {
                         "name": "status",
                         "in": "query",
@@ -2910,6 +2904,16 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
                     }
                 ],
                 "responses": {
@@ -2918,28 +2922,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Pqrs Types retrieved successfully"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/PqrsTypeResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -2950,12 +2932,6 @@
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -2976,28 +2952,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "name",
-                                    "code"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "maxLength": 100,
-                                        "example": "Queja"
-                                    },
-                                    "code": {
-                                        "type": "string",
-                                        "maxLength": 20,
-                                        "example": "Q"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "maxLength": 1,
-                                        "example": "1"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/StorePqrsTypeRequest"
                             }
                         }
                     }
@@ -3045,7 +3000,7 @@
                         "description": "Pqrs Type ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/components/schemas/ShowPqrsTypeRequest"
                         }
                     }
                 ],
@@ -3099,24 +3054,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "maxLength": 100,
-                                        "example": "Queja Actualizada"
-                                    },
-                                    "code": {
-                                        "type": "string",
-                                        "maxLength": 20,
-                                        "example": "QA"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "maxLength": 1,
-                                        "example": "1"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/UpdatePqrsTypeRequest"
                             }
                         }
                     }
@@ -3162,7 +3100,7 @@
                         "description": "Pqrs Type ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/components/schemas/DeletePqrsTypeRequest"
                         }
                     }
                 ],
@@ -3192,20 +3130,10 @@
                 "tags": [
                     "PriorityTypes"
                 ],
-                "summary": "Get list of priority types",
-                "description": "Returns list of priority types",
-                "operationId": "getPriorityTypesList",
+                "summary": "List priority types",
+                "description": "Get paginated list of priority types. Permite filtrar por name, code y status.",
+                "operationId": "indexPriorityTypes",
                 "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    },
                     {
                         "name": "name",
                         "in": "query",
@@ -3227,10 +3155,20 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status (1=active, 0=inactive)",
+                        "description": "Filter by status",
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
                         }
                     }
                 ],
@@ -3240,20 +3178,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/PriorityTypeResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -3264,12 +3188,6 @@
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -3290,7 +3208,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/StorePriorityTypeRequest"
                             }
                         }
                     }
@@ -3344,7 +3262,7 @@
                         "description": "Priority type ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ShowPriorityTypeRequest"
                         }
                     }
                 ],
@@ -3401,7 +3319,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/UpdatePriorityTypeRequest"
                             }
                         }
                     }
@@ -3456,7 +3374,7 @@
                         "description": "Priority type ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/DeletePriorityTypeRequest"
                         }
                     }
                 ],
@@ -3489,20 +3407,10 @@
                 "tags": [
                     "Roles"
                 ],
-                "summary": "Get list of roles",
-                "description": "Returns a paginated list of roles with permissions and user count.",
-                "operationId": "getRolesList",
+                "summary": "List roles",
+                "description": "Get paginated list of roles. Permite filtrar por name, description, permission y status.",
+                "operationId": "indexRoles",
                 "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    },
                     {
                         "name": "name",
                         "in": "query",
@@ -3529,6 +3437,25 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
                     }
                 ],
                 "responses": {
@@ -3537,20 +3464,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/RoleResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -3561,12 +3474,6 @@
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -3587,7 +3494,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/StoreRoleRequest"
                             }
                         }
                     }
@@ -3643,7 +3550,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/UserAssignRolePermissionRequest"
                             }
                         }
                     }
@@ -3705,7 +3612,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/RoleAssignPermissionRequest"
                             }
                         }
                     }
@@ -3811,7 +3718,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/UpdateRoleRequest"
                             }
                         }
                     }
@@ -3852,13 +3759,14 @@
                 "tags": [
                     "SupportStatuses"
                 ],
-                "summary": "Get list of support statuses",
-                "description": "Returns a paginated list of support statuses.",
-                "operationId": "getSupportStatusesList",
+                "summary": "List support statuses",
+                "description": "Get paginated list of support statuses. Permite filtrar por nombre (name), código (code), color, estado (status) y cantidad por página (per_page).",
+                "operationId": "indexSupportStatuses",
                 "parameters": [
                     {
                         "name": "name",
                         "in": "query",
+                        "description": "Filtrar por nombre del estado de soporte (texto parcial)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -3867,6 +3775,7 @@
                     {
                         "name": "code",
                         "in": "query",
+                        "description": "Filtrar por código del estado de soporte",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -3875,6 +3784,7 @@
                     {
                         "name": "color",
                         "in": "query",
+                        "description": "Filtrar por color",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -3883,17 +3793,26 @@
                     {
                         "name": "status",
                         "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "1",
+                                "0",
+                                "all"
+                            ]
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 15
                         }
                     }
                 ],
@@ -3903,20 +3822,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/SupportStatusResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -3947,7 +3852,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/SupportStatusStoreRequest"
                             }
                         }
                     }
@@ -4047,7 +3952,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/SupportStatusUpdateRequest"
                             }
                         }
                     }
@@ -4125,18 +4030,50 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get list of users",
-                "description": "Returns list of users with roles and permissions.",
-                "operationId": "getUsersList",
+                "summary": "List users",
+                "description": "Get paginated list of users. Permite filtrar por nombre (name), email, estado (status) y cantidad por página (per_page).",
+                "operationId": "indexUsers",
                 "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por nombre de usuario (texto parcial)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "Filtrar por email de usuario",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "1",
+                            "enum": [
+                                "1",
+                                "0"
+                            ]
+                        }
+                    },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page",
+                        "description": "Items per page (1-100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 15
+                            "example": 15
                         }
                     }
                 ],
@@ -4146,20 +4083,6 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/UserResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        }
-                                    },
                                     "type": "object"
                                 }
                             }
@@ -4170,12 +4093,6 @@
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -4196,7 +4113,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/UserRequest"
                             }
                         }
                     }
@@ -4296,7 +4213,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
+                                "$ref": "#/components/schemas/UserRequest"
                             }
                         }
                     }
@@ -4386,20 +4303,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "description": "User status: 1=active, 0=inactive",
-                                        "type": "string",
-                                        "enum": [
-                                            "0",
-                                            "1"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/UserStatusRequest"
                             }
                         }
                     }
@@ -4545,9 +4449,14 @@
                 "type": "object"
             },
             "CommerceBasicDataRequest": {
+                "description": "Request schema for basic commerce data, including commerce, legal representatives, and documents.",
                 "properties": {
                     "commerce": {
-                        "$ref": "#/components/schemas/CommerceRequest"
+                        "description": "CommerceBasicDataRequest",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommerceRequest"
+                        }
                     },
                     "legal_representatives": {
                         "type": "array",
@@ -4638,6 +4547,29 @@
                 },
                 "type": "object"
             },
+            "CountryFilterRequest": {
+                "required": [],
+                "properties": {
+                    "per_page": {
+                        "description": "Number of records per page (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
+                    },
+                    "status": {
+                        "description": "Filter by status: 1 (active), 0 (inactive), all (all records)",
+                        "type": "string",
+                        "enum": [
+                            "0",
+                            "1",
+                            "all"
+                        ],
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
             "CountryRequest": {
                 "title": "Country Request",
                 "description": "Country request body data",
@@ -4673,6 +4605,43 @@
                         "example": "CO1234"
                     }
                 },
+                "type": "object"
+            },
+            "DeleteBankRequest": {
+                "description": "Request schema for deleting a bank. No body parameters required.",
+                "type": "object"
+            },
+            "DeleteCategoryRequest": {
+                "description": "Request schema for deleting a category. No body parameters required.",
+                "type": "object"
+            },
+            "DeleteCityRequest": {
+                "description": "Request schema for deleting a city. No body parameters required.",
+                "type": "object"
+            },
+            "DeleteDepartmentRequest": {
+                "description": "Request schema for deleting a department. No body parameters required.",
+                "type": "object"
+            },
+            "DeleteNeighborhoodRequest": {
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Neighborhood ID",
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "DeletePqrsTypeRequest": {
+                "description": "Request schema for deleting a PQRS type. No body parameters required.",
+                "type": "object"
+            },
+            "DeletePriorityTypeRequest": {
+                "description": "Request schema for deleting a priority type. No body parameters required.",
                 "type": "object"
             },
             "DepartmentRequest": {
@@ -4729,6 +4698,7 @@
                 ],
                 "properties": {
                     "name": {
+                        "description": "EstablishmentTypeRequest",
                         "type": "string",
                         "maxLength": 255,
                         "example": "Restaurante"
@@ -4737,6 +4707,148 @@
                         "type": "string",
                         "maxLength": 20,
                         "example": "REST"
+                    }
+                },
+                "type": "object"
+            },
+            "IndexBankRequest": {
+                "properties": {
+                    "name": {
+                        "description": "Nombre del banco para filtrar.",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Banco Ejemplo"
+                    },
+                    "code": {
+                        "description": "Código del banco para filtrar.",
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "1234"
+                    },
+                    "status": {
+                        "description": "Estado del banco (1=activo, 0=inactivo)",
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "per_page": {
+                        "description": "Cantidad de registros por página (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
+                    }
+                },
+                "type": "object"
+            },
+            "IndexCategoryRequest": {
+                "properties": {
+                    "per_page": {
+                        "description": "Cantidad de registros por página (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
+                    },
+                    "status": {
+                        "description": "Filtrar por estado: 1 (activo), 0 (inactivo), all (todos)",
+                        "type": "string",
+                        "enum": [
+                            "1",
+                            "0",
+                            "all"
+                        ],
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "IndexCityRequest": {
+                "properties": {
+                    "per_page": {
+                        "description": "Cantidad de registros por página (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
+                    },
+                    "status": {
+                        "description": "Filtrar por estado: 1 (activo), 0 (inactivo), all (todos)",
+                        "type": "string",
+                        "enum": [
+                            "1",
+                            "0",
+                            "all"
+                        ],
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "IndexDepartmentRequest": {
+                "properties": {
+                    "per_page": {
+                        "description": "Cantidad de registros por página (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
+                    },
+                    "status": {
+                        "description": "Filtrar por estado: 1 (activo), 0 (inactivo), all (todos)",
+                        "type": "string",
+                        "enum": [
+                            "1",
+                            "0",
+                            "all"
+                        ],
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "IndexPqrsTypeRequest": {
+                "properties": {
+                    "per_page": {
+                        "description": "Cantidad de registros por página (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
+                    },
+                    "status": {
+                        "description": "Estado del tipo PQRS (1=activo, 0=inactivo)",
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "name": {
+                        "description": "Nombre del tipo PQRS para filtrar.",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Petición"
+                    },
+                    "code": {
+                        "description": "Código del tipo PQRS para filtrar.",
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "PQRS01"
+                    }
+                },
+                "type": "object"
+            },
+            "IndexPriorityTypeRequest": {
+                "properties": {
+                    "per_page": {
+                        "description": "Cantidad de registros por página (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
+                    },
+                    "status": {
+                        "description": "Estado del tipo de prioridad (1=activo, 0=inactivo)",
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
                     }
                 },
                 "type": "object"
@@ -4819,9 +4931,11 @@
                 },
                 "type": "object"
             },
+            "MeRequest": {
+                "description": "Request schema for authenticated user info. No body parameters required.",
+                "type": "object"
+            },
             "NeighborhoodRequest": {
-                "title": "Neighborhood Request",
-                "description": "Neighborhood request body data",
                 "required": [
                     "city_id",
                     "name",
@@ -4829,39 +4943,25 @@
                 ],
                 "properties": {
                     "city_id": {
-                        "title": "city_id",
                         "description": "ID of the city",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
+                        "type": "integer",
                         "example": 1
                     },
                     "name": {
-                        "title": "name",
                         "description": "Name of the neighborhood",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
+                        "type": "string",
+                        "maxLength": 255,
                         "example": "Chapinero"
                     },
                     "code": {
-                        "title": "code",
                         "description": "Unique code for the neighborhood (6 alphanumeric characters)",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
+                        "type": "string",
+                        "maxLength": 6,
                         "example": "NB0001"
                     },
                     "status": {
-                        "title": "status",
                         "description": "Status of the neighborhood (A: Active, I: Inactive)",
-                        "type": "array",
-                        "items": {
-                            "type": "mixed"
-                        },
+                        "type": "string",
                         "example": "A"
                     }
                 },
@@ -4888,7 +4988,44 @@
                 },
                 "type": "object"
             },
-            "BankStoreRequest": {
+            "ShowBankRequest": {
+                "description": "Request schema for showing a bank. No body parameters required.",
+                "type": "object"
+            },
+            "ShowCategoryRequest": {
+                "description": "Request schema for showing a category. No body parameters required.",
+                "type": "object"
+            },
+            "ShowCityRequest": {
+                "description": "Request schema for showing a city. No body parameters required.",
+                "type": "object"
+            },
+            "ShowDepartmentRequest": {
+                "description": "Request schema for showing a department. No body parameters required.",
+                "type": "object"
+            },
+            "ShowNeighborhoodRequest": {
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Neighborhood ID",
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "ShowPqrsTypeRequest": {
+                "description": "Request schema for showing a PQRS type. No body parameters required.",
+                "type": "object"
+            },
+            "ShowPriorityTypeRequest": {
+                "description": "Request schema for showing a priority type. No body parameters required.",
+                "type": "object"
+            },
+            "StoreBankRequest": {
                 "required": [
                     "name",
                     "code"
@@ -4932,6 +5069,58 @@
                         "type": "string",
                         "maxLength": 255,
                         "example": "Permite crear usuarios"
+                    }
+                },
+                "type": "object"
+            },
+            "StorePqrsTypeRequest": {
+                "required": [
+                    "name",
+                    "code"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "StorePqrsTypeRequest",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Petición"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "PQRS01"
+                    },
+                    "status": {
+                        "description": "1=Activo, 0=Inactivo",
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "StorePriorityTypeRequest": {
+                "required": [
+                    "name",
+                    "code"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "StorePriorityTypeRequest",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Alta"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "example": "ALTA"
+                    },
+                    "status": {
+                        "description": "1=Activo, 0=Inactivo",
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
                     }
                 },
                 "type": "object"
@@ -5033,7 +5222,7 @@
                 },
                 "type": "object"
             },
-            "BankUpdateRequest": {
+            "UpdateBankRequest": {
                 "required": [
                     "name",
                     "code"
@@ -5060,7 +5249,51 @@
                 },
                 "type": "object"
             },
-            "RoleUpdateRequest": {
+            "UpdatePqrsTypeRequest": {
+                "properties": {
+                    "name": {
+                        "description": "UpdatePqrsTypeRequest",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Petición"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "PQRS01"
+                    },
+                    "status": {
+                        "description": "1=Activo, 0=Inactivo",
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdatePriorityTypeRequest": {
+                "properties": {
+                    "name": {
+                        "description": "UpdatePriorityTypeRequest",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Alta"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "example": "ALTA"
+                    },
+                    "status": {
+                        "description": "1=Activo, 0=Inactivo",
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateRoleRequest": {
                 "required": [
                     "name",
                     "description"
@@ -5111,6 +5344,18 @@
                         "description": "If true, replaces all roles/permissions; if false, adds",
                         "type": "boolean",
                         "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "UserIndexRequest": {
+                "properties": {
+                    "per_page": {
+                        "description": "Cantidad de registros por página (default: 15)",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 10
                     }
                 },
                 "type": "object"
@@ -5167,6 +5412,82 @@
                             1
                         ],
                         "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "UserStatusRequest": {
+                "required": [
+                    "status"
+                ],
+                "properties": {
+                    "status": {
+                        "description": "User status: 1=active, 0=inactive",
+                        "type": "integer",
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "AuditLogRequest": {
+                "required": [
+                    "method",
+                    "endpoint",
+                    "response_code",
+                    "response_time"
+                ],
+                "properties": {
+                    "user_id": {
+                        "description": "User ID (nullable)",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "method": {
+                        "description": "HTTP method",
+                        "type": "string",
+                        "maxLength": 10,
+                        "example": "POST"
+                    },
+                    "endpoint": {
+                        "description": "Requested endpoint",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "/api/v1/resource"
+                    },
+                    "payload": {
+                        "description": "Request payload (nullable, JSON string)",
+                        "type": "string",
+                        "example": "{key:value}",
+                        "nullable": true
+                    },
+                    "response_code": {
+                        "description": "HTTP response code",
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "response_time": {
+                        "description": "Response time in ms",
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "ip_address": {
+                        "description": "Client IP address (nullable)",
+                        "type": "string",
+                        "maxLength": 45,
+                        "example": "192.168.1.1",
+                        "nullable": true
+                    },
+                    "user_agent": {
+                        "description": "User agent (nullable)",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Mozilla/5.0",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -6282,10 +6603,6 @@
         {
             "name": "AuditLogs",
             "description": "API Endpoints of Audit Logs"
-        },
-        {
-            "name": "Authentication",
-            "description": "API Endpoints for User Authentication"
         },
         {
             "name": "Banks",

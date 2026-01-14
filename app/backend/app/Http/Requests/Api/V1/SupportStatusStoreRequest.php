@@ -7,8 +7,11 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
+ * SupportStatusStoreRequest
+ *
  * @OA\Schema(
  *     schema="SupportStatusStoreRequest",
+ *     type="object",
  *     required={"name", "code", "color"},
  *
  *     @OA\Property(property="name", type="string", maxLength=100, example="Abierto", description="Support status name"),

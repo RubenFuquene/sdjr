@@ -34,46 +34,28 @@ class PqrsTypeController extends Controller
     }
 
     /**
-     * Get a paginated list of Pqrs Types.
-     *
      * @OA\Get(
      *     path="/api/v1/pqrs-types",
-     *     operationId="getPqrsTypes",
+     *     operationId="indexPqrsTypes",
      *     tags={"PqrsTypes"},
-     *     summary="List Pqrs Types",
-     *     description="Returns paginated list of Pqrs Types",
+     *     summary="List PQRS Types",
+     *     description="Get paginated list of PQRS Types. Permite filtrar por status, name y code.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
      *     @OA\Parameter(name="name", in="query", required=false, description="Filter by name", @OA\Schema(type="string")),
      *     @OA\Parameter(name="code", in="query", required=false, description="Filter by code", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
      *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="status", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Pqrs Types retrieved successfully"),
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PqrsTypeResource")),
-     *             @OA\Property(property="meta", type="object"),
-     *             @OA\Property(property="links", type="object")
-     *         )
-     *     ),
-     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=422, description="Unprocessable Entity"),
-     *     @OA\Response(response=500, description="Internal Server Error")
+     *     @OA\Response(response=403, description="Forbidden")
      * )
      */
     public function index(IndexPqrsTypeRequest $request): JsonResponse
     {
         try {
-            $filters = $request->only(['status', 'name', 'code']);
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $pqrs = $this->service->getPaginated($filters, $perPage);
             $resource = PqrsTypeResource::collection($pqrs);
@@ -140,7 +122,7 @@ class PqrsTypeController extends Controller
      *     description="Returns a single Pqrs Type",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(ref="#/components/schemas/ShowPqrsTypeRequest")),
      *
      *     @OA\Response(
      *         response=200,
@@ -222,7 +204,7 @@ class PqrsTypeController extends Controller
      *     description="Deletes a Pqrs Type",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="id", in="path", required=true, description="Pqrs Type ID", @OA\Schema(ref="#/components/schemas/DeletePqrsTypeRequest")),
      *
      *     @OA\Response(response=204, description="No Content"),
      *     @OA\Response(response=401, description="Unauthenticated"),

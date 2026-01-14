@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CommerceRequest;
+use App\Http\Requests\Api\V1\IndexCommerceRequest;
 use App\Http\Resources\Api\V1\CommerceResource;
 use App\Services\CommerceService;
 use App\Traits\ApiResponseTrait;
@@ -37,56 +38,20 @@ class CommerceController extends Controller
      *     operationId="getCommercesList",
      *     tags={"Commerces"},
      *     summary="Get list of commerces",
-     *     description="Returns paginated list of commerces.",
+     *     description="Returns paginated list of commerces. Permite filtrar por término de búsqueda (search), estado (status), cantidad por página (per_page) y número de página (page).",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Items per page",
+     *     @OA\Parameter(name="search", in="query", required=false, description="Filtrar por término de búsqueda", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="page", in="query", required=false, description="Número de página", @OA\Schema(type="integer", default=1)),
      *
-     *         @OA\Schema(type="integer", default=15)
-     *     ),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
      *
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         required=false,
-     *         description="Page number",
-     *
-     *         @OA\Schema(type="integer", default=1)
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="search",
-     *         in="query",
-     *         required=false,
-     *         description="Search term",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="status",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by status",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *
-     *         @OA\JsonContent(type="object",
-     *
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommerceResource")),
-     *             @OA\Property(property="meta", type="object"),
-     *             @OA\Property(property="links", type="object")
-     *         )
-     *     ),
+     *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommerceResource")),
+     *         @OA\Property(property="meta", type="object"),
+     *         @OA\Property(property="links", type="object")
+     *     )),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -94,15 +59,13 @@ class CommerceController extends Controller
      *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function index(): AnonymousResourceCollection|JsonResponse
+    public function index(IndexCommerceRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $perPage = (int) request('per_page', 15);
-            $page = (int) request('page', 1);
-            $search = request('search');
-            $status = request('status');
-
-            $commerces = $this->commerceService->paginateWithFilters($perPage, $page, $search, $status);
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
+            $page = $request->validatedPage();
+            $commerces = $this->commerceService->paginateWithFilters($perPage, $page, $filters['search'] ?? null, $filters['status'] ?? null);
             $resource = CommerceResource::collection($commerces);
 
             return $this->paginatedResponse($commerces, $resource, 'Commerces retrieved successfully');

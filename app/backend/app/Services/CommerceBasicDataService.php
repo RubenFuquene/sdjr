@@ -5,13 +5,36 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Commerce;
-use App\Models\CommerceDocument;
-use App\Models\LegalRepresentative;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class CommerceBasicDataService
 {
+    /**
+     * LegalRepresentativeService instance.
+     */
+    private LegalRepresentativeService $legalRepresentativeService;
+
+    /**
+     * CommerceDocumentService instance.
+     */
+    private CommerceDocumentService $commerceDocumentService;
+
+    /**
+     * CommercePayoutMethodService instance.
+     */
+    private CommercePayoutMethodService $myAccountService;
+
+    /**
+     * Constructor to initialize services.
+     */
+    public function __construct()
+    {
+        $this->legalRepresentativeService = new LegalRepresentativeService;
+        $this->commerceDocumentService = new CommerceDocumentService;
+        $this->myAccountService = new CommercePayoutMethodService;
+    }
+
     /**
      * Store commerce with related legal representatives and documents in a transaction.
      *
@@ -23,21 +46,25 @@ class CommerceBasicDataService
             $commerceData = $data['commerce'];
             $commerce = Commerce::create($commerceData);
 
-            if (! empty($data['legal_representatives'])) {
-                foreach ($data['legal_representatives'] as $lr) {
-                    $lr['commerce_id'] = $commerce->id;
-                    LegalRepresentative::create($lr);
-                }
+            if (! empty($data['legal_representative'])) {
+                $legalRepresentativeData = $data['legal_representative'];
+                $legalRepresentativeData['commerce_id'] = $commerce->id;
+                $this->legalRepresentativeService->store($legalRepresentativeData);
             }
 
             if (! empty($data['commerce_documents'])) {
-                foreach ($data['commerce_documents'] as $doc) {
-                    $doc['commerce_id'] = $commerce->id;
-                    CommerceDocument::create($doc);
-                }
+                $commerceDocumentsData = $data['commerce_documents'];
+                $commerceDocumentsData['commerce_id'] = $commerce->id;
+                $this->commerceDocumentService->store($commerceDocumentsData);
             }
 
-            return $commerce->load(['legalRepresentatives', 'commerceDocuments']);
+            if (! empty($data['my_account'])) {
+                $myAccountData = $data['my_account'];
+                $myAccountData['commerce_id'] = $commerce->id;
+                $this->myAccountService->store($myAccountData);
+            }
+
+            return $commerce->load(['legalRepresentatives', 'commerceDocuments', 'myAccount']);
         });
     }
 }

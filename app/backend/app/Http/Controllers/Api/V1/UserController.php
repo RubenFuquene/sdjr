@@ -37,44 +37,34 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/v1/users",
-     *     operationId="getUsersList",
+     *     operationId="indexUsers",
      *     tags={"Users"},
-     *     summary="Get list of users",
-     *     description="Returns list of users with roles and permissions.",
+     *     summary="List users",
+     *     description="Get paginated list of users. Permite filtrar por nombre (name), email, estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Items per page",
-     *
-     *         @OA\Schema(type="integer", default=15)
-     *     ),
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre de usuario (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="email", in="query", required=false, description="Filtrar por email de usuario", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/UserResource")),
-     *             @OA\Property(property="meta", type="object"),
-     *             @OA\Property(property="links", type="object")
-     *         )
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=422, description="Unprocessable Entity"),
-     *     @OA\Response(response=500, description="Internal Server Error")
+     *     @OA\Response(response=403, description="Forbidden")
      * )
      */
     public function index(UserIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
-            $users = $this->userService->getPaginated($perPage);
+            $users = $this->userService->getPaginated($filters, $perPage);
             $resource = UserResource::collection($users);
 
             return $this->paginatedResponse($users, $resource, 'Users retrieved successfully');
@@ -276,11 +266,7 @@ class UserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(
-     *             required={"status"},
-     *
-     *             @OA\Property(property="status", type="string", enum={"0","1"}, description="User status: 1=active, 0=inactive")
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/UserStatusRequest")
      *     ),
      *
      *     @OA\Response(

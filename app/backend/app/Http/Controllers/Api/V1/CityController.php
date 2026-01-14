@@ -31,60 +31,30 @@ class CityController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
      * @OA\Get(
-     *      path="/api/v1/cities",
-     *      operationId="getCitiesList",
-     *      tags={"Cities"},
-     *      summary="Get list of cities",
-     *      description="Returns list of cities",
-     *      security={{"sanctum":{}}},
+     *     path="/api/v1/cities",
+     *     operationId="indexCities",
+     *     tags={"Cities"},
+     *     summary="List cities",
+     *     description="Get paginated list of cities. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
+     *     security={{"sanctum":{}}},
      *
-     *      @OA\Parameter(
-     *          name="per_page",
-     *          in="query",
-     *          required=false,
-     *          description="Items per page",
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre de la ciudad (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código de la ciudad", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *
-     *          @OA\Schema(type="integer", default=15)
-     *      ),
-     *
-     *      @OA\Parameter(
-     *          name="status",
-     *          in="query",
-     *          required=false,
-     *          description="Filter by status (1=active, 0=inactive)",
-     *
-     *          @OA\Schema(type="string")
-     *      ),
-     *
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *
-     *          @OA\JsonContent(
-     *
-     *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CityResource")),
-     *              @OA\Property(property="meta", type="object"),
-     *              @OA\Property(property="links", type="object")
-     *          )
-     *      ),
-     *
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=422, description="Unprocessable Entity"),
-     *      @OA\Response(response=500, description="Internal Server Error")
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
      * )
-     *
-     * @return AnonymousResourceCollection
      */
     public function index(IndexCityRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
-            $status = $request->validatedStatus();
-            $cities = $this->cityService->getPaginated($perPage, $status);
+            $cities = $this->cityService->getPaginated($filters, $perPage);
             $resource = CityResource::collection($cities);
 
             return $this->paginatedResponse($cities, $resource, 'Cities retrieved successfully');
@@ -152,7 +122,7 @@ class CityController extends Controller
      *          required=true,
      *          description="City ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/ShowCityRequest")
      *      ),
      *
      *      @OA\Response(
@@ -252,7 +222,7 @@ class CityController extends Controller
      *          required=true,
      *          description="City ID",
      *
-     *          @OA\Schema(type="string")
+     *          @OA\Schema(ref="#/components/schemas/DeleteCityRequest")
      *      ),
      *
      *      @OA\Response(response=204, description="No Content"),

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Constant;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class RoleService
 {
@@ -47,10 +47,11 @@ class RoleService
         $roles = $query->paginate($perPage);
 
         // Agregar el conteo de usuarios a cada rol
-        // $roles->getCollection()->transform(function ($role) {
-        //     $role->user_count = $role->users()->count();
-        //     return $role;
-        // });
+        $roles->getCollection()->transform(function ($role) {
+            $role->user_count = $role->users()->count();
+
+            return $role;
+        });
 
         return $roles;
     }

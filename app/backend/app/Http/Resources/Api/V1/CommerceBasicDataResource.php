@@ -28,8 +28,8 @@ class CommerceBasicDataResource extends JsonResource
 
         return [
             'commerce' => new CommerceResource($commerce),
-            'legal_representatives' => LegalRepresentativeResource::collection($this->whenLoaded('legalRepresentatives')),
             'commerce_documents' => CommerceDocumentResource::collection($this->whenLoaded('commerceDocuments')),
+            'my_account' => CommercePayoutMethodResource::collection($this->whenLoaded('myAccount')),
         ];
     }
 }

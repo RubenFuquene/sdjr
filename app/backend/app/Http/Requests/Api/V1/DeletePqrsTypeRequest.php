@@ -6,6 +6,15 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * DeletePqrsTypeRequest
+ *
+ * @OA\Schema(
+ *     schema="DeletePqrsTypeRequest",
+ *     type="object",
+ *     description="Request schema for deleting a PQRS type. No body parameters required."
+ * )
+ */
 class DeletePqrsTypeRequest extends FormRequest
 {
     public function authorize(): bool

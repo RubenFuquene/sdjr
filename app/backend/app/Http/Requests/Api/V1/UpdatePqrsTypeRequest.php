@@ -6,6 +6,18 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * UpdatePqrsTypeRequest
+ *
+ * @OA\Schema(
+ *     schema="UpdatePqrsTypeRequest",
+ *     type="object",
+ *
+ *     @OA\Property(property="name", type="string", maxLength=100, example="Petición"),
+ *     @OA\Property(property="code", type="string", maxLength=20, example="PQRS01"),
+ *     @OA\Property(property="status", type="string", maxLength=1, example="1", description="1=Activo, 0=Inactivo")
+ * )
+ */
 class UpdatePqrsTypeRequest extends FormRequest
 {
     public function authorize(): bool

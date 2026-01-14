@@ -6,6 +6,30 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * IndexCityRequest
+ *
+ * @OA\Schema(
+ *     schema="IndexCityRequest",
+ *     type="object",
+ *
+ *     @OA\Property(
+ *         property="per_page",
+ *         type="integer",
+ *         minimum=1,
+ *         maximum=100,
+ *         description="Cantidad de registros por página (default: 15)",
+ *         example=10
+ *     ),
+ *     @OA\Property(
+ *         property="status",
+ *         type="string",
+ *         enum={"1", "0", "all"},
+ *         description="Filtrar por estado: 1 (activo), 0 (inactivo), all (todos)",
+ *         example="1"
+ *     )
+ * )
+ */
 class IndexCityRequest extends FormRequest
 {
     public function authorize(): bool
@@ -26,8 +50,11 @@ class IndexCityRequest extends FormRequest
         return (int) ($this->input('per_page', 15));
     }
 
-    public function validatedStatus(): string
+    /**
+     * Get validated filters.
+     */
+    public function validatedFilters(): array
     {
-        return $this->input('status', 'all');
+        return $this->only(['name', 'code', 'status']);
     }
 }

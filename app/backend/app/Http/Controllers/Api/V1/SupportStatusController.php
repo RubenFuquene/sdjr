@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\IndexSupportStatusRequest;
 use App\Http\Requests\Api\V1\SupportStatusStoreRequest;
 use App\Http\Requests\Api\V1\SupportStatusUpdateRequest;
 use App\Http\Resources\Api\V1\SupportStatusResource;
@@ -29,28 +30,28 @@ class SupportStatusController extends Controller
     /**
      * @OA\Get(
      *     path="/api/v1/support-statuses",
-     *     operationId="getSupportStatusesList",
+     *     operationId="indexSupportStatuses",
      *     tags={"SupportStatuses"},
-     *     summary="Get list of support statuses",
-     *     description="Returns a paginated list of support statuses.",
+     *     summary="List support statuses",
+     *     description="Get paginated list of support statuses. Permite filtrar por nombre (name), código (code), color, estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="code", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="color", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre del estado de soporte (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del estado de soporte", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="color", in="query", required=false, description="Filtrar por color", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *
-     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/SupportStatusResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexSupportStatusRequest $request): JsonResponse
     {
         try {
-            $filters = $request->only(['name', 'code', 'color', 'status']);
-            $perPage = (int) $request->get('per_page', 15);
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
             $statuses = $this->supportStatusService->getPaginated($filters, $perPage);
             $resource = SupportStatusResource::collection($statuses);
 

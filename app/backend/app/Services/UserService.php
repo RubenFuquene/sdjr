@@ -28,11 +28,30 @@ class UserService
     /**
      * Get paginated users with roles and permissions loaded.
      *
+     * @param  array<string, mixed>  $filters  Filters to apply (name, last_name, email, phone, status)
      * @param  int  $perPage  Number of users per page (default: 15)
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
-        return User::with('roles', 'permissions')->paginate($perPage);
+        $query = User::with('roles', 'permissions');
+
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (! empty($filters['last_name'])) {
+            $query->where('last_name', 'like', "%{$filters['last_name']}%");
+        }
+        if (! empty($filters['email'])) {
+            $query->where('email', 'like', "%{$filters['email']}%");
+        }
+        if (! empty($filters['phone'])) {
+            $query->where('phone', 'like', "%{$filters['phone']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**

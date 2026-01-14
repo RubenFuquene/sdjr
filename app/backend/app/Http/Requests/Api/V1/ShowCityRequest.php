@@ -6,6 +6,15 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * ShowCityRequest
+ *
+ * @OA\Schema(
+ *     schema="ShowCityRequest",
+ *     type="object",
+ *     description="Request schema for showing a city. No body parameters required."
+ * )
+ */
 class ShowCityRequest extends FormRequest
 {
     public function authorize(): bool
