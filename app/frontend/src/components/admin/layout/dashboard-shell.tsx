@@ -34,7 +34,7 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex-col border-r border-[#C8D86D] bg-[#DDE8BB] shadow-xl transform transition-transform duration-300 ease-in-out overflow-y-auto md:relative md:translate-x-0 md:flex ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex-col border-r border-[#C8D86D] bg-[#DDE8BB] shadow-xl transform transition-transform duration-300 ease-in-out overflow-y-auto shrink-0 md:relative md:translate-x-0 md:flex ${
           sidebarOpen ? "translate-x-0 flex" : "-translate-x-full"
         }`}
       >
@@ -78,7 +78,7 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
         </nav>
       </aside>
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col min-w-0">
         <header className="flex flex-col gap-4 border-b border-[#C8D86D] bg-[#DDE8BB] px-4 md:px-6 py-3 md:py-4 md:flex-row md:items-center md:justify-between shadow-sm">
           <div className="flex items-center gap-3">
             {/* Hamburger menu button */}
@@ -109,7 +109,7 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
           </div>
         </header>
 
-        <main className="flex-1 bg-white px-4 py-6 md:px-6 overflow-y-auto min-h-0" style={{ scrollbarWidth: 'thin', scrollbarColor: '#C8D86D transparent' }}>{children}</main>
+        <main className="flex-1 bg-white px-4 py-6 md:px-6 overflow-y-auto min-h-0 min-w-0" style={{ scrollbarWidth: 'thin', scrollbarColor: '#C8D86D transparent' }}>{children}</main>
       </div>
     </div>
   );

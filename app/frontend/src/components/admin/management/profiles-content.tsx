@@ -14,21 +14,19 @@
 
 import { useState, useCallback, ReactNode } from 'react';
 import { Users, Store, UserCog } from 'lucide-react';
-import { Vista, Proveedor, Usuario, Administrador } from '@/types/admin';
+import { Vista, Usuario, Administrador } from '@/types/admin';
 import { RolesView } from './roles';
-import { ProvidersTable } from './providers/providers-table';
+import { ProvidersView } from './providers/providers-view';
 import { UsersTable } from './users/users-table';
 import { AdministratorsTable } from './administrators/administrators-table';
 import { PageHeader } from '@/components/admin/shared/page-header';
 
 interface ProfilesContentProps {
-  proveedores: Proveedor[];
   usuarios: Usuario[];
   administradores: Administrador[];
 }
 
 export function ProfilesContent({
-  proveedores,
   usuarios,
   administradores,
 }: ProfilesContentProps) {
@@ -113,7 +111,7 @@ export function ProfilesContent({
 
       {/* Vistas delegadas */}
       {vista === 'perfiles' && <RolesView onSetHeaderActions={handleSetHeaderActions} />}
-      {vista === 'proveedores' && <ProvidersTable data={proveedores} />}
+      {vista === 'proveedores' && <ProvidersView />}
       {vista === 'usuarios' && <UsersTable data={usuarios} />}
       {vista === 'administradores' && <AdministratorsTable data={administradores} />}
     </div>

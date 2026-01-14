@@ -1,12 +1,14 @@
 /**
- * Hook de Gestión de Roles
+ * Hook de Gestión de Roles - Centralizado
  * 
- * Encapsula toda la lógica de negocio de roles:
- * - Data fetching desde API
+ * Encapsula toda la lógica relacionada con roles:
+ * - Data fetching desde API /api/v1/roles
  * - CRUD operations (create, update)
- * - Adaptación de datos de API a formato UI
+ * - Mapeo de datos API → Frontend types
+ * - Adaptación de datos a formato UI
+ * - Gestión de estado (loading, error, refresh)
  * 
- * Responsabilidad única: Lógica de negocio de roles
+ * Responsabilidad única: Toda la lógica de negocio de roles
  * 
  * @example
  * const roleManagement = useRoleManagement();
@@ -19,15 +21,17 @@
  * await roleManagement.handleCreate(roleData);
  * await roleManagement.handleUpdate(roleId, roleData);
  * 
- * // Transformaciones
- * const adapted = roleManagement.adaptProfileToRole(perfil);
+ * // Refresh
+ * await roleManagement.refresh();
  */
 
-import { useRoles } from './use-roles';
-import { createRole, updateRole } from '@/lib/api/roles';
-import { adaptPermissions } from '@/components/admin/adapters/permission-adapter';
-import { CreateRoleRequest } from '@/types/role-form-types';
-import { Perfil } from '@/types/admin';
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { getRoles, createRole, updateRole, ApiError } from "@/lib/api/index";
+import { adaptPermissions } from "@/components/admin/adapters/permission-adapter";
+import { CreateRoleRequest } from "@/types/role-form-types";
+import { Perfil, RoleFromAPI } from "@/types/admin";
 
 /**
  * Estructura adaptada de rol para el árbol de permisos
@@ -40,11 +44,34 @@ export interface AdaptedRole {
 }
 
 /**
- * Hook de gestión de roles con lógica de negocio encapsulada
+ * Transforma RoleFromAPI a Perfil (frontend type)
+ * Mapea permisos por prefijo (admin.*, provider.*)
  */
-export function useRoleManagement() {
-  // Data fetching
-  const { roles: perfiles, loading, error, refresh } = useRoles();
+function mapRoleToPerfil(role: RoleFromAPI): Perfil {
+  const permissionsEntries = Object.entries(role.permissions);
+  return {
+    id: role.id,
+    nombre: role.name,
+    descripcion: role.description,
+    permisosAdmin: permissionsEntries
+      .filter(([key]) => key.startsWith("admin."))
+      .map(([key, value]) => ({ name: key, description: value })),
+    permisosProveedor: permissionsEntries
+      .filter(([key]) => key.startsWith("provider."))
+      .map(([key, value]) => ({ name: key, description: value })),
+    usuarios: role.users_count,
+    activo: role.status === "1",
+  };
+}
+
+/**
+ * Hook de gestión centralizado de roles
+ */
+export function useRoleManagement(perPage: number = 15) {
+  // Estado de datos
+  const [roles, setRoles] = useState<Perfil[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Adapta un Perfil de API a formato requerido por el árbol de permisos
@@ -66,6 +93,38 @@ export function useRoleManagement() {
   };
 
   /**
+   * Fetch inicial y refresh de roles desde API
+   * GET /api/v1/roles?per_page={perPage}
+   */
+  const fetchRoles = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await getRoles(perPage);
+      const mappedRoles = response.data.map(mapRoleToPerfil);
+
+      setRoles(mappedRoles);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Error inesperado al cargar roles");
+      }
+      console.error("Error fetching roles:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [perPage]);
+
+  /**
+   * Cargar roles al montar el componente
+   */
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
+  /**
    * Crea un nuevo rol
    * POST /api/v1/roles
    */
@@ -82,7 +141,7 @@ export function useRoleManagement() {
       console.log('✅ Rol creado exitosamente');
       
       // Refrescar lista de roles
-      refresh();
+      await fetchRoles();
     } catch (error) {
       console.error('❌ Error al crear rol:', error);
       throw error;
@@ -109,7 +168,7 @@ export function useRoleManagement() {
       console.log('✅ Rol editado exitosamente');
       
       // Refrescar lista de roles
-      refresh();
+      await fetchRoles();
     } catch (error) {
       console.error('❌ Error al editar rol:', error);
       throw error;
@@ -118,7 +177,7 @@ export function useRoleManagement() {
 
   return {
     // Data
-    roles: perfiles,
+    roles,
     loading,
     error,
     
@@ -130,6 +189,6 @@ export function useRoleManagement() {
     adaptProfileToRole,
     
     // Utilities
-    refresh
+    refresh: fetchRoles
   };
 }

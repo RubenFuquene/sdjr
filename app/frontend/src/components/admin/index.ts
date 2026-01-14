@@ -6,6 +6,7 @@ export { ProfilesFilters } from "./management/profiles-filters";
 export { RolesTable } from "./management/roles/roles-table";
 export { RolesView } from "./management/roles/roles-view";
 export { ProvidersTable } from "./management/providers/providers-table";
+export { ProvidersView } from "./management/providers/providers-view";
 export { UsersTable } from "./management/users/users-table";
 export { AdministratorsTable } from "./management/administrators/administrators-table";
 
