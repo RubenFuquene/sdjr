@@ -6,11 +6,11 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* Brand - Púrpura Berenjena */
+  /* Brand - Púrpura Berenjena (Primary) */
   --color-brand-purple: #4B236A;
   --color-brand-purple-600: #5D2B7D;
   
-  /* Brand - Verde Tomatillo */
+  /* Brand - Verde Tomatillo (Accent) */
   --color-brand-lime: #DDE8BB;
   --color-brand-lime-500: #C8D86D;
 
@@ -27,6 +27,16 @@
   --color-sidebar-bg: #DDE8BB;
   --color-sidebar-border: #C8D86D;
   --color-dashboard-bg: #F9FAFB;
+
+  /* Provider Panel - Colores específicos */
+  --color-provider-primary: #4B236A;
+  --color-provider-primary-hover: #5D2B7D;
+  --color-provider-accent: #DDE8BB;
+  --color-provider-accent-dark: #C8D86D;
+  --color-provider-text: #1A1A1A;
+  --color-provider-text-muted: #6A6A6A;
+  --color-provider-border: #E0E0E0;
+  --color-provider-bg: #F7F7F7;
 }
 
 @theme inline {
@@ -41,6 +51,16 @@
   --color-border: var(--color-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Provider Panel Colors */
+  --color-provider-primary: var(--color-provider-primary);
+  --color-provider-primary-hover: var(--color-provider-primary-hover);
+  --color-provider-accent: var(--color-provider-accent);
+  --color-provider-accent-dark: var(--color-provider-accent-dark);
+  --color-provider-text: var(--color-provider-text);
+  --color-provider-text-muted: var(--color-provider-text-muted);
+  --color-provider-border: var(--color-provider-border);
+  --color-provider-bg: var(--color-provider-bg);
 }
 
 @media (prefers-color-scheme: dark) {
