@@ -41,7 +41,7 @@ class CommerceController extends Controller
      *     description="Returns paginated list of commerces. Permite filtrar por término de búsqueda (search), estado (status), cantidad por página (per_page) y número de página (page).",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(name="search", in="query", required=false, description="Filtrar por término de búsqueda", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos, all=todos", @OA\Schema(type="string", enum={"1","0","all"}, default="all")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", default=15)),
      *     @OA\Parameter(name="page", in="query", required=false, description="Número de página", @OA\Schema(type="integer", default=1)),
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
