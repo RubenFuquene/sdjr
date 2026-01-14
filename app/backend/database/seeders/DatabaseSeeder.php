@@ -46,6 +46,7 @@ class DatabaseSeeder extends Seeder
             SupportStatusSeeder::class,
             PqrsTypeSeeder::class,
             PriorityTypeSeeder::class,
+            CommercePayoutMethodSeeder::class,
         ]);
 
         Log::info('Database seeding completed');

@@ -30,12 +30,6 @@ class NeighborhoodRequest extends FormRequest
         return $this->user()?->can($permission) ?? false;
     }
 
-    /**
-     * @OA\Property(property="city_id", title="city_id", description="ID of the city", example=1)
-     * @OA\Property(property="name", title="name", description="Name of the neighborhood", example="Chapinero")
-     * @OA\Property(property="code", title="code", description="Unique code for the neighborhood (6 alphanumeric characters)", example="NB0001")
-     * @OA\Property(property="status", title="status", description="Status of the neighborhood (A: Active, I: Inactive)", example="A")
-     */
     public function rules(): array
     {
         return [

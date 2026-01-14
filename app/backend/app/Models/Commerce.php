@@ -123,6 +123,16 @@ class Commerce extends Model
     }
 
     /**
+     * Get the my account of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function myAccount()
+    {
+        return $this->hasMany(CommercePayoutMethod::class);
+    }
+
+    /**
      * Set and sanitize the name attribute.
      *
      * @param  string|null  $value

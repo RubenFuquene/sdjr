@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteNeighborhoodRequest;
+use App\Http\Requests\Api\V1\IndexNeighborhoodRequest;
 use App\Http\Requests\Api\V1\NeighborhoodRequest;
+use App\Http\Requests\Api\V1\ShowNeighborhoodRequest;
 use App\Http\Resources\Api\V1\NeighborhoodResource;
-use App\Models\Neighborhood;
 use App\Services\NeighborhoodService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -38,28 +39,25 @@ class NeighborhoodController extends Controller
      *     operationId="indexNeighborhoods",
      *     tags={"Neighborhoods"},
      *     summary="List neighborhoods",
-     *     description="Get paginated list of neighborhoods",
+     *     description="Get paginated list of neighborhoods. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Items per page",
-     *
-     *         @OA\Schema(ref="#/components/schemas/NeighborhoodRequest", property="per_page")
-     *     ),
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre del barrio (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del barrio", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexNeighborhoodRequest $request): JsonResponse
     {
         try {
-            $perPage = (int) ($request->get('per_page', 15));
-            $neighborhoods = $this->neighborhoodService->getPaginated($perPage);
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
+            $neighborhoods = $this->neighborhoodService->getPaginated($filters, $perPage);
             $resource = NeighborhoodResource::collection($neighborhoods);
 
             return $this->paginatedResponse($neighborhoods, $resource, 'Neighborhoods retrieved successfully');
@@ -105,7 +103,7 @@ class NeighborhoodController extends Controller
      *     description="Get a specific neighborhood",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(ref="#/components/schemas/NeighborhoodRequest")),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer"), description="Neighborhood ID"),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/NeighborhoodResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -113,7 +111,7 @@ class NeighborhoodController extends Controller
      *     @OA\Response(response=404, description="Not found")
      * )
      */
-    public function show(NeighborhoodRequest $request, int $id): JsonResponse
+    public function show(ShowNeighborhoodRequest $request, int $id): JsonResponse
     {
         try {
             $neighborhood = $this->neighborhoodService->show($id);
@@ -164,13 +162,15 @@ class NeighborhoodController extends Controller
      *     description="Delete a specific neighborhood",
      *     security={{"sanctum":{}}},
      *
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer"), description="Neighborhood ID"),
+     *
      *     @OA\Response(response=204, description="No Content"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=404, description="Not found")
      * )
      */
-    public function destroy(int $neighborhood_id): JsonResponse
+    public function destroy(DeleteNeighborhoodRequest $request, int $neighborhood_id): JsonResponse
     {
         try {
             $this->neighborhoodService->destroy($neighborhood_id);

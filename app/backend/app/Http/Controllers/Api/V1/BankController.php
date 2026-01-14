@@ -37,49 +37,18 @@ class BankController extends Controller
     /**
      * @OA\Get(
      *     path="/api/v1/banks",
-     *     operationId="getBanksList",
+     *     operationId="indexBanks",
      *     tags={"Banks"},
-     *     summary="Get list of banks",
-     *     description="Returns a paginated list of banks.",
+     *     summary="List banks",
+     *     description="Get paginated list of banks. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(
-     *         name="name",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by name",
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre del banco (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del banco (ISO)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
      *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="name")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="code",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by code",
-     *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="code")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="status",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by status",
-     *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="status")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Items per page",
-     *
-     *         @OA\Schema(ref="#/components/schemas/IndexBankRequest", property="per_page")
-     *     ),
-     *
-     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/BankResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
@@ -87,7 +56,7 @@ class BankController extends Controller
     public function index(IndexBankRequest $request): JsonResponse
     {
         try {
-            $filters = $request->only(['name', 'code', 'status']);
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $banks = $this->bankService->getPaginated($filters, $perPage);
             $resource = BankResource::collection($banks);

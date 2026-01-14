@@ -55,7 +55,6 @@ class CommerceBasicDataController extends Controller
         try {
             $payload = $request->validated();
             $commerce = $this->commerceBasicDataService->store($payload);
-            $commerce->load(['legalRepresentatives', 'commerceDocuments']);
 
             return $this->successResponse(new CommerceBasicDataResource($commerce), 'Commerce basic data created successfully', Response::HTTP_CREATED);
         } catch (Throwable $e) {
