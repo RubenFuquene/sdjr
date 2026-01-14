@@ -36,7 +36,7 @@ class RoleResource extends JsonResource
             'description' => $this->description,
             'permissions' => $this->permissions->pluck('description', 'name'),
             'status' => $this->status,
-            'users_count' => $this->users_count ?? 0,
+            'user_count' => $this->user_count ?? 0,
         ];
     }
 }

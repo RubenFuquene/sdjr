@@ -15,6 +15,6 @@ class Role extends SpatieRole
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'model_has_roles', 'role_id', 'model_id')
-            ->where('model_type', User::class);
+            ->where('model_type', 'App\Models\User');
     }
 }
