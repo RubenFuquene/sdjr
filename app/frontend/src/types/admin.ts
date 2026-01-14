@@ -43,6 +43,27 @@ export {
 // Re-exportar constantes de Provider
 export { TIPOS_CUENTA, TIPOS_DOCUMENTO_IDENTIDAD } from './provider';
 
+// Re-exportar tipos de User
+export type {
+  UserFromAPI,
+  GetUsersParams,
+  CreateUserPayload,
+  UpdateUserPayload,
+} from './user';
+
+// Re-exportar adaptadores de User
+export {
+  userFromAPIToUsuario,
+  usersFromAPIToUsuarios,
+  usuarioToBackendPayload,
+  esUserFromAPIValido,
+  esArrayUserFromAPIValido,
+  activoToStatus,
+  statusToActivo,
+  obtenerRolPrincipal,
+  formatearRoles,
+} from './user.adapters';
+
 // ============================================
 // API Response Types (Generic)
 // ============================================

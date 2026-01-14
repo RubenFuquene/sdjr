@@ -18,3 +18,15 @@ export { getRoles, createRole, updateRole, deleteRole } from "./roles";
 
 // Commerces (Proveedores)
 export { getCommerces, getCommerceById, updateCommerce, deleteCommerce } from "./commerces";
+
+// Users (Usuarios)
+export { 
+  getUsers, 
+  getUserById, 
+  createUser, 
+  updateUser, 
+  updateUserStatus, 
+  deleteUser,
+  getAdministrators 
+} from "./users";
+export type { ApiSuccess } from "./users";

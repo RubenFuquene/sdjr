@@ -15,7 +15,7 @@
 import { useState, useCallback, ReactNode, useMemo, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { ProveedorListItem, Proveedor, Perfil, CommerceFromAPI } from '@/types/admin';
-import { getCommerceById, updateCommerce, ApiError } from '@/lib/api/index';
+import { getCommerceById, updateCommerce } from '@/lib/api/index';
 import { commerceToProveedor, proveedorToBackendPayload } from '@/types/provider.adapters';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { ProvidersTable } from './providers-table';

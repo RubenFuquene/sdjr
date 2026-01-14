@@ -7,27 +7,25 @@
  * 
  * Delega responsabilidades:
  * - Roles → RolesView (auto-contenido)
- * - Proveedores → ProvidersTable (presentación)
- * - Usuarios → UsersTable (presentación)
+ * - Proveedores → ProvidersView (auto-contenido)
+ * - Usuarios → UsersView (auto-contenido)
  * - Administradores → AdministratorsTable (presentación)
  */
 
 import { useState, useCallback, ReactNode } from 'react';
 import { Users, Store, UserCog } from 'lucide-react';
-import { Vista, Usuario, Administrador } from '@/types/admin';
+import { Vista, Administrador } from '@/types/admin';
 import { RolesView } from './roles';
 import { ProvidersView } from './providers/providers-view';
-import { UsersTable } from './users/users-table';
+import { UsersView } from './users/users-view';
 import { AdministratorsTable } from './administrators/administrators-table';
 import { PageHeader } from '@/components/admin/shared/page-header';
 
 interface ProfilesContentProps {
-  usuarios: Usuario[];
   administradores: Administrador[];
 }
 
 export function ProfilesContent({
-  usuarios,
   administradores,
 }: ProfilesContentProps) {
   const [vista, setVista] = useState<Vista>('perfiles');
@@ -112,7 +110,7 @@ export function ProfilesContent({
       {/* Vistas delegadas */}
       {vista === 'perfiles' && <RolesView onSetHeaderActions={handleSetHeaderActions} />}
       {vista === 'proveedores' && <ProvidersView />}
-      {vista === 'usuarios' && <UsersTable data={usuarios} />}
+      {vista === 'usuarios' && <UsersView />}
       {vista === 'administradores' && <AdministratorsTable data={administradores} />}
     </div>
   );
