@@ -27,7 +27,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getCommerces, deleteCommerce, ApiError } from "@/lib/api/index";
+import { getCommerces, updateCommerce, deleteCommerce, ApiError } from "@/lib/api/index";
 import type { ProveedorListItem, Proveedor } from "@/types/admin";
 import { commerceToProveedorListItem } from "@/types/provider.adapters";
 
@@ -179,7 +179,7 @@ export function useCommerceManagement() {
 
   /**
    * Actualiza un comercio existente
-   * TODO: PUT /api/v1/commerces/{id} cuando endpoint esté disponible
+   * PUT /api/v1/commerces/{id}
    */
   const handleUpdate = async (
     id: number,
@@ -188,7 +188,7 @@ export function useCommerceManagement() {
     try {
       console.log('🚀 Editando comercio:', commerceData, 'ID:', id);
       
-      // TODO: await updateCommerce(id, commerceData);
+      await updateCommerce(id, commerceData);
       console.log('✅ Comercio editado exitosamente');
       
       // Refrescar lista

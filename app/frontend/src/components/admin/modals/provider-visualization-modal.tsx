@@ -137,8 +137,9 @@ export function ProviderVisualizationModal({
 
   /**
    * Valida el formulario antes de guardar
+   * Retorna un objeto con {isValid, errors} para evitar problemas de closure
    */
-  const validateForm = (): boolean => {
+  const validateForm = (): { isValid: boolean; errors: Record<string, string> } => {
     const newErrors: Record<string, string> = {};
 
     // Validaciones básicas
@@ -182,17 +183,22 @@ export function ProviderVisualizationModal({
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return {
+      isValid: Object.keys(newErrors).length === 0,
+      errors: newErrors,
+    };
   };
 
   /**
    * Guarda los cambios del formulario
    */
   const handleSave = async () => {
-    if (!validateForm()) {
+    const { isValid, errors: validationErrors } = validateForm();
+    
+    if (!isValid) {
       // Si hay errores en información bancaria, ir a esa tab
-      const hasBasicErrors = Object.keys(errors).some(key => !key.startsWith('informacionBancaria'));
-      const hasBancariaErrors = Object.keys(errors).some(key => key.startsWith('informacionBancaria'));
+      const hasBasicErrors = Object.keys(validationErrors).some(key => !key.startsWith('informacionBancaria'));
+      const hasBancariaErrors = Object.keys(validationErrors).some(key => key.startsWith('informacionBancaria'));
       
       if (hasBancariaErrors && !hasBasicErrors) {
         setActiveTab('bancaria');

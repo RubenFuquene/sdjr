@@ -111,7 +111,7 @@ export function ProfilesContent({
 
       {/* Vistas delegadas */}
       {vista === 'perfiles' && <RolesView onSetHeaderActions={handleSetHeaderActions} />}
-      {vista === 'proveedores' && <ProvidersView />}
+      {vista === 'proveedores' && <ProvidersView onSetHeaderActions={handleSetHeaderActions} />}
       {vista === 'usuarios' && <UsersTable data={usuarios} />}
       {vista === 'administradores' && <AdministratorsTable data={administradores} />}
     </div>
