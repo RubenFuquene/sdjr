@@ -181,4 +181,3 @@ class NeighborhoodController extends Controller
         }
     }
 }
-
