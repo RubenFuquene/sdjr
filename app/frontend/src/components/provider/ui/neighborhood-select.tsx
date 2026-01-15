@@ -75,7 +75,7 @@ export function NeighborhoodSelect({
     };
 
     fetchNeighborhoods();
-  }, [cityId]); // Remove onChange from dependencies to avoid infinite loop
+  }, [cityId]); // onChange omitida intencionalmente para evitar loops infinitos (es callback estable)
 
   const hasNeighborhoods = neighborhoods.length > 0;
   const isDisabled = disabled || !cityId;
