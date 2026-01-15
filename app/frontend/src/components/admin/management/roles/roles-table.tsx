@@ -7,9 +7,10 @@ interface RolesTableProps {
   data: Perfil[];
   onView?: (perfil: Perfil) => void;
   onEdit?: (perfil: Perfil) => void;
+  onToggle?: (perfilId: number, currentStatus: boolean) => Promise<void>;
 }
 
-export function RolesTable({ data, onView, onEdit }: RolesTableProps) {
+export function RolesTable({ data, onView, onEdit, onToggle }: RolesTableProps) {
   return (
     <div className={TABLE_STYLES.container}>
       <div className="overflow-x-auto">
@@ -79,6 +80,7 @@ export function RolesTable({ data, onView, onEdit }: RolesTableProps) {
                     activo={perfil.activo}
                     onView={onView ? () => onView(perfil) : undefined}
                     onEdit={onEdit ? () => onEdit(perfil) : undefined}
+                    onToggle={onToggle ? () => onToggle(perfil.id, perfil.activo) : undefined}
                   />
                 </td>
               </tr>

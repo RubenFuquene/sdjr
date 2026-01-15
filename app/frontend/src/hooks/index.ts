@@ -1,5 +1,6 @@
 // Barrel export for all hooks
 export { useAuthForm } from './use-auth-form';
+export { useApiErrorHandler } from './use-api-error-handler';
 export { useCommerceManagement } from './use-commerce-management';
 export { useLocation } from './use-location';
 export { usePermissions } from './use-permissions';

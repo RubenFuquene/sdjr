@@ -28,10 +28,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getRoles, createRole, updateRole, ApiError } from "@/lib/api/index";
+import { getRoles, createRole, updateRole, updateRoleStatus, ApiError } from "@/lib/api/index";
 import { adaptPermissions } from "@/components/admin/adapters/permission-adapter";
 import { CreateRoleRequest } from "@/types/role-form-types";
 import { Perfil, RoleFromAPI } from "@/types/admin";
+import { useApiErrorHandler } from "./use-api-error-handler";
 
 /**
  * Estructura adaptada de rol para el árbol de permisos
@@ -72,6 +73,9 @@ export function useRoleManagement(perPage: number = 15) {
   const [roles, setRoles] = useState<Perfil[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Error handler centralizado
+  const handleError = useApiErrorHandler();
 
   /**
    * Adapta un Perfil de API a formato requerido por el árbol de permisos
@@ -175,6 +179,38 @@ export function useRoleManagement(perPage: number = 15) {
     }
   };
 
+  /**
+   * Cambia el estado de un rol (activo/inactivo)
+   * PATCH /api/v1/roles/{id}
+   * 
+   * Nota: Si el backend retorna 405 (Method Not Allowed), significa que PATCH
+   * aún no está implementado. Ver: docs/backend-endpoints-v2.md #1
+   */
+  const handleToggleRoleStatus = useCallback(async (
+    id: number,
+    currentStatus: boolean
+  ): Promise<void> => {
+    try {
+      const newStatus = currentStatus ? "0" : "1";
+      console.log(`🔄 Cambiando estado del rol ${id} a ${newStatus === "1" ? "activo" : "inactivo"}`);
+      
+      await updateRoleStatus(id, newStatus);
+      
+      // Actualizar estado local optimistamente
+      setRoles(prev => 
+        prev.map(role => 
+          role.id === id 
+            ? { ...role, activo: newStatus === "1" }
+            : role
+        )
+      );
+
+      console.log('✅ Estado del rol actualizado exitosamente');
+    } catch (error) {
+      handleError(error);
+    }
+  }, [handleError]);
+
   return {
     // Data
     roles,
@@ -184,6 +220,7 @@ export function useRoleManagement(perPage: number = 15) {
     // Handlers
     handleCreate,
     handleUpdate,
+    handleToggleRoleStatus,
     
     // Transformaciones
     adaptProfileToRole,

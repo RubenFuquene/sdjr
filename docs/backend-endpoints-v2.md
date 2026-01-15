@@ -6,127 +6,101 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 
 ## Pendientes
 
-### 0) POST /api/v1/providers/register (CRÍTICO)
+### 1) PATCH /api/v1/roles/{id} — Status Update (PENDIENTE CRÍTICO)
 
-**🚨 CRÍTICO para MVP Provider Panel**
+**🚨 CRÍTICO - Bloqueador para feature de activación/desactivación de roles**
 
-- **Propósito:** Endpoint público para registro de nuevos proveedores (sin requerir autenticación)
-- **Diferencia con POST /api/v1/users:**
-  - `POST /api/v1/users` requiere Sanctum y permisos admin
-  - `POST /api/v1/providers/register` es público, especializado para proveedores
+- **Propósito:** Endpoint para actualizar solo el estado de un rol (activo/inactivo)
+- **Ruta:** `PATCH /api/v1/roles/{id}`
+- **Body esperado:** `{ "status": "0" | "1" }`
 - **Validaciones esperadas:**
-  - `name` (string, requerido, min 2 chars)
-  - `email` (string, requerido, valid email, **único en tabla users**)
-  - `password` (string, requerido, min 6 chars)
-  - Email no debe existir en sistema (422 si duplicado)
-  - Validar contra spam/bot (rate limiting recomendado)
-- **Proceso esperado:**
-  1. Crear usuario con rol `provider` o `user` automáticamente
-  2. Generar token Sanctum para sesión inmediata
-  3. Responder con `LoginResponse` (mismo formato que `/api/v1/login`)
+  - `id` existente → 404 si no existe
+  - `status` requerido, in:0,1 → 422 si inválido
+  - Permiso `admin.profiles.roles.update` → 403 si sin permisos
 - **Respuesta exitosa (200 OK):**
   ```json
   {
-    "message": "Provider registered successfully",
-    "data": {
-      "id": 1,
-      "name": "Mi Tienda",
-      "email": "provider@example.com",
-      "roles": ["provider"],
-      "status": "A"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "id": 1,
+    "name": "Administrador",
+    "description": "Rol de administrador",
+    "status": "1",
+    "permissions": {...},
+    "users_count": 5
   }
   ```
-- **Errores esperados:**
-  - 422 Unprocessable Entity: email duplicado o validaciones fallidas
-  - 429 Too Many Requests: rate limiting
-  - 500 Internal Server Error: fallo del servidor
-- **No requiere autenticación:** Header `Authorization` no necesario
-- **Headers esperados:**
-  ```json
-  {
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-  }
-  ```
+- **Frontend:** Ya implementado en `use-role-management.ts::handleToggleRoleStatus()` con manejo robusto de errores HTTP
+- **Nota:** El PUT genérico requiere todos los campos (name, description), por lo que no es apropiado para actualizaciones parciales
+- **Prioridad:** ALTA - El frontend está 100% listo, solo falta que el backend implemente PATCH con validación parcial
 
----
+### 2) DELETE /api/v1/roles/{id} ✅ IMPLEMENTADO
 
-### 1) PATCH /api/v1/roles//status (nuevo)
+**✅ Status: COMPLETADO**
 
-- Propuesta: endpoint dedicado para activar/inactivar rol.
-- Body esperado: `{ "status": "0" | "1" }` (aceptar boolean si se prefiere en backend, pero responder como string/entero consistente con el resto del modelo).
-- Validaciones: permiso `admin.profiles.roles.update` o equivalente; `id` existente; `status` requerido e in:0,1.
-- Respuesta: rol con estado actualizado (usar `RoleResource`), o al menos `{ "message": "Role status updated" }` + status code 200.
-- Notas: evita exigir `name` y `description` en updates parciales y mantiene semántica clara.
+- El endpoint `DELETE /api/v1/roles/{id}` está implementado en `RoleController::destroy()`
+- Responde con 200 OK (o código adecuado) según la lógica configurada
+- **Próximo paso:** Validar que sea soft delete (baja lógica) en lugar de eliminación física
 
-### 2) GET /api/v1/roles — users_count incorrecto (bug abierto)
+### 3) GET /api/v1/roles con parámetro `q` ❌ PENDIENTE
 
-- Problema: `users_count` sigue devolviendo 0 en la colección.
-- Esperado: conteo real de usuarios por rol en el listado.
-- Aceptación: respuesta incluye `users_count` correcto para cada item (ejemplo: 5 cuando hay 5 usuarios con el rol) y mantiene la paginación/filters actuales.
+**⚠️ Status: PENDIENTE**
 
-### 3) DELETE /api/v1/roles/ (pendiente por definir)
+- Contexto: El endpoint `GET /api/v1/roles` ya implementa filtros `name`, `description`, `permission`
+- **Requerimiento:** Agregar parámetro `q` para búsqueda global rápida (like en name + description)
+- **Ejemplo esperado:** `GET /api/v1/roles?q=admin` o `GET /api/v1/roles?q=admin&permission=roles.create`
 
-- Observación: no hay endpoint en Swagger ni en el controller actual.
-- Decidir alcance: eliminar físico vs. baja lógica (status=0). En línea con Spatie, preferimos baja lógica y conservación de permisos históricos.
-- Si se implementa, exigir permiso `admin.profiles.roles.delete` (o equivalente) y responder 200 con confirmación. Si se opta por baja lógica, podría reutilizar el PATCH de estado; de lo contrario, implementar `DELETE` explícito.
+### 4) PATCH /api/v1/commerces/{id}/status ❌ PENDIENTE
 
-### 4) GET /api/v1/roles — parámetro `q` para búsqueda global (nuevo)
+**⚠️ Status: PENDIENTE**
 
-- Contexto: GET /api/v1/roles ya implementa filtros `name`, `description`, `permission` en el método `index()` del RoleController. Estos filtros funcionan y están disponibles.
-- Necesidad: agregar un parámetro `q` para búsqueda rápida en nombre/descripción (y opcionalmente permisos) usado por el buscador del frontend.
-- Propuesta: nuevo query param `q` que aplique like sobre name+description, conviviendo con los filtros específicos existentes. Ejemplo: `GET /api/v1/roles?q=admin` o `GET /api/v1/roles?q=admin&permission=roles.create`.
+- Similar al requerimiento #1, necesita PATCH para actualización parcial de estado
+- Body esperado: `{ "is_active": true | false }` o `{ "status": "1" | "0" }`
+- El PUT genérico no es apropiado por los campos requeridos
 
-### 5) PATCH /api/v1/commerces/status
+### 5) PATCH /api/v1/commerces/{id}/verification ❌ NO IMPLEMENTADO
 
-- Propuesta: endpoint dedicado para activar/inactivar comercio (proveedor).
-- Body esperado: `{ "is_active": true | false }` (aceptar `{ "status": "1" | "0" }` opcionalmente, pero responder de forma consistente con el modelo actual).
-- Validaciones: permiso `provider.commerces.update`; `id` existente; `is_active` requerido, boolean.
-- Respuesta: `CommerceResource` con estado actualizado o `{ "message": "Commerce status updated" }` + status code 200.
-- Notas: evita exigir `name`, `address`, etc. en updates parciales (ver punto 7).
+**⚠️ Status: PENDIENTE**
 
-### 6) PATCH /api/v1/commerces/`<id>`/verification
+- No se encontró endpoint para marcar/verificar proveedores
+- **Requerimiento:** Body esperado `{ "is_verified": true | false }`
 
-- Propuesta: endpoint para marcar/verificar proveedor.
-- Body esperado: `{ "is_verified": true | false }`.
-- Validaciones: permiso `provider.commerces.update` y reglas de negocio para verificación.
-- Respuesta: `CommerceResource` actualizado o `{ "message": "Commerce verification updated" }` + status code 200.
-
-### 7) DELETE /api/v1/commerces/`<id>` — Error 500 (BUG)
+### 6) DELETE /api/v1/commerces/{id} — Error 500 🐛 BUG ABIERTO
 
 **🐛 Bug reportado:** 2026-01-14
 
-- **Problema:** Al intentar eliminar un commerce existente (ej: ID 13), el endpoint devuelve 500 Internal Server Error.
-- **Error actual:**
-  ```json
-  {
-    "status": false,
-    "message": "Error deleting commerce",
-    "errors": {
-      "exception": "No query results for model [App\\Models\\Commerce] 13"
-    }
-  }
-  ```
-- **Causa raíz:** `CommerceService::delete()` usa `findOrFail()` que lanza `ModelNotFoundException`, la cual no está siendo capturada correctamente y se propaga como error 500.
-- **Código actual:**
-  ```php
-  public function delete(int $commerce_id): void
-  {
-      DB::transaction(function () use ($commerce_id) {
-          $commerce = Commerce::findOrFail($commerce_id); // ❌ Lanza excepción no controlada
-          $commerce->delete();
-      });
-  }
-  ```
-- **Solución esperada:**
-  1. Capturar `ModelNotFoundException` en el controller o service y retornar 404 con mensaje amigable.
-  2. O cambiar a `find()` y validar manualmente si el registro existe antes de intentar eliminarlo.
-- **Respuesta actual correcta (cuando existe):** 204 No Content.
-- **Impacto:** El frontend muestra error genérico al usuario en lugar de mensaje claro "Proveedor no encontrado".
+**⚠️ Status: IMPLEMENTADO PERO CON BUG**
+
+- El endpoint existe en `CommerceController::destroy()`
+- **Problema:** Devuelve 500 Internal Server Error en lugar de 404 cuando el commerce no existe
+- **Causa:** `CommerceService::delete()` no captura correctamente `ModelNotFoundException`
+- **Solución esperada:** Retornar 404 con mensaje amigable cuando commerce_id no existe
+
+
+### 7) GET /api/v1/commerces/{id} — legal_representatives entrega array de arrays 🐛 BUG ABIERTO
+
+**🐛 Bug reportado:** 2026-01-15
+
+**⚠️ Status: IMPLEMENTADO PERO CON BUG**
+
+- El endpoint existe y retorna datos, pero la estructura es incorrecta
+- **Problema:** `legal_representatives` se devuelve como `[[{...}]]` en lugar de `[{...}]`
+- **Solución esperada:** Remover el nesting innecesario en el Resource o transformer de Commerce
+- **Impacto:** El frontend requiere desanidación manual para consumir los datos
+
+## Resumen de Estado
+
+| # | Endpoint | Status | Acción | Frontend |
+|---|----------|--------|--------|----------|
+| 1 | PATCH /api/v1/roles/{id} | ❌ Pendiente (CRÍTICO) | Implementar endpoint PATCH con validación parcial | ✅ Listo - Manejo de error 405 |
+| 2 | DELETE /api/v1/roles/{id} | ✅ Implementado | Validar que sea soft delete | ✅ Funciona |
+| 3 | GET /api/v1/roles?q=... | ❌ Pendiente | Agregar parámetro de búsqueda global | ⏳ Pendiente |
+| 4 | PATCH /api/v1/commerces/{id}/status | ❌ Pendiente | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
+| 5 | PATCH /api/v1/commerces/{id}/verification | ❌ Pendiente | Implementar nuevo endpoint | ⏳ Pendiente |
+| 6 | DELETE /api/v1/commerces/{id} | 🐛 Bug (500 error) | Capturar ModelNotFoundException → 404 | ⏳ Pendiente |
+| 7 | GET /api/v1/commerces/{id} legal_representatives | 🐛 Bug (array anidado) | Remover nesting innecesario en Resource | ⏳ Pendiente |
 
 ## Notas
 
 - Endpoints de autenticación y CRUD listados en el doc original se consideran implementados o validados; sólo se listan aquí los pendientes/bugs actuales.
 - Si aparece un nuevo requerimiento, agregarlo en este archivo y marcar fecha/estado para mantener trazabilidad.
+- **Fecha de revisión:** 2026-01-15
+- **Patrón PATCH:** El frontend implementa manejo robusto de errores HTTP para endpoints PATCH. Cuando el backend no soporta PATCH (405), se muestra error amigable al usuario con referencia al documento de requerimientos.
