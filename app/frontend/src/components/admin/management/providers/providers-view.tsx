@@ -176,24 +176,7 @@ export function ProvidersView({
     // TODO: Implementar modal de creación
   }, []);
 
-  /**
-   * Header Actions: Botón "Crear Proveedor"
-   */
-  useEffect(() => {
-    if (!onSetHeaderActions) return;
 
-    const buttonClass = 'flex items-center gap-2 px-4 h-[52px] bg-[#4B236A] text-white rounded-xl hover:bg-[#5D2B7D] transition shadow-lg hover:shadow-xl';
-    const button = (
-      <button onClick={handleCreateClick} className={buttonClass}>
-        <Plus size={20} />
-        <span>Crear Proveedor</span>
-      </button>
-    );
-
-    onSetHeaderActions(button);
-
-    return () => onSetHeaderActions(null);
-  }, [onSetHeaderActions, handleCreateClick]);
 
   /**
    * Reintentar cargar datos en caso de error
