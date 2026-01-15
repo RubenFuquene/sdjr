@@ -117,7 +117,7 @@ export async function updateUser(
  */
 export async function updateUserStatus(
   id: number,
-  status: 'A' | 'I'
+  status: '1' | '0'
 ): Promise<ApiSuccess<UserFromAPI>> {
   return fetchWithErrorHandling<ApiSuccess<UserFromAPI>>(
     `/api/v1/users/${id}/status`,

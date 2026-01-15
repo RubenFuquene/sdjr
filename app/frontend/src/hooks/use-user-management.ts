@@ -33,8 +33,8 @@ import {
   deleteUser,
   ApiError,
 } from "@/lib/api/index";
-import type { Usuario, UserFromAPI } from "@/types/admin";
-import { userFromAPIToUsuario, usersFromAPIToUsuarios } from "@/types/user.adapters";
+import type { Usuario } from "@/types/admin";
+import { usersFromAPIToUsuarios } from "@/types/user.adapters";
 
 /**
  * Parámetros de búsqueda y filtrado para usuarios
@@ -44,7 +44,7 @@ export interface UserFilters {
   perPage?: number;
   search?: string;  // Busca en name, last_name, email
   role?: string;    // Filtra por rol
-  status?: 'A' | 'I';  // Filtra por estado
+  status?: '1' | '0';  // Filtra por estado
 }
 
 /**
@@ -204,7 +204,7 @@ export function useUserManagement(perPage: number = 15) {
         console.log("🚀 Cambiando estado del usuario:", id, !currentUser.activo);
 
         // Toggle: si está activo (A), cambiar a inactivo (I), y viceversa
-        const newStatus = currentUser.activo ? 'I' : 'A';
+        const newStatus = currentUser.activo ? '0' : '1';
         await updateUserStatus(id, newStatus);
 
         console.log("✅ Estado del usuario actualizado");

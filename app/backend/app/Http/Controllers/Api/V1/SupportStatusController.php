@@ -192,4 +192,3 @@ class SupportStatusController extends Controller
         }
     }
 }
-

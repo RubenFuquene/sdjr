@@ -21,7 +21,7 @@ import type { UserFromAPI } from './user';
  * - last_name → apellidos
  * - phone → celular
  * - roles[0] → perfil (primer rol)
- * - status ('A'/'I') → activo (boolean)
+ * - status ('1'/'0') → activo (boolean)
  *
  * @param user - Respuesta del backend (UserResource)
  * @returns Usuario para frontend
@@ -61,7 +61,7 @@ export const usersFromAPIToUsuarios = (users: UserFromAPI[]): Usuario[] => {
  * - nombres → name
  * - apellidos → last_name
  * - celular → phone
- * - activo (boolean) → status ('A'/'I')
+ * - activo (boolean) → status ('1'/'0')
  *
  * @param usuario - Usuario del frontend
  * @returns Payload para backend (PUT/POST)
@@ -87,7 +87,7 @@ export const usuarioToBackendPayload = (
     payload.roles = [usuario.perfil];  // Backend espera array de roles
   }
   if (usuario.activo !== undefined) {
-    payload.status = usuario.activo ? 'A' : 'I';
+    payload.status = usuario.activo ? '1' : '0';
   }
 
   return payload;
@@ -116,7 +116,7 @@ export const esUserFromAPIValido = (user: unknown): user is UserFromAPI => {
     typeof u.email === 'string' &&
     typeof u.phone === 'string' &&
     Array.isArray(u.roles) &&
-    (u.status === 'A' || u.status === 'I') &&
+    (u.status === '1' || u.status === '0') &&
     typeof u.created_at === 'string' &&
     typeof u.updated_at === 'string'
   );
@@ -143,18 +143,18 @@ export const esArrayUserFromAPIValido = (users: unknown): users is UserFromAPI[]
  * @param activo - Estado del frontend (true/false)
  * @returns Estado del backend ('A'/'I')
  */
-export const activoToStatus = (activo: boolean): 'A' | 'I' => {
-  return activo ? 'A' : 'I';
+export const activoToStatus = (activo: boolean): '1' | '0' => {
+  return activo ? '1' : '0';
 };
 
 /**
  * Convierte status del backend a estado booleano
  *
- * @param status - Estado del backend ('A'/'I')
+ * @param status - Estado del backend ('1'/'0')
  * @returns Estado del frontend (true/false)
  */
-export const statusToActivo = (status: 'A' | 'I'): boolean => {
-  return status === 'A';
+export const statusToActivo = (status: '1' | '0'): boolean => {
+  return status === '1';
 };
 
 // ============================================

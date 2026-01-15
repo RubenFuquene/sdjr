@@ -253,4 +253,3 @@ class PriorityTypeController extends Controller
         }
     }
 }
-

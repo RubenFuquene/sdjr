@@ -17,7 +17,7 @@ export interface UserFromAPI {
   email: string;             // Backend: email
   phone: string;             // Backend: phone
   roles: string[];           // Backend: roles array (spatie)
-  status: string;            // Backend: boolean como entero ('1' activo, '0' inactivo)
+  status: string;            // Backend: string ('1' activo, '0' inactivo)
   created_at: string;        // ISO timestamp
   updated_at: string;        // ISO timestamp
 }
@@ -34,7 +34,7 @@ export interface GetUsersParams {
   perPage?: number;
   search?: string;    // Backend: busca en name, last_name, email
   role?: string;      // Backend: filtra por nombre de rol
-  status?: 'A' | 'I'; // Backend: 'A' activo, 'I' inactivo
+  status?: '1' | '0'; // Backend: '1' activo, '0' inactivo
 }
 
 // ============================================
@@ -51,8 +51,8 @@ export interface CreateUserPayload {
   phone: string;
   password: string;
   password_confirmation?: string;
-  status?: 'A' | 'I';
-  roles?: string[];          // Array de nombres de roles
+  status?: '1' | '0';
+  roles?: string[];
 }
 
 /**

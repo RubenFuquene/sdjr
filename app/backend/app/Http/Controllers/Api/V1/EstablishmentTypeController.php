@@ -218,4 +218,3 @@ class EstablishmentTypeController extends Controller
         }
     }
 }
-
