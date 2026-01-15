@@ -125,13 +125,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.profiles.users.assign_roles_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign roles and permissions to users', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.users.update_status', 'guard_name' => $guardName, 'description' => 'Permission to update user status', 'created_at' => now(), 'updated_at' => now()],
 
-            ['name' => 'admin.profiles.admin.index', 'guard_name' => $guardName, 'description' => 'List admin', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.profiles.admin.create', 'guard_name' => $guardName, 'description' => 'Create admin', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.profiles.admin.show', 'guard_name' => $guardName, 'description' => 'View admin', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.profiles.admin.edit', 'guard_name' => $guardName, 'description' => 'Permission to edit admin', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.profiles.admin.update', 'guard_name' => $guardName, 'description' => 'Permission to update admin', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.profiles.admin.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete admin', 'created_at' => now(), 'updated_at' => now()],
-
             // Administrator Modules
             ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.view', 'guard_name' => $guardName, 'description' => 'View admin parametrization module', 'created_at' => now(), 'updated_at' => now()],

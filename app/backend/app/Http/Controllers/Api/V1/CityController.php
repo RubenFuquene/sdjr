@@ -77,7 +77,7 @@ class CityController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -172,7 +172,7 @@ class CityController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(

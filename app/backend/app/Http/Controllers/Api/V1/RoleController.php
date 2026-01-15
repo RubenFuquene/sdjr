@@ -72,7 +72,6 @@ class RoleController extends Controller
                 'name' => request('name'),
                 'description' => request('description'),
                 'permission' => request('permission'),
-                'status' => request('status', Constant::STATUS_ACTIVE),
                 'per_page' => request('per_page', Constant::DEFAULT_PER_PAGE),
             ];
             $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount($filters);
@@ -150,7 +149,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/UserAssignRolePermissionRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(
@@ -203,7 +202,7 @@ class RoleController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/RoleAssignPermissionRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(

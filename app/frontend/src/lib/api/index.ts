@@ -15,3 +15,6 @@ export type { LoginResult } from "./auth";
 
 // Roles (Perfiles)
 export { getRoles, createRole, updateRole, deleteRole } from "./roles";
+
+// Commerces (Proveedores)
+export { getCommerces, getCommerceById, updateCommerce, deleteCommerce } from "./commerces";

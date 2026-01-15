@@ -1,10 +1,50 @@
 /**
- * Tipos para la gestión administrativa
+ * Tipos para la gestión administrativa - Tipos genéricos
+ * Para tipos específicos de Proveedores, ver: provider.ts
+ *
  * Basado en diseños Figma para las 4 secciones: Perfiles, Proveedores, Usuarios, Administradores
  */
 
+// Re-exportar tipos de Provider (SRP: cada módulo en su archivo)
+export type { 
+  Proveedor, 
+  ProveedorListItem, 
+  CommerceFromAPI,
+  DocumentoProveedor,
+  Sucursal,
+  InformacionBancaria,
+  Legal,
+  ProveedorPayload,
+  ProveedorUpdateResponse,
+  DescargaDocumento,
+  BancoOption,
+  TipoCuenta,
+  TipoDocumentoIdentidad,
+  EstadoProveedor,
+} from './provider';
+
+// Re-exportar adaptadores de Provider
+export {
+  commerceToProveedorListItem,
+  commerceToProveedor,
+  commercesToProveedorListItems,
+  mapearDocumentos,
+  mapearSucursales,
+  mapearInformacionBancaria,
+  mapearInformacionLegal,
+  proveedorToBackendPayload,
+  esCommerceValido,
+  esProveedorValido,
+  normalizarEmail,
+  normalizarTelefono,
+  obtenerLabelEstado,
+} from './provider.adapters';
+
+// Re-exportar constantes de Provider
+export { TIPOS_CUENTA, TIPOS_DOCUMENTO_IDENTIDAD } from './provider';
+
 // ============================================
-// API Response Types (Laravel Backend)
+// API Response Types (Generic)
 // ============================================
 
 /**
@@ -37,6 +77,7 @@ export interface RoleFromAPI {
   name: string;
   description: string;
   permissions: Record<string, string>; // { "users.create": "Crear usuarios" }
+  status: string;
   users_count: number;
 }
 
@@ -53,7 +94,7 @@ export interface RoleFromAPI {
  */
 
 // ============================================
-// Frontend Types (UI Components)
+// Frontend Types - Usuarios y Perfiles
 // ============================================
 
 export interface Perfil {
@@ -63,20 +104,6 @@ export interface Perfil {
   permisosAdmin: Array<{ name: string; description: string }>;
   permisosProveedor: Array<{ name: string; description: string }>;
   usuarios: number;
-  activo: boolean;
-}
-
-export interface Proveedor {
-  id: number;
-  nombreComercial: string;
-  nit: string;
-  representanteLegal: string;
-  tipoEstablecimiento: string;
-  telefono: string;
-  email: string;
-  departamento: string;
-  ciudad: string;
-  perfil: string;
   activo: boolean;
 }
 

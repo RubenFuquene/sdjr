@@ -184,7 +184,12 @@ class BankController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/UpdateBankRequest")
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="name", type="string", example="Banco de la Nación"),
+     *             @OA\Property(property="code", type="string", example="BN"),
+     *             @OA\Property(property="status", type="string", example="active")
+     *         )
      *     ),
      *
      *     @OA\Response(

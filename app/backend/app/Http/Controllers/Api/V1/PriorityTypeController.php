@@ -80,7 +80,7 @@ class PriorityTypeController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/StorePriorityTypeRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(
@@ -178,7 +178,7 @@ class PriorityTypeController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(ref="#/components/schemas/UpdatePriorityTypeRequest")
+     *          @OA\JsonContent(type="object")
      *      ),
      *
      *      @OA\Response(

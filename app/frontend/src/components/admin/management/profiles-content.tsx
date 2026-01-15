@@ -1,210 +1,106 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Users, Store, UserCog, Plus, UserPlus } from "lucide-react";
-import { Vista, Proveedor, Usuario, Administrador, Perfil } from "@/types/admin";
-import { CreateRoleRequest } from "@/types/role-form-types";
-import { adaptPermissions } from "@/components/admin/adapters/permission-adapter";
-import { useRoles } from "@/hooks/use-roles";
-import { createRole, updateRole } from "@/lib/api/roles";
-import { ProfilesFilters } from "./profiles-filters";
-import { ProfilesTable } from "./profiles/profiles-table";
-import { ProvidersTable } from "@/components/admin/management/providers/providers-table";
-import { UsersTable } from "@/components/admin/management/users/users-table";
-import { AdministratorsTable } from "@/components/admin/management/administrators/administrators-table";
-import { TableLoadingState } from "@/components/admin/shared/loading-state";
-import { ErrorState } from "@/components/admin/shared/error-state";
-import { PageHeader } from "@/components/admin/shared/page-header";
-import { RoleCreationModal } from "@/components/admin/modals";
+/**
+ * Componente Coordinador de Perfiles
+ * 
+ * Responsabilidad única: Coordinar tabs y layout general
+ * 
+ * Delega responsabilidades:
+ * - Roles → RolesView (auto-contenido)
+ * - Proveedores → ProvidersTable (presentación)
+ * - Usuarios → UsersTable (presentación)
+ * - Administradores → AdministratorsTable (presentación)
+ */
+
+import { useState, useCallback, ReactNode } from 'react';
+import { Users, Store, UserCog } from 'lucide-react';
+import { Vista, Usuario, Administrador } from '@/types/admin';
+import { RolesView } from './roles';
+import { ProvidersView } from './providers/providers-view';
+import { UsersTable } from './users/users-table';
+import { AdministratorsTable } from './administrators/administrators-table';
+import { PageHeader } from '@/components/admin/shared/page-header';
 
 interface ProfilesContentProps {
-  proveedores: Proveedor[];
   usuarios: Usuario[];
   administradores: Administrador[];
 }
 
 export function ProfilesContent({
-  proveedores,
   usuarios,
   administradores,
 }: ProfilesContentProps) {
-  const [vista, setVista] = useState<Vista>("perfiles");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [perfilFilter, setPerfilFilter] = useState("todos");
-  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedRole, setSelectedRole] = useState<{id: number; name: string; description: string; permissions: string[]} | undefined>(undefined);
-  
-  // Cargar roles desde API
-  const { roles: perfiles, loading, error, refresh } = useRoles();
-
-  // Función para adaptar Perfil a formato del modal
-  const adaptProfileToRole = (perfil: Perfil) => {
-    // Combinar permisos de admin y proveedor (manteniendo name y description)
-    const allPermissions = [...perfil.permisosAdmin, ...perfil.permisosProveedor];
-    
-    console.log("el perfil adaptado es:", perfil);
-    
-    // Los permisos ya tienen la estructura correcta { name, description }
-    const adapted4Levels = adaptPermissions(allPermissions);
-    
-    return {
-      id: perfil.id,
-      name: perfil.nombre,
-      description: perfil.descripcion,
-      permissions: adapted4Levels.map(p => p.name) // Permisos de 4 niveles para el árbol
-    };
-  };
-
-  const handleSearch = () => {
-    console.log("Buscando:", { vista, searchTerm, perfilFilter });
-    // TODO: Implementar lógica de filtrado real
-  };
+  const [vista, setVista] = useState<Vista>('perfiles');
+  const [headerActions, setHeaderActions] = useState<ReactNode | null>(null);
 
   const handleVistaChange = (newVista: Vista) => {
     setVista(newVista);
-    setSearchTerm("");
-    setPerfilFilter("todos");
   };
 
-  const handleCreate = () => {
-    if (vista === "perfiles") {
-      setModalMode('create');
-      setSelectedRole(undefined);
-      setIsRoleModalOpen(true);
-    } else {
-      console.log(`Crear en vista: ${vista}`);
-      // TODO: Implementar otros modales de creación
-    }
-  };
-
-  const handleViewRole = (role: Perfil) => {
-    setModalMode('view');
-    setSelectedRole(adaptProfileToRole(role));
-    setIsRoleModalOpen(true);
-  };
-
-  const handleEditRole = (role: Perfil) => {
-    setModalMode('edit');
-    setSelectedRole(adaptProfileToRole(role));
-    setIsRoleModalOpen(true);
-  };
-
-  const handleCreateRole = async (roleData: CreateRoleRequest) => {
-    try {
-      if (modalMode === 'edit' && selectedRole) {
-        // Llamada real a API PUT /api/v1/roles/{id}
-        console.log('🚀 Editando rol:', roleData, 'ID:', selectedRole.id);
-        await updateRole(selectedRole.id, {
-          name: roleData.name,
-          description: roleData.description,
-          permissions: roleData.permissions
-        });
-      } else {
-        // Llamada real a API POST /api/v1/roles
-        console.log('🚀 Creando rol:', roleData);
-        await createRole({
-          name: roleData.name,
-          description: roleData.description,
-          permissions: roleData.permissions
-        });
-      }
-
-      console.log('✅ Rol', modalMode === 'edit' ? 'editado' : 'creado', 'exitosamente');
-
-      // Refrescar la lista de roles
-      refresh();
-
-      // Cerrar modal
-      setIsRoleModalOpen(false);
-      setSelectedRole(undefined);
-
-    } catch (error) {
-      console.error('❌ Error al', modalMode === 'edit' ? 'editar' : 'crear', 'rol:', error);
-      throw error; // Re-lanzar para que el modal maneje el error
-    }
-  };
-
-  const renderActionButton = () => {
-    const buttonClass = "flex items-center gap-2 px-4 h-[52px] bg-[#4B236A] text-white rounded-xl hover:bg-[#5D2B7D] transition shadow-lg hover:shadow-xl";
-    
-    switch (vista) {
-      case "perfiles":
-        return (
-          <button onClick={handleCreate} className={buttonClass}>
-            <Plus className="w-5 h-5" />
-            Crear Rol
-          </button>
-        );
-      case "administradores":
-        return (
-          <button onClick={handleCreate} className={buttonClass}>
-            <UserPlus className="w-5 h-5" />
-            Agregar Administrador
-          </button>
-        );
-      default:
-        return null;
-    }
-  };
+  // Setter estable para permitir que las vistas hijas "renten" el espacio de acciones del header
+  const handleSetHeaderActions = useCallback((node: ReactNode | null) => {
+    setHeaderActions(node ?? null);
+  }, []);
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Header con título, descripción y acciones dinámicas */}
+      {/* Header con título y descripción */}
       <PageHeader>
         <PageHeader.Content>
           <PageHeader.Title>Gestión de Perfiles</PageHeader.Title>
           <PageHeader.Description>
-            Administra perfiles, proveedores, usuarios y administradores del sistema
+            Administra roles, proveedores, usuarios y administradores del sistema
           </PageHeader.Description>
         </PageHeader.Content>
-        <PageHeader.Actions>
-          {renderActionButton()}
-        </PageHeader.Actions>
+        {headerActions ? (
+          <PageHeader.Actions>
+            {headerActions}
+          </PageHeader.Actions>
+        ) : null}
       </PageHeader>
-      
+
       {/* Tabs */}
       <div className="bg-white rounded-[18px] shadow-sm p-4 border border-slate-100">
         <div className="flex flex-wrap gap-4">
           <button
-            onClick={() => handleVistaChange("perfiles")}
+            onClick={() => handleVistaChange('perfiles')}
             className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
-              vista === "perfiles"
-                ? "bg-[#4B236A] text-white shadow-lg"
-                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+              vista === 'perfiles'
+                ? 'bg-[#4B236A] text-white shadow-lg'
+                : 'text-[#6A6A6A] hover:bg-[#F7F7F7]'
             }`}
           >
             <Users className="w-5 h-5" />
             Perfiles
           </button>
           <button
-            onClick={() => handleVistaChange("proveedores")}
+            onClick={() => handleVistaChange('proveedores')}
             className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
-              vista === "proveedores"
-                ? "bg-[#4B236A] text-white shadow-lg"
-                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+              vista === 'proveedores'
+                ? 'bg-[#4B236A] text-white shadow-lg'
+                : 'text-[#6A6A6A] hover:bg-[#F7F7F7]'
             }`}
           >
             <Store className="w-5 h-5" />
             Proveedores
           </button>
           <button
-            onClick={() => handleVistaChange("usuarios")}
+            onClick={() => handleVistaChange('usuarios')}
             className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
-              vista === "usuarios"
-                ? "bg-[#4B236A] text-white shadow-lg"
-                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+              vista === 'usuarios'
+                ? 'bg-[#4B236A] text-white shadow-lg'
+                : 'text-[#6A6A6A] hover:bg-[#F7F7F7]'
             }`}
           >
             <Users className="w-5 h-5" />
             Usuarios
           </button>
           <button
-            onClick={() => handleVistaChange("administradores")}
+            onClick={() => handleVistaChange('administradores')}
             className={`flex items-center gap-2 px-4 py-3 rounded-xl transition ${
-              vista === "administradores"
-                ? "bg-[#4B236A] text-white shadow-lg"
-                : "text-[#6A6A6A] hover:bg-[#F7F7F7]"
+              vista === 'administradores'
+                ? 'bg-[#4B236A] text-white shadow-lg'
+                : 'text-[#6A6A6A] hover:bg-[#F7F7F7]'
             }`}
           >
             <UserCog className="w-5 h-5" />
@@ -213,51 +109,11 @@ export function ProfilesContent({
         </div>
       </div>
 
-      {/* Filtros */}
-      <ProfilesFilters
-        vista={vista}
-        searchTerm={searchTerm}
-        perfilFilter={perfilFilter}
-        perfiles={perfiles}
-        onSearchChange={setSearchTerm}
-        onPerfilChange={setPerfilFilter}
-        onSearch={handleSearch}
-      />
-
-      {/* Tablas con estados de loading y error */}
-      {vista === "perfiles" && (
-        <>
-          {loading && <TableLoadingState />}
-          {error && <ErrorState message={error} onRetry={refresh} />}
-          {!loading && !error && perfiles.length === 0 && (
-            <div className="text-center py-12 text-[#6A6A6A]">
-              No se encontraron perfiles
-            </div>
-          )}
-          {!loading && !error && perfiles.length > 0 && (
-            <ProfilesTable 
-              data={perfiles} 
-              onView={handleViewRole}
-              onEdit={handleEditRole}
-            />
-          )}
-        </>
-      )}
-      {vista === "proveedores" && <ProvidersTable data={proveedores} />}
-      {vista === "usuarios" && <UsersTable data={usuarios} />}
-      {vista === "administradores" && <AdministratorsTable data={administradores} />}
-
-      {/* Modal de Creación/Edición/Vista de Roles */}
-      <RoleCreationModal
-        isOpen={isRoleModalOpen}
-        mode={modalMode}
-        role={selectedRole}
-        onClose={() => {
-          setIsRoleModalOpen(false);
-          setSelectedRole(undefined);
-        }}
-        onSave={handleCreateRole}
-      />
+      {/* Vistas delegadas */}
+      {vista === 'perfiles' && <RolesView onSetHeaderActions={handleSetHeaderActions} />}
+      {vista === 'proveedores' && <ProvidersView onSetHeaderActions={handleSetHeaderActions} />}
+      {vista === 'usuarios' && <UsersTable data={usuarios} />}
+      {vista === 'administradores' && <AdministratorsTable data={administradores} />}
     </div>
   );
 }

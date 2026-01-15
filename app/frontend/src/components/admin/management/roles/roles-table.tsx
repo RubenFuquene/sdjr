@@ -2,13 +2,13 @@ import { Perfil } from "@/types/admin";
 import { Badge, StatusBadge } from "@/components/admin/shared/badge";
 import { TableActions } from "@/components/admin/shared/table-actions";
 
-interface ProfilesTableProps {
+interface RolesTableProps {
   data: Perfil[];
   onView?: (perfil: Perfil) => void;
   onEdit?: (perfil: Perfil) => void;
 }
 
-export function ProfilesTable({ data, onView, onEdit }: ProfilesTableProps) {
+export function RolesTable({ data, onView, onEdit }: RolesTableProps) {
   return (
     <div className="bg-white rounded-[18px] shadow-sm border border-slate-100 overflow-hidden">
       <div className="overflow-x-auto">
