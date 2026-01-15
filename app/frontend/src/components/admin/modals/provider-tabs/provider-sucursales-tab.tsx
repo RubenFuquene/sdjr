@@ -9,6 +9,8 @@
 
 'use client';
 
+import Image from 'next/image';
+
 import { MapPin } from 'lucide-react';
 import type { Proveedor, Sucursal } from '@/types/admin';
 
@@ -18,8 +20,6 @@ import type { Proveedor, Sucursal } from '@/types/admin';
 
 interface ProviderSucursalesTabProps {
   formData: Proveedor;
-  isViewMode: boolean;
-  onFieldChange: (field: keyof Proveedor, value: unknown) => void;
 }
 
 // ============================================
@@ -28,8 +28,6 @@ interface ProviderSucursalesTabProps {
 
 export function ProviderSucursalesTab({
   formData,
-  isViewMode,
-  onFieldChange,
 }: ProviderSucursalesTabProps) {
   const sucursales = formData.sucursales || [];
   const totalSucursales = sucursales.length;
@@ -152,13 +150,15 @@ function SucursalCard({ sucursal }: SucursalCardProps) {
           </p>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {sucursal.fotos.map((foto, fotoIdx) => (
-              <img
-                key={fotoIdx}
-                src={foto}
-                alt={`Foto ${fotoIdx + 1} de ${sucursal.nombreSede}`}
-                className="w-20 h-20 rounded-lg object-cover border border-[#E0E0E0] flex-shrink-0 hover:scale-105 transition-transform cursor-pointer"
-                onClick={() => window.open(foto, '_blank')}
-              />
+              <div key={fotoIdx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#E0E0E0] flex-shrink-0 hover:scale-105 transition-transform cursor-pointer" onClick={() => window.open(foto, '_blank')}>
+                <Image
+                  src={foto}
+                  alt={`Foto ${fotoIdx + 1} de ${sucursal.nombreSede}`}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                />
+              </div>
             ))}
           </div>
         </div>

@@ -280,8 +280,6 @@ export function ProviderVisualizationModal({
           {activeTab === 'sucursales' && (
             <ProviderSucursalesTab
               formData={formData}
-              isViewMode={isViewMode}
-              onFieldChange={handleFieldChange}
             />
           )}
 
@@ -297,8 +295,6 @@ export function ProviderVisualizationModal({
           {activeTab === 'legal' && (
             <ProviderLegalTab
               formData={formData}
-              isViewMode={isViewMode}
-              onFieldChange={handleFieldChange}
             />
           )}
         </div>

@@ -95,7 +95,7 @@ Todos los endpoints necesarios para gestión de usuarios están **implementados 
 - **Query params:**
   - `search` - Búsqueda por nombre, apellido o email
   - `role` - Filtrar por rol (nombre del rol)
-  - `status` - Filtrar por estado ('A' activo, 'I' inactivo)
+  - `status` - Filtrar por estado ('1' activo, '0' inactivo)
   - `per_page` - Paginación (default 15)
   - `page` - Número de página
 - **Respuesta:** Paginada con `UserResource[]`
@@ -158,7 +158,7 @@ Todos los endpoints necesarios para gestión de usuarios están **implementados 
 - **Body esperado:**
   ```json
   {
-    "status": "A" // 'A' para activo, 'I' para inactivo
+    "status": "1" // '1' para activo, '0' para inactivo
   }
   ```
 - **Respuesta:** 200 OK con `UserResource` actualizado
@@ -182,7 +182,7 @@ Todos los endpoints necesarios para gestión de usuarios están **implementados 
 - `email` (string, unique) - Email del usuario
 - `phone` (string) - Teléfono/celular
 - `password` (string, hashed) - Contraseña hasheada
-- `status` (string) - Estado: 'A' (activo) o 'I' (inactivo)
+- `status` (string) - Estado: '1' (activo) o '0' (inactivo)
 - `email_verified_at` (timestamp, nullable)
 - `remember_token` (string, nullable)
 - `created_at` (timestamp)
@@ -210,7 +210,7 @@ interface Usuario {
   celular: string;      // ← Backend: phone
   email: string;        // ← Backend: email
   perfil: string;       // ← Backend: roles[0] (primer rol)
-  activo: boolean;      // ← Backend: status === 'A'
+  activo: boolean;      // ← Backend: status === '1'
 }
 ```
 

@@ -20,8 +20,6 @@ import type { Proveedor } from '@/types/admin';
 
 interface ProviderLegalTabProps {
   formData: Proveedor;
-  isViewMode: boolean;
-  onFieldChange: (field: keyof Proveedor, value: unknown) => void;
 }
 
 // ============================================
@@ -30,8 +28,6 @@ interface ProviderLegalTabProps {
 
 export function ProviderLegalTab({
   formData,
-  isViewMode,
-  onFieldChange,
 }: ProviderLegalTabProps) {
   const legal = formData.legal || {
     aceptoTerminos: false,
