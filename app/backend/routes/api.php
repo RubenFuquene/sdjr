@@ -1,34 +1,41 @@
 <?php
 
-use App\Http\Controllers\Api\V1\AuditLogController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BankController;
-use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CityController;
-use App\Http\Controllers\Api\V1\CommerceBasicDataController;
-use App\Http\Controllers\Api\V1\CommerceController;
+use App\Http\Controllers\Api\V1\RoleController;
+use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\LogoutController;
 use App\Http\Controllers\Api\V1\CountryController;
+use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CommerceController;
+use App\Http\Controllers\Api\V1\PqrsTypeController;
 use App\Http\Controllers\Api\V1\DepartmentController;
+use App\Http\Controllers\Api\V1\PermissionController;
+use App\Http\Controllers\Api\V1\NeighborhoodController;
+use App\Http\Controllers\Api\V1\PriorityTypeController;
+use App\Http\Controllers\Api\V1\SupportStatusController;
+use App\Http\Controllers\Api\V1\ForgotPasswordController;
+use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\EstablishmentTypeController;
 use App\Http\Controllers\Api\V1\LegalRepresentativeController;
-use App\Http\Controllers\Api\V1\LogoutController;
-use App\Http\Controllers\Api\V1\MeController;
-use App\Http\Controllers\Api\V1\NeighborhoodController;
-use App\Http\Controllers\Api\V1\PermissionController;
-use App\Http\Controllers\Api\V1\PqrsTypeController;
-use App\Http\Controllers\Api\V1\PriorityTypeController;
-use App\Http\Controllers\Api\V1\RoleController;
-use App\Http\Controllers\Api\V1\SupportStatusController;
-use App\Http\Controllers\Api\V1\UserController;
-use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
     // Authentication routes
     Route::post('login', [AuthController::class, 'login']);
 
+    // Password forgot endpoint
+    Route::post('password/forgot', [ForgotPasswordController::class, 'forgot']);
+    Route::post('password/reset', [ForgotPasswordController::class, 'reset']);
+
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
+
+
 
         // Support Status Management routes
         Route::apiResource('support-statuses', SupportStatusController::class);
