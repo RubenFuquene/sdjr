@@ -185,6 +185,7 @@ class BankController extends Controller
      *         required=true,
      *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string", example="Banco de la Nación"),
      *             @OA\Property(property="code", type="string", example="BN"),
      *             @OA\Property(property="status", type="string", example="active")
