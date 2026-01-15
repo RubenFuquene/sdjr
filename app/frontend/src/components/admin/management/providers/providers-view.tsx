@@ -12,10 +12,9 @@
  * Patrón: Layout State Composition (similar a RolesView)
  */
 
-import { useState, useCallback, ReactNode, useMemo, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { useState, useCallback, ReactNode, useMemo } from 'react';
 import { ProveedorListItem, Proveedor, Perfil, CommerceFromAPI } from '@/types/admin';
-import { getCommerceById, updateCommerce, ApiError } from '@/lib/api/index';
+import { getCommerceById, updateCommerce } from '@/lib/api/index';
 import { commerceToProveedor, proveedorToBackendPayload } from '@/types/provider.adapters';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { ProvidersTable } from './providers-table';
@@ -43,7 +42,7 @@ interface ProvidersViewProps {
  */
 export function ProvidersView({ 
   onSetHeaderActions,
-}: ProvidersViewProps) {
+}: ProvidersViewProps) {  // onSetHeaderActions puede ser usado en el futuro
   // Hook de gestión de comercios
   const commerceManagement = useCommerceManagement();
 
@@ -55,7 +54,6 @@ export function ProvidersView({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
   const [selectedProvider, setSelectedProvider] = useState<Proveedor | null>(null);
-  const [isLoadingProvider, setIsLoadingProvider] = useState(false);
 
   // Estado del confirmation dialog para eliminar
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -75,7 +73,6 @@ export function ProvidersView({
    */
   const handleViewProvider = useCallback(async (proveedor: ProveedorListItem) => {
     try {
-      setIsLoadingProvider(true);
       // Fetch proveedor completo desde API
       const response = await getCommerceById(proveedor.id);
       const commerce: CommerceFromAPI = response.data;
@@ -86,8 +83,6 @@ export function ProvidersView({
       setIsModalOpen(true);
     } catch (error) {
       console.error('Error al cargar proveedor:', error);
-    } finally {
-      setIsLoadingProvider(false);
     }
   }, []);
 
@@ -96,7 +91,6 @@ export function ProvidersView({
    */
   const handleEditProvider = useCallback(async (proveedor: ProveedorListItem) => {
     try {
-      setIsLoadingProvider(true);
       // Fetch proveedor completo desde API
       const response = await getCommerceById(proveedor.id);
       const commerce: CommerceFromAPI = response.data;
@@ -107,8 +101,6 @@ export function ProvidersView({
       setIsModalOpen(true);
     } catch (error) {
       console.error('Error al cargar proveedor:', error);
-    } finally {
-      setIsLoadingProvider(false);
     }
   }, []);
 
@@ -168,13 +160,7 @@ export function ProvidersView({
     }
   }, [searchTerm, perfilFilter, commerceManagement]);
 
-  /**
-   * Crea un nuevo proveedor
-   */
-  const handleCreateClick = useCallback(() => {
-    console.log('Abrir modal de creación de proveedor');
-    // TODO: Implementar modal de creación
-  }, []);
+
 
 
 
