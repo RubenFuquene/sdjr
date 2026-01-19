@@ -136,6 +136,18 @@ export function RolesView({ onSetHeaderActions }: RolesViewProps) {
     // TODO: Implementar lógica de filtrado real cuando sea necesario
   };
 
+  /**
+   * Cambiar estado de un rol (activo/inactivo)
+   */
+  const handleToggleRoleStatus = async (roleId: number, currentStatus: boolean) => {
+    try {
+      await roleManagement.handleToggleRoleStatus(roleId, currentStatus);
+    } catch (error) {
+      console.error('Error al cambiar estado del rol:', error);
+      // El toast/notificación se maneja en el nivel superior si es necesario
+    }
+  };
+
   const buttonClass = 'flex items-center gap-2 px-4 h-[52px] bg-[#4B236A] text-white rounded-xl hover:bg-[#5D2B7D] transition shadow-lg hover:shadow-xl';
 
   // Header Actions: botón "Crear Rol" en el header superior
@@ -190,6 +202,7 @@ export function RolesView({ onSetHeaderActions }: RolesViewProps) {
           data={roleManagement.roles}
           onView={handleViewRole}
           onEdit={handleEditRole}
+          onToggle={handleToggleRoleStatus}
         />
       )}
 

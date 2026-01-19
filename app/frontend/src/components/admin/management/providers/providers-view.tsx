@@ -160,10 +160,6 @@ export function ProvidersView({
     }
   }, [searchTerm, perfilFilter, commerceManagement]);
 
-
-
-
-
   /**
    * Reintentar cargar datos en caso de error
    */

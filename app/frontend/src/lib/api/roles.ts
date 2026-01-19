@@ -37,6 +37,20 @@ export async function createRole(data: {
 }
 
 /**
+ * PATCH /api/v1/roles/{id}
+ * Actualiza el estado de un rol (activo/inactivo)
+ */
+export async function updateRoleStatus(
+  id: number,
+  status: "0" | "1"
+): Promise<RoleFromAPI> {
+  return fetchWithErrorHandling<RoleFromAPI>(`/api/v1/roles/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+/**
  * PUT /api/v1/roles/{id}
  * Actualiza un rol existente
  * TODO: Implementar cuando se necesite
