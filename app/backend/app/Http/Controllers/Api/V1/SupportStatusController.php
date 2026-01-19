@@ -72,7 +72,7 @@ class SupportStatusController extends Controller
      *     description="Creates a new support status.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/SupportStatusStoreRequest")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(type="object")),
      *
      *     @OA\Response(response=201, description="Support status created successfully", @OA\JsonContent(ref="#/components/schemas/SupportStatusResource")),
      *     @OA\Response(response=400, description="Bad Request"),
@@ -136,7 +136,7 @@ class SupportStatusController extends Controller
      *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/SupportStatusUpdateRequest")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(type="object")),
      *
      *     @OA\Response(response=200, description="Support status updated successfully", @OA\JsonContent(ref="#/components/schemas/SupportStatusResource")),
      *     @OA\Response(response=404, description="Support status not found"),

@@ -1,12 +1,32 @@
-import { Proveedor } from "@/types/admin";
+'use client';
+
+import { ProveedorListItem } from "@/types/admin";
 import { Badge, StatusBadge } from "@/components/admin/shared/badge";
 import { TableActions } from "@/components/admin/shared/table-actions";
 
+/**
+ * Tabla Presentacional de Proveedores
+ * 
+ * Responsabilidad única: Renderizar tabla
+ * - Sin lógica de negocio
+ * - Props para handlers de acciones
+ * - Componente puro y reutilizable
+ */
 interface ProvidersTableProps {
-  data: Proveedor[];
+  data: ProveedorListItem[];
+  onView?: (proveedor: ProveedorListItem) => void;
+  onEdit?: (proveedor: ProveedorListItem) => void;
+  onToggle?: (proveedor: ProveedorListItem) => void;
+  onDelete?: (proveedor: ProveedorListItem) => void;
 }
 
-export function ProvidersTable({ data }: ProvidersTableProps) {
+export function ProvidersTable({ 
+  data, 
+  onView, 
+  onEdit, 
+  onToggle, 
+  onDelete 
+}: ProvidersTableProps) {
   return (
     <div className="bg-white rounded-[18px] shadow-sm border border-slate-100 overflow-hidden">
       <div className="overflow-x-auto">
@@ -14,12 +34,9 @@ export function ProvidersTable({ data }: ProvidersTableProps) {
           <thead className="bg-[#F7F7F7] border-b border-[#E0E0E0]">
             <tr>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Nombre Comercial</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">NIT</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Representante Legal</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Tipo</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Teléfono</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Email</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Ubicación</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Perfil</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Estado</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Acciones</th>
@@ -32,13 +49,7 @@ export function ProvidersTable({ data }: ProvidersTableProps) {
                   <span className="text-sm font-medium text-[#1A1A1A]">{proveedor.nombreComercial}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-[#6A6A6A]">{proveedor.nit}</span>
-                </td>
-                <td className="px-6 py-4">
                   <span className="text-sm text-[#1A1A1A]">{proveedor.representanteLegal}</span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-[#6A6A6A]">{proveedor.tipoEstablecimiento}</span>
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm text-[#6A6A6A]">{proveedor.telefono}</span>
@@ -47,19 +58,20 @@ export function ProvidersTable({ data }: ProvidersTableProps) {
                   <span className="text-sm text-[#6A6A6A]">{proveedor.email}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-[#1A1A1A]">{proveedor.ciudad}, {proveedor.departamento}</span>
-                </td>
-                <td className="px-6 py-4">
                   <Badge variant="perfil">{proveedor.perfil}</Badge>
                 </td>
                 <td className="px-6 py-4">
-                  <StatusBadge activo={proveedor.activo} />
+                  <StatusBadge activo={proveedor.estado} />
                 </td>
                 <td className="px-6 py-4">
                   <TableActions 
                     itemId={proveedor.id} 
                     itemName={proveedor.nombreComercial} 
-                    activo={proveedor.activo} 
+                    activo={proveedor.estado}
+                    onView={onView ? () => onView(proveedor) : undefined}
+                    onEdit={onEdit ? () => onEdit(proveedor) : undefined}
+                    onToggle={onToggle ? () => onToggle(proveedor) : undefined}
+                    onDelete={onDelete ? () => onDelete(proveedor) : undefined}
                   />
                 </td>
               </tr>

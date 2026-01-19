@@ -7,7 +7,6 @@
 
 import { useState, useEffect } from 'react';
 import { RoleCreationModalProps, RoleFormData } from '../../../types/role-form-types';
-import { reverseAdaptPermissions } from '../adapters/permission-adapter';
 import { usePermissions } from '../../../hooks/use-permissions';
 import { PermissionTreeView } from './permission-tree-view';
 
@@ -75,13 +74,11 @@ export function RoleCreationModal({
     try {
       setIsSubmitting(true);
       
-      // 🔄 Convertir permisos adaptados de vuelta a 3 niveles para backend
-      const originalPermissions = reverseAdaptPermissions(formData.selectedPermissions);
-      
+      // Enviar permisos directamente (backend ya usa formato 4 niveles)
       await onSave({
         name: formData.name.trim(),
         description: formData.description.trim(),
-        permissions: originalPermissions
+        permissions: formData.selectedPermissions
       });
       
       onClose();

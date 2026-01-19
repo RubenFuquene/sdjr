@@ -1,12 +1,34 @@
+/**
+ * Tabla Presentacional de Usuarios
+ * 
+ * Responsabilidad única: Renderizar UI
+ * - Recibe datos y handlers como props
+ * - No tiene estado interno
+ * - No hace llamadas API
+ * - Solo renderiza basado en props
+ * 
+ * Patrón: Presentational Component (similar a ProvidersTable)
+ */
+
 import { Usuario } from "@/types/admin";
 import { Badge, StatusBadge } from "@/components/admin/shared/badge";
 import { TableActions } from "@/components/admin/shared/table-actions";
 
 interface UsersTableProps {
   data: Usuario[];
+  onView: (usuario: Usuario) => void;
+  onEdit: (usuario: Usuario) => void;
+  onToggle: (usuario: Usuario) => void;
+  onDelete: (usuario: Usuario) => void;
 }
 
-export function UsersTable({ data }: UsersTableProps) {
+export function UsersTable({ 
+  data, 
+  onView, 
+  onEdit, 
+  onToggle, 
+  onDelete 
+}: UsersTableProps) {
   return (
     <div className="bg-white rounded-[18px] shadow-sm border border-slate-100 overflow-hidden">
       <div className="overflow-x-auto">
@@ -47,7 +69,11 @@ export function UsersTable({ data }: UsersTableProps) {
                   <TableActions 
                     itemId={usuario.id} 
                     itemName={`${usuario.nombres} ${usuario.apellidos}`} 
-                    activo={usuario.activo} 
+                    activo={usuario.activo}
+                    onView={() => onView(usuario)}
+                    onEdit={() => onEdit(usuario)}
+                    onToggle={() => onToggle(usuario)}
+                    onDelete={() => onDelete(usuario)}
                   />
                 </td>
               </tr>

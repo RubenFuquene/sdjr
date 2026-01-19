@@ -32,7 +32,7 @@ class AuthController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(ref="#/components/schemas/LoginRequest")
+     *         @OA\JsonContent(type="object")
      *     ),
      *
      *     @OA\Response(

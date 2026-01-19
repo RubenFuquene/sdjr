@@ -1,5 +1,7 @@
 # Endpoints Backend Pendientes - SDJR
 
+> Nota: Documento histórico. Para el listado vigente de pendientes, ver [docs/backend-endpoints-v2.md](backend-endpoints-v2.md).
+
 ## Contexto
 
 Lista de endpoints faltantes en el backend Laravel que necesitamos para completar la funcionalidad del frontend. Estos serán implementados por Jerson Jiménez.
