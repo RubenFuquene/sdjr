@@ -46,16 +46,31 @@ class CommerceDocument extends Model
         'verified_at' => 'datetime',
     ];
 
+    /**
+     * Get the commerce associated with this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function commerce()
     {
         return $this->belongsTo(Commerce::class);
     }
 
+    /**
+     * Get the user who verified this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function verifiedBy()
     {
         return $this->belongsTo(User::class, 'verified_by_id');
     }
 
+    /**
+     * Get the user who uploaded this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function uploadedBy()
     {
         return $this->belongsTo(User::class, 'uploaded_by_id');
