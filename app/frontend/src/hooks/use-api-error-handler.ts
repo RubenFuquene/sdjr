@@ -27,7 +27,7 @@ export function useApiErrorHandler() {
       401: "Sesión expirada. Por favor, inicia sesión de nuevo.",
       403: "No tienes permisos para realizar esta acción.",
       404: "Recurso no encontrado.",
-      405: "Esta funcionalidad aún no está disponible. Por favor, contacta al equipo de backend.",
+      405: "Esta funcionalidad aún no está disponible. Por favor, contacta al equipo de soporte.",
       422: "Los datos proporcionados no son válidos.",
       500: "Error interno del servidor. Intenta de nuevo más tarde.",
     };
