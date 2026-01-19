@@ -11,7 +11,7 @@
  *   return (
  *     <>
  *       <SonnerTest />
- *       {/* tu contenido */}
+ *       // tu contenido aquí
  *     </>
  *   );
  * }
