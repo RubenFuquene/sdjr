@@ -91,6 +91,8 @@ Route::prefix('v1')->group(function () {
 
         // Commerce routes
         Route::apiResource('commerces', CommerceController::class);
+        Route::patch('commerces/{id}/status', [CommerceController::class, 'patchStatus']);
+        Route::patch('commerces/{id}/verification', [CommerceController::class, 'patchVerification']);
         Route::post('commerces/basic', [CommerceBasicDataController::class, 'store']);
 
         // Legal Representative routes
