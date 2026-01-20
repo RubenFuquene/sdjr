@@ -75,6 +75,7 @@ class RoleController extends Controller
                 'description' => request('description'),
                 'permission' => request('permission'),
                 'per_page' => request('per_page', Constant::DEFAULT_PER_PAGE),
+                'q' => request('q'),
             ];
             $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount($filters);
             $resource = RoleResource::collection($roles);

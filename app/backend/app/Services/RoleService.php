@@ -43,6 +43,12 @@ class RoleService
                 $q->where('name', 'like', "%{$filters['permission']}%");
             });
         }
+        if(! empty($filters['q'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', "%{$filters['q']}%")
+                  ->orWhere('description', 'like', "%{$filters['q']}%");
+            });
+        }
 
         $roles = $query->paginate($perPage);
 
