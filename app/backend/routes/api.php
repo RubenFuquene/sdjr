@@ -19,12 +19,16 @@ use App\Http\Controllers\Api\V1\NeighborhoodController;
 use App\Http\Controllers\Api\V1\PriorityTypeController;
 use App\Http\Controllers\Api\V1\SupportStatusController;
 use App\Http\Controllers\Api\V1\ForgotPasswordController;
+use App\Http\Controllers\Api\V1\ProviderRegisterController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\EstablishmentTypeController;
 use App\Http\Controllers\Api\V1\LegalRepresentativeController;
 
 Route::prefix('v1')->group(function () {
 
+    // Registro público de proveedores
+    Route::post('provider/register', [ProviderRegisterController::class, '__invoke']);
+    
     // Authentication routes
     Route::post('login', [AuthController::class, 'login']);
 
