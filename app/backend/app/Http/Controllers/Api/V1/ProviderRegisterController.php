@@ -70,10 +70,10 @@ class ProviderRegisterController extends Controller
 
             // Iniciar sesión automáticamente
             $tokenData = $this->authService->login([
-                'email' => $request->input('email'),
+                'email' => $user->email,
                 'password' => $request->input('password'),
             ]);
-            
+
             return $this->loginResponse(new UserResource($user), $tokenData['token']);
         } catch (Throwable $e) {
             Log::error('Error registering provider', ['error' => $e->getMessage()]);

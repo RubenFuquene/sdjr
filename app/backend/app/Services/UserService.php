@@ -62,7 +62,7 @@ class UserService
      */
     public function create(array $data): User
     {
-        $data['password'] = Hash::make($data['password']);
+        // Password hashing is handled by the User model cast 'hashed'        
         $data['remember_token'] = Str::random(10);
 
         return User::create($data);

@@ -8,6 +8,7 @@ use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ProviderRegisterTest extends TestCase
@@ -18,8 +19,8 @@ class ProviderRegisterTest extends TestCase
      * Test provider registration returns token on success.
      */
     public function test_register_provider_returns_token(): void
-    {
-        Role::create(['name' => 'provider', 'guard_name' => 'sanctum']);
+    {        
+        Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'sanctum']);
 
         $payload = [
             'name' => 'Proveedor',
@@ -32,7 +33,7 @@ class ProviderRegisterTest extends TestCase
         $response = $this->postJson('/api/v1/provider/register', $payload);
 
         // Forzar refresco de usuario tras creación
-        $user = User::where('email', $payload['email'])->first();
+        $user = User::where('email', trim(Str::lower($payload['email'])))->first();
         if ($user) {
             $user->refresh();
         }
@@ -46,12 +47,11 @@ class ProviderRegisterTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('users', [
-            'email' => $payload['email'],
+            'email' => $user->email,
             'name' => 'Proveedor',
             'last_name' => 'Test',
         ]);
 
-        $user = User::where('email', $payload['email'])->first();
         $this->assertTrue($user->hasRole('provider'));
     }
 
