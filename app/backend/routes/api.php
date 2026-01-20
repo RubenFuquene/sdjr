@@ -78,6 +78,7 @@ Route::prefix('v1')->group(function () {
         Route::put('roles/{id}', [RoleController::class, 'update']);
         Route::delete('roles/{id}', [RoleController::class, 'destroy']);
         Route::post('users/{user}/assign-roles-permissions', [RoleController::class, 'assignRolesPermissions']);
+        Route::patch('roles/{id}/status', [RoleController::class, 'patchStatus']);
         Route::post('roles/{role}/assign-permissions', [RoleController::class, 'assignPermissionsToRole']);
 
         // Endpoint para obtener y crear permisos

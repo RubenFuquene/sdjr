@@ -147,4 +147,25 @@ class RoleService
             throw $e;
         }
     }
+
+    /**
+     * Update the status of a role.
+     *
+     * @param int $roleId
+     * @param int $status
+     * @return Role
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function updateStatus(int $roleId, int $status): Role
+    {
+        try {
+            $role = Role::findOrFail($roleId);
+            $role->status = $status;
+            $role->save();
+            return $role;
+        } catch (Exception $e) {
+            Log::error('Error updating role status', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
 }
