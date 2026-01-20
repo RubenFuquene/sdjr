@@ -329,6 +329,122 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
   3. ¿Panel admin para gestionar documentos?
 - **Prioridad:** BAJA - MVP puede usar documentos estáticos en `/public/legal/`
 
+### 13) POST /api/v1/documents/presigned — Generar URL pre-firmada para carga ❌ PENDIENTE
+
+**⚠️ Status: PENDIENTE - Nuevo flujo de carga de documentos**
+
+- **Contexto:** Flujo mejorado de carga de documentos usando **presigned URLs** (URLs pre-firmadas) que delegan la subida directamente al cliente de almacenamiento (MinIO/S3).
+- **Propósito:** El frontend valida el documento localmente, solicita una presigned URL al backend, sube directamente a MinIO/S3, y después confirma la carga.
+- **Ventajas:**
+  - No consume ancho de banda del backend.
+  - Subidas más rápidas (directo a storage).
+  - Escalabilidad mejorada.
+  - Control fino sobre metadatos y ciclo de vida del documento.
+- **Ruta:** `POST /api/v1/documents/presigned`
+- **Body esperado:**
+  ```json
+  {
+    "document_type": "CAMARA_COMERCIO",
+    "file_name": "chamber_cert_2026.pdf",
+    "mime_type": "application/pdf",
+    "file_size_bytes": 2048000,
+    "commerce_id": 5,
+    "replace_document_id": null,
+    "versioning_enabled": false,
+    "metadata": {}
+  }
+  ```
+- **Validaciones esperadas:**
+  - `document_type` requerido, en enum válido → 422 si inválido.
+  - `mime_type` en whitelist (pdf, jpg, png, docx) → 422 si inválido.
+  - `file_size_bytes` máximo 50MB → 422 si excede.
+  - `commerce_id` debe existir → 404 si no existe.
+  - Permiso `admin.providers.upload_documents` → 403 si sin permisos.
+- **Respuesta exitosa (201 CREATED):**
+  ```json
+  {
+    "upload_token": "550e8400-e29b-41d4-a716-446655440000",
+    "presigned_url": "https://minio.staging.sdjr.com:9000/documents?X-Amz-Algorithm=...",
+    "expires_in": 3600,
+    "fields": {
+      "key": "documents/commerce_5/550e8400-e29b-41d4-a716-446655440000/chamber_cert_2026.pdf",
+      "policy": "...",
+      "x-amz-signature": "..."
+    }
+  }
+  ```
+- **Frontend:** Consume presigned URL para upload directo al bucket.
+- **Documentación técnica:** Ver [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md)
+- **Prioridad:** ALTA - Requerimiento de infraestructura para otros endpoints de documentos
+
+### 14) POST /api/v1/documents/confirm — Confirmar carga completada ❌ PENDIENTE
+
+**⚠️ Status: PENDIENTE - Compañero del endpoint #13**
+
+- **Contexto:** Después de que MinIO/S3 confirma la carga exitosa del archivo, el frontend notifica al backend con metadatos del bucket.
+- **Propósito:** El backend almacena la metadata del archivo en BD y marca el documento como confirmado.
+- **Ruta:** `POST /api/v1/documents/confirm`
+- **Body esperado:**
+  ```json
+  {
+    "upload_token": "550e8400-e29b-41d4-a716-446655440000",
+    "s3_metadata": {
+      "etag": "\"abc123def456\"",
+      "object_size": 2048000,
+      "last_modified": "2026-01-19T14:30:00Z"
+    }
+  }
+  ```
+- **Validaciones esperadas:**
+  - `upload_token` requerido → 422 si falta.
+  - Token debe existir en BD con estado `'pending'` → 404 si no existe.
+  - Token no debe estar expirado → 410 Gone si expiración pasada.
+  - `s3_metadata.etag` requerido → 422 si falta.
+- **Respuesta exitosa (200 OK):**
+  ```json
+  {
+    "id": 42,
+    "commerce_id": 5,
+    "document_type": "CAMARA_COMERCIO",
+    "upload_status": "confirmed",
+    "s3_etag": "\"abc123def456\"",
+    "s3_object_size": 2048000,
+    "created_at": "2026-01-19T14:25:00Z",
+    "updated_at": "2026-01-19T14:30:00Z"
+  }
+  ```
+- **Casos Especiales:**
+  - **Reintento:** Si upload falla, frontend reintenta con mismo `upload_token` mientras no esté expirado.
+  - **Reemplazo:** Parámetro `replace_document_id` en presigned marca documento anterior como reemplazado.
+  - **Versionado:** Parámetro `versioning_enabled` guarda historial completo.
+- **Documentación técnica:** Ver [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md) (secciones 5.1, 5.2, 5.3)
+- **Trabajo requerido:**
+  1. Migración BD: agregar columnas a `commerce_documents`.
+  2. Servicios: `DocumentUploadService` con lógica de presigned URLs.
+  3. Endpoints: `POST /documents/presigned` y `POST /documents/confirm`.
+  4. Cron Job: limpieza de documentos huérfanos (pendientes > 24h).
+  5. Tests: unitarios e integración con MinIO.
+- **Prioridad:** ALTA - Bloqueador para carga de documentos del proveedor
+
+### 15) Cron Job: Limpieza de Documentos Huérfanos ❌ PENDIENTE
+
+**⚠️ Status: PENDIENTE - Compañero del endpoint #13-14**
+
+- **Contexto:** Los documentos en estado `'pending'` sin confirmación deben limpiarse después de cierto tiempo.
+- **Propósito:** Liberar almacenamiento en MinIO/S3 y BD de uploads incompletos.
+- **Cadencia:** Ejecutar cada hora (configurable).
+- **Lógica:**
+  1. Buscar documentos con `upload_status = 'pending'` y `expires_at < NOW()`.
+  2. Marcar como `'orphaned'` (no borrar físicamente de S3 para poder auditar).
+  3. (Opcional) Después de N días, borrar físico de S3 (configuración).
+  4. Log de auditoría con cantidad de huérfanos encontrados.
+- **Comando Artisan:**
+  ```bash
+  php artisan documents:cleanup-orphaned [--delete-s3]
+  ```
+- **Documentación técnica:** Ver [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md) (sección 6.4)
+- **Prioridad:** MEDIA - Importante para mantenimiento pero no bloquea funcionalidad core
+
 ## Resumen de Estado
 
 | #  | Endpoint                                         | Status                  | Acción                                            | Frontend     |
@@ -345,14 +461,19 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 | 10 | GET /api/v1/banks                                | ✅ Implementado         | N/A - Usar en formularios de método de pago       | ✅ Funciona  |
 | 11 | GET /api/v1/commerces/{id}/documents             | ❌ Pendiente            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |
 | 12 | Documentos Legales (Términos, Privacidad, etc.)  | ❌ Pendiente            | Decidir almacenamiento (estático/BD/cloud)        | ⏳ Pendiente |
+| 13 | POST /api/v1/documents/presigned                 | ❌ Pendiente (ALTA)     | Implementar generador de presigned URLs            | ⏳ Pendiente |
+| 14 | POST /api/v1/documents/confirm                   | ❌ Pendiente (ALTA)     | Confirmar upload y guardar metadata                | ⏳ Pendiente |
+| 15 | Cron: Limpieza de Documentos Huérfanos           | ❌ Pendiente            | Job de limpieza automática de uploads incompletos  | N/A         |
 
 ## Notas
 
 - Endpoints de autenticación y CRUD listados en el doc original se consideran implementados o validados; sólo se listan aquí los pendientes/bugs actuales.
 - Si aparece un nuevo requerimiento, agregarlo en este archivo y marcar fecha/estado para mantener trazabilidad.
-- **Fecha de revisión:** 2026-01-18
+- **Fecha de revisión:** 2026-01-19
 - **Patrón PATCH:** El frontend implementa manejo robusto de errores HTTP para endpoints PATCH. Cuando el backend no soporta PATCH (405), se muestra error amigable al usuario con referencia al documento de requerimientos.
 - **Sucursales:** La tabla `commerce_branches` está diseñada en el diagrama ER pero no implementada en backend. Requiere trabajo completo: migración, modelo, endpoints CRUD y Resources.
 - **Métodos de Pago:** La tabla `commerce_payout_methods` y modelo existen. El Resource `CommercePayoutMethodResource` está listo. Solo falta crear el endpoint `GET /api/v1/commerces/{id}/payout-methods`.
-- **Documentos:** La tabla `commerce_documents` existe con Resource completro. Solo requiere endpoint `GET /api/v1/commerces/{id}/documents`.
+- **Documentos:** La tabla `commerce_documents` existe con Resource completo. Nuevos endpoints #13 y #14 implementan flujo de carga con presigned URLs.
 - **Documentos Legales:** No están contemplados en el diseño actual. Requiere decisión técnica sobre almacenamiento (estático en `/public/legal/`, BD, o cloud storage).
+- **Presigned URLs (NEW):** Flujo completo de carga de documentos (#13-15) delega upload directo a MinIO/S3 para mejorar performance y escalabilidad. Ver documento técnico [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md) para detalles completos de arquitectura, casos especiales (reintento, reemplazo, versionado) y plan de implementación.
+
