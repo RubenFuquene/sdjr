@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *   schema="UpdateCommerceBranchRequest",
  *   type="object",
+ *
  *   @OA\Property(property="department_id", type="integer", example=1),
  *   @OA\Property(property="city_id", type="integer", example=1),
  *   @OA\Property(property="neighborhood_id", type="integer", example=1),

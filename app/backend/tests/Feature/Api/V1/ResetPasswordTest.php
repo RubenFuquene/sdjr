@@ -30,7 +30,7 @@ class ResetPasswordTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'status' => true,
-                'message' => 'Password reset successfully.'
+                'message' => 'Password reset successfully.',
             ]);
     }
 
@@ -50,8 +50,7 @@ class ResetPasswordTest extends TestCase
         $response->assertStatus(500)
             ->assertJson([
                 'status' => false,
-                'message' => 'Could not reset password.'
+                'message' => 'Could not reset password.',
             ]);
     }
-
 }

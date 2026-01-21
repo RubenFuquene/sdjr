@@ -23,7 +23,7 @@ class PatchRoleStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'integer', 'in:' . Constant::STATUS_ACTIVE . ',' . Constant::STATUS_INACTIVE],
+            'status' => ['required', 'integer', 'in:'.Constant::STATUS_ACTIVE.','.Constant::STATUS_INACTIVE],
         ];
     }
 }

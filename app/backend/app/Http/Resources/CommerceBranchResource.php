@@ -9,6 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @OA\Schema(
  *     schema="CommerceBranchResource",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="commerce_id", type="integer", example=5),
  *     @OA\Property(property="name", type="string", example="Sucursal Norte"),
@@ -30,7 +31,7 @@ class CommerceBranchResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray($request): array

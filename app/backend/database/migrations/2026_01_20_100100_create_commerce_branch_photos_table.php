@@ -6,7 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('commerce_branch_photos', function (Blueprint $table) {
@@ -28,7 +29,7 @@ return new class extends Migration {
             $table->timestamp('uploaded_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('upload_token');
             $table->index('photo_type');
             $table->index('expires_at');

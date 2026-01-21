@@ -14,9 +14,6 @@ class CommerceBranchHoursService
 {
     /**
      * Store a new branch hour
-     *
-     * @param array $data
-     * @return CommerceBranchHour
      */
     public function store(array $data): CommerceBranchHour
     {

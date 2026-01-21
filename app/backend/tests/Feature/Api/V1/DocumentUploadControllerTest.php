@@ -2,19 +2,19 @@
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Commerce;
-use Illuminate\Support\Str;
 use App\Models\CommerceDocument;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class DocumentUploadControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'admin.providers.upload_documents']);

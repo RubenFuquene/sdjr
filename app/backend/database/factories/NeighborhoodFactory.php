@@ -19,8 +19,8 @@ class NeighborhoodFactory extends Factory
     public function definition(): array
     {
         return [
-            'city_id' => City::factory(),            
-            'name' => $this->faker->unique()->streetName(),            
+            'city_id' => City::factory(),
+            'name' => $this->faker->unique()->streetName(),
             'code' => strtoupper($this->faker->unique()->bothify('??####')),
             'status' => Constant::STATUS_ACTIVE,
         ];

@@ -147,14 +147,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.review.view', 'guard_name' => $guardName, 'description' => 'View provider review module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.support.view', 'guard_name' => $guardName, 'description' => 'View provider support module', 'created_at' => now(), 'updated_at' => now()],
 
-
             // Legal Documents
             ['name' => 'legal_documents.index', 'guard_name' => $guardName, 'description' => 'List legal documents', 'created_at' => now(), 'updated_at' => now()],
 
             // Commerces Modules
             ['name' => 'provider.commerces.index', 'guard_name' => $guardName, 'description' => 'List commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.create', 'guard_name' => $guardName, 'description' => 'Create commerces', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],            
+            ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.edit', 'guard_name' => $guardName, 'description' => 'Edit commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Update commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Delete commerces', 'created_at' => now(), 'updated_at' => now()],
@@ -177,7 +176,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.establishment_types.edit', 'guard_name' => $guardName, 'description' => 'Edit establishment types', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.update', 'guard_name' => $guardName, 'description' => 'Update establishment types', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Delete establishment types', 'created_at' => now(), 'updated_at' => now()],
-            
+
             ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'View admin provider upload documents module', 'created_at' => now(), 'updated_at' => now()],
         ];
 

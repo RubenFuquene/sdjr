@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Constants\Constant;
-use App\Models\CommerceBranch;
-use App\Models\Commerce;
-use App\Models\Department;
 use App\Models\City;
+use App\Models\Commerce;
+use App\Models\CommerceBranch;
+use App\Models\Department;
 use App\Models\Neighborhood;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

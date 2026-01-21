@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   title="Document Upload Resource",
  *   description="Recurso que representa un documento subido por comercio.",
  *   required={"id", "commerce_id", "document_type", "upload_token", "upload_status", "file_path", "mime_type", "expires_at", "uploaded_by_id", "failed_attempts", "created_at", "updated_at"},
+ *
  *   @OA\Property(property="id", type="integer", example=1),
  *   @OA\Property(property="commerce_id", type="integer", example=123),
  *   @OA\Property(property="document_type", type="string", example="factura"),
@@ -38,12 +39,12 @@ class DocumentUploadResource extends JsonResource
         return [
             'id' => $this->id,
             'commerce_id' => $this->commerce_id,
-            'document_type' => $this->document_type,            
+            'document_type' => $this->document_type,
             'upload_status' => $this->upload_status,
             's3_etag' => $this->s3_etag,
             's3_object_size' => $this->s3_object_size,
             'file_path' => $this->file_path,
-            'uploaded_by_id' => $this->uploaded_by_id,            
+            'uploaded_by_id' => $this->uploaded_by_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

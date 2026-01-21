@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ProviderRegisterTest extends TestCase
 {
@@ -19,17 +18,17 @@ class ProviderRegisterTest extends TestCase
      * Test provider registration returns token on success.
      */
     public function test_register_provider_returns_token(): void
-    {        
+    {
         Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'sanctum']);
 
         $payload = [
             'name' => 'Proveedor',
             'last_name' => 'Test',
-            'email' => 'proveedor' . Str::random(5) . '@test.com',
+            'email' => 'proveedor'.Str::random(5).'@test.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ];
-        
+
         $response = $this->postJson('/api/v1/provider/register', $payload);
 
         // Forzar refresco de usuario tras creación
@@ -43,7 +42,7 @@ class ProviderRegisterTest extends TestCase
                 'status',
                 'message',
                 'data',
-                'token'
+                'token',
             ]);
 
         $this->assertDatabaseHas('users', [

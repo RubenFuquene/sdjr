@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @OA\Schema(
  *   schema="CommercePayoutMethodResource",
  *   type="object",
+ *
  *   @OA\Property(property="id", type="integer", example=1),
  *   @OA\Property(property="commerce_id", type="integer", example=1),
  *   @OA\Property(property="type", type="string", example="bank"),

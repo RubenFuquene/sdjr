@@ -12,6 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *   schema="StoreDocumentUploadRequest",
  *   type="object",
  *   required={"document_type", "file_name", "mime_type", "file_size_bytes", "commerce_id"},
+ *
  *   @OA\Property(property="document_type", type="string", example="ID_CARD"),
  *   @OA\Property(property="file_name", type="string", example="documento.pdf"),
  *   @OA\Property(property="mime_type", type="string", example="application/pdf"),
@@ -32,7 +33,7 @@ class StoreDocumentUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document_type' => ['required', 'string', 'in:' . implode(',', [
+            'document_type' => ['required', 'string', 'in:'.implode(',', [
                 Constant::DOCUMENT_TYPE_LICENSE,
                 Constant::DOCUMENT_TYPE_OTHER,
                 Constant::DOCUMENT_TYPE_CAMARA_COMERCIO,
@@ -41,7 +42,7 @@ class StoreDocumentUploadRequest extends FormRequest
                 Constant::DOCUMENT_TYPE_ID_CARD,
             ])],
             'file_name' => ['required', 'string', 'max:255'],
-            'mime_type' => ['required', 'string', 'in:' . implode(',', Constant::ALLOWED_FILE_EXTENSIONS)],
+            'mime_type' => ['required', 'string', 'in:'.implode(',', Constant::ALLOWED_FILE_EXTENSIONS)],
             'file_size_bytes' => ['required', 'integer', 'min:1'],
             'commerce_id' => ['required', 'integer', 'exists:commerces,id'],
             'replace_document_id' => ['nullable', 'integer', 'exists:commerce_documents,id'],

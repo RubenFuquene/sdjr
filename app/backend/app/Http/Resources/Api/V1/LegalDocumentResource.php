@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @OA\Schema(
  *   schema="LegalDocumentResource",
  *   type="object",
+ *
  *   @OA\Property(property="id", type="integer", example=1),
  *   @OA\Property(property="type", type="string", example="terms"),
  *   @OA\Property(property="title", type="string", example="Términos y Condiciones"),
@@ -27,7 +28,6 @@ class LegalDocumentResource extends JsonResource
      * Transform the resource into an array.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
      */
     public function toArray($request): array
     {

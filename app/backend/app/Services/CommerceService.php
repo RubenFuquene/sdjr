@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Throwable;
 use App\Models\Commerce;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class CommerceService
 {
@@ -95,9 +95,6 @@ class CommerceService
     /**
      * Update the is_active status of a commerce.
      *
-     * @param int $commerceId
-     * @param int $isActive
-     * @return Commerce
      * @throws ModelNotFoundException
      */
     public function updateStatus(int $commerceId, int $isActive): Commerce
@@ -106,18 +103,16 @@ class CommerceService
             $commerce = Commerce::findOrFail($commerceId);
             $commerce->is_active = $isActive;
             $commerce->save();
+
             return $commerce;
         } catch (\Exception $e) {
             throw $e;
         }
     }
-    
+
     /**
      * Update the is_verified status of a commerce.
      *
-     * @param int $commerceId
-     * @param int $isVerified
-     * @return Commerce
      * @throws ModelNotFoundException
      */
     public function updateVerification(int $commerceId, int $isVerified): Commerce
@@ -126,8 +121,9 @@ class CommerceService
             $commerce = Commerce::findOrFail($commerceId);
             $commerce->is_verified = $isVerified;
             $commerce->save();
+
             return $commerce;
-        } catch (\Exception $e) {            
+        } catch (\Exception $e) {
             throw $e;
         }
     }

@@ -12,10 +12,6 @@ class LegalDocumentService
 {
     /**
      * Get paginated legal documents with filters.
-     *
-     * @param array $filters
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function getPaginated(array $filters, int $perPage): LengthAwarePaginator
     {
@@ -26,14 +22,12 @@ class LegalDocumentService
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
         }
+
         return $query->orderByDesc('effective_date')->paginate($perPage);
     }
 
     /**
      * Get the latest active legal document by type.
-     *
-     * @param string $type
-     * @return LegalDocument|null
      */
     public function getLatestByType(string $type): ?LegalDocument
     {

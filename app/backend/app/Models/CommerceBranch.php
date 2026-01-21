@@ -118,7 +118,8 @@ class CommerceBranch extends Model
 
     /**
      * Mutator: Normalize name
-     * @param string $value
+     *
+     * @param  string  $value
      */
     public function setNameAttribute($value): void
     {
@@ -127,7 +128,8 @@ class CommerceBranch extends Model
 
     /**
      * Mutator: Normalize address
-     * @param string $value
+     *
+     * @param  string  $value
      */
     public function setAddressAttribute($value): void
     {

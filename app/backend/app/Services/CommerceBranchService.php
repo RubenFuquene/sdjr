@@ -6,10 +6,10 @@ namespace App\Services;
 
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Service for handling CommerceBranch logic
@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class CommerceBranchService
 {
     private CommerceBranchHoursService $commerceBranchHoursService;
+
     private CommerceBranchPhotoService $commerceBranchPhotoService;
 
     public function __construct(
@@ -25,42 +26,34 @@ class CommerceBranchService
     ) {
         $this->commerceBranchHoursService = $commerceBranchHoursService;
         $this->commerceBranchPhotoService = $commerceBranchPhotoService;
-    }  
+    }
 
     /**
      * Get paginated branches for a commerce
      *
-     * @param int $commerceId
-     * @param int $perPage
-     * @return LengthAwarePaginator
      * @throws ModelNotFoundException
      */
     public function getBranchesByCommerceId(int $commerceId, int $perPage = 15): LengthAwarePaginator
     {
         try {
-            if (isset($commerceId)) {        
-                if (!Commerce::where('id', $commerceId)->exists()) {
+            if (isset($commerceId)) {
+                if (! Commerce::where('id', $commerceId)->exists()) {
                     throw new ModelNotFoundException('Commerce not found');
-                }            
+                }
             }
 
             return CommerceBranch::where('commerce_id', $commerceId)
                 ->with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos'])
                 ->paginate($perPage);
-                
+
         } catch (ModelNotFoundException $e) {
             Log::error('Commerce not found for branches', ['commerce_id' => $commerceId]);
             throw $e;
         }
     }
 
-
     /**
      * Paginate all branches
-     *
-     * @param array $filters
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
@@ -87,14 +80,12 @@ class CommerceBranchService
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
+
         return $query->paginate($perPage);
     }
 
     /**
      * Store a new branch
-     *
-     * @param array $data
-     * @return CommerceBranch
      */
     public function store(array $data): CommerceBranch
     {
@@ -120,9 +111,6 @@ class CommerceBranchService
 
     /**
      * Show a branch by id
-     *
-     * @param int $id
-     * @return CommerceBranch
      */
     public function show(int $id): CommerceBranch
     {
@@ -131,23 +119,17 @@ class CommerceBranchService
 
     /**
      * Update a branch
-     *
-     * @param int $id
-     * @param array $data
-     * @return CommerceBranch
      */
     public function update(int $id, array $data): CommerceBranch
     {
         $branch = CommerceBranch::findOrFail($id);
         $branch->update($data);
+
         return $branch->fresh(['department', 'city', 'neighborhood']);
     }
 
     /**
      * Delete a branch (soft delete)
-     *
-     * @param int $id
-     * @return void
      */
     public function destroy(int $id): void
     {

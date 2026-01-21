@@ -100,8 +100,8 @@ trait ApiResponseTrait
             'status' => true,
             'message' => $message,
             'data' => $data,
-            'token' => $token
+            'token' => $token,
         ], $code);
-        
+
     }
 }

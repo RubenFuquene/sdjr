@@ -23,7 +23,7 @@ class PatchCommerceVerificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'is_verified' => ['required', 'integer', 'in:' . Constant::STATUS_ACTIVE . ',' . Constant::STATUS_INACTIVE],
+            'is_verified' => ['required', 'integer', 'in:'.Constant::STATUS_ACTIVE.','.Constant::STATUS_INACTIVE],
         ];
     }
 }

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Constants\Constant;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -24,7 +23,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class LegalDocument extends Model
 {
-    use HasFactory, SoftDeletes, SanitizesTextAttributes;
+    use HasFactory, SanitizesTextAttributes, SoftDeletes;
 
     protected $fillable = [
         'type',

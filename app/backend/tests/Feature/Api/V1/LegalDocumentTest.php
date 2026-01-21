@@ -14,7 +14,7 @@ class LegalDocumentTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'legal_documents.index', 'guard_name' => 'sanctum']);
@@ -22,7 +22,7 @@ class LegalDocumentTest extends TestCase
 
     public function test_index_legal_documents_success(): void
     {
-        
+
         $user = User::factory()->create();
         $user->givePermissionTo('legal_documents.index');
         LegalDocument::factory()->count(3)->create();
@@ -31,9 +31,9 @@ class LegalDocumentTest extends TestCase
         $response->assertOk();
         $response->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'type', 'title', 'content', 'version', 'status', 'effective_date', 'created_at', 'updated_at']
+                '*' => ['id', 'type', 'title', 'content', 'version', 'status', 'effective_date', 'created_at', 'updated_at'],
             ],
-            'meta', 'links'
+            'meta', 'links',
         ]);
     }
 

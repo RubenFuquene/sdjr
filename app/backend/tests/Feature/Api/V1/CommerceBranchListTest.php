@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use App\Models\User;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class CommerceBranchListTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'provider.commerces.view', 'guard_name' => 'sanctum']);
-    }   
+    }
 
     public function test_list_branches_success(): void
     {
@@ -34,10 +34,10 @@ class CommerceBranchListTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'commerce_id', 'name', 'address', 'department', 'city', 'neighborhood', 'latitude', 'longitude', 'phone', 'email', 'is_active', 'created_at', 'updated_at'
-                    ]
+                        'id', 'commerce_id', 'name', 'address', 'department', 'city', 'neighborhood', 'latitude', 'longitude', 'phone', 'email', 'is_active', 'created_at', 'updated_at',
+                    ],
                 ],
-                'meta', 'links'
+                'meta', 'links',
             ]);
     }
 

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *   schema="IndexCommercePayoutMethodRequest",
  *   type="object",
+ *
  *   @OA\Property(property="per_page", type="integer", example=15),
  *   @OA\Property(property="page", type="integer", example=1),
  *   @OA\Property(property="type", type="string", example="bank"),

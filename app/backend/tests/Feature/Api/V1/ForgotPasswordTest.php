@@ -13,7 +13,7 @@ class ForgotPasswordTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Notification::fake();
@@ -32,10 +32,10 @@ class ForgotPasswordTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'status' => true,
-                'message' => 'Recovery email sent successfully.'
+                'message' => 'Recovery email sent successfully.',
             ]);
     }
-    
+
     public function test_cannot_request_reset_with_invalid_email(): void
     {
         $authUser = User::factory()->create();
@@ -48,5 +48,4 @@ class ForgotPasswordTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
     }
-
 }

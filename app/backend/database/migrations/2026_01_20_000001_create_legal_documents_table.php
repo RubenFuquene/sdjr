@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Constants\Constant;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Constants\Constant;
 
 return new class extends Migration
 {
@@ -16,7 +16,7 @@ return new class extends Migration
             $table->enum('type', [
                 Constant::LEGAL_DOCUMENT_TYPE_TERMS,
                 Constant::LEGAL_DOCUMENT_TYPE_PRIVACY,
-                Constant::LEGAL_DOCUMENT_TYPE_SERVICE_CONTRACT
+                Constant::LEGAL_DOCUMENT_TYPE_SERVICE_CONTRACT,
             ]);
             $table->string('title');
             $table->longText('content'); // HTML structure
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->enum('status', [
                 Constant::LEGAL_DOCUMENT_STATUS_DRAFT,
                 Constant::LEGAL_DOCUMENT_STATUS_ACTIVE,
-                Constant::LEGAL_DOCUMENT_STATUS_ARCHIVED
+                Constant::LEGAL_DOCUMENT_STATUS_ARCHIVED,
             ])->default(Constant::LEGAL_DOCUMENT_STATUS_DRAFT);
             $table->date('effective_date')->nullable();
             $table->timestamps();

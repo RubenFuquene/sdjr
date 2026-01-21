@@ -22,8 +22,8 @@ class PatchCommerceStatusRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [            
-            'is_active' => ['required', 'integer', 'in:' . Constant::STATUS_ACTIVE . ',' . Constant::STATUS_INACTIVE],
+        return [
+            'is_active' => ['required', 'integer', 'in:'.Constant::STATUS_ACTIVE.','.Constant::STATUS_INACTIVE],
         ];
     }
 }

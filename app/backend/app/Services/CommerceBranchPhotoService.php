@@ -14,9 +14,6 @@ class CommerceBranchPhotoService
 {
     /**
      * Store a new branch photo
-     *
-     * @param array $data
-     * @return CommerceBranchPhoto
      */
     public function store(array $data): CommerceBranchPhoto
     {

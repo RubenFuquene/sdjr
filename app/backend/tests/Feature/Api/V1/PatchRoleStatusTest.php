@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Constants\Constant;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
 
 class PatchRoleStatusTest extends TestCase
 {
@@ -17,7 +17,7 @@ class PatchRoleStatusTest extends TestCase
 
     protected User $user;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -42,7 +42,7 @@ class PatchRoleStatusTest extends TestCase
                     'id',
                     'name',
                     'status',
-                ]
+                ],
             ]);
         $this->assertDatabaseHas('roles', [
             'id' => $role->id,

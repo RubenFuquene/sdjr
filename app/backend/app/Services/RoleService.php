@@ -43,10 +43,10 @@ class RoleService
                 $q->where('name', 'like', "%{$filters['permission']}%");
             });
         }
-        if(! empty($filters['q'])) {
+        if (! empty($filters['q'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('name', 'like', "%{$filters['q']}%")
-                  ->orWhere('description', 'like', "%{$filters['q']}%");
+                    ->orWhere('description', 'like', "%{$filters['q']}%");
             });
         }
 
@@ -157,9 +157,6 @@ class RoleService
     /**
      * Update the status of a role.
      *
-     * @param int $roleId
-     * @param int $status
-     * @return Role
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function updateStatus(int $roleId, int $status): Role
@@ -168,6 +165,7 @@ class RoleService
             $role = Role::findOrFail($roleId);
             $role->status = $status;
             $role->save();
+
             return $role;
         } catch (Exception $e) {
             Log::error('Error updating role status', ['error' => $e->getMessage()]);

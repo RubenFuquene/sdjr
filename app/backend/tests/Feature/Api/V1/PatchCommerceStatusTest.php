@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
+use App\Constants\Constant;
 use App\Models\Commerce;
 use App\Models\User;
-use App\Constants\Constant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -17,11 +17,11 @@ class PatchCommerceStatusTest extends TestCase
 
     protected User $user;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        //Crear permiso
+        // Crear permiso
         Permission::create(['name' => 'provider.commerces.update']);
 
         // Crear usuario con permiso
@@ -34,7 +34,7 @@ class PatchCommerceStatusTest extends TestCase
     {
         $commerce = Commerce::factory()->create(['is_active' => Constant::STATUS_ACTIVE]);
         $response = $this->patchJson('/api/v1/commerces/'.$commerce->id.'/status', [
-            'is_active' => Constant::STATUS_INACTIVE
+            'is_active' => Constant::STATUS_INACTIVE,
         ]);
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -43,7 +43,7 @@ class PatchCommerceStatusTest extends TestCase
                 'data' => [
                     'id',
                     'is_active',
-                ]
+                ],
             ]);
         $this->assertDatabaseHas('commerces', [
             'id' => $commerce->id,
@@ -55,7 +55,7 @@ class PatchCommerceStatusTest extends TestCase
     {
         $commerce = Commerce::factory()->create(['is_active' => Constant::STATUS_ACTIVE]);
         $response = $this->patchJson('/api/v1/commerces/'.$commerce->id.'/status', [
-            'is_active' => 5
+            'is_active' => 5,
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['is_active']);
@@ -67,7 +67,7 @@ class PatchCommerceStatusTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user, 'sanctum');
         $response = $this->patchJson('/api/v1/commerces/'.$commerce->id.'/status', [
-            'is_active' => Constant::STATUS_INACTIVE
+            'is_active' => Constant::STATUS_INACTIVE,
         ]);
         $response->assertStatus(403);
     }

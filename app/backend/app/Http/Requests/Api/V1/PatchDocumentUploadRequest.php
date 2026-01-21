@@ -11,6 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *   schema="PatchDocumentUploadRequest",
  *   type="object",
  *   required={"upload_token", "s3_metadata"},
+ *
  *   @OA\Property(property="upload_token", type="string", example="token123"),
  *   @OA\Property(
  *     property="s3_metadata",

@@ -11,6 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *   schema="StoreCommerceBranchRequest",
  *   type="object",
  *   required={"commerce_branch", "commerce_branch_hours", "commerce_branch_photos"},
+ *
  *   @OA\Property(
  *     property="commerce_branch",
  *     type="object",

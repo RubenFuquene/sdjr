@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Constants\Constant;
-use App\Models\User;
 use App\Models\Commerce;
 use App\Models\CommerceDocument;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CommerceDocumentFactory extends Factory

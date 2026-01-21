@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Constants\Constant;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -24,7 +24,7 @@ return new class extends Migration
                 Constant::UPLOAD_STATUS_PENDING,
                 Constant::UPLOAD_STATUS_CONFIRMED,
                 Constant::UPLOAD_STATUS_FAILED,
-                Constant::UPLOAD_STATUS_ORPHANED
+                Constant::UPLOAD_STATUS_ORPHANED,
             ])->default(Constant::UPLOAD_STATUS_PENDING);
             $table->string('s3_etag', 255)->nullable();
             $table->bigInteger('s3_object_size')->nullable();

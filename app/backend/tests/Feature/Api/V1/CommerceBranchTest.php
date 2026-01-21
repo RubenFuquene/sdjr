@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use App\Models\User;
-use App\Models\Commerce;
-use App\Models\Department;
 use App\Models\City;
-use App\Models\Neighborhood;
+use App\Models\Commerce;
 use App\Models\CommerceBranch;
+use App\Models\Department;
+use App\Models\Neighborhood;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -18,7 +18,7 @@ class CommerceBranchTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'provider.commerces.create', 'guard_name' => 'sanctum']);
@@ -70,7 +70,7 @@ class CommerceBranchTest extends TestCase
                 'file_path' => '/photos/branch1.jpg',
                 'mime_type' => 'image/jpeg',
                 'uploaded_at' => '2026-01-20 10:00:00',
-            ]
+            ],
         ];
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/commerce-branches', $payload)

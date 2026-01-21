@@ -38,15 +38,19 @@ class LegalDocumentController extends Controller
      *     summary="Get list of legal documents",
      *     description="Returns paginated list of legal documents. Permite filtrar por tipo, estado, cantidad por página y número de página.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
      *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer", default=1)),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
+     *
      *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/LegalDocumentResource")),
      *         @OA\Property(property="meta", type="object"),
      *         @OA\Property(property="links", type="object")
      *     )),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
@@ -58,9 +62,11 @@ class LegalDocumentController extends Controller
             $perPage = $request->validatedPerPage();
             $documents = $this->legalDocumentService->getPaginated($filters, $perPage);
             $resource = LegalDocumentResource::collection($documents);
+
             return $this->paginatedResponse($documents, $resource, 'Legal documents retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error listing legal documents', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error listing legal documents', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }
@@ -73,7 +79,9 @@ class LegalDocumentController extends Controller
      *     summary="Get latest active legal document by type",
      *     description="Returns the latest active legal document for a given type.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="type", in="path", required=true, @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/LegalDocumentResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -84,12 +92,14 @@ class LegalDocumentController extends Controller
     {
         try {
             $document = $this->legalDocumentService->getLatestByType($type);
-            if (!$document) {
+            if (! $document) {
                 return $this->errorResponse('Legal document not found', Response::HTTP_NOT_FOUND);
             }
+
             return $this->successResponse(new LegalDocumentResource($document), 'Legal document retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error retrieving legal document', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error retrieving legal document', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }

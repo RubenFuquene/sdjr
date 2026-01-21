@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 use App\Notifications\ResetPasswordNotification;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
 
 /**
  * Class PasswordResetService
@@ -23,8 +20,6 @@ class PasswordResetService
     /**
      * Reset the user's password using token.
      *
-     * @param array $data
-     * @return void
      * @throws Exception
      */
     public function resetPassword(array $data): void
@@ -38,7 +33,7 @@ class PasswordResetService
                 ],
                 function () use ($data) {
                     $user = User::where('email', $data['email'])->first();
-                    if (!$user) {
+                    if (! $user) {
                         throw new Exception('Usuario no encontrado para restablecer la contraseña.');
                     }
                     $user->password = bcrypt($data['password']);
@@ -50,7 +45,7 @@ class PasswordResetService
                 Log::error('Password reset failed', [
                     'email' => $data['email'],
                     'status' => $status,
-                    'data' => $data
+                    'data' => $data,
                 ]);
                 throw new Exception('No se pudo restablecer la contraseña.');
             }
@@ -62,8 +57,6 @@ class PasswordResetService
     /**
      * Send password reset link to user email.
      *
-     * @param string $email
-     * @return void
      * @throws Exception
      */
     public function sendResetLink(string $email): void

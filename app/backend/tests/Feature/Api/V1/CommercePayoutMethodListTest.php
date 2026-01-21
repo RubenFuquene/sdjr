@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use App\Models\User;
 use App\Models\Commerce;
 use App\Models\CommercePayoutMethod;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -16,7 +15,7 @@ class CommercePayoutMethodListTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'provider.commerce_payout_methods.index', 'guard_name' => 'sanctum']);
@@ -36,10 +35,10 @@ class CommercePayoutMethodListTest extends TestCase
         $response->assertJsonStructure([
             'data' => [
                 '*' => [
-                    'id', 'commerce_id', 'type', 'bank', 'account_type', 'account_number', 'owner', 'is_primary', 'status', 'created_at', 'updated_at'
-                ]
+                    'id', 'commerce_id', 'type', 'bank', 'account_type', 'account_number', 'owner', 'is_primary', 'status', 'created_at', 'updated_at',
+                ],
             ],
-            'meta', 'links'
+            'meta', 'links',
         ]);
     }
 
@@ -61,6 +60,6 @@ class CommercePayoutMethodListTest extends TestCase
 
         $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/commerces/{$invalidId}/payout-methods")
-            ->assertStatus(404);        
+            ->assertStatus(404);
     }
 }

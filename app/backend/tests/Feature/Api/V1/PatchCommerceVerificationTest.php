@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Commerce;
 use App\Constants\Constant;
-use Spatie\Permission\Models\Permission;
+use App\Models\Commerce;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class PatchCommerceVerificationTest extends TestCase
 {
@@ -17,11 +17,11 @@ class PatchCommerceVerificationTest extends TestCase
 
     protected User $user;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        //Crear permiso
+        // Crear permiso
         Permission::create(['name' => 'provider.commerces.update']);
 
         // Crear usuario con permiso
@@ -34,7 +34,7 @@ class PatchCommerceVerificationTest extends TestCase
     {
         $commerce = Commerce::factory()->create(['is_verified' => Constant::STATUS_INACTIVE]);
         $response = $this->patchJson("/api/v1/commerces/{$commerce->id}/verification", [
-            'is_verified' => Constant::STATUS_ACTIVE
+            'is_verified' => Constant::STATUS_ACTIVE,
         ]);
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -43,7 +43,7 @@ class PatchCommerceVerificationTest extends TestCase
                 'data' => [
                     'id',
                     'is_verified',
-                ]
+                ],
             ]);
         $this->assertDatabaseHas('commerces', [
             'id' => $commerce->id,
@@ -55,7 +55,7 @@ class PatchCommerceVerificationTest extends TestCase
     {
         $commerce = Commerce::factory()->create(['is_verified' => Constant::STATUS_INACTIVE]);
         $response = $this->patchJson("/api/v1/commerces/{$commerce->id}/verification", [
-            'is_verified' => 5
+            'is_verified' => 5,
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['is_verified']);
@@ -67,7 +67,7 @@ class PatchCommerceVerificationTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user, 'sanctum');
         $response = $this->patchJson("/api/v1/commerces/{$commerce->id}/verification", [
-            'is_verified' => Constant::STATUS_ACTIVE
+            'is_verified' => Constant::STATUS_ACTIVE,
         ]);
         $response->assertStatus(403);
     }

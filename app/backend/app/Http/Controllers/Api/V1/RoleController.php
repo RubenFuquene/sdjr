@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Constants\Constant;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\PatchRoleStatusRequest;
+use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
+use App\Http\Requests\Api\V1\StoreRoleRequest;
+use App\Http\Requests\Api\V1\UpdateRoleRequest;
+use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
+use App\Http\Resources\Api\V1\RoleResource;
 use App\Models\Role;
 use App\Models\User;
-use App\Constants\Constant;
 use App\Services\RoleService;
 use App\Traits\ApiResponseTrait;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\RoleResource;
-use App\Http\Requests\Api\V1\StoreRoleRequest;
-use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\Api\V1\UpdateRoleRequest;
-use App\Http\Requests\Api\V1\PatchRoleStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
-use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @OA\Tag(
@@ -342,25 +342,32 @@ class RoleController extends Controller
      *     summary="Update role status",
      *     description="Updates the status of a role (active/inactive).",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="Role ID",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="status",
      *         in="query",
      *         required=true,
      *         description="Role status (1=active, 0=inactive)",
+     *
      *         @OA\Schema(type="integer", enum={1,0})
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Role status updated successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/RoleResource")
      *     ),
+     *
      *     @OA\Response(response=404, description="Role not found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -371,11 +378,13 @@ class RoleController extends Controller
     {
         try {
             $role = $this->roleService->updateStatus($id, (int) $request->validated('status'));
+
             return $this->successResponse(new RoleResource($role), 'Role status updated successfully', 200);
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse('Role not found', 404);
         } catch (\Throwable $e) {
             Log::error('Error updating role status', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error updating role status', 500, ['exception' => $e->getMessage()]);
         }
     }
