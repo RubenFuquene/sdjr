@@ -184,4 +184,21 @@ class DocumentUploadService
             'failed_attempts' => 0
         ]);
     }
+
+    /**
+     * Marcar documentos expirados como 'orphaned'.
+     *
+     * Busca documentos con upload_status = 'pending' y expires_at < NOW(),
+     * y actualiza su estado a 'orphaned'.
+     *
+     * @return int Número de documentos actualizados
+     */
+    public function markExpiredPendingAsOrphaned(): int
+    {
+        return CommerceDocument::where([
+            'upload_status' => Constant::UPLOAD_STATUS_PENDING
+        ])
+        ->where('expires_at', '<', now())
+        ->update(['upload_status' => Constant::UPLOAD_STATUS_ORPHANED]);
+    }
 }
