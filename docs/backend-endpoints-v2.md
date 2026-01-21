@@ -85,7 +85,7 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 - **Solución esperada:** Remover el nesting innecesario en el Resource o transformer de Commerce
 - **Impacto:** El frontend requiere desanidación manual para consumir los datos
 
-### 8) GET /api/v1/commerces//branches — Listar sucursales de un comercio ❌ NO IMPLEMENTADO
+### 8) GET /api/v1/commerces//branches — Listar sucursales de un comercio  ✅ IMPLEMENTADO
 
 **⚠️ Status: NO IMPLEMENTADO**
 
@@ -144,9 +144,7 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
   4. Crear Resource `CommerceBranchResource` para serializar respuesta
 - **Prioridad:** MEDIA - Feature completa requiere también endpoints POST/PUT/DELETE para CRUD de sucursales
 
-### 9) GET /api/v1/commerces//payout-methods — Información bancaria/métodos de pago ⚠️ NO IMPLEMENTADO EN ENDPOINT
-
-**⚠️ Status: DATOS EXISTEN PERO SIN ENDPOINT DEDICATED**
+### 9) GET /api/v1/commerces//payout-methods — Información bancaria/métodos de pago ✅ IMPLEMENTADO
 
 - **Contexto:** El modelo `CommercePayoutMethod` existe y almacena información bancaria (tabla `commerce_payout_methods`)
 - **Problema:** No hay endpoint específico para obtener los métodos de pago de un comercio
@@ -263,7 +261,7 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 - **Nota técnica:** Resource `CommerceDocumentResource` está completo en backend
 - **Prioridad:** MEDIA - Información complementaria del proveedor
 
-### 12) Documentos Legales de Plataforma (Términos, Privacidad, Contrato) ❌ NO IMPLEMENTADO
+### 12) Documentos Legales de Plataforma (Términos, Privacidad, Contrato) ✅ IMPLEMENTADO
 
 **❌ Status: NO EXISTE EN BD NI ENDPOINTS**
 
