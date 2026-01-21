@@ -1,39 +1,41 @@
 import { Perfil } from "@/types/admin";
 import { Badge, StatusBadge } from "@/components/admin/shared/badge";
 import { TableActions } from "@/components/admin/shared/table-actions";
+import { TABLE_STYLES } from "@/components/admin/shared/table-styles";
 
 interface RolesTableProps {
   data: Perfil[];
   onView?: (perfil: Perfil) => void;
   onEdit?: (perfil: Perfil) => void;
+  onToggle?: (perfilId: number, currentStatus: boolean) => Promise<void>;
 }
 
-export function RolesTable({ data, onView, onEdit }: RolesTableProps) {
+export function RolesTable({ data, onView, onEdit, onToggle }: RolesTableProps) {
   return (
-    <div className="bg-white rounded-[18px] shadow-sm border border-slate-100 overflow-hidden">
+    <div className={TABLE_STYLES.container}>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-[#F7F7F7] border-b border-[#E0E0E0]">
+          <thead className={TABLE_STYLES.headerRow}>
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Perfil</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Descripción</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Permisos Admin</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Permisos Proveedor</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Usuarios</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Estado</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Acciones</th>
+              <th className={TABLE_STYLES.headerCell}>Perfil</th>
+              <th className={TABLE_STYLES.headerCell}>Descripción</th>
+              <th className={TABLE_STYLES.headerCell}>Permisos Admin</th>
+              <th className={TABLE_STYLES.headerCell}>Permisos Proveedor</th>
+              <th className={TABLE_STYLES.headerCell}>Usuarios</th>
+              <th className={TABLE_STYLES.headerCell}>Estado</th>
+              <th className={TABLE_STYLES.headerCell}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E0E0E0]">
+          <tbody className={TABLE_STYLES.rowDivider}>
             {data.map((perfil) => (
-              <tr key={perfil.id} className="hover:bg-[#F7F7F7] transition">
-                <td className="px-6 py-4">
-                  <span className="text-sm font-medium text-[#1A1A1A]">{perfil.nombre}</span>
+              <tr key={perfil.id} className={TABLE_STYLES.bodyRow}>
+                <td className={TABLE_STYLES.bodyCell}>
+                  <span className={TABLE_STYLES.bodyCellBold}>{perfil.nombre}</span>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-[#6A6A6A]">{perfil.descripcion}</span>
+                <td className={TABLE_STYLES.bodyCell}>
+                  <span className={TABLE_STYLES.bodyCellMuted}>{perfil.descripcion}</span>
                 </td>
-                <td className="px-6 py-4">
+                <td className={TABLE_STYLES.bodyCell}>
                   <div className="flex flex-wrap gap-1">
                     {perfil.permisosAdmin.length > 0 ? (
                       perfil.permisosAdmin.slice(0, 2).map((permiso, idx) => (
@@ -42,14 +44,14 @@ export function RolesTable({ data, onView, onEdit }: RolesTableProps) {
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-[#6A6A6A]">-</span>
+                      <span className={TABLE_STYLES.bodyCellMuted}>-</span>
                     )}
                     {perfil.permisosAdmin.length > 2 && (
                       <Badge variant="permiso">+{perfil.permisosAdmin.length - 2}</Badge>
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className={TABLE_STYLES.bodyCell}>
                   <div className="flex flex-wrap gap-1">
                     {perfil.permisosProveedor.length > 0 ? (
                       perfil.permisosProveedor.slice(0, 2).map((permiso, idx) => (
@@ -58,26 +60,27 @@ export function RolesTable({ data, onView, onEdit }: RolesTableProps) {
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-[#6A6A6A]">-</span>
+                      <span className={TABLE_STYLES.bodyCellMuted}>-</span>
                     )}
                     {perfil.permisosProveedor.length > 2 && (
                       <Badge variant="permiso">+{perfil.permisosProveedor.length - 2}</Badge>
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-[#1A1A1A]">{perfil.usuarios}</span>
+                <td className={TABLE_STYLES.bodyCell}>
+                  <span className={TABLE_STYLES.bodyCellText}>{perfil.usuarios}</span>
                 </td>
-                <td className="px-6 py-4">
+                <td className={TABLE_STYLES.bodyCell}>
                   <StatusBadge activo={perfil.activo} />
                 </td>
-                <td className="px-6 py-4">
+                <td className={TABLE_STYLES.bodyCell}>
                   <TableActions 
                     itemId={perfil.id} 
                     itemName={perfil.nombre} 
                     activo={perfil.activo}
                     onView={onView ? () => onView(perfil) : undefined}
                     onEdit={onEdit ? () => onEdit(perfil) : undefined}
+                    onToggle={onToggle ? () => onToggle(perfil.id, perfil.activo) : undefined}
                   />
                 </td>
               </tr>

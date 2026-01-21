@@ -6,127 +6,474 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 
 ## Pendientes
 
-### 0) POST /api/v1/providers/register (CRÍTICO) - ✅ Creado
+### 1) PATCH /api/v1/roles/ — Status Update (PENDIENTE CRÍTICO) - ✅ IMPLEMENTADO
 
-**🚨 CRÍTICO para MVP Provider Panel**
+**🚨 CRÍTICO - Bloqueador para feature de activación/desactivación de roles**
 
-- **Propósito:** Endpoint público para registro de nuevos proveedores (sin requerir autenticación)
-- **Diferencia con POST /api/v1/users:**
-  - `POST /api/v1/users` requiere Sanctum y permisos admin
-  - `POST /api/v1/providers/register` es público, especializado para proveedores
+- **Propósito:** Endpoint para actualizar solo el estado de un rol (activo/inactivo)
+- **Ruta:** `PATCH /api/v1/roles/{id}`
+- **Body esperado:** `{ "status": "0" | "1" }`
 - **Validaciones esperadas:**
-  - `name` (string, requerido, min 2 chars)
-  - `email` (string, requerido, valid email, **único en tabla users**)
-  - `password` (string, requerido, min 6 chars)
-  - Email no debe existir en sistema (422 si duplicado)
-  - Validar contra spam/bot (rate limiting recomendado)
-- **Proceso esperado:**
-  1. Crear usuario con rol `provider` o `user` automáticamente
-  2. Generar token Sanctum para sesión inmediata
-  3. Responder con `LoginResponse` (mismo formato que `/api/v1/login`)
+  - `id` existente → 404 si no existe
+  - `status` requerido, in:0,1 → 422 si inválido
+  - Permiso `admin.profiles.roles.update` → 403 si sin permisos
 - **Respuesta exitosa (200 OK):**
   ```json
   {
-    "message": "Provider registered successfully",
-    "data": {
-      "id": 1,
-      "name": "Mi Tienda",
-      "email": "provider@example.com",
-      "roles": ["provider"],
-      "status": "A"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "id": 1,
+    "name": "Administrador",
+    "description": "Rol de administrador",
+    "status": "1",
+    "permissions": {...},
+    "users_count": 5
   }
   ```
-- **Errores esperados:**
-  - 422 Unprocessable Entity: email duplicado o validaciones fallidas
-  - 429 Too Many Requests: rate limiting
-  - 500 Internal Server Error: fallo del servidor
-- **No requiere autenticación:** Header `Authorization` no necesario
-- **Headers esperados:**
-  ```json
-  {
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-  }
-  ```
+- **Frontend:** Ya implementado en `use-role-management.ts::handleToggleRoleStatus()` con manejo robusto de errores HTTP
+- **Nota:** El PUT genérico requiere todos los campos (name, description), por lo que no es apropiado para actualizaciones parciales
+- **Prioridad:** ALTA - El frontend está 100% listo, solo falta que el backend implemente PATCH con validación parcial
 
----
+### 2) DELETE /api/v1/roles/ ✅ IMPLEMENTADO
 
-### 1) PATCH /api/v1/roles//status (nuevo) - ✅ Creado
+**✅ Status: COMPLETADO**
 
-- Propuesta: endpoint dedicado para activar/inactivar rol.
-- Body esperado: `{ "status": "0" | "1" }` (aceptar boolean si se prefiere en backend, pero responder como string/entero consistente con el resto del modelo).
-- Validaciones: permiso `admin.profiles.roles.update` o equivalente; `id` existente; `status` requerido e in:0,1.
-- Respuesta: rol con estado actualizado (usar `RoleResource`), o al menos `{ "message": "Role status updated" }` + status code 200.
-- Notas: evita exigir `name` y `description` en updates parciales y mantiene semántica clara.
+- El endpoint `DELETE /api/v1/roles/{id}` está implementado en `RoleController::destroy()`
+- Responde con 200 OK (o código adecuado) según la lógica configurada
+- **Próximo paso:** Validar que sea soft delete (baja lógica) en lugar de eliminación física
 
-### 2) GET /api/v1/roles — users_count incorrecto (bug abierto) - ✅ Solucionado
+### 3) GET /api/v1/roles con parámetro `q` ✅ IMPLEMENTADO
 
-- Problema: `users_count` sigue devolviendo 0 en la colección.
-- Esperado: conteo real de usuarios por rol en el listado.
-- Aceptación: respuesta incluye `users_count` correcto para cada item (ejemplo: 5 cuando hay 5 usuarios con el rol) y mantiene la paginación/filters actuales.
+**⚠️ Status: PENDIENTE**
 
-### 3) DELETE /api/v1/roles/ (pendiente por definir) - ⚠️ El modelo Spatie no usa SoftDelete natural
+- Contexto: El endpoint `GET /api/v1/roles` ya implementa filtros `name`, `description`, `permission`
+- **Requerimiento:** Agregar parámetro `q` para búsqueda global rápida (like en name + description)
+- **Ejemplo esperado:** `GET /api/v1/roles?q=admin` o `GET /api/v1/roles?q=admin&permission=roles.create`
 
-- Observación: no hay endpoint en Swagger ni en el controller actual.
-- Decidir alcance: eliminar físico vs. baja lógica (status=0). En línea con Spatie, preferimos baja lógica y conservación de permisos históricos.
-- Si se implementa, exigir permiso `admin.profiles.roles.delete` (o equivalente) y responder 200 con confirmación. Si se opta por baja lógica, podría reutilizar el PATCH de estado; de lo contrario, implementar `DELETE` explícito.
+### 4) PATCH /api/v1/commerces//status ✅ IMPLEMENTADO
 
-### 4) GET /api/v1/roles — parámetro `q` para búsqueda global (nuevo) - ✅ Solucionado (se creó el query param q)
+**⚠️ Status: PENDIENTE**
 
-- Contexto: GET /api/v1/roles ya implementa filtros `name`, `description`, `permission` en el método `index()` del RoleController. Estos filtros funcionan y están disponibles.
-- Necesidad: agregar un parámetro `q` para búsqueda rápida en nombre/descripción (y opcionalmente permisos) usado por el buscador del frontend.
-- Propuesta: nuevo query param `q` que aplique like sobre name+description, conviviendo con los filtros específicos existentes. Ejemplo: `GET /api/v1/roles?q=admin` o `GET /api/v1/roles?q=admin&permission=roles.create`.
+- Similar al requerimiento #1, necesita PATCH para actualización parcial de estado
+- Body esperado: `{ "is_active": true | false }` o `{ "status": "1" | "0" }`
+- El PUT genérico no es apropiado por los campos requeridos
 
-### 5) PATCH /api/v1/commerces/status - ✅ Implementado
+### 5) PATCH /api/v1/commerces//verification ✅ IMPLEMENTADO
 
-- Propuesta: endpoint dedicado para activar/inactivar comercio (proveedor).
-- Body esperado: `{ "is_active": true | false }` (aceptar `{ "status": "1" | "0" }` opcionalmente, pero responder de forma consistente con el modelo actual).
-- Validaciones: permiso `provider.commerces.update`; `id` existente; `is_active` requerido, boolean.
-- Respuesta: `CommerceResource` con estado actualizado o `{ "message": "Commerce status updated" }` + status code 200.
-- Notas: evita exigir `name`, `address`, etc. en updates parciales (ver punto 7).
+**⚠️ Status: PENDIENTE**
 
-### 6) PATCH /api/v1/commerces/`<id>`/verification - ✅ Implementado
- 
-- Propuesta: endpoint para marcar/verificar proveedor.
-- Body esperado: `{ "is_verified": true | false }`.
-- Validaciones: permiso `provider.commerces.update` y reglas de negocio para verificación.
-- Respuesta: `CommerceResource` actualizado o `{ "message": "Commerce verification updated" }` + status code 200.
+- No se encontró endpoint para marcar/verificar proveedores
+- **Requerimiento:** Body esperado `{ "is_verified": true | false }`
 
-### 7) DELETE /api/v1/commerces/`<id>` — Error 500 (BUG) - ✅ Corregido
+### 6) DELETE /api/v1/commerces/ — Error 500 🐛 BUG ABIERTO - ✅ CORREGIDO
 
 **🐛 Bug reportado:** 2026-01-14
 
-- **Problema:** Al intentar eliminar un commerce existente (ej: ID 13), el endpoint devuelve 500 Internal Server Error.
-- **Error actual:**
+**⚠️ Status: IMPLEMENTADO PERO CON BUG**
+
+- El endpoint existe en `CommerceController::destroy()`
+- **Problema:** Devuelve 500 Internal Server Error en lugar de 404 cuando el commerce no existe
+- **Causa:** `CommerceService::delete()` no captura correctamente `ModelNotFoundException`
+- **Solución esperada:** Retornar 404 con mensaje amigable cuando commerce_id no existe
+
+### 7) GET /api/v1/commerces/ — legal_representatives entrega array de arrays 🐛 BUG ABIERTO
+
+**🐛 Bug reportado:** 2026-01-15
+
+**⚠️ Status: IMPLEMENTADO PERO CON BUG**
+
+- El endpoint existe y retorna datos, pero la estructura es incorrecta
+- **Problema:** `legal_representatives` se devuelve como `[[{...}]]` en lugar de `[{...}]`
+- **Solución esperada:** Remover el nesting innecesario en el Resource o transformer de Commerce
+- **Impacto:** El frontend requiere desanidación manual para consumir los datos
+
+### 8) GET /api/v1/commerces//branches — Listar sucursales de un comercio ❌ NO IMPLEMENTADO
+
+**⚠️ Status: NO IMPLEMENTADO**
+
+- **Propósito:** Obtener la lista de sucursales (Commerce Branch) de un comercio específico
+- **Ruta esperada:** `GET /api/v1/commerces/{id}/branches`
+- **Contexto:** La tabla `commerce_branches` existe en el diagrama ER (ERsumass.drawio) pero no hay modelo ni endpoints implementados
+- **Esquema DB esperado:**
+  ```sql
+  commerce_branches:
+    - id (PK)
+    - commerce_id (FK)
+    - department_id (FK)
+    - city_id (FK)
+    - neighborhood_id (FK)
+    - name (varchar)
+    - address (varchar)
+    - latitude (float)
+    - longitude (float)
+    - phone (varchar)
+    - email (varchar)
+    - is_active (boolean)
+    - created_at (datetime)
+    - updated_at (datetime)
+  ```
+- **Respuesta esperada (200 OK):**
   ```json
   {
-    "status": false,
-    "message": "Error deleting commerce",
-    "errors": {
-      "exception": "No query results for model [App\\Models\\Commerce] 13"
+    "data": [
+      {
+        "id": 1,
+        "commerce_id": 5,
+        "name": "Sucursal Norte",
+        "address": "Calle 123 #45-67",
+        "department": "Cundinamarca",
+        "city": "Bogotá",
+        "neighborhood": "Chapinero",
+        "latitude": 4.6097,
+        "longitude": -74.0817,
+        "phone": "3001234567",
+        "email": "norte@comercio.com",
+        "is_active": true,
+        "created_at": "2026-01-18T10:00:00Z",
+        "updated_at": "2026-01-18T10:00:00Z"
+      }
+    ]
+  }
+  ```
+- **Validaciones esperadas:**
+  - `commerce_id` debe existir → 404 si no existe
+  - Permiso `admin.providers.view` → 403 si sin permisos
+- **Frontend:** Requerido para renderizar la tab "Sucursales" en el modal de visualización de proveedores
+- **Trabajo requerido:**
+  1. Crear migración `create_commerce_branches_table`
+  2. Crear modelo `CommerceBranch` con relaciones (belongsTo Commerce, Department, City, Neighborhood)
+  3. Crear endpoint `GET /api/v1/commerces/{id}/branches` en `CommerceController`
+  4. Crear Resource `CommerceBranchResource` para serializar respuesta
+- **Prioridad:** MEDIA - Feature completa requiere también endpoints POST/PUT/DELETE para CRUD de sucursales
+
+### 9) GET /api/v1/commerces//payout-methods — Información bancaria/métodos de pago ⚠️ NO IMPLEMENTADO EN ENDPOINT
+
+**⚠️ Status: DATOS EXISTEN PERO SIN ENDPOINT DEDICATED**
+
+- **Contexto:** El modelo `CommercePayoutMethod` existe y almacena información bancaria (tabla `commerce_payout_methods`)
+- **Problema:** No hay endpoint específico para obtener los métodos de pago de un comercio
+- **Datos disponibles en BD:**
+  - `commerce_payout_methods` table con relaciones a:
+    - `banks` (tabla auxiliar con id, name, code)
+    - `users` (owner_id - propietario de la cuenta)
+  - Campos:
+    - `type`: enum (bank, paypal, crypto)
+    - `bank_id`: FK a banks table
+    - `account_type`: enum (savings, checking, other)
+    - `account_number`: string (con máscara recomendada)
+    - `is_primary`: boolean
+    - `status`: char (0/1)
+- **Respuesta esperada (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "commerce_id": 5,
+        "type": "bank",
+        "bank": {
+          "id": 1,
+          "name": "Banco de Bogotá",
+          "code": "BOGOTA"
+        },
+        "account_type": "savings",
+        "account_number": "****9876",
+        "owner": {
+          "id": 1,
+          "name": "Juan García",
+          "email": "juan@comercio.com"
+        },
+        "is_primary": true,
+        "status": "1",
+        "created_at": "2026-01-18T10:00:00Z",
+        "updated_at": "2026-01-18T10:00:00Z"
+      }
+    ]
+  }
+  ```
+- **Validaciones esperadas:**
+  - `commerce_id` debe existir → 404 si no existe
+  - Permiso `admin.providers.view` → 403 si sin permisos
+  - Enmascarar `account_number` (mostrar solo últimos 4 dígitos) por seguridad
+- **Frontend:** Requerido para:
+  - Tab "Información Bancaria" en el modal de visualización de proveedores
+  - Validación antes de permitir pagos/transferencias
+  - Mostrar método primario en resumen de proveedor
+- **Trabajo requerido:**
+  1. Crear Resource `CommercePayoutMethodResource` (ya existe como **BankResource** pero no es específica del commerce)
+  2. Crear endpoint `GET /api/v1/commerces/{id}/payout-methods` en `CommerceController`
+  3. Asegurar enmascaramiento de `account_number` en la respuesta
+  4. (Opcional) Endpoints POST/PUT/DELETE para CRUD de métodos de pago
+- **Nota técnica:** Ya existe `CommercePayoutMethodResource` completa en el backend (con relaciones a Bank y Owner)
+- **Prioridad:** MEDIA - Similar a sucursales, es información adicional del proveedor
+
+### 10) GET /api/v1/banks — Listado de bancos disponibles ✅ EXISTE
+
+**✅ Status: IMPLEMENTADO**
+
+- **Endpoint:** `GET /api/v1/banks`
+- **Propósito:** Obtener lista de bancos disponibles para seleccionar al agregar método de pago
+- **Controlador:** `BankController`
+- **Resource:** `BankResource` (con id, name, code, status)
+- **Frontend:** Ya consume este endpoint (ver `BancoOption` en types/provider.ts)
+
+### 11) GET /api/v1/commerces/{id}/documents — Documentos del comercio ⚠️ PARCIAL
+
+**⚠️ Status: DATOS EXISTEN PERO INCOMPLETO**
+
+- **Contexto:** La tabla `commerce_documents` existe y almacena documentos de comercios (tabla `commerce_documents`)
+- **Estructura BD:** Modelo completo con campos para tipo, archivo, verificación, etc.
+- **Datos disponibles:**
+  - `commerce_documents` table con relaciones a:
+    - `commerce` (FK)
+    - `verified_by` (user que verifica - FK)
+    - `uploaded_by` (user que sube - FK)
+  - Campos:
+    - `document_type`: enum (ej: ID_CARD, REGISTRATION, etc.)
+    - `file_path`: ruta al archivo subido
+    - `mime_type`: tipo de archivo (pdf, jpg, etc.)
+    - `verified`: boolean (documentación verificada)
+    - `uploaded_at`: timestamp de carga
+    - `verified_at`: timestamp de verificación
+- **Respuesta esperada (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "document_type": "CAMARA_COMERCIO",
+        "file_path": "/uploads/documents/comercio_5_chamber_cert.pdf",
+        "mime_type": "application/pdf",
+        "verified": true,
+        "uploaded_at": "2026-01-18T10:00:00Z",
+        "verified_at": "2026-01-18T11:00:00Z"
+      }
+    ]
+  }
+  ```
+- **Validaciones esperadas:**
+  - `commerce_id` debe existir → 404 si no existe
+  - Permiso `admin.providers.view` → 403 si sin permisos
+- **Frontend:** Requerido para:
+  - Tab "Documentos" en modal de proveedor
+  - Mostrar documentos habilitadores (cédula de cámara, RUT, etc.)
+- **Trabajo requerido:**
+  1. Crear endpoint `GET /api/v1/commerces/{id}/documents` en `CommerceController`
+  2. Resource `CommerceDocumentResource` ya existe (listo para usar)
+  3. Definir enumeración de `document_type` permitidos (en Constants.php)
+  4. (Opcional) Endpoints POST para subir nuevos documentos
+- **Nota técnica:** Resource `CommerceDocumentResource` está completo en backend
+- **Prioridad:** MEDIA - Información complementaria del proveedor
+
+### 12) Documentos Legales de Plataforma (Términos, Privacidad, Contrato) ❌ NO IMPLEMENTADO
+
+**❌ Status: NO EXISTE EN BD NI ENDPOINTS**
+
+- **Contexto:** El frontend espera 3 documentos legales estáticos:
+  - Términos y Condiciones
+  - Política de Privacidad
+  - Contrato de Prestación de Servicios
+- **Problema:** No hay tabla en BD para estos documentos, no hay endpoints
+- **Frontend actual:**
+  - ProviderLegalTab espera acceso a estos documentos
+  - Links hardcodeados en componente (placeholder: `/legal/terminos-y-condiciones`, etc.)
+- **Propuesta técnica:**
+  - **Opción A (Simple):** Servir documentos legales como HTML estático desde `/public/legal/` 
+    - No requiere BD
+    - Frontend accede directamente a URLs
+    - Fácil mantenimiento sin backend
+  - **Opción B (Completa):** Crear tabla `legal_documents` en BD
+    - Permite gestión administrativa de documentos
+    - Histórico de cambios
+    - Versioning de términos/políticas
+  - **Opción C (Hibrida):** Endpoints que devuelven HTML de documentos desde storage
+    - Flexible para actualizaciones
+    - Control backend
+    - Sin tabla de BD (almacenamiento en S3 o local)
+- **Campos esperados (si se elige opción B/C):**
+  ```sql
+  legal_documents:
+    - id (PK)
+    - type: enum ('terms', 'privacy', 'service_contract')
+    - title: varchar
+    - content: longtext (HTML)
+    - version: int
+    - status: enum ('draft', 'active', 'archived')
+    - effective_date: datetime
+    - created_at: datetime
+    - updated_at: datetime
+  ```
+- **Endpoint esperado (si opción B/C):**
+  ```
+  GET /api/v1/legal-documents/{type}
+  GET /api/v1/legal-documents (listar todos)
+  ```
+- **Respuesta esperada:**
+  ```json
+  {
+    "data": {
+      "type": "terms",
+      "title": "Términos y Condiciones",
+      "content": "<h1>Términos...</h1>",
+      "version": 1,
+      "effective_date": "2026-01-01T00:00:00Z"
     }
   }
   ```
-- **Causa raíz:** `CommerceService::delete()` usa `findOrFail()` que lanza `ModelNotFoundException`, la cual no está siendo capturada correctamente y se propaga como error 500.
-- **Código actual:**
-  ```php
-  public function delete(int $commerce_id): void
+- **Frontend:** Requerido para:
+  - Tab "Información Legal" en modal de proveedor
+  - Mostrar links a documentos legales
+  - Página de aceptación durante registro
+  - Footer con links a políticas
+- **Decidir primero:**
+  1. ¿Cuál es la propuesta de almacenamiento? (estático, BD, cloud storage)
+  2. ¿Necesita versionado/histórico de cambios?
+  3. ¿Panel admin para gestionar documentos?
+- **Prioridad:** BAJA - MVP puede usar documentos estáticos en `/public/legal/`
+
+### 13) POST /api/v1/documents/presigned — Generar URL pre-firmada para carga ❌ PENDIENTE
+
+**⚠️ Status: PENDIENTE - Nuevo flujo de carga de documentos**
+
+- **Contexto:** Flujo mejorado de carga de documentos usando **presigned URLs** (URLs pre-firmadas) que delegan la subida directamente al cliente de almacenamiento (MinIO/S3).
+- **Propósito:** El frontend valida el documento localmente, solicita una presigned URL al backend, sube directamente a MinIO/S3, y después confirma la carga.
+- **Ventajas:**
+  - No consume ancho de banda del backend.
+  - Subidas más rápidas (directo a storage).
+  - Escalabilidad mejorada.
+  - Control fino sobre metadatos y ciclo de vida del documento.
+- **Ruta:** `POST /api/v1/documents/presigned`
+- **Body esperado:**
+  ```json
   {
-      DB::transaction(function () use ($commerce_id) {
-          $commerce = Commerce::findOrFail($commerce_id); // ❌ Lanza excepción no controlada
-          $commerce->delete();
-      });
+    "document_type": "CAMARA_COMERCIO",
+    "file_name": "chamber_cert_2026.pdf",
+    "mime_type": "application/pdf",
+    "file_size_bytes": 2048000,
+    "commerce_id": 5,
+    "replace_document_id": null,
+    "versioning_enabled": false,
+    "metadata": {}
   }
   ```
-- **Solución esperada:**
-  1. Capturar `ModelNotFoundException` en el controller o service y retornar 404 con mensaje amigable.
-  2. O cambiar a `find()` y validar manualmente si el registro existe antes de intentar eliminarlo.
-- **Respuesta actual correcta (cuando existe):** 204 No Content.
-- **Impacto:** El frontend muestra error genérico al usuario en lugar de mensaje claro "Proveedor no encontrado".
+- **Validaciones esperadas:**
+  - `document_type` requerido, en enum válido → 422 si inválido.
+  - `mime_type` en whitelist (pdf, jpg, png, docx) → 422 si inválido.
+  - `file_size_bytes` máximo 50MB → 422 si excede.
+  - `commerce_id` debe existir → 404 si no existe.
+  - Permiso `admin.providers.upload_documents` → 403 si sin permisos.
+- **Respuesta exitosa (201 CREATED):**
+  ```json
+  {
+    "upload_token": "550e8400-e29b-41d4-a716-446655440000",
+    "presigned_url": "https://minio.staging.sdjr.com:9000/documents?X-Amz-Algorithm=...",
+    "expires_in": 3600,
+    "fields": {
+      "key": "documents/commerce_5/550e8400-e29b-41d4-a716-446655440000/chamber_cert_2026.pdf",
+      "policy": "...",
+      "x-amz-signature": "..."
+    }
+  }
+  ```
+- **Frontend:** Consume presigned URL para upload directo al bucket.
+- **Documentación técnica:** Ver [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md)
+- **Prioridad:** ALTA - Requerimiento de infraestructura para otros endpoints de documentos
+
+### 14) POST /api/v1/documents/confirm — Confirmar carga completada ❌ PENDIENTE
+
+**⚠️ Status: PENDIENTE - Compañero del endpoint #13**
+
+- **Contexto:** Después de que MinIO/S3 confirma la carga exitosa del archivo, el frontend notifica al backend con metadatos del bucket.
+- **Propósito:** El backend almacena la metadata del archivo en BD y marca el documento como confirmado.
+- **Ruta:** `POST /api/v1/documents/confirm`
+- **Body esperado:**
+  ```json
+  {
+    "upload_token": "550e8400-e29b-41d4-a716-446655440000",
+    "s3_metadata": {
+      "etag": "\"abc123def456\"",
+      "object_size": 2048000,
+      "last_modified": "2026-01-19T14:30:00Z"
+    }
+  }
+  ```
+- **Validaciones esperadas:**
+  - `upload_token` requerido → 422 si falta.
+  - Token debe existir en BD con estado `'pending'` → 404 si no existe.
+  - Token no debe estar expirado → 410 Gone si expiración pasada.
+  - `s3_metadata.etag` requerido → 422 si falta.
+- **Respuesta exitosa (200 OK):**
+  ```json
+  {
+    "id": 42,
+    "commerce_id": 5,
+    "document_type": "CAMARA_COMERCIO",
+    "upload_status": "confirmed",
+    "s3_etag": "\"abc123def456\"",
+    "s3_object_size": 2048000,
+    "created_at": "2026-01-19T14:25:00Z",
+    "updated_at": "2026-01-19T14:30:00Z"
+  }
+  ```
+- **Casos Especiales:**
+  - **Reintento:** Si upload falla, frontend reintenta con mismo `upload_token` mientras no esté expirado.
+  - **Reemplazo:** Parámetro `replace_document_id` en presigned marca documento anterior como reemplazado.
+  - **Versionado:** Parámetro `versioning_enabled` guarda historial completo.
+- **Documentación técnica:** Ver [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md) (secciones 5.1, 5.2, 5.3)
+- **Trabajo requerido:**
+  1. Migración BD: agregar columnas a `commerce_documents`.
+  2. Servicios: `DocumentUploadService` con lógica de presigned URLs.
+  3. Endpoints: `POST /documents/presigned` y `POST /documents/confirm`.
+  4. Cron Job: limpieza de documentos huérfanos (pendientes > 24h).
+  5. Tests: unitarios e integración con MinIO.
+- **Prioridad:** ALTA - Bloqueador para carga de documentos del proveedor
+
+### 15) Cron Job: Limpieza de Documentos Huérfanos ❌ PENDIENTE
+
+**⚠️ Status: PENDIENTE - Compañero del endpoint #13-14**
+
+- **Contexto:** Los documentos en estado `'pending'` sin confirmación deben limpiarse después de cierto tiempo.
+- **Propósito:** Liberar almacenamiento en MinIO/S3 y BD de uploads incompletos.
+- **Cadencia:** Ejecutar cada hora (configurable).
+- **Lógica:**
+  1. Buscar documentos con `upload_status = 'pending'` y `expires_at < NOW()`.
+  2. Marcar como `'orphaned'` (no borrar físicamente de S3 para poder auditar).
+  3. (Opcional) Después de N días, borrar físico de S3 (configuración).
+  4. Log de auditoría con cantidad de huérfanos encontrados.
+- **Comando Artisan:**
+  ```bash
+  php artisan documents:cleanup-orphaned [--delete-s3]
+  ```
+- **Documentación técnica:** Ver [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md) (sección 6.4)
+- **Prioridad:** MEDIA - Importante para mantenimiento pero no bloquea funcionalidad core
+
+## Resumen de Estado
+
+| #  | Endpoint                                         | Status                  | Acción                                            | Frontend     |
+| -- | ------------------------------------------------ | ----------------------- | -------------------------------------------------- | ------------ |
+| 1  | PATCH /api/v1/roles/{id}                         | ❌ Pendiente (CRÍTICO) | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
+| 2  | DELETE /api/v1/roles/{id}                        | ✅ Implementado         | Validar que sea soft delete                        | ✅ Funciona  |
+| 3  | GET /api/v1/roles?q=...                          | ❌ Pendiente            | Agregar parámetro de búsqueda global             | ⏳ Pendiente |
+| 4  | PATCH /api/v1/commerces/{id}/status              | ❌ Pendiente            | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
+| 5  | PATCH /api/v1/commerces/{id}/verification        | ❌ Pendiente            | Implementar nuevo endpoint                         | ⏳ Pendiente |
+| 6  | DELETE /api/v1/commerces/{id}                    | 🐛 Bug (500 error)      | Capturar ModelNotFoundException → 404             | ⏳ Pendiente |
+| 7  | GET /api/v1/commerces/{id} legal_representatives | 🐛 Bug (array anidado)  | Remover nesting innecesario en Resource            | ⏳ Pendiente |
+| 8  | GET /api/v1/commerces/{id}/branches              | ❌ Pendiente            | Crear modelo, migración, endpoint y Resource      | ⏳ Pendiente |
+| 9  | GET /api/v1/commerces/{id}/payout-methods        | ❌ Pendiente            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |
+| 10 | GET /api/v1/banks                                | ✅ Implementado         | N/A - Usar en formularios de método de pago       | ✅ Funciona  |
+| 11 | GET /api/v1/commerces/{id}/documents             | ❌ Pendiente            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |
+| 12 | Documentos Legales (Términos, Privacidad, etc.)  | ❌ Pendiente            | Decidir almacenamiento (estático/BD/cloud)        | ⏳ Pendiente |
+| 13 | POST /api/v1/documents/presigned                 | ❌ Pendiente (ALTA)     | Implementar generador de presigned URLs            | ⏳ Pendiente |
+| 14 | POST /api/v1/documents/confirm                   | ❌ Pendiente (ALTA)     | Confirmar upload y guardar metadata                | ⏳ Pendiente |
+| 15 | Cron: Limpieza de Documentos Huérfanos           | ❌ Pendiente            | Job de limpieza automática de uploads incompletos  | N/A         |
 
 ## Notas
 
 - Endpoints de autenticación y CRUD listados en el doc original se consideran implementados o validados; sólo se listan aquí los pendientes/bugs actuales.
 - Si aparece un nuevo requerimiento, agregarlo en este archivo y marcar fecha/estado para mantener trazabilidad.
+- **Fecha de revisión:** 2026-01-19
+- **Patrón PATCH:** El frontend implementa manejo robusto de errores HTTP para endpoints PATCH. Cuando el backend no soporta PATCH (405), se muestra error amigable al usuario con referencia al documento de requerimientos.
+- **Sucursales:** La tabla `commerce_branches` está diseñada en el diagrama ER pero no implementada en backend. Requiere trabajo completo: migración, modelo, endpoints CRUD y Resources.
+- **Métodos de Pago:** La tabla `commerce_payout_methods` y modelo existen. El Resource `CommercePayoutMethodResource` está listo. Solo falta crear el endpoint `GET /api/v1/commerces/{id}/payout-methods`.
+- **Documentos:** La tabla `commerce_documents` existe con Resource completo. Nuevos endpoints #13 y #14 implementan flujo de carga con presigned URLs.
+- **Documentos Legales:** No están contemplados en el diseño actual. Requiere decisión técnica sobre almacenamiento (estático en `/public/legal/`, BD, o cloud storage).
+- **Presigned URLs (NEW):** Flujo completo de carga de documentos (#13-15) delega upload directo a MinIO/S3 para mejorar performance y escalabilidad. Ver documento técnico [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md) para detalles completos de arquitectura, casos especiales (reintento, reemplazo, versionado) y plan de implementación.
+

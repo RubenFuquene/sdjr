@@ -1,6 +1,7 @@
 import { Administrador } from "@/types/admin";
 import { Badge, StatusBadge } from "@/components/admin/shared/badge";
 import { TableActions } from "@/components/admin/shared/table-actions";
+import { TABLE_STYLES } from "@/components/admin/shared/table-styles";
 
 interface AdministratorsTableProps {
   data: Administrador[];
@@ -8,42 +9,42 @@ interface AdministratorsTableProps {
 
 export function AdministratorsTable({ data }: AdministratorsTableProps) {
   return (
-    <div className="bg-white rounded-[18px] shadow-sm border border-slate-100 overflow-hidden">
+    <div className={TABLE_STYLES.container}>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-[#F7F7F7] border-b border-[#E0E0E0]">
+          <thead className={TABLE_STYLES.headerRow}>
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Nombres</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Apellidos</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Correo</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Área</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Perfil</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Estado</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-[#1A1A1A]">Acciones</th>
+              <th className={TABLE_STYLES.headerCell}>Nombres</th>
+              <th className={TABLE_STYLES.headerCell}>Apellidos</th>
+              <th className={TABLE_STYLES.headerCell}>Correo</th>
+              <th className={TABLE_STYLES.headerCell}>Área</th>
+              <th className={TABLE_STYLES.headerCell}>Perfil</th>
+              <th className={TABLE_STYLES.headerCell}>Estado</th>
+              <th className={TABLE_STYLES.headerCell}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E0E0E0]">
+          <tbody className={TABLE_STYLES.rowDivider}>
             {data.map((admin) => (
-              <tr key={admin.id} className="hover:bg-[#F7F7F7] transition">
-                <td className="px-6 py-4">
-                  <span className="text-sm text-[#1A1A1A]">{admin.nombres}</span>
+              <tr key={admin.id} className={TABLE_STYLES.bodyRow}>
+                <td className={TABLE_STYLES.bodyCell}>
+                  <span className={TABLE_STYLES.bodyCellText}>{admin.nombres}</span>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-[#1A1A1A]">{admin.apellidos}</span>
+                <td className={TABLE_STYLES.bodyCell}>
+                  <span className={TABLE_STYLES.bodyCellText}>{admin.apellidos}</span>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-[#6A6A6A]">{admin.correo}</span>
+                <td className={TABLE_STYLES.bodyCell}>
+                  <span className={TABLE_STYLES.bodyCellMuted}>{admin.correo}</span>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-[#6A6A6A]">{admin.area}</span>
+                <td className={TABLE_STYLES.bodyCell}>
+                  <span className={TABLE_STYLES.bodyCellMuted}>{admin.area}</span>
                 </td>
-                <td className="px-6 py-4">
+                <td className={TABLE_STYLES.bodyCell}>
                   <Badge variant="perfil">{admin.perfil}</Badge>
                 </td>
-                <td className="px-6 py-4">
+                <td className={TABLE_STYLES.bodyCell}>
                   <StatusBadge activo={admin.activo} />
                 </td>
-                <td className="px-6 py-4">
+                <td className={TABLE_STYLES.bodyCell}>
                   <TableActions 
                     itemId={admin.id} 
                     itemName={`${admin.nombres} ${admin.apellidos}`} 

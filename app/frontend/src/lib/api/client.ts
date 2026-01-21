@@ -89,6 +89,13 @@ export async function fetchWithErrorHandling<T>(
           throw new ApiError("No tienes permisos para realizar esta acción.", 403, errorData);
         case 404:
           throw new ApiError("Recurso no encontrado.", 404, errorData);
+        case 405:
+          throw new ApiError(
+            `El método ${options.method || 'GET'} no está soportado en ${endpoint}. ` +
+            `Por favor, contacta a soporte.`,
+            405,
+            errorData
+          );
         case 500:
           throw new ApiError("Error interno del servidor. Intenta de nuevo.", 500, errorData);
         default:

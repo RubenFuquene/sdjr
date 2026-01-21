@@ -72,7 +72,7 @@ export function CitySelect({
     };
 
     fetchCities();
-  }, [departmentId]); // Remove onChange from dependencies to avoid infinite loop
+  }, [departmentId]); // onChange omitida intencionalmente para evitar loops infinitos (es callback estable)
 
   const isDisabled = disabled || !departmentId || loading;
 
