@@ -21,6 +21,7 @@ import { ProfilesFilters } from '../profiles-filters';
 import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
 import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
+import { UserVisualizationModal } from '@/components/admin/modals';
 
 /**
  * Props de la vista
@@ -43,7 +44,7 @@ export function UsersView({
 }: UsersViewProps) {
   // Hook de gestión de usuarios
   const userManagement = useUserManagement();
-  const { usuarios, loading, error, handleSearch, handleToggle, handleDelete, handleRetry } = userManagement;
+  const { usuarios, loading, error, handleSearch, handleToggle, handleDelete, handleRetry, refresh } = userManagement;
 
   // Estado del confirmation dialog para eliminar
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -51,6 +52,13 @@ export function UsersView({
     user: Usuario | null;
   }>({ isOpen: false, user: null });
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Estado del modal de visualización/edición
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    mode: 'view' | 'edit';
+    usuario: Usuario | null;
+  }>({ isOpen: false, mode: 'view', usuario: null });
 
   // Estado de filtros locales
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,22 +72,24 @@ export function UsersView({
 
   /**
    * Abre modal de vista (solo lectura)
-   * TODO: Implementar cuando tengamos useUserManagement + modal
    */
-  const handleViewUser = useCallback(async (usuario: Usuario) => {
-    console.log('Ver usuario:', usuario);
-    // TODO: Fetch usuario completo desde API
-    // TODO: Abrir modal en modo view
+  const handleViewUser = useCallback((usuario: Usuario) => {
+    setModalState({
+      isOpen: true,
+      mode: 'view',
+      usuario,
+    });
   }, []);
 
   /**
    * Abre modal de edición
-   * TODO: Implementar cuando tengamos useUserManagement + modal
    */
-  const handleEditUser = useCallback(async (usuario: Usuario) => {
-    console.log('Editar usuario:', usuario);
-    // TODO: Fetch usuario completo desde API
-    // TODO: Abrir modal en modo edit
+  const handleEditUser = useCallback((usuario: Usuario) => {
+    setModalState({
+      isOpen: true,
+      mode: 'edit',
+      usuario,
+    });
   }, []);
 
   /**
@@ -116,6 +126,23 @@ export function UsersView({
       setIsDeleting(false);
     }
   }, [deleteDialog.user, handleDelete]);
+
+  /**
+   * Cierra el modal y resetea su estado
+   */
+  const handleModalClose = useCallback(() => {
+    setModalState({ isOpen: false, mode: 'view', usuario: null });
+  }, []);
+
+  /**
+   * Maneja el guardado de cambios en el modal de edición
+   */
+  const handleModalSave = useCallback((updatedUsuario: Usuario) => {
+    console.log('Usuario actualizado:', updatedUsuario);
+    // Refrescar la tabla para mostrar cambios
+    refresh();
+    handleModalClose();
+  }, [refresh, handleModalClose]);
 
   /**
    * Cancela la eliminación
@@ -229,6 +256,16 @@ export function UsersView({
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onClose={handleCancelDelete}
+      />
+
+      {/* Modal de Visualización/Edición de Usuarios */}
+      <UserVisualizationModal
+        isOpen={modalState.isOpen}
+        mode={modalState.mode}
+        usuario={modalState.usuario}
+        roles={['admin', 'provider', 'customer']}
+        onClose={handleModalClose}
+        onSave={handleModalSave}
       />
     </>
   );

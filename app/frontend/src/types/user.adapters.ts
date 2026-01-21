@@ -22,6 +22,8 @@ import type { UserFromAPI } from './user';
  * - phone → celular
  * - roles[0] → perfil (primer rol)
  * - status ('1'/'0') → activo (boolean)
+ * - created_at → createdAt (ISO timestamp)
+ * - updated_at → updatedAt (ISO timestamp)
  *
  * @param user - Respuesta del backend (UserResource)
  * @returns Usuario para frontend
@@ -35,6 +37,8 @@ export const userFromAPIToUsuario = (user: UserFromAPI): Usuario => {
     email: user.email,
     perfil: user.roles?.[0] || 'Sin rol',  // Primer rol o fallback
     activo: user.status === '1',            // '1' = true, '0' = false
+    createdAt: user.created_at,             // ISO timestamp
+    updatedAt: user.updated_at,             // ISO timestamp
   };
 };
 

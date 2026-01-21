@@ -28,3 +28,4 @@ temp/
 # Design reference (Figma exports)
 design-reference-*/
 !design-reference/README.md
+app/frontend/src/components/dev/sonner-test.tsx

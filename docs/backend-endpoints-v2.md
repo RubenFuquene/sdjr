@@ -74,6 +74,29 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 - **Causa:** `CommerceService::delete()` no captura correctamente `ModelNotFoundException`
 - **Solución esperada:** Retornar 404 con mensaje amigable cuando commerce_id no existe
 
+### 6.1) DELETE /api/v1/users/{id} — Error 500 🐛 BUG ABIERTO
+
+**🐛 Bug reportado:** 2026-01-20
+
+**⚠️ Status: IMPLEMENTADO PERO CON BUG**
+
+- El endpoint existe en `UserController::destroy()`
+- **Problema:** Devuelve 500 Internal Server Error cuando intenta eliminar un usuario
+- **Causa:** Variable `$user` indefinida en línea 243 de `UserController.php`
+  ```php
+  // Línea 243 - Intenta usar $user que no fue inicializado
+  Undefined variable $user
+  ```
+- **Contexto del error:**
+  - Archivo: `/app/Http/Controllers/Api/V1/UserController.php`
+  - Línea: 243
+  - Exception: `ErrorException`
+- **Solución esperada:** 
+  1. Recuperar el usuario correctamente antes de eliminarlo
+  2. Retornar 404 con mensaje amigable cuando user_id no existe
+  3. Retornar 200 OK con confirmación cuando se elimina exitosamente
+- **Frontend:** El endpoint está completamente implementado en UsersView con manejo de confirmación, pero no funciona hasta que se corrija el backend
+
 ### 7) GET /api/v1/commerces/ — legal_representatives entrega array de arrays 🐛 BUG ABIERTO
 
 **🐛 Bug reportado:** 2026-01-15
@@ -455,6 +478,7 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 | 4  | PATCH /api/v1/commerces/{id}/status              | ❌ Pendiente            | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
 | 5  | PATCH /api/v1/commerces/{id}/verification        | ❌ Pendiente            | Implementar nuevo endpoint                         | ⏳ Pendiente |
 | 6  | DELETE /api/v1/commerces/{id}                    | 🐛 Bug (500 error)      | Capturar ModelNotFoundException → 404             | ⏳ Pendiente |
+| 6.1| DELETE /api/v1/users/{id}                        | 🐛 Bug (500 error)      | Inicializar $user antes de usarla (línea 243)     | ⏳ Pendiente |
 | 7  | GET /api/v1/commerces/{id} legal_representatives | 🐛 Bug (array anidado)  | Remover nesting innecesario en Resource            | ⏳ Pendiente |
 | 8  | GET /api/v1/commerces/{id}/branches              | ❌ Pendiente            | Crear modelo, migración, endpoint y Resource      | ⏳ Pendiente |
 | 9  | GET /api/v1/commerces/{id}/payout-methods        | ❌ Pendiente            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |

@@ -136,6 +136,8 @@ export interface Usuario {
   email: string;
   perfil: string;
   activo: boolean;
+  createdAt?: string;  // ISO timestamp de creación
+  updatedAt?: string;  // ISO timestamp de última actualización
 }
 
 export interface Administrador {
