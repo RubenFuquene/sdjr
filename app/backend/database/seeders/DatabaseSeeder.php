@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\SeederControl;
+use COM;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
@@ -47,6 +48,11 @@ class DatabaseSeeder extends Seeder
             PqrsTypeSeeder::class,
             PriorityTypeSeeder::class,
             CommercePayoutMethodSeeder::class,
+            CommerceBranchSeeder::class,
+            CommerceDocumentSeeder::class,
+            CommerceBranchPhotoSeeder::class,
+            CommerceBranchHourSeeder::class,
+            LegalDocumentSeeder::class,
         ]);
 
         Log::info('Database seeding completed');

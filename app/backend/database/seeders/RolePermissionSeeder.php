@@ -147,14 +147,18 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.review.view', 'guard_name' => $guardName, 'description' => 'View provider review module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.support.view', 'guard_name' => $guardName, 'description' => 'View provider support module', 'created_at' => now(), 'updated_at' => now()],
 
+
+            // Legal Documents
+            ['name' => 'legal_documents.index', 'guard_name' => $guardName, 'description' => 'List legal documents', 'created_at' => now(), 'updated_at' => now()],
+
             // Commerces Modules
             ['name' => 'provider.commerces.index', 'guard_name' => $guardName, 'description' => 'List commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.create', 'guard_name' => $guardName, 'description' => 'Create commerces', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerces.view', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],            
             ['name' => 'provider.commerces.edit', 'guard_name' => $guardName, 'description' => 'Edit commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Update commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Delete commerces', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerce_payout_methods.index', 'guard_name' => $guardName, 'description' => 'List provider commerce payout methods', 'created_at' => now(), 'updated_at' => now()],
 
             // Legal Representatives
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'List legal representatives', 'created_at' => now(), 'updated_at' => now()],

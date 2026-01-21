@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\LogoutController;
 use App\Http\Controllers\Api\V1\CountryController;
+use App\Http\Controllers\DocumentUploadController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CommerceController;
@@ -17,7 +18,9 @@ use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\NeighborhoodController;
 use App\Http\Controllers\Api\V1\PriorityTypeController;
+use App\Http\Controllers\Api\V1\LegalDocumentController;
 use App\Http\Controllers\Api\V1\SupportStatusController;
+use App\Http\Controllers\Api\V1\CommerceBranchController;
 use App\Http\Controllers\Api\V1\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\ProviderRegisterController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
@@ -93,10 +96,26 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('commerces', CommerceController::class);
         Route::patch('commerces/{id}/status', [CommerceController::class, 'patchStatus']);
         Route::patch('commerces/{id}/verification', [CommerceController::class, 'patchVerification']);
+        Route::get('commerces/{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
+        Route::get('commerces/{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
         Route::post('commerces/basic', [CommerceBasicDataController::class, 'store']);
+
+
+        // Legal Documents
+        Route::get('legal-documents', [LegalDocumentController::class, 'index']);
+        Route::get('legal-documents/{type}', [LegalDocumentController::class, 'showByType']);
+
+        // Commerce Branches
+        Route::apiResource('commerce-branches',CommerceBranchController::class);
 
         // Legal Representative routes
         Route::apiResource('legal-representatives', LegalRepresentativeController::class);
+
+        // Document Upload Endpoints
+        // Route::prefix('documents')->group(function () {
+        //     Route::post('/presigned', [DocumentUploadController::class, 'presigned']);
+        //     Route::post('/confirm', [DocumentUploadController::class, 'confirm']);
+        // });
 
     });
 });
