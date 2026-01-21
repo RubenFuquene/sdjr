@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use App\Constants\Constant;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use App\Models\CommerceDocument;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentUploadService
 {
@@ -17,14 +19,12 @@ class DocumentUploadService
      */
     public function generatePresignedUrl(array $data): array
     {
-        // Validaciones
-        $this->validateInput($data);
-
         // Generar token único
         $uploadToken = Str::uuid()->toString();
 
         // Construir path en S3
         $fileName = $this->sanitizeFileName($data['file_name']);
+        
         $path = sprintf(
             'documents/commerce_%d/%s/%s',
             $data['commerce_id'],
@@ -134,4 +134,25 @@ class DocumentUploadService
             'application/msword', // .doc
         ];
     }
+
+    /**
+     * Almacenar registro de documento
+     * @param array $data
+     * @param array $result
+     * @return CommerceDocument
+     */
+    public function store(array $data, array $result): CommerceDocument
+    {
+        return CommerceDocument::create([
+            'commerce_id' => $data['commerce_id'],
+            'document_type' => $data['document_type'],
+            'upload_token' => $result['upload_token'],
+            'upload_status' => Constant::UPLOAD_STATUS_PENDING,
+            'file_path' => $result['path'],
+            'mime_type' => $data['mime_type'],
+            'expires_at' => now()->addHour(),
+            'uploaded_by_id' => auth()->id(),
+            'failed_attempts' => 0,
+        ]);
+    }   
 }

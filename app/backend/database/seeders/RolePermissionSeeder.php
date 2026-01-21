@@ -177,6 +177,8 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.establishment_types.edit', 'guard_name' => $guardName, 'description' => 'Edit establishment types', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.update', 'guard_name' => $guardName, 'description' => 'Update establishment types', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Delete establishment types', 'created_at' => now(), 'updated_at' => now()],
+            
+            ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'View admin provider upload documents module', 'created_at' => now(), 'updated_at' => now()],
         ];
 
         // Crear permisos si no existen

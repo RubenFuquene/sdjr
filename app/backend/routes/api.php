@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\LogoutController;
 use App\Http\Controllers\Api\V1\CountryController;
-use App\Http\Controllers\DocumentUploadController;
+use App\Http\Controllers\Api\V1\DocumentUploadController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CommerceController;
@@ -112,10 +112,10 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('legal-representatives', LegalRepresentativeController::class);
 
         // Document Upload Endpoints
-        // Route::prefix('documents')->group(function () {
-        //     Route::post('/presigned', [DocumentUploadController::class, 'presigned']);
-        //     Route::post('/confirm', [DocumentUploadController::class, 'confirm']);
-        // });
+        Route::prefix('documents')->group(function () {
+            Route::post('/presigned', [DocumentUploadController::class, 'presigned']);
+            Route::post('/confirm', [DocumentUploadController::class, 'confirm']);
+        });
 
     });
 });

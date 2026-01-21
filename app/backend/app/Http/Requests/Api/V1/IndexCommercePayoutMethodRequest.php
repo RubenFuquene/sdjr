@@ -6,6 +6,18 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @OA\Schema(
+ *   schema="IndexCommercePayoutMethodRequest",
+ *   type="object",
+ *   @OA\Property(property="per_page", type="integer", example=15),
+ *   @OA\Property(property="page", type="integer", example=1),
+ *   @OA\Property(property="type", type="string", example="bank"),
+ *   @OA\Property(property="owner_id", type="integer", example=1),
+ *   @OA\Property(property="account_number", type="string", example="1234567890"),
+ *   @OA\Property(property="status", type="string", maxLength=1, example="1")
+ * )
+ */
 class IndexCommercePayoutMethodRequest extends FormRequest
 {
     public function authorize(): bool
