@@ -32,6 +32,16 @@ class CommerceDocument extends Model
         'commerce_id',
         'verified_by_id',
         'uploaded_by_id',
+        'upload_token',
+        'upload_status',
+        's3_etag',
+        's3_object_size',
+        's3_last_modified',
+        'replacement_of_id',
+        'version_of_id',
+        'version_number',
+        'expires_at',
+        'failed_attempts',
         'document_type',
         'file_path',
         'mime_type',
@@ -44,6 +54,7 @@ class CommerceDocument extends Model
         'verified' => 'boolean',
         'uploaded_at' => 'datetime',
         'verified_at' => 'datetime',
+        'expires_at' => 'datetime',
     ];
 
     /**

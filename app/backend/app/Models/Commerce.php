@@ -113,6 +113,14 @@ class Commerce extends Model
     }
 
     /**
+     * Get the principal legal representatives of the commerce.
+     */
+    public function legalRepresentativesActive()
+    {
+        return $this->hasMany(LegalRepresentative::class)->where('is_primary', true);
+    }
+
+    /**
      * Get the commerce documents of the commerce.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

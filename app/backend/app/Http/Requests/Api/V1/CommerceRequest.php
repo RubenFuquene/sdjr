@@ -37,8 +37,7 @@ class CommerceRequest extends FormRequest
     }
 
     public function rules(): array
-    {
-        $method = $this->method();
+    {        
         $rules = [
             'owner_user_id' => ['required', 'integer', 'exists:users,id'],
             'department_id' => ['required', 'integer', 'exists:departments,id'],
