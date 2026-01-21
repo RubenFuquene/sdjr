@@ -327,7 +327,7 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
   3. ¿Panel admin para gestionar documentos?
 - **Prioridad:** BAJA - MVP puede usar documentos estáticos en `/public/legal/`
 
-### 13) POST /api/v1/documents/presigned — Generar URL pre-firmada para carga ❌ PENDIENTE
+### 13) POST /api/v1/documents/presigned — Generar URL pre-firmada para carga ✅ IMPLEMENTADO
 
 **⚠️ Status: PENDIENTE - Nuevo flujo de carga de documentos**
 
@@ -375,7 +375,7 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 - **Documentación técnica:** Ver [document-upload-flow.md](../app/backend/specs/docs/document-upload-flow.md)
 - **Prioridad:** ALTA - Requerimiento de infraestructura para otros endpoints de documentos
 
-### 14) POST /api/v1/documents/confirm — Confirmar carga completada ❌ PENDIENTE
+### 14) POST /api/v1/documents/confirm — Confirmar carga completada  ✅ IMPLEMENTADO
 
 **⚠️ Status: PENDIENTE - Compañero del endpoint #13**
 
@@ -424,7 +424,7 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
   5. Tests: unitarios e integración con MinIO.
 - **Prioridad:** ALTA - Bloqueador para carga de documentos del proveedor
 
-### 15) Cron Job: Limpieza de Documentos Huérfanos ❌ PENDIENTE
+### 15) Cron Job: Limpieza de Documentos Huérfanos ⏳⚠️ Parcial, falta implementar JOB automático
 
 **⚠️ Status: PENDIENTE - Compañero del endpoint #13-14**
 
@@ -447,21 +447,21 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 
 | #  | Endpoint                                         | Status                  | Acción                                            | Frontend     |
 | -- | ------------------------------------------------ | ----------------------- | -------------------------------------------------- | ------------ |
-| 1  | PATCH /api/v1/roles/{id}                         | ❌ Pendiente (CRÍTICO) | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
+| 1  | PATCH /api/v1/roles/{id}                         | ✅ Implementado | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
 | 2  | DELETE /api/v1/roles/{id}                        | ✅ Implementado         | Validar que sea soft delete                        | ✅ Funciona  |
-| 3  | GET /api/v1/roles?q=...                          | ❌ Pendiente            | Agregar parámetro de búsqueda global             | ⏳ Pendiente |
-| 4  | PATCH /api/v1/commerces/{id}/status              | ❌ Pendiente            | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
-| 5  | PATCH /api/v1/commerces/{id}/verification        | ❌ Pendiente            | Implementar nuevo endpoint                         | ⏳ Pendiente |
-| 6  | DELETE /api/v1/commerces/{id}                    | 🐛 Bug (500 error)      | Capturar ModelNotFoundException → 404             | ⏳ Pendiente |
+| 3  | GET /api/v1/roles?q=...                          | ✅ Implementado            | Agregar parámetro de búsqueda global             | ⏳ Pendiente |
+| 4  | PATCH /api/v1/commerces/{id}/status              | ✅ Implementado            | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
+| 5  | PATCH /api/v1/commerces/{id}/verification        | ✅ Implementado            | Implementar nuevo endpoint                         | ⏳ Pendiente |
+| 6  | DELETE /api/v1/commerces/{id}                    | ✅ Corregido     | Capturar ModelNotFoundException → 404             | ⏳ Pendiente |
 | 7  | GET /api/v1/commerces/{id} legal_representatives | 🐛 Bug (array anidado)  | Remover nesting innecesario en Resource            | ⏳ Pendiente |
-| 8  | GET /api/v1/commerces/{id}/branches              | ❌ Pendiente            | Crear modelo, migración, endpoint y Resource      | ⏳ Pendiente |
-| 9  | GET /api/v1/commerces/{id}/payout-methods        | ❌ Pendiente            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |
+| 8  | GET /api/v1/commerces/{id}/branches              | ✅ Implementado            | Crear modelo, migración, endpoint y Resource      | ⏳ Pendiente |
+| 9  | GET /api/v1/commerces/{id}/payout-methods        | ✅ Implementado            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |
 | 10 | GET /api/v1/banks                                | ✅ Implementado         | N/A - Usar en formularios de método de pago       | ✅ Funciona  |
-| 11 | GET /api/v1/commerces/{id}/documents             | ❌ Pendiente            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |
-| 12 | Documentos Legales (Términos, Privacidad, etc.)  | ❌ Pendiente            | Decidir almacenamiento (estático/BD/cloud)        | ⏳ Pendiente |
-| 13 | POST /api/v1/documents/presigned                 | ❌ Pendiente (ALTA)     | Implementar generador de presigned URLs            | ⏳ Pendiente |
-| 14 | POST /api/v1/documents/confirm                   | ❌ Pendiente (ALTA)     | Confirmar upload y guardar metadata                | ⏳ Pendiente |
-| 15 | Cron: Limpieza de Documentos Huérfanos           | ❌ Pendiente            | Job de limpieza automática de uploads incompletos  | N/A         |
+| 11 | GET /api/v1/commerces/{id}/documents             | ✅ Implementado            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |
+| 12 | Documentos Legales (Términos, Privacidad, etc.)  | ✅ Implementado            | Decidir almacenamiento (estático/BD/cloud)        | ⏳ Pendiente |
+| 13 | POST /api/v1/documents/presigned                 | ✅ Implementado (ALTA)     | Implementar generador de presigned URLs            | ⏳ Pendiente |
+| 14 | POST /api/v1/documents/confirm                   | ✅ Implementado (ALTA)     | Confirmar upload y guardar metadata                | ⏳ Pendiente |
+| 15 | Cron: Limpieza de Documentos Huérfanos           | ✅ Implementado            | Job de limpieza automática de uploads incompletos  | N/A         |
 
 ## Notas
 
