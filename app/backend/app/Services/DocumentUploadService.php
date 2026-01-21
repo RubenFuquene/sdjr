@@ -26,7 +26,7 @@ class DocumentUploadService
         $fileName = $this->sanitizeFileName($data['file_name']);
         
         $path = sprintf(
-            'documents/commerce_%d/%s/%s',
+            '/commerce_%d/%s/%s',
             $data['commerce_id'],
             $uploadToken,
             $fileName
@@ -155,4 +155,33 @@ class DocumentUploadService
             'failed_attempts' => 0,
         ]);
     }   
+
+    /**
+     * Obtener documento por token de carga
+     *
+     * @param string $uploadToken
+     * @return CommerceDocument|null
+     */
+    public function getDocumentPendingByToken(string $uploadToken): CommerceDocument|null
+    {
+        return CommerceDocument::where(['upload_token' => $uploadToken, 'upload_status' => Constant::UPLOAD_STATUS_PENDING])->firstOrFail();
+    }
+
+    /**
+     * Actualizar documento tras confirmación
+     * @param CommerceDocument $document
+     * @param array $data
+     * @return bool
+     */
+    public function update(CommerceDocument $document, array $data): bool
+    {
+        return $document->update([
+            'upload_status' => Constant::UPLOAD_STATUS_CONFIRMED,
+            's3_etag' => $data['s3_metadata']['etag'],
+            's3_object_size' => $data['s3_metadata']['object_size'],
+            's3_last_modified' => $data['s3_metadata']['last_modified'],
+            'expires_at' => null,
+            'failed_attempts' => 0
+        ]);
+    }
 }

@@ -32,7 +32,7 @@ class CommerceDocumentFactory extends Factory
             'failed_attempts' => $this->faker->numberBetween(0, 3),
             'document_type' => $this->faker->randomElement([Constant::DOCUMENT_TYPE_ID_CARD, Constant::DOCUMENT_TYPE_LICENSE, Constant::DOCUMENT_TYPE_OTHER, Constant::DOCUMENT_TYPE_CAMARA_COMERCIO, Constant::DOCUMENT_TYPE_RUT, Constant::DOCUMENT_TYPE_REGISTRATION]),
             'file_path' => '/tmp/'.$this->faker->uuid().'.pdf',
-            'mime_type' => 'application/pdf',
+            'mime_type' => $this->faker->randomElement(Constant::ALLOWED_FILE_EXTENSIONS),
             'verified' => $this->faker->boolean(20),
             'uploaded_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'verified_at' => $this->faker->optional(0.2)->dateTimeBetween('-1 year', 'now'),
