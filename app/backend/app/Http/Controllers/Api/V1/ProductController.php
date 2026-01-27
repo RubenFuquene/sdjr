@@ -15,10 +15,11 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Http\Requests\Api\V1\ShowProductRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
 use App\Http\Requests\Api\V1\StoreProductRequest;
-use Symfony\Component\HttpKernel\HttpCache\Store;
 use App\Http\Requests\Api\V1\UpdateProductRequest;
 use App\Http\Requests\Api\V1\DestroyProductRequest;
 use App\Http\Requests\Api\V1\StoreProductPackageItemRequest;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductController extends Controller
 {
@@ -182,6 +183,8 @@ class ProductController extends Controller
         try {
             $products = $this->productService->getByCommerce($commerce_id);
             return $this->successResponse(ProductResource::collection($products), 'Products fetched successfully', Response::HTTP_OK);
+        } catch( ModelNotFoundException $e) {
+            return $this->errorResponse($e->getMessage(), Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return $this->errorResponse('Error fetching products by commerce', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -207,6 +210,8 @@ class ProductController extends Controller
         try {
             $products = $this->productService->getByCommerceBranch($branch_id);
             return $this->successResponse(ProductResource::collection($products), 'Products fetched successfully', Response::HTTP_OK);
+        } catch( ModelNotFoundException $e) {
+            return $this->errorResponse($e->getMessage(), Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {            
             return $this->errorResponse('Error fetching products by commerce branch', Response::HTTP_INTERNAL_SERVER_ERROR);
         }

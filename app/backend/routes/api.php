@@ -121,7 +121,7 @@ Route::prefix('v1')->group(function () {
         
         Route::prefix('products/commerce')->group(function () {
             Route::get('{commerce_id}', [ProductController::class, 'byCommerce']);
-            Route::get('branches/{branch_id}', [ProductController::class, 'byCommerceBranch']);
+            Route::get('branch/{branch_id}', [ProductController::class, 'byCommerceBranch']);
             Route::post('/', [ProductController::class, 'store']);
             Route::put('/{id}', [ProductController::class, 'update']);
             Route::delete('/{commerce_id}', [ProductController::class, 'deleted']);

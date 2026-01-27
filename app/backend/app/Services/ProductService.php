@@ -135,7 +135,11 @@ class ProductService
      */
     public function getByCommerce(int $commerce_id)
     {
-        return Product::where('commerce_id', $commerce_id)->get();
+        $products = Product::where('commerce_id', $commerce_id)->get();
+        if ($products->isEmpty()) {
+            throw new ModelNotFoundException('No products found for the specified commerce.');
+        }
+        return $products;
     }
 
     /**
@@ -145,9 +149,14 @@ class ProductService
      */
     public function getByCommerceBranch(int $branch_id)
     {
-        return Product::whereHas('commerce.commerceBranches', function ($query) use ($branch_id) {
+        $products = Product::whereHas('commerce.commerceBranches', function ($query) use ($branch_id) {
             $query->where('id', $branch_id);
         })->get();
+
+        if ($products->isEmpty()) {
+            throw new ModelNotFoundException('No products found for the given commerce branch.');
+        }
+        return $products;
     }
 
     /**

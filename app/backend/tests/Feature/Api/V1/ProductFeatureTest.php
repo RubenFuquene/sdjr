@@ -149,4 +149,27 @@ class ProductFeatureTest extends TestCase
         $response = $this->postJson('/api/v1/products', $payload);
         $response->assertForbidden();
     }
+
+    public function test_get_products_by_commerce_returns_404_when_none_found()
+    {
+        $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create();
+        $response = $this->getJson('/api/v1/products/commerce/' . $commerce->id);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => false,
+                'message' => 'No products found for the specified commerce.'
+            ]);
+    }
+
+    public function test_get_products_by_commerce_branch_returns_404_when_none_found()
+    {
+        $this->actingAsAdmin();        
+        $response = $this->getJson('/api/v1/products/commerce/branch/1111');
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => false,
+                'message' => 'No products found for the given commerce branch.'
+            ]);
+    }
 }
