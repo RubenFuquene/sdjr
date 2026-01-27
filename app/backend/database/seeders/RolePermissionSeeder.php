@@ -178,6 +178,15 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Delete establishment types', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'View admin provider upload documents module', 'created_at' => now(), 'updated_at' => now()],
+
+            ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'List product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Create product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.show', 'guard_name' => $guardName, 'description' => 'View product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.view', 'guard_name' => $guardName, 'description' => 'View product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.edit', 'guard_name' => $guardName, 'description' => 'Edit product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.update', 'guard_name' => $guardName, 'description' => 'Update product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.delete', 'guard_name' => $guardName, 'description' => 'Delete product categories', 'created_at' => now(), 'updated_at' => now()],
+            
         ];
 
         // Crear permisos si no existen
