@@ -187,6 +187,14 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.product_categories.update', 'guard_name' => $guardName, 'description' => 'Update product categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.delete', 'guard_name' => $guardName, 'description' => 'Delete product categories', 'created_at' => now(), 'updated_at' => now()],
             
+            ['name' => 'provider.products.index', 'guard_name' => $guardName, 'description' => 'List products by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.create', 'guard_name' => $guardName, 'description' => 'Create products by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.show', 'guard_name' => $guardName, 'description' => 'View product by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.view', 'guard_name' => $guardName, 'description' => 'View product by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.edit', 'guard_name' => $guardName, 'description' => 'Edit product by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.update', 'guard_name' => $guardName, 'description' => 'Update products by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.delete', 'guard_name' => $guardName, 'description' => 'Delete product by commerce', 'created_at' => now(), 'updated_at' => now()],
+
         ];
 
         // Crear permisos si no existen

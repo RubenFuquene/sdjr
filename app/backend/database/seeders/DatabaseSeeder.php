@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use App\Models\SeederControl;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -52,6 +53,8 @@ class DatabaseSeeder extends Seeder
             CommerceBranchPhotoSeeder::class,
             CommerceBranchHourSeeder::class,
             LegalDocumentSeeder::class,
+            ProductCategorySeeder::class,
+            ProductSeeder::class,
         ]);
 
         Log::info('Database seeding completed');

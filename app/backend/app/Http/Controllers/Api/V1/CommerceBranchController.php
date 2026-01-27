@@ -10,7 +10,7 @@ use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\ShowCommerceBranchRequest;
 use App\Http\Requests\Api\V1\StoreCommerceBranchRequest;
 use App\Http\Requests\Api\V1\UpdateCommerceBranchRequest;
-use App\Http\Resources\CommerceBranchResource;
+use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Services\CommerceBranchService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

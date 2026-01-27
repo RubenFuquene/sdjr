@@ -131,6 +131,16 @@ class Commerce extends Model
     }
 
     /**
+     * Get the commerce branches of the commerce.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function commerceBranches()
+    {
+        return $this->hasMany(CommerceBranch::class);
+    }
+
+    /**
      * Get the my account of the commerce.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

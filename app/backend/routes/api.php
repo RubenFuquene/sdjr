@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\LogoutController;
 use App\Http\Controllers\Api\V1\CountryController;
+use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CommerceController;
@@ -58,9 +59,6 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('establishment-types', EstablishmentTypeController::class);
         Route::apiResource('pqrs-types', PqrsTypeController::class);
         Route::apiResource('priority-types', PriorityTypeController::class);
-
-        // Product Category Management routes
-        Route::apiResource('product-categories', ProductCategoryController::class);
 
         // User Management routes
         Route::apiResource('users', UserController::class);
@@ -118,5 +116,19 @@ Route::prefix('v1')->group(function () {
             Route::post('/confirm', [DocumentUploadController::class, 'confirm']);
         });
 
+        // Product Management routes
+        Route::apiResource('products', ProductController::class);
+        
+        Route::prefix('products/commerce')->group(function () {
+            Route::get('{commerce_id}', [ProductController::class, 'byCommerce']);
+            Route::get('branches/{branch_id}', [ProductController::class, 'byCommerceBranch']);
+            Route::post('/', [ProductController::class, 'store']);
+            Route::put('/{id}', [ProductController::class, 'update']);
+            Route::delete('/{commerce_id}', [ProductController::class, 'deleted']);
+            Route::post('package-items', [ProductController::class, 'storePackageItems']);
+            Route::put('package-items/{id}', [ProductController::class, 'updatePackageItems']);
+        });
+        
+        Route::apiResource('product-categories', ProductCategoryController::class);
     });
 });

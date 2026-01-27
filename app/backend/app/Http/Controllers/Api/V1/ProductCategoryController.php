@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductCategoryIndexRequest;
-use App\Http\Requests\StoreProductCategoryRequest;
-use App\Http\Requests\UpdateProductCategoryRequest;
-use App\Http\Requests\ShowProductCategoryRequest;
-use App\Http\Requests\DestroyProductCategoryRequest;
-use App\Http\Resources\ProductCategoryResource;
+use App\Http\Requests\Api\V1\ProductCategoryIndexRequest;
+use App\Http\Requests\Api\V1\StoreProductCategoryRequest;
+use App\Http\Requests\Api\V1\UpdateProductCategoryRequest;
+use App\Http\Requests\Api\V1\ShowProductCategoryRequest;
+use App\Http\Requests\Api\V1\DestroyProductCategoryRequest;
+use App\Http\Resources\Api\V1\ProductCategoryResource;
 use App\Services\ProductCategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;

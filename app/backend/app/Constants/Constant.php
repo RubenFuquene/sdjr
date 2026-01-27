@@ -66,4 +66,9 @@ class Constant
     public const ALLOWED_FILE_EXTENSIONS = ['pdf', 'jpg', 'png', 'docx'];
 
     public const ALLOWED_SIZE_BYTES = 52428800; // 50 MB
+
+    // Product Types
+    public const PRODUCT_TYPE_SINGLE = 'single';
+    
+    public const PRODUCT_TYPE_PACKAGE = 'package';
 }

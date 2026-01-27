@@ -13,7 +13,7 @@ use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
-use App\Http\Resources\CommerceBranchResource;
+use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Services\CommerceBranchService;
 use App\Services\CommercePayoutMethodService;
 use App\Services\CommerceService;
