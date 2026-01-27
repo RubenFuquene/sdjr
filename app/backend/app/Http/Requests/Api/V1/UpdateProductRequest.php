@@ -6,6 +6,37 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @OA\Schema(
+ *   schema="UpdateProductRequest",
+ *   required={"product"},
+ *   @OA\Property(
+ *     property="product",
+ *     type="object",
+ *     @OA\Property(property="commerce_id", type="integer", example=1, description="ID of the commerce"),
+ *     @OA\Property(property="product_category_id", type="integer", example=2, description="ID of the product category"),
+ *     @OA\Property(property="title", type="string", maxLength=100, example="Café Premium", description="Product title"),
+ *     @OA\Property(property="description", type="string", maxLength=255, nullable=true, example="Café de origen especial", description="Product description"),
+ *     @OA\Property(property="product_type", type="string", enum={"single","package"}, example="single", description="Type of product (single/package)"),
+ *     @OA\Property(property="original_price", type="number", format="float", example=100.00, description="Original price"),
+ *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price"),
+ *     @OA\Property(property="quantity_total", type="integer", example=50, description="Total quantity"),
+ *     @OA\Property(property="quantity_available", type="integer", example=50, description="Available quantity"),
+ *     @OA\Property(property="expires_at", type="string", format="date-time", nullable=true, example="2026-12-31T23:59:59", description="Expiration date"),
+ *     @OA\Property(property="status", type="string", maxLength=1, example="1", description="Status (1=Activo, 0=Inactivo)"),
+ *   ),
+ *   @OA\Property(
+ *     property="commerce_branches",
+ *     type="array",
+ *     @OA\Items(type="integer", example=1, description="ID of a commerce branch")
+ *   ),
+ *   @OA\Property(
+ *     property="package_items",
+ *     type="array",
+ *     @OA\Items(type="integer", example=10, description="ID of a product included in the package")
+ *   )
+ * )
+ */
 class UpdateProductRequest extends FormRequest
 {
     public function authorize(): bool

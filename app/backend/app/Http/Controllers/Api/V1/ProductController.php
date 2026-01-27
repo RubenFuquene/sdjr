@@ -17,8 +17,6 @@ use App\Http\Requests\Api\V1\ProductIndexRequest;
 use App\Http\Requests\Api\V1\StoreProductRequest;
 use App\Http\Requests\Api\V1\UpdateProductRequest;
 use App\Http\Requests\Api\V1\DestroyProductRequest;
-use App\Http\Requests\Api\V1\StoreProductPackageItemRequest;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductController extends Controller
@@ -226,7 +224,7 @@ class ProductController extends Controller
      *   summary="Store product package items",
      *   description="Stores items for a product package",
      *   security={{"sanctum":{}}},
-     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/StoreProductPackageItemRequest")),
+     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/StoreProductRequest")),
      *   @OA\Response(response=200, description="Successful operation"),
      *   @OA\Response(response=401, description="Unauthenticated"),
      *   @OA\Response(response=403, description="Forbidden"),
