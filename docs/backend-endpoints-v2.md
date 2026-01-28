@@ -32,13 +32,57 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 - **Nota:** El PUT genérico requiere todos los campos (name, description), por lo que no es apropiado para actualizaciones parciales
 - **Prioridad:** ALTA - El frontend está 100% listo, solo falta que el backend implemente PATCH con validación parcial
 
-### 2) DELETE /api/v1/roles/ ✅ IMPLEMENTADO
+### 2) DELETE /api/v1/roles/{id} ❌ PENDIENTE
 
-**✅ Status: COMPLETADO**
+**⚠️ Status: NO IMPLEMENTADO - FALTA MÉTODO destroy()**
 
-- El endpoint `DELETE /api/v1/roles/{id}` está implementado en `RoleController::destroy()`
-- Responde con 200 OK (o código adecuado) según la lógica configurada
-- **Próximo paso:** Validar que sea soft delete (baja lógica) en lugar de eliminación física
+- **Ruta esperada:** `DELETE /api/v1/roles/{id}`
+- **Problema:** El método `destroy()` no existe en `RoleController`
+- **Métodos disponibles en RoleController:** 
+  - ✅ `index()` - GET /api/v1/roles
+  - ✅ `store()` - POST /api/v1/roles
+  - ✅ `show()` - GET /api/v1/roles/{id}
+  - ✅ `update()` - PUT /api/v1/roles/{id}
+  - ❌ `destroy()` - DELETE /api/v1/roles/{id} **FALTA**
+  - ✅ `assignRolesPermissions()` - Custom
+  - ✅ `assignPermissionsToRole()` - Custom
+
+**Comportamiento esperado:**
+1. Validar que el rol existe → 404 si no existe
+2. Validar permisos → 403 si sin `admin.profiles.roles.delete`
+3. Soft delete del rol (marcar con `deleted_at`)
+4. Retornar 200 OK con mensaje de confirmación
+
+**Respuesta esperada (200 OK):**
+```json
+{
+  "message": "Role deleted successfully",
+  "data": {
+    "id": 1,
+    "name": "Administrador",
+    "description": "Rol de administrador",
+    "deleted_at": "2026-01-28T15:30:00Z"
+  }
+}
+```
+
+**Trabajo requerido:**
+1. Implementar método `destroy()` en `RoleController`
+2. Crear/usar `DestroyRoleRequest` para validación de autorización
+3. Usar `RoleService::delete()` o similar para soft delete
+4. Validar permisos: `admin.profiles.roles.delete`
+
+**Frontend:** 
+- ✅ UI implementada (botón de eliminar, diálogo de confirmación)
+- ✅ Hook implementado (`handleDelete()` en `use-role-management.ts`)
+- ⏳ Bloqueado esperando endpoint backend
+
+**Error actual:**
+```
+Call to undefined method App\Http\Controllers\Api\V1\RoleController::destroy()
+```
+
+**Prioridad:** ALTA - Bloqueador de funcionalidad de CRUD de roles
 
 ### 3) GET /api/v1/roles con parámetro `q` ❌ PENDIENTE
 
@@ -96,6 +140,81 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
   2. Retornar 404 con mensaje amigable cuando user_id no existe
   3. Retornar 200 OK con confirmación cuando se elimina exitosamente
 - **Frontend:** El endpoint está completamente implementado en UsersView con manejo de confirmación, pero no funciona hasta que se corrija el backend
+
+### 6.2) POST /api/v1/roles — Error 403 Permission Denied 🐛 BUG CRÍTICO
+
+**🐛 Bug reportado:** 2026-01-27  
+**Endpoint:** `POST /api/v1/roles`  
+**Error:** HTTP 403 Forbidden  
+
+**⚠️ Status: BLOQUEADOR CRÍTICO - TYPO EN NOMBRE DE PERMISO**
+
+**Problema:** El `authorize()` de `StoreRoleRequest` verifica el permiso `admin.profile.roles.create` (sin "s"), pero el seeder crea los permisos como `admin.profiles.roles.*` (con "s").
+
+**Causa raíz (TYPO):**
+
+**Archivo:** `app/Http/Requests/Api/V1/StoreRoleRequest.php` línea 32
+```php
+public function authorize(): bool
+{
+    return $this->user()?->can('admin.profile.roles.create') ?? false;
+    // ❌ Typo: 'admin.profile.roles.create' (sin "s")
+}
+```
+
+**Permisos reales en BD (RolePermissionSeeder.php líneas 97-103):**
+```php
+'admin.profiles.roles.index',   // ✅ Con "s"
+'admin.profiles.roles.create',  // ✅ Con "s"
+'admin.profiles.roles.show',
+'admin.profiles.roles.edit',
+'admin.profiles.roles.update',
+'admin.profiles.roles.delete',
+'admin.profiles.roles.assign_permissions',
+```
+
+**Comportamiento esperado:** El método `authorize()` debe verificar `admin.profiles.roles.create` (con "s") para coincidir con los permisos seedeados.
+
+**Solución propuesta:**
+```php
+// Archivo: app/Http/Requests/Api/V1/StoreRoleRequest.php (línea 32)
+public function authorize(): bool
+{
+    return $this->user()?->can('admin.profiles.roles.create') ?? false;
+    // ✅ Corregido: 'admin.profiles.roles.create' (agregado "s")
+}
+```
+
+**Verificación en Tinker:**
+```php
+$user = auth()->user();
+$user->can('admin.profile.roles.create');   // ❌ false (permiso NO existe)
+$user->can('admin.profiles.roles.create');  // ✅ true (permiso existe)
+```
+
+**Impacto:**
+- ❌ Bloqueador total: Usuarios con permisos correctos reciben 403
+- ❌ Frontend completamente implementado pero no funcional
+- ❌ Afecta CRUD completo de roles (probablemente el mismo typo en otros FormRequests)
+
+**Archivos potencialmente afectados:**
+1. `StoreRoleRequest.php` (confirmado) → `admin.profile.roles.create`
+2. `UpdateRoleRequest.php` (revisar) → Probablemente `admin.profile.roles.update`
+3. Otros FormRequests de roles (revisar pattern completo)
+
+**Datos de reproducción:**
+```bash
+# Request que falla
+POST /api/v1/roles
+Authorization: Bearer 37|aoM8yVdsThHHQm2QZ0K2bzxthkjURcwWAfkBzDA3a7918fe3
+Body: {"name":"Delete","description":"Delete","permissions":["admin.profiles.roles.index"]}
+
+# Error: 403 Forbidden
+```
+
+**Frontend:** Completamente implementado y esperando corrección backend.
+
+**Prioridad:** 🚨 CRÍTICA - Bloqueador total del módulo de gestión de roles.
 
 ### 7) GET /api/v1/commerces/ — legal_representatives entrega array de arrays 🐛 BUG ABIERTO
 
@@ -473,12 +592,13 @@ Listado vigente de requerimientos backend a implementar por Jerson Jiménez. Fec
 | #  | Endpoint                                         | Status                  | Acción                                            | Frontend     |
 | -- | ------------------------------------------------ | ----------------------- | -------------------------------------------------- | ------------ |
 | 1  | PATCH /api/v1/roles/{id}                         | ❌ Pendiente (CRÍTICO) | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
-| 2  | DELETE /api/v1/roles/{id}                        | ✅ Implementado         | Validar que sea soft delete                        | ✅ Funciona  |
+| 2  | DELETE /api/v1/roles/{id}                        | ❌ Pendiente (FALTA)    | Implementar método destroy() en RoleController     | ✅ UI Lista  |
 | 3  | GET /api/v1/roles?q=...                          | ❌ Pendiente            | Agregar parámetro de búsqueda global             | ⏳ Pendiente |
 | 4  | PATCH /api/v1/commerces/{id}/status              | ❌ Pendiente            | Implementar endpoint PATCH con validación parcial | ⏳ Pendiente |
 | 5  | PATCH /api/v1/commerces/{id}/verification        | ❌ Pendiente            | Implementar nuevo endpoint                         | ⏳ Pendiente |
 | 6  | DELETE /api/v1/commerces/{id}                    | 🐛 Bug (500 error)      | Capturar ModelNotFoundException → 404             | ⏳ Pendiente |
 | 6.1| DELETE /api/v1/users/{id}                        | 🐛 Bug (500 error)      | Inicializar $user antes de usarla (línea 243)     | ⏳ Pendiente |
+| 6.2| POST /api/v1/roles                               | 🐛 Bug (403 error)      | Typo en nombre de permiso en FormRequest           | ⏳ Pendiente |
 | 7  | GET /api/v1/commerces/{id} legal_representatives | 🐛 Bug (array anidado)  | Remover nesting innecesario en Resource            | ⏳ Pendiente |
 | 8  | GET /api/v1/commerces/{id}/branches              | ❌ Pendiente            | Crear modelo, migración, endpoint y Resource      | ⏳ Pendiente |
 | 9  | GET /api/v1/commerces/{id}/payout-methods        | ❌ Pendiente            | Crear endpoint (Resource ya existe)                | ⏳ Pendiente |

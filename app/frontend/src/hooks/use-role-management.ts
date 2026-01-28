@@ -28,7 +28,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getRoles, createRole, updateRole, updateRoleStatus, ApiError } from "@/lib/api/index";
+import { getRoles, createRole, updateRole, updateRoleStatus, deleteRole, ApiError } from "@/lib/api/index";
 import { adaptPermissions } from "@/components/admin/adapters/permission-adapter";
 import { CreateRoleRequest } from "@/types/role-form-types";
 import { Perfil, RoleFromAPI } from "@/types/admin";
@@ -211,6 +211,26 @@ export function useRoleManagement(perPage: number = 15) {
     }
   }, [handleError]);
 
+  /**
+   * Elimina un rol
+   * DELETE /api/v1/roles/{id}
+   */
+  const handleDelete = async (id: number): Promise<void> => {
+    try {
+      console.log(`🗑️ Eliminando rol ${id}`);
+      
+      await deleteRole(id);
+      
+      console.log('✅ Rol eliminado exitosamente');
+      
+      // Refrescar lista de roles
+      await fetchRoles();
+    } catch (error) {
+      console.error('❌ Error al eliminar rol:', error);
+      throw error;
+    }
+  };
+
   return {
     // Data
     roles,
@@ -221,6 +241,7 @@ export function useRoleManagement(perPage: number = 15) {
     handleCreate,
     handleUpdate,
     handleToggleRoleStatus,
+    handleDelete,
     
     // Transformaciones
     adaptProfileToRole,
