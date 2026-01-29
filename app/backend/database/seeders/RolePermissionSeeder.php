@@ -147,14 +147,17 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.review.view', 'guard_name' => $guardName, 'description' => 'View provider review module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.support.view', 'guard_name' => $guardName, 'description' => 'View provider support module', 'created_at' => now(), 'updated_at' => now()],
 
+            // Legal Documents
+            ['name' => 'legal_documents.index', 'guard_name' => $guardName, 'description' => 'List legal documents', 'created_at' => now(), 'updated_at' => now()],
+
             // Commerces Modules
             ['name' => 'provider.commerces.index', 'guard_name' => $guardName, 'description' => 'List commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.create', 'guard_name' => $guardName, 'description' => 'Create commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerces.view', 'guard_name' => $guardName, 'description' => 'View commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.edit', 'guard_name' => $guardName, 'description' => 'Edit commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Update commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Delete commerces', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerce_payout_methods.index', 'guard_name' => $guardName, 'description' => 'List provider commerce payout methods', 'created_at' => now(), 'updated_at' => now()],
 
             // Legal Representatives
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'List legal representatives', 'created_at' => now(), 'updated_at' => now()],
@@ -173,6 +176,25 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.establishment_types.edit', 'guard_name' => $guardName, 'description' => 'Edit establishment types', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.update', 'guard_name' => $guardName, 'description' => 'Update establishment types', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Delete establishment types', 'created_at' => now(), 'updated_at' => now()],
+
+            ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'View admin provider upload documents module', 'created_at' => now(), 'updated_at' => now()],
+
+            ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'List product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Create product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.show', 'guard_name' => $guardName, 'description' => 'View product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.view', 'guard_name' => $guardName, 'description' => 'View product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.edit', 'guard_name' => $guardName, 'description' => 'Edit product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.update', 'guard_name' => $guardName, 'description' => 'Update product categories', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.product_categories.delete', 'guard_name' => $guardName, 'description' => 'Delete product categories', 'created_at' => now(), 'updated_at' => now()],
+
+            ['name' => 'provider.products.index', 'guard_name' => $guardName, 'description' => 'List products by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.create', 'guard_name' => $guardName, 'description' => 'Create products by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.show', 'guard_name' => $guardName, 'description' => 'View product by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.view', 'guard_name' => $guardName, 'description' => 'View product by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.edit', 'guard_name' => $guardName, 'description' => 'Edit product by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.update', 'guard_name' => $guardName, 'description' => 'Update products by commerce', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.delete', 'guard_name' => $guardName, 'description' => 'Delete product by commerce', 'created_at' => now(), 'updated_at' => now()],
+
         ];
 
         // Crear permisos si no existen

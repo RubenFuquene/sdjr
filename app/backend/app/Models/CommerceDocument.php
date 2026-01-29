@@ -32,6 +32,16 @@ class CommerceDocument extends Model
         'commerce_id',
         'verified_by_id',
         'uploaded_by_id',
+        'upload_token',
+        'upload_status',
+        's3_etag',
+        's3_object_size',
+        's3_last_modified',
+        'replacement_of_id',
+        'version_of_id',
+        'version_number',
+        'expires_at',
+        'failed_attempts',
         'document_type',
         'file_path',
         'mime_type',
@@ -44,18 +54,34 @@ class CommerceDocument extends Model
         'verified' => 'boolean',
         'uploaded_at' => 'datetime',
         'verified_at' => 'datetime',
+        'expires_at' => 'datetime',
     ];
 
+    /**
+     * Get the commerce associated with this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function commerce()
     {
         return $this->belongsTo(Commerce::class);
     }
 
+    /**
+     * Get the user who verified this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function verifiedBy()
     {
         return $this->belongsTo(User::class, 'verified_by_id');
     }
 
+    /**
+     * Get the user who uploaded this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function uploadedBy()
     {
         return $this->belongsTo(User::class, 'uploaded_by_id');

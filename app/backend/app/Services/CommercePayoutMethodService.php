@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Commerce;
 use App\Models\CommercePayoutMethod;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Throwable;
 
 /**
@@ -22,6 +24,10 @@ class CommercePayoutMethodService
         $query = CommercePayoutMethod::query();
 
         if (isset($filters['commerce_id'])) {
+            // Validar existencia del comercio
+            if (! Commerce::where('id', $filters['commerce_id'])->exists()) {
+                throw new ModelNotFoundException('Commerce not found');
+            }
             $query->where('commerce_id', $filters['commerce_id']);
         }
         if (isset($filters['type'])) {

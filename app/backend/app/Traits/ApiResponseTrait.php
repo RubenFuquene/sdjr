@@ -90,4 +90,18 @@ trait ApiResponseTrait
             ],
         ], 200);
     }
+
+    /**
+     * Return a login response with token.
+     */
+    protected function loginResponse(mixed $data = null, $token = '', ?string $message = 'Login successful', int $code = 200): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'message' => $message,
+            'data' => $data,
+            'token' => $token,
+        ], $code);
+
+    }
 }

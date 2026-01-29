@@ -46,7 +46,7 @@ class CommerceResource extends JsonResource
             'department' => new DepartmentResource($this->department),
             'city' => new CityResource($this->city),
             'neighborhood' => new NeighborhoodResource($this->neighborhood),
-            'legal_representatives' => new LegalRepresentativeResourceCollection($this->legalRepresentatives),
+            'legal_representatives' => new LegalRepresentativeResourceCollection($this->legalRepresentativesActive),
             'name' => $this->name,
             'description' => $this->description,
             'tax_id' => $this->tax_id,

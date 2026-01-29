@@ -22,26 +22,26 @@ class UserSeeder extends ControlledSeeder
      */
     protected function runSeeder(): void
     {
-        // Create a specific admin user for testing purposes (updateOrCreate for idempotency)
-        User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin',
-                'last_name' => 'User',
-                'phone' => '3001234567',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Only create random users if they don't exist
-        if (User::count() <= 1) {
-            User::factory(10)->create();
+        // Create a specific users for testing purposes
+        $users = env('SEEDING_USERS');
+        if ($users) {
+            $emails = explode(',', $users);
+            foreach ($emails as $email) {
+                $email = trim($email);
+                User::firstOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => explode('@', $email)[0],
+                        'last_name' => 'User',
+                        'phone' => '3000000000',
+                        'password' => Hash::make('password'),
+                        'email_verified_at' => now(),
+                    ]
+                );
+            }
         }
-    }
 
-    protected function getRecordsCount(): int
-    {
-        return User::count();
+        // Always create 10 additional test users
+        User::factory(10)->create();
     }
 }

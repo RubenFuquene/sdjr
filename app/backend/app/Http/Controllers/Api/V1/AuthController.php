@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\LoginRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\AuthService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -16,6 +17,8 @@ use Illuminate\Http\JsonResponse;
  */
 class AuthController extends Controller
 {
+    use ApiResponseTrait;
+
     protected AuthService $authService;
 
     public function __construct(AuthService $authService)
@@ -63,10 +66,6 @@ class AuthController extends Controller
     {
         $data = $this->authService->login($request->validated());
 
-        return response()->json([
-            'message' => 'Login successful',
-            'data' => new UserResource($data['user']),
-            'token' => $data['token'],
-        ]);
+        return $this->loginResponse(new UserResource($data['user']), $data['token']);
     }
 }

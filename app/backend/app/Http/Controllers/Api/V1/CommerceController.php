@@ -6,10 +6,19 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CommerceRequest;
+use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
+use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
 use App\Http\Requests\Api\V1\IndexCommerceRequest;
+use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
+use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
+use App\Http\Resources\Api\V1\CommerceBranchResource;
+use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
+use App\Services\CommerceBranchService;
+use App\Services\CommercePayoutMethodService;
 use App\Services\CommerceService;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
@@ -27,9 +36,18 @@ class CommerceController extends Controller
 
     private CommerceService $commerceService;
 
-    public function __construct(CommerceService $commerceService)
-    {
+    private CommerceBranchService $commerceBranchService;
+
+    private CommercePayoutMethodService $commercePayoutMethodService;
+
+    public function __construct(
+        CommerceService $commerceService,
+        CommerceBranchService $commerceBranchService,
+        CommercePayoutMethodService $commercePayoutMethodService
+    ) {
         $this->commerceService = $commerceService;
+        $this->commerceBranchService = $commerceBranchService;
+        $this->commercePayoutMethodService = $commercePayoutMethodService;
     }
 
     /**
@@ -216,10 +234,217 @@ class CommerceController extends Controller
             $this->commerceService->delete($commerce_id);
 
             return $this->successResponse(null, 'Commerce deleted successfully', Response::HTTP_NO_CONTENT);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
         } catch (\Throwable $e) {
             Log::error('Error deleting commerce', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error deleting commerce', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/commerces/{id}/status",
+     *     operationId="patchCommerceStatus",
+     *     tags={"Commerces"},
+     *     summary="Update commerce status",
+     *     description="Updates the is_active status of a commerce (active/inactive).",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Commerce ID",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"is_active"},
+     *
+     *             @OA\Property(property="is_active", type="integer", enum={1,0}, example=1)
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commerce status updated successfully",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceResource")
+     *     ),
+     *
+     *     @OA\Response(response=404, description="Commerce not found"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Validation Error")
+     * )
+     */
+    public function patchStatus(PatchCommerceStatusRequest $request, int $id): JsonResponse
+    {
+        try {
+            $commerce = $this->commerceService->updateStatus(
+                $id,
+                (int) $request->validated('is_active')
+            );
+
+            return $this->successResponse(new CommerceResource($commerce), 'Commerce status updated successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
+        } catch (\Throwable $e) {
+            Log::error('Error updating commerce status', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error updating commerce status', 500, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/commerces/{id}/verification",
+     *     operationId="patchCommerceVerification",
+     *     tags={"Commerces"},
+     *     summary="Update commerce verification status",
+     *     description="Updates the is_verified status of a commerce (verified/unverified).",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Commerce ID",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"is_verified"},
+     *
+     *             @OA\Property(property="is_verified", type="integer", enum={1,0}, example=1)
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commerce verification updated successfully",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceResource")
+     *     ),
+     *
+     *     @OA\Response(response=404, description="Commerce not found"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Validation Error")
+     * )
+     */
+    public function patchVerification(PatchCommerceVerificationRequest $request, int $id): JsonResponse
+    {
+        try {
+            $commerce = $this->commerceService->updateVerification($id, (int) $request->validated('is_verified'));
+
+            return $this->successResponse(new CommerceResource($commerce), 'Commerce verification updated successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
+        } catch (\Throwable $e) {
+            Log::error('Error updating commerce verification', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error updating commerce verification', 500, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/commerces/{commerce_id}/branches",
+     *     operationId="getBranchesByCommerceId",
+     *     tags={"Commerces"},
+     *     summary="List branches by commerce",
+     *     description="Returns paginated list of branches for a specific commerce.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="commerce_id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer", default=1)),
+     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
+     *
+     *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommerceBranchResource")),
+     *         @OA\Property(property="meta", type="object"),
+     *         @OA\Property(property="links", type="object")
+     *     )),
+     *
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Commerce not found")
+     * )
+     */
+    public function getBranchesByCommerceId(int $commerce_id, IndexCommerceBranchRequest $request): JsonResponse
+    {
+        try {
+            $perPage = $request->query('per_page', 15);
+            $branches = $this->commerceBranchService->getBranchesByCommerceId($commerce_id, (int) $perPage);
+            $resource = CommerceBranchResource::collection($branches);
+
+            return $this->paginatedResponse($branches, $resource, 'Branches retrieved successfully');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
+        } catch (\Throwable $e) {
+            Log::error('Error listing branches', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error listing branches', 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/commerces/{commerce_id}/payout-methods",
+     *     operationId="getPayoutMethodsByCommerceId",
+     *     tags={"Commerces"},
+     *     summary="List payout methods by commerce",
+     *     description="Returns paginated list of payout methods for a specific commerce.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="commerce_id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer", default=1)),
+     *     @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="owner_id", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="account_number", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string", maxLength=1)),
+     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
+     *
+     *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommercePayoutMethodResource")),
+     *         @OA\Property(property="meta", type="object"),
+     *         @OA\Property(property="links", type="object")
+     *     )),
+     *
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Commerce not found")
+     * )
+     */
+    public function getPayoutMethodsByCommerceId(int $commerce_id, IndexCommercePayoutMethodRequest $request): JsonResponse
+    {
+        try {
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
+            $filters['commerce_id'] = $commerce_id;
+            $payoutMethods = $this->commercePayoutMethodService->getPaginated($filters, $perPage);
+            $resource = CommercePayoutMethodResource::collection($payoutMethods);
+
+            return $this->paginatedResponse($payoutMethods, $resource, 'Payout methods retrieved successfully');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
+        } catch (\Throwable $e) {
+            Log::error('Error listing payout methods', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error listing payout methods', 500);
         }
     }
 }

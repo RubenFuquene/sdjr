@@ -25,6 +25,4 @@ tmp/
 temp/
 *.tmp
 
-# Design reference (Figma exports)
-design-reference-*/
-!design-reference/README.md
+design-reference-*
