@@ -2,19 +2,20 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Constants\Constant;
 use App\Models\Country;
 use App\Models\Department;
 use App\Models\User;
+use Faker\Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
-use Faker\Generator;
-use App\Constants\Constant;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class DepartmentTest extends TestCase
 {
     use RefreshDatabase;
+
     protected Generator $faker;
 
     protected function setUp(): void
@@ -24,27 +25,27 @@ class DepartmentTest extends TestCase
     }
 
     /**
-     * Test that the index endpoint returns a list of departments.
+     * Verifica que el endpoint index retorne la lista de departamentos correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso y un departamento, valida la cantidad y la respuesta.
      */
     public function test_index_returns_departments()
     {
-        Permission::firstOrCreate(['name' => 'departments.index', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.index', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.index');
+        $user->givePermissionTo('admin.params.departments.index');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
         Department::create([
             'country_id' => $country->id,
             'name' => 'Cundinamarca',
             'code' => 'DEP001',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
 
         $response = $this->getJson('/api/v1/departments');
@@ -54,27 +55,27 @@ class DepartmentTest extends TestCase
     }
 
     /**
-     * Test that the store endpoint creates a new department.
+     * Verifica que el endpoint store cree un nuevo departamento correctamente.
      *
-     * @return void
+     * Crea un usuario con permiso, envía los datos y valida la respuesta y la base de datos.
      */
     public function test_store_creates_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.create', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.create');
+        $user->givePermissionTo('admin.params.departments.create');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ]);
         $data = [
             'country_id' => $country->id,
             'name' => 'Antioquia',
             'code' => 'DEP002',
-            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE])
+            'status' => $this->faker->randomElement([Constant::STATUS_ACTIVE, Constant::STATUS_INACTIVE]),
         ];
 
         $response = $this->postJson('/api/v1/departments', $data);
@@ -98,21 +99,21 @@ class DepartmentTest extends TestCase
      */
     public function test_show_returns_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.show', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.show', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.show');
+        $user->givePermissionTo('admin.params.departments.show');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $department = Department::create([
             'country_id' => $country->id,
             'name' => 'Valle del Cauca',
             'code' => 'DEP003',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->getJson("/api/v1/departments/{$department->id}");
@@ -129,27 +130,27 @@ class DepartmentTest extends TestCase
      */
     public function test_update_updates_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.update', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.update', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.update');
+        $user->givePermissionTo('admin.params.departments.update');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $department = Department::create([
             'country_id' => $country->id,
             'name' => 'Atlantico',
             'code' => 'DEP004',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $data = [
             'country_id' => $country->id,
             'name' => 'Atlántico',
             'code' => 'DEP005',
-            'status' => Constant::STATUS_INACTIVE
+            'status' => Constant::STATUS_INACTIVE,
         ];
 
         $response = $this->putJson("/api/v1/departments/{$department->id}", $data);
@@ -167,21 +168,21 @@ class DepartmentTest extends TestCase
      */
     public function test_destroy_deletes_department()
     {
-        Permission::firstOrCreate(['name' => 'departments.delete', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.params.departments.delete', 'guard_name' => 'sanctum']);
         $user = User::factory()->create();
-        $user->givePermissionTo('departments.delete');
+        $user->givePermissionTo('admin.params.departments.delete');
         Sanctum::actingAs($user);
 
         $country = Country::create([
             'name' => 'Colombia',
             'code' => 'CO1234',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
         $department = Department::create([
             'country_id' => $country->id,
             'name' => 'Bolivar',
             'code' => 'DEP006',
-            'status' => Constant::STATUS_ACTIVE
+            'status' => Constant::STATUS_ACTIVE,
         ]);
 
         $response = $this->deleteJson("/api/v1/departments/{$department->id}");

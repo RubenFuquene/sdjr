@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  *     schema="AuditLog",
  *     title="Audit Log",
  *     description="Audit log entry",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="user_id", type="integer", nullable=true, example=5),
  *     @OA\Property(property="method", type="string", example="POST"),

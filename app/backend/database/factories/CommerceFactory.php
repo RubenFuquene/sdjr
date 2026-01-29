@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Commerce;
-use App\Models\User;
-use App\Models\Department;
 use App\Models\City;
+use App\Models\Commerce;
+use App\Models\Department;
 use App\Models\Neighborhood;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CommerceFactory extends Factory
@@ -30,7 +30,7 @@ class CommerceFactory extends Factory
             'phone' => $this->faker->phoneNumber(),
             'email' => $this->faker->unique()->safeEmail(),
             'is_active' => $this->faker->boolean(90),
-            'is_verified' => $this->faker->boolean(10),            
+            'is_verified' => $this->faker->boolean(10),
         ];
     }
 }

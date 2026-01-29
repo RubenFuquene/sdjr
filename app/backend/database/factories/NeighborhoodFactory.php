@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Neighborhood;
-use App\Models\City;
 use App\Constants\Constant;
+use App\Models\City;
+use App\Models\Neighborhood;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,8 +20,8 @@ class NeighborhoodFactory extends Factory
     {
         return [
             'city_id' => City::factory(),
-            'name' => $this->faker->streetName(),
-            'code' => strtoupper($this->faker->unique()->bothify('NB####')),
+            'name' => $this->faker->unique()->streetName(),
+            'code' => strtoupper($this->faker->unique()->bothify('??####')),
             'status' => Constant::STATUS_ACTIVE,
         ];
     }

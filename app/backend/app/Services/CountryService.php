@@ -10,8 +10,6 @@ class CountryService
 {
     /**
      * Get all countries.
-     *
-     * @return Collection
      */
     public function getAll(): Collection
     {
@@ -20,25 +18,25 @@ class CountryService
 
     /**
      * Get paginated countries with optional status filter.
-     *
-     * @param int $perPage
-     * @param string $status
-     * @return LengthAwarePaginator
      */
-    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = Country::query();
-        if ($status !== 'all') {
-            $query->where('status', $status);
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
         }
+        if (! empty($filters['code'])) {
+            $query->where('code', 'like', "%{$filters['code']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
         return $query->paginate($perPage);
     }
 
     /**
      * Create a new country.
-     *
-     * @param array $data
-     * @return Country
      */
     public function create(array $data): Country
     {
@@ -47,9 +45,6 @@ class CountryService
 
     /**
      * Find a country by ID.
-     *
-     * @param string $id
-     * @return Country|null
      */
     public function find(string $id): ?Country
     {
@@ -58,22 +53,16 @@ class CountryService
 
     /**
      * Update a country.
-     *
-     * @param Country $country
-     * @param array $data
-     * @return Country
      */
     public function update(Country $country, array $data): Country
     {
         $country->update($data);
+
         return $country;
     }
 
     /**
      * Delete a country.
-     *
-     * @param Country $country
-     * @return bool
      */
     public function delete(Country $country): bool
     {

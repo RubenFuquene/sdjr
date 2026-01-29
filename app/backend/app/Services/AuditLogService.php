@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\AuditLog;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class AuditLogService
 {
@@ -30,8 +30,6 @@ class AuditLogService
     /**
      * Get a single audit log by ID.
      *
-     * @param int $id
-     * @return AuditLog
      * @throws ModelNotFoundException
      */
     public function getById(int $id): AuditLog

@@ -7,9 +7,13 @@ services:
       - "3000:3000"
     volumes:
       - ../frontend:/app
+      - frontend-next:/app/.next
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING_INTERVAL=1000
     networks:
       - sdjr-network
     depends_on:
@@ -27,11 +31,18 @@ services:
     networks:
       - sdjr-network
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   db:
     image: mysql:8.0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
       - "3306:3306"
     environment:
@@ -51,9 +62,33 @@ services:
     networks:
       - sdjr-network
 
+  minio:
+    image: minio/minio:latest
+    container_name: sdjr_minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BROWSER_REDIRECT_URL: http://minio:9001
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+      - ./minio_init.sh:/tmp/minio_init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    command: minio server /data --console-address ":9001"
+    networks:
+      - sdjr-network
+
 networks:
   sdjr-network:
     driver: bridge
 
 volumes:
   db-data:
+  frontend-next:
+  minio_data:

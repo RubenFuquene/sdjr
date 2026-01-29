@@ -18,7 +18,7 @@ class LegalRepresentativeServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new LegalRepresentativeService();
+        $this->service = new LegalRepresentativeService;
     }
 
     public function test_store_and_show_legal_representative(): void
@@ -34,15 +34,15 @@ class LegalRepresentativeServiceTest extends TestCase
     {
         $legal = LegalRepresentative::factory()->create();
         $update = [
-            'name' => 'NuevoNombre',
-            'last_name' => 'NuevoApellido',
+            'name' => 'Nuevo Nombre',
+            'last_name' => 'Nuevo Apellido',
             'document' => '9999999999',
             'document_type' => 'NIT',
             'commerce_id' => $legal->commerce_id,
         ];
         $updated = $this->service->update($legal->id, $update);
-        $this->assertEquals('NuevoNombre', $updated->name);
-        $this->assertEquals('NuevoApellido', $updated->last_name);
+        $this->assertEquals('Nuevo Nombre', $updated->name);
+        $this->assertEquals('Nuevo Apellido', $updated->last_name);
         $this->assertEquals('9999999999', $updated->document);
         $this->assertEquals('NIT', $updated->document_type);
     }

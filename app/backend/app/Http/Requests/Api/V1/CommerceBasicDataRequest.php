@@ -7,9 +7,14 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
+ * CommerceBasicDataRequest
+ *
  * @OA\Schema(
  *     schema="CommerceBasicDataRequest",
- *     @OA\Property(property="commerce", ref="#/components/schemas/CommerceRequest"),
+ *     type="object",
+ *     description="Request schema for basic commerce data, including commerce, legal representatives, and documents.",
+ *
+ *     @OA\Property(property="commerce", type="array", @OA\Items(ref="#/components/schemas/CommerceRequest")),
  *     @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeRequest")),
  *     @OA\Property(property="commerce_documents", type="array", @OA\Items(ref="#/components/schemas/CommerceDocument"))
  * )
@@ -18,35 +23,35 @@ class CommerceBasicDataRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('commerces.create') ?? false;
+        return $this->user()?->can('provider.commerces.create') ?? false;
     }
 
     public function rules(): array
     {
         return [
             'commerce' => ['nullable', 'array'],
-            'commerce.*.owner_user_id' => ['required', 'integer', 'exists:users,id'],
-            'commerce.*.department_id' => ['required', 'integer', 'exists:departments,id'],
-            'commerce.*.city_id' => ['required', 'integer', 'exists:cities,id'],
-            'commerce.*.neighborhood_id' => ['required', 'integer', 'exists:neighborhoods,id'],
-            'commerce.*.name' => ['required', 'string', 'max:255'],
-            'commerce.*.description' => ['nullable', 'string', 'max:500'],
-            'commerce.*.tax_id' => ['required', 'string', 'max:50'],
-            'commerce.*.tax_id_type' => ['required', 'string', 'max:10'],
-            'commerce.*.address' => ['required', 'string', 'max:255'],
-            'commerce.*.phone' => ['nullable', 'string', 'max:20'],
-            'commerce.*.email' => ['nullable', 'string', 'email', 'max:100'],
-            'commerce.*.is_verified' => ['boolean'],
-            'commerce.*.is_active' => ['boolean'],
+            'commerce.owner_user_id' => ['required', 'integer', 'exists:users,id'],
+            'commerce.department_id' => ['required', 'integer', 'exists:departments,id'],
+            'commerce.city_id' => ['required', 'integer', 'exists:cities,id'],
+            'commerce.neighborhood_id' => ['required', 'integer', 'exists:neighborhoods,id'],
+            'commerce.name' => ['required', 'string', 'max:255'],
+            'commerce.description' => ['nullable', 'string', 'max:500'],
+            'commerce.tax_id' => ['required', 'string', 'max:50'],
+            'commerce.tax_id_type' => ['required', 'string', 'max:10'],
+            'commerce.address' => ['required', 'string', 'max:255'],
+            'commerce.phone' => ['nullable', 'string', 'max:20'],
+            'commerce.email' => ['nullable', 'string', 'email', 'max:100'],
+            'commerce.is_verified' => ['boolean'],
+            'commerce.is_active' => ['boolean'],
 
-            'legal_representatives' => ['nullable', 'array'],
-            'legal_representatives.*.name' => ['required_with:legal_representatives', 'string', 'max:255'],
-            'legal_representatives.*.last_name' => ['required_with:legal_representatives', 'string', 'max:255'],
-            'legal_representatives.*.document' => ['required_with:legal_representatives', 'string', 'max:30'],
-            'legal_representatives.*.document_type' => ['required_with:legal_representatives', 'string', 'in:CC,CE,NIT,PAS'],
-            'legal_representatives.*.email' => ['nullable', 'string', 'email', 'max:100'],
-            'legal_representatives.*.phone' => ['nullable', 'string', 'max:20'],
-            'legal_representatives.*.is_primary' => ['boolean'],
+            'legal_representative' => ['nullable', 'array'],
+            'legal_representative.name' => ['required', 'string', 'max:255'],
+            'legal_representative.last_name' => ['required', 'string', 'max:255'],
+            'legal_representative.document' => ['required', 'string', 'max:30'],
+            'legal_representative.document_type' => ['required', 'string', 'in:CC,CE,NIT,PAS'],
+            'legal_representative.email' => ['nullable', 'string', 'email', 'max:100'],
+            'legal_representative.phone' => ['nullable', 'string', 'max:20'],
+            'legal_representative.is_primary' => ['boolean'],
 
             'commerce_documents' => ['nullable', 'array'],
             'commerce_documents.*.verified_by_id' => ['nullable', 'integer', 'exists:users,id'],
@@ -57,6 +62,13 @@ class CommerceBasicDataRequest extends FormRequest
             'commerce_documents.*.verified' => ['boolean'],
             'commerce_documents.*.uploaded_at' => ['nullable', 'date'],
             'commerce_documents.*.verified_at' => ['nullable', 'date'],
+
+            'my_account.type' => ['required', 'string', 'max:15'],
+            'my_account.account_type' => ['required', 'string', 'max:50'],
+            'my_account.bank_id' => ['required', 'exists:banks,id'],
+            'my_account.account_number' => ['required', 'string', 'max:50'],
+            'my_account.owner_id' => ['required', 'exists:users,id'],
+            'my_account.is_primary' => ['boolean'],
         ];
     }
 }

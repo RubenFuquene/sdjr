@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Neighborhood extends Model
 {
-    use HasFactory, SoftDeletes, SanitizesTextAttributes;
+    use HasFactory, SanitizesTextAttributes, SoftDeletes;
 
     protected $fillable = [
         'city_id',

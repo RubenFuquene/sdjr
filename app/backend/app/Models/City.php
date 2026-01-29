@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Traits\SanitizesTextAttributes;
 
 class City extends Model
 {
@@ -20,8 +20,6 @@ class City extends Model
 
     /**
      * Get the department that owns the city.
-     *
-     * @return BelongsTo
      */
     public function department(): BelongsTo
     {
@@ -43,7 +41,7 @@ class City extends Model
     {
         $this->attributes['name'] = $this->sanitizeText($value);
     }
-    
+
     /**
      * Sanitize code before saving.
      */

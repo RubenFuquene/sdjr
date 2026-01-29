@@ -16,14 +16,20 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class CategoryRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'categories.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.params.categories.'.($action === 'store' ? 'create' : 'update');
+
         return $this->user()?->can($permission) ?? false;
     }
 
     /**
+     * Get the validation rules that apply to the request.
+     *
      * @OA\Property(property="name", type="string", example="Food")
      * @OA\Property(property="icon", type="string", example="https://example.com/icon.png")
      * @OA\Property(property="status", type="string", example="1")

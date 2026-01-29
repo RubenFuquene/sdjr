@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CityRequest;
+use App\Http\Requests\Api\V1\DeleteCityRequest;
+use App\Http\Requests\Api\V1\IndexCityRequest;
+use App\Http\Requests\Api\V1\ShowCityRequest;
 use App\Http\Resources\Api\V1\CityResource;
 use App\Services\CityService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -19,6 +22,7 @@ use App\Traits\ApiResponseTrait;
 class CityController extends Controller
 {
     use ApiResponseTrait;
+
     protected CityService $cityService;
 
     public function __construct(CityService $cityService)
@@ -27,39 +31,32 @@ class CityController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
      * @OA\Get(
-     *      path="/api/v1/cities",
-     *      operationId="getCitiesList",
-     *      tags={"Cities"},
-     *      summary="Get list of cities",
-     *      description="Returns list of cities",
-     *      security={{"sanctum":{}}},
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
-     *     )
+     *     path="/api/v1/cities",
+     *     operationId="indexCities",
+     *     tags={"Cities"},
+     *     summary="List cities",
+     *     description="Get paginated list of cities. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
+     *     security={{"sanctum":{}}},
      *
-     * @return AnonymousResourceCollection
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre de la ciudad (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código de la ciudad", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
+     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
-    public function index(\App\Http\Requests\Api\V1\CityIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(IndexCityRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
+            $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
-            $status = $request->validatedStatus();
-            $cities = $this->cityService->getPaginated($perPage, $status);
+            $cities = $this->cityService->getPaginated($filters, $perPage);
             $resource = CityResource::collection($cities);
+
             return $this->paginatedResponse($cities, $resource, 'Cities retrieved successfully');
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving cities', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -67,45 +64,41 @@ class CityController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created city.
      *
      * @OA\Post(
      *      path="/api/v1/cities",
      *      operationId="storeCity",
      *      tags={"Cities"},
      *      summary="Store new city",
-     *      description="Returns city data",
+     *      description="Returns created city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
+     *
+     *          @OA\JsonContent(type="object")
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
-     * )
      *
-     * @param CityRequest $request
-     * @return CityResource
+     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
+     *      ),
+     *
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
+     * )
      */
     public function store(CityRequest $request): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->create($request->validated());
+
             return $this->successResponse(new CityResource($city), 'City created successfully', 201);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error creating city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -113,57 +106,43 @@ class CityController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified city.
      *
      * @OA\Get(
      *      path="/api/v1/cities/{id}",
-     *      operationId="getCityById",
+     *      operationId="showCity",
      *      tags={"Cities"},
      *      summary="Get city information",
      *      description="Returns city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="City id",
-     *          required=true,
      *          in="path",
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          required=true,
+     *          description="City ID",
+     *
+     *          @OA\Schema(ref="#/components/schemas/ShowCityRequest")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
-     * )
      *
-     * @param string $id
-     * @return CityResource|JsonResponse
+     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
+     *      ),
+     *
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
+     * )
      */
-    public function show(string $id): CityResource|JsonResponse
+    public function show(ShowCityRequest $request, string $id): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (!$city) {
-                return $this->errorResponse('City not found', 404);
-            }
+
             return $this->successResponse(new CityResource($city), 'City retrieved successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -171,7 +150,7 @@ class CityController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified city.
      *
      * @OA\Put(
      *      path="/api/v1/cities/{id}",
@@ -180,54 +159,46 @@ class CityController extends Controller
      *      summary="Update existing city",
      *      description="Returns updated city data",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="City id",
-     *          required=true,
      *          in="path",
-     *          @OA\Schema(
-     *              type="string"
-     *          )
+     *          required=true,
+     *          description="City ID",
+     *
+     *          @OA\Schema(type="string")
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/CityRequest")
+     *
+     *          @OA\JsonContent(type="object")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
-     *       ),
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
-     * )
      *
-     * @param CityRequest $request
-     * @param string $id
-     * @return CityResource|JsonResponse
+     *          @OA\JsonContent(ref="#/components/schemas/CityResource")
+     *      ),
+     *
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=400, description="Bad Request"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=422, description="Unprocessable Entity"),
+     *      @OA\Response(response=500, description="Internal Server Error")
+     * )
      */
     public function update(CityRequest $request, string $id): CityResource|JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (!$city) {
+            if (! $city) {
                 return $this->errorResponse('City not found', 404);
             }
             $updatedCity = $this->cityService->update($city, $request->validated());
+
             return $this->successResponse(new CityResource($updatedCity), 'City updated successfully', 200);
         } catch (\Throwable $e) {
             return $this->errorResponse('Error updating city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);
@@ -235,7 +206,7 @@ class CityController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified city.
      *
      * @OA\Delete(
      *      path="/api/v1/cities/{id}",
@@ -244,47 +215,32 @@ class CityController extends Controller
      *      summary="Delete existing city",
      *      description="Deletes a record and returns no content",
      *      security={{"sanctum":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
-     *          description="City id",
-     *          required=true,
      *          in="path",
-     *          @OA\Schema(
-     *              type="string"
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="City deleted successfully")
-     *          )
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Resource Not Found"
-     *      )
-     * )
+     *          required=true,
+     *          description="City ID",
      *
-     * @param string $id
-     * @return JsonResponse
+     *          @OA\Schema(ref="#/components/schemas/DeleteCityRequest")
+     *      ),
+     *
+     *      @OA\Response(response=204, description="No Content"),
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=403, description="Forbidden"),
+     *      @OA\Response(response=500, description="Internal Server Error")
+     * )
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(DeleteCityRequest $request, string $id): JsonResponse
     {
         try {
             $city = $this->cityService->find($id);
-            if (!$city) {
+            if (! $city) {
                 return $this->errorResponse('City not found', 404);
             }
             $this->cityService->delete($city);
+
             return $this->noContentResponse();
         } catch (\Throwable $e) {
             return $this->errorResponse('Error deleting city', 500, app()->environment('production') ? null : ['exception' => $e->getMessage()]);

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Department;
 use App\Constants\Constant;
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

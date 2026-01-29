@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="EstablishmentTypeResource",
  *     title="EstablishmentType Resource",
  *     description="EstablishmentType resource representation",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Restaurante"),
  *     @OA\Property(property="code", type="string", example="REST"),
@@ -21,6 +22,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class EstablishmentTypeResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
     public function toArray($request): array
     {
         return [

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *     schema="LegalRepresentativeRequest",
  *     required={"commerce_id","name","last_name","document","document_type"},
+ *
  *     @OA\Property(property="commerce_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", maxLength=255, example="Juan"),
  *     @OA\Property(property="last_name", type="string", maxLength=255, example="Pérez"),
@@ -25,7 +26,8 @@ class LegalRepresentativeRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'legal_representatives.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'provider.legal_representatives.'.($action === 'store' ? 'create' : 'update');
+
         return $this->user()?->can($permission) ?? false;
     }
 
@@ -41,6 +43,7 @@ class LegalRepresentativeRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'is_primary' => ['boolean'],
         ];
+
         return $rules;
     }
 }

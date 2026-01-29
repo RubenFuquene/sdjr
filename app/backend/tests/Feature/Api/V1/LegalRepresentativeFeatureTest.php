@@ -22,29 +22,35 @@ class LegalRepresentativeFeatureTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->create();
         $permissions = [
-            'legal_representatives.create',
-            'legal_representatives.view',
-            'legal_representatives.update',
-            'legal_representatives.delete',
+            'provider.legal_representatives.create',
+            'provider.legal_representatives.view',
+            'provider.legal_representatives.update',
+            'provider.legal_representatives.delete',
         ];
         foreach ($permissions as $perm) {
-            Permission::findOrCreate($perm);
+            Permission::findOrCreate($perm, 'sanctum');
         }
         $this->user->givePermissionTo($permissions);
     }
 
+    /**
+     * Prueba que un usuario con permisos puede listar los representantes legales.
+     */
     public function test_can_list_legal_representatives(): void
     {
         $this->actingAs($this->user);
         LegalRepresentative::factory()->count(2)->create();
         $response = $this->getJson('/api/v1/legal-representatives');
         $response->assertOk()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonStructure([
-                'success', 'data', 'meta'
+                'status', 'data', 'meta',
             ]);
     }
 
+    /**
+     * Prueba que un usuario con permisos puede crear un representante legal.
+     */
     public function test_can_create_legal_representative(): void
     {
         $this->actingAs($this->user);
@@ -61,20 +67,26 @@ class LegalRepresentativeFeatureTest extends TestCase
         ];
         $response = $this->postJson('/api/v1/legal-representatives', $payload);
         $response->assertCreated()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonPath('data.name', 'Juan');
     }
 
+    /**
+     * Prueba que un usuario con permisos puede ver el detalle de un representante legal.
+     */
     public function test_can_show_legal_representative(): void
     {
         $this->actingAs($this->user);
         $legal = LegalRepresentative::factory()->create();
-        $response = $this->getJson('/api/v1/legal-representatives/' . $legal->id);
+        $response = $this->getJson('/api/v1/legal-representatives/'.$legal->id);
         $response->assertOk()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonPath('data.id', $legal->id);
     }
 
+    /**
+     * Prueba que un usuario con permisos puede actualizar un representante legal.
+     */
     public function test_can_update_legal_representative(): void
     {
         $this->actingAs($this->user);
@@ -89,21 +101,27 @@ class LegalRepresentativeFeatureTest extends TestCase
             'phone' => '3109876543',
             'is_primary' => false,
         ];
-        $response = $this->putJson('/api/v1/legal-representatives/' . $legal->id, $payload);
+        $response = $this->putJson('/api/v1/legal-representatives/'.$legal->id, $payload);
         $response->assertOk()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', true)
             ->assertJsonPath('data.name', 'Carlos');
     }
 
+    /**
+     * Prueba que un usuario con permisos puede eliminar (soft delete) un representante legal.
+     */
     public function test_can_delete_legal_representative(): void
     {
         $this->actingAs($this->user);
         $legal = LegalRepresentative::factory()->create();
-        $response = $this->deleteJson('/api/v1/legal-representatives/' . $legal->id);
+        $response = $this->deleteJson('/api/v1/legal-representatives/'.$legal->id);
         $response->assertNoContent();
         $this->assertSoftDeleted('legal_representatives', ['id' => $legal->id]);
     }
 
+    /**
+     * Prueba que un usuario sin permisos no puede crear un representante legal.
+     */
     public function test_cannot_create_without_permission(): void
     {
         $user = User::factory()->create();

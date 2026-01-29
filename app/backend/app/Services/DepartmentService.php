@@ -10,8 +10,6 @@ class DepartmentService
 {
     /**
      * Get all departments.
-     *
-     * @return Collection
      */
     public function getAll(): Collection
     {
@@ -20,24 +18,25 @@ class DepartmentService
 
     /**
      * Get paginated departments.
-     *
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
-    public function getPaginated(int $perPage = 15, string $status = 'all'): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = Department::with('country');
-        if ($status !== 'all') {
-            $query->where('status', $status);
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
         }
+        if (! empty($filters['code'])) {
+            $query->where('code', 'like', "%{$filters['code']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
         return $query->paginate($perPage);
     }
 
     /**
      * Create a new department.
-     *
-     * @param array $data
-     * @return Department
      */
     public function create(array $data): Department
     {
@@ -46,33 +45,24 @@ class DepartmentService
 
     /**
      * Find a department by ID.
-     *
-     * @param string $id
-     * @return Department|null
      */
     public function find(string $id): ?Department
     {
-        return Department::with('country')->find($id);
+        return Department::with('country')->findOrFail($id);
     }
 
     /**
      * Update a department.
-     *
-     * @param Department $department
-     * @param array $data
-     * @return Department
      */
     public function update(Department $department, array $data): Department
     {
         $department->update($data);
+
         return $department;
     }
 
     /**
      * Delete a department.
-     *
-     * @param Department $department
-     * @return bool
      */
     public function delete(Department $department): bool
     {

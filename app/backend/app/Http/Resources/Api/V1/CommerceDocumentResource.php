@@ -9,6 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @OA\Schema(
  *     schema="CommerceDocumentResource",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="document_type", type="string", example="ID_CARD"),
  *     @OA\Property(property="file_path", type="string", example="/uploads/doc.pdf"),
@@ -19,6 +20,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class CommerceDocumentResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
     public function toArray($request): array
     {
         return [

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *     schema="UserRequest",
  *     required={"name", "last_name", "email", "password"},
+ *
  *     @OA\Property(property="name", type="string", maxLength=255, example="Juan", description="User first name"),
  *     @OA\Property(property="last_name", type="string", maxLength=255, example="Pérez", description="User last name"),
  *     @OA\Property(property="email", type="string", format="email", example="juan.perez@example.com", description="User email address"),
@@ -21,17 +22,23 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class UserRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'users.' . ($action === 'store' ? 'create' : 'update');
+        $permission = 'admin.profiles.users.'.($action === 'store' ? 'create' : 'update');
+
         return $this->user()?->can($permission) ?? false;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     */
     public function rules(): array
-    {        
+    {
         $method = $this->method();
-
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],

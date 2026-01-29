@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Commerce;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -14,8 +14,6 @@ class CommerceService
 {
     /**
      * Get paginated commerces
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
@@ -24,8 +22,7 @@ class CommerceService
 
     /**
      * Store a new commerce
-     * @param array $data
-     * @return Commerce
+     *
      * @throws Throwable
      */
     public function store(array $data): Commerce
@@ -37,9 +34,7 @@ class CommerceService
 
     /**
      * Update a commerce
-     * @param int $commerce_id
-     * @param array $data
-     * @return Commerce
+     *
      * @throws Throwable
      */
     public function update(int $commerce_id, array $data): Commerce
@@ -47,14 +42,14 @@ class CommerceService
         return DB::transaction(function () use ($commerce_id, $data) {
             $commerce = Commerce::findOrFail($commerce_id);
             $commerce->update($data);
+
             return $commerce->refresh();
         });
     }
 
     /**
      * Delete a commerce
-     * @param int $commerce_id
-     * @return void
+     *
      * @throws Throwable
      */
     public function delete(int $commerce_id): void
@@ -67,11 +62,69 @@ class CommerceService
 
     /**
      * Show a commerce
-     * @param int $commerce_id
-     * @return Commerce
      */
     public function show(int $commerce_id): Commerce
     {
         return Commerce::findOrFail($commerce_id);
+    }
+
+    /**
+     * Get paginated commerces with filters: page, per_page, search, status
+     */
+    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null): LengthAwarePaginator
+    {
+        $query = Commerce::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('description', 'like', "%$search%")
+                    ->orWhere('tax_id', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%");
+            });
+        }
+
+        if (! is_null($status)) {
+            $query->where('is_active', $status);
+        }
+
+        return $query->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    /**
+     * Update the is_active status of a commerce.
+     *
+     * @throws ModelNotFoundException
+     */
+    public function updateStatus(int $commerceId, int $isActive): Commerce
+    {
+        try {
+            $commerce = Commerce::findOrFail($commerceId);
+            $commerce->is_active = $isActive;
+            $commerce->save();
+
+            return $commerce;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Update the is_verified status of a commerce.
+     *
+     * @throws ModelNotFoundException
+     */
+    public function updateVerification(int $commerceId, int $isVerified): Commerce
+    {
+        try {
+            $commerce = Commerce::findOrFail($commerceId);
+            $commerce->is_verified = $isVerified;
+            $commerce->save();
+
+            return $commerce;
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }
