@@ -69,6 +69,6 @@ class Constant
 
     // Product Types
     public const PRODUCT_TYPE_SINGLE = 'single';
-    
+
     public const PRODUCT_TYPE_PACKAGE = 'package';
 }

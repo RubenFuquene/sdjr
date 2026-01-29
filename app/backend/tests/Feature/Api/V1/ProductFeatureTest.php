@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Commerce;
 use App\Constants\Constant;
+use App\Models\Commerce;
 use App\Models\CommerceBranch;
+use App\Models\Product;
 use App\Models\ProductCategory;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class ProductFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'provider.products.index', 'guard_name' => 'sanctum']);
@@ -41,6 +39,7 @@ class ProductFeatureTest extends TestCase
             'provider.products.delete',
         ]);
         $this->actingAs($user, 'sanctum');
+
         return $user;
     }
 
@@ -49,7 +48,7 @@ class ProductFeatureTest extends TestCase
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
         Product::factory()->count(3)->create(['commerce_id' => $commerce->id]);
-        $response = $this->getJson('/api/v1/products/commerce/' . $commerce->id);
+        $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
         $response->assertOk()->assertJsonStructure(['data']);
     }
 
@@ -57,10 +56,10 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
-        $category = ProductCategory::factory()->create();        
+        $category = ProductCategory::factory()->create();
 
         $commerce_branch = CommerceBranch::factory()->create([
-            'commerce_id' => $commerce->id,            
+            'commerce_id' => $commerce->id,
         ]);
 
         $payload = [
@@ -89,7 +88,7 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $product = Product::factory()->create();
-        $response = $this->getJson('/api/v1/products/' . $product->id);
+        $response = $this->getJson('/api/v1/products/'.$product->id);
         $response->assertOk()->assertJsonFragment(['id' => $product->id]);
     }
 
@@ -98,10 +97,10 @@ class ProductFeatureTest extends TestCase
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
         Product::factory()->count(2)->create(['commerce_id' => $commerce->id]);
-        $response = $this->getJson('/api/v1/products/commerce/' . $commerce->id);
+        $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
         $response->assertOk()->assertJsonCount(2, 'data');
     }
-    
+
     public function test_update_modifies_product()
     {
         $this->actingAsAdmin();
@@ -119,7 +118,7 @@ class ProductFeatureTest extends TestCase
                 $commerce_branch->id,
             ],
         ];
-        $response = $this->putJson('/api/v1/products/' . $product->id, $payload);
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
         $response->assertOk()->assertJsonFragment(['title' => 'Té Verde']);
         $this->assertDatabaseHas('products', ['id' => $product->id, 'title' => 'Té Verde']);
     }
@@ -128,7 +127,7 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $product = Product::factory()->create();
-        $response = $this->deleteJson('/api/v1/products/' . $product->id);
+        $response = $this->deleteJson('/api/v1/products/'.$product->id);
         $response->assertNoContent();
     }
 
@@ -155,22 +154,22 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
-        $response = $this->getJson('/api/v1/products/commerce/' . $commerce->id);
+        $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
         $response->assertStatus(404)
             ->assertJson([
                 'status' => false,
-                'message' => 'No products found for the specified commerce.'
+                'message' => 'No products found for the specified commerce.',
             ]);
     }
 
     public function test_get_products_by_commerce_branch_returns_404_when_none_found()
     {
-        $this->actingAsAdmin();        
+        $this->actingAsAdmin();
         $response = $this->getJson('/api/v1/products/commerce/branch/1111');
         $response->assertStatus(404)
             ->assertJson([
                 'status' => false,
-                'message' => 'No products found for the given commerce branch.'
+                'message' => 'No products found for the given commerce branch.',
             ]);
     }
 }

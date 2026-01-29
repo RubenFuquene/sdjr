@@ -11,6 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *   schema="StoreProductRequest",
  *   required={"product"},
+ *
  *   @OA\Property(
  *     property="product",
  *     type="object",
@@ -30,11 +31,14 @@ use Illuminate\Foundation\Http\FormRequest;
  *   @OA\Property(
  *     property="commerce_branch_ids",
  *     type="array",
+ *
  *     @OA\Items(type="integer", example=1, description="ID of a commerce branch")
  *   ),
+ *
  *   @OA\Property(
  *     property="package_items",
  *     type="array",
+ *
  *     @OA\Items(type="integer", example=10, description="ID of a product included in the package")
  *   )
  * )
@@ -49,12 +53,12 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            
+
             'product.commerce_id' => ['required', 'integer', 'exists:commerces,id'],
             'product.product_category_id' => ['required', 'integer', 'exists:product_categories,id'],
             'product.title' => ['required', 'string', 'max:100'],
             'product.description' => ['nullable', 'string', 'max:255'],
-            'product.product_type' => ['required', 'string', 'in:' . Constant::PRODUCT_TYPE_SINGLE . ',' . Constant::PRODUCT_TYPE_PACKAGE],
+            'product.product_type' => ['required', 'string', 'in:'.Constant::PRODUCT_TYPE_SINGLE.','.Constant::PRODUCT_TYPE_PACKAGE],
             'product.original_price' => ['required', 'numeric', 'min:0'],
             'product.discounted_price' => ['nullable', 'numeric', 'min:0'],
             'product.quantity_total' => ['required', 'integer', 'min:0'],
@@ -64,9 +68,9 @@ class StoreProductRequest extends FormRequest
 
             'commerce_branch_ids.*' => ['required', 'integer', 'exists:commerce_branches,id'],
 
-            //Fotos
+            // Fotos
 
-            //Package
+            // Package
             'package_items.*' => ['sometimes', 'integer', 'exists:products,id'],
         ];
     }

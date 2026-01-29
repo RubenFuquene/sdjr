@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Product
  *
- * @package App\Models
  *
  * @property int $id
  * @property int $commerce_id
@@ -63,8 +62,7 @@ class Product extends Model
     /**
      * Set the title attribute with sanitization and normalization.
      *
-     * @param string $value
-     * @return void
+     * @param  string  $value
      */
     public function setTitleAttribute($value): void
     {
@@ -74,8 +72,7 @@ class Product extends Model
     /**
      * Set the description attribute with sanitization and normalization.
      *
-     * @param string|null $value
-     * @return void
+     * @param  string|null  $value
      */
     public function setDescriptionAttribute($value): void
     {
@@ -84,6 +81,7 @@ class Product extends Model
 
     /**
      * Get the product category.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function category()
@@ -93,6 +91,7 @@ class Product extends Model
 
     /**
      * Get the commerce.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function commerce()
@@ -102,6 +101,7 @@ class Product extends Model
 
     /**
      * The commerce branches that belong to the product.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function commerceBranches()
@@ -111,11 +111,11 @@ class Product extends Model
 
     /**
      * The products that belong to the package.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function packageItems()
     {
         return $this->belongsToMany(Product::class, 'product_package_items', 'product_package_id', 'product_id');
     }
-
 }

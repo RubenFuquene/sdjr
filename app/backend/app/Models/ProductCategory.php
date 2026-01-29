@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductCategory
  *
- * @package App\Models
  *
  * @property int $id
  * @property string $name
@@ -49,8 +48,7 @@ class ProductCategory extends Model
     /**
      * Set the name attribute with sanitization and normalization.
      *
-     * @param string $value
-     * @return void
+     * @param  string  $value
      */
     public function setNameAttribute($value): void
     {
@@ -60,8 +58,7 @@ class ProductCategory extends Model
     /**
      * Set the description attribute with sanitization and normalization.
      *
-     * @param string|null $value
-     * @return void
+     * @param  string|null  $value
      */
     public function setDescriptionAttribute($value): void
     {

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *   schema="UpdateProductRequest",
  *   required={"product"},
+ *
  *   @OA\Property(
  *     property="product",
  *     type="object",
@@ -28,11 +29,14 @@ use Illuminate\Foundation\Http\FormRequest;
  *   @OA\Property(
  *     property="commerce_branches",
  *     type="array",
+ *
  *     @OA\Items(type="integer", example=1, description="ID of a commerce branch")
  *   ),
+ *
  *   @OA\Property(
  *     property="package_items",
  *     type="array",
+ *
  *     @OA\Items(type="integer", example=10, description="ID of a product included in the package")
  *   )
  * )
@@ -47,7 +51,7 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            
+
             'product.commerce_id' => ['required', 'integer', 'exists:commerces,id'],
             'product.product_category_id' => ['sometimes', 'integer', 'exists:product_categories,id'],
             'product.title' => ['sometimes', 'string', 'max:100'],
@@ -62,9 +66,9 @@ class UpdateProductRequest extends FormRequest
 
             'commerce_branches.*' => ['sometimes', 'integer', 'exists:commerce_branches,id'],
 
-            //Fotos
+            // Fotos
 
-            //Package
+            // Package
             'package_items.*' => ['sometimes', 'integer', 'exists:products,id'],
         ];
     }

@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Constant;
-use Exception;
 use App\Models\Product;
-use App\Models\ProductCommerceBranch;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Service class for Product business logic.
@@ -20,10 +19,6 @@ class ProductService
 {
     /**
      * Get paginated list of products with optional filters.
-     *
-     * @param array $filters
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function index(array $filters, int $perPage = 15): LengthAwarePaginator
     {
@@ -33,10 +28,10 @@ class ProductService
             $query->where('status', $filters['status']);
         }
         if (isset($filters['title'])) {
-            $query->where('title', 'like', '%' . $filters['title'] . '%');
+            $query->where('title', 'like', '%'.$filters['title'].'%');
         }
         if (isset($filters['description'])) {
-            $query->where('description', 'like', '%' . $filters['description'] . '%');
+            $query->where('description', 'like', '%'.$filters['description'].'%');
         }
         if (isset($filters['commerce_id'])) {
             $query->where('commerce_id', $filters['commerce_id']);
@@ -51,8 +46,6 @@ class ProductService
     /**
      * Store a new product.
      *
-     * @param array $data
-     * @return Product
      * @throws Exception
      */
     public function store(array $data): Product
@@ -65,9 +58,10 @@ class ProductService
                 if (isset($data['commerce_branch_ids']) && is_array($data['commerce_branch_ids'])) {
                     $product->commerceBranches()->attach($data['commerce_branch_ids']);
                 }
+
                 return $product;
             });
-            
+
         } catch (Exception $e) {
             Log::error('Error creating Product', ['error' => $e->getMessage()]);
             throw $e;
@@ -77,8 +71,6 @@ class ProductService
     /**
      * Show a product by ID.
      *
-     * @param int $id
-     * @return Product
      * @throws ModelNotFoundException
      */
     public function show(int $id): Product
@@ -89,9 +81,6 @@ class ProductService
     /**
      * Update a product by ID.
      *
-     * @param int $id
-     * @param array $data
-     * @return Product
      * @throws Exception
      */
     public function update(int $id, array $data): Product
@@ -102,7 +91,8 @@ class ProductService
             $product->commerceBranches()->detach();
             if (isset($data['commerce_branch_ids']) && is_array($data['commerce_branch_ids'])) {
                 $product->commerceBranches()->attach($data['commerce_branch_ids']);
-            }   
+            }
+
             return $product;
         } catch (Exception $e) {
             Log::error('Error updating Product', ['error' => $e->getMessage()]);
@@ -113,8 +103,6 @@ class ProductService
     /**
      * Delete a product by ID.
      *
-     * @param int $id
-     * @return void
      * @throws Exception
      */
     public function destroy(int $id): void
@@ -130,7 +118,7 @@ class ProductService
 
     /**
      * Get products by commerce ID.
-     * @param int $commerce_id
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getByCommerce(int $commerce_id)
@@ -139,12 +127,13 @@ class ProductService
         if ($products->isEmpty()) {
             throw new ModelNotFoundException('No products found for the specified commerce.');
         }
+
         return $products;
     }
 
     /**
      * Get products by commerce branch ID.
-     * @param int $branch_id
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getByCommerceBranch(int $branch_id)
@@ -156,13 +145,13 @@ class ProductService
         if ($products->isEmpty()) {
             throw new ModelNotFoundException('No products found for the given commerce branch.');
         }
+
         return $products;
     }
 
     /**
      * Store product package items.
-     * @param array $data
-     * @return Product
+     *
      * @throws Exception
      */
     public function storePackageItems(array $data): Product
@@ -184,16 +173,14 @@ class ProductService
             });
 
         } catch (Exception $e) {
-            Log::error('Error storing ProductPackageItems', ['error' => $e->getMessage(). ' on line ' . $e->getLine()]);
+            Log::error('Error storing ProductPackageItems', ['error' => $e->getMessage().' on line '.$e->getLine()]);
             throw $e;
         }
     }
 
     /**
      * Update product package items.
-     * @param int $product_package_id
-     * @param array $items
-     * @return Product
+     *
      * @throws Exception
      */
     public function updatePackageItems(int $product_package_id, array $items): Product
@@ -202,7 +189,7 @@ class ProductService
             $items['product']['product_type'] = Constant::PRODUCT_TYPE_PACKAGE;
             $productPackage = $this->update($product_package_id, $items);
             $productPackage->packageItems()->detach();
-            if (!empty($items['package_items'])) {
+            if (! empty($items['package_items'])) {
                 $productPackage->packageItems()->attach($items['package_items']);
             }
 

@@ -5,18 +5,16 @@ declare(strict_types=1);
 namespace Tests\Feature\Api\V1;
 
 use App\Models\ProductCategory;
-use App\Constants\Constant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
-use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 class ProductCategoryFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'provider.product_categories.index', 'guard_name' => 'sanctum']);
@@ -37,6 +35,7 @@ class ProductCategoryFeatureTest extends TestCase
             'provider.product_categories.delete',
         ]);
         $this->actingAs($user, 'sanctum');
+
         return $user;
     }
 
@@ -64,7 +63,7 @@ class ProductCategoryFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $category = ProductCategory::factory()->create();
-        $response = $this->getJson('/api/v1/product-categories/' . $category->id);
+        $response = $this->getJson('/api/v1/product-categories/'.$category->id);
         $response->assertOk()->assertJsonFragment(['id' => $category->id]);
     }
 
@@ -73,7 +72,7 @@ class ProductCategoryFeatureTest extends TestCase
         $this->actingAsAdmin();
         $category = ProductCategory::factory()->create();
         $payload = ['name' => 'Snacks'];
-        $response = $this->putJson('/api/v1/product-categories/' . $category->id, $payload);
+        $response = $this->putJson('/api/v1/product-categories/'.$category->id, $payload);
         $response->assertOk()->assertJsonFragment(['name' => 'Snacks']);
         $this->assertDatabaseHas('product_categories', ['id' => $category->id, 'name' => 'Snacks']);
     }
@@ -82,8 +81,8 @@ class ProductCategoryFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $category = ProductCategory::factory()->create();
-        $response = $this->deleteJson('/api/v1/product-categories/' . $category->id);
-        $response->assertNoContent();        
+        $response = $this->deleteJson('/api/v1/product-categories/'.$category->id);
+        $response->assertNoContent();
     }
 
     public function test_store_fails_without_permission()

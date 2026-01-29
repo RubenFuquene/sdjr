@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class ProductCommerceBranch
  *
- * @package App\Models
  *
  * @property int $id
  * @property int $product_id

@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @OA\Schema(
  *   schema="ProductCategoryResource",
  *   type="object",
+ *
  *   @OA\Property(property="id", type="integer"),
  *   @OA\Property(property="name", type="string"),
  *   @OA\Property(property="description", type="string", nullable=true),

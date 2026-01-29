@@ -132,7 +132,7 @@ class Commerce extends Model
 
     /**
      * Get the commerce branches of the commerce.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function commerceBranches()
