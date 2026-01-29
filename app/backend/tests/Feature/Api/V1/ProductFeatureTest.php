@@ -47,8 +47,9 @@ class ProductFeatureTest extends TestCase
     public function test_index_returns_paginated_list()
     {
         $this->actingAsAdmin();
-        Product::factory()->count(3)->create();
-        $response = $this->getJson('/api/v1/products/commerce/1');
+        $commerce = Commerce::factory()->create();
+        Product::factory()->count(3)->create(['commerce_id' => $commerce->id]);
+        $response = $this->getJson('/api/v1/products/commerce/' . $commerce->id);
         $response->assertOk()->assertJsonStructure(['data']);
     }
 
