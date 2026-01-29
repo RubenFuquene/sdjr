@@ -24,3 +24,5 @@ yarn-error.log*
 tmp/
 temp/
 *.tmp
+
+design-reference-*
