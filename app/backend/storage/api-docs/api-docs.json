@@ -93,7 +93,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/LoginRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -343,7 +343,21 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UpdateBankRequest"
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Banco de la Nación"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "BN"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "active"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -447,15 +461,14 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "all",
+                            "default": "1",
                             "enum": [
                                 "1",
-                                "0",
-                                "all"
+                                "0"
                             ]
                         }
                     },
@@ -506,7 +519,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CategoryRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -617,7 +630,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CategoryRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -730,15 +743,14 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "all",
+                            "default": "1",
                             "enum": [
                                 "1",
-                                "0",
-                                "all"
+                                "0"
                             ]
                         }
                     },
@@ -789,7 +801,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CityRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -900,7 +912,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CityRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -1028,6 +1040,313 @@
                 ]
             }
         },
+        "/api/v1/commerce-branches": {
+            "get": {
+                "tags": [
+                    "Commerce Branches"
+                ],
+                "summary": "List all commerce branches",
+                "description": "Returns paginated list of all commerce branches.",
+                "operationId": "getCommerceBranches",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "phone",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CommerceBranchResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Commerce Branches"
+                ],
+                "summary": "Create a new branch",
+                "description": "Creates a new commerce branch.",
+                "operationId": "storeCommerceBranch",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCommerceBranchRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceBranchResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerce-branches/{id}": {
+            "get": {
+                "tags": [
+                    "Commerce Branches"
+                ],
+                "summary": "Show a branch",
+                "description": "Returns a single commerce branch.",
+                "operationId": "showCommerceBranch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceBranchResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Commerce Branches"
+                ],
+                "summary": "Update a branch",
+                "description": "Updates a commerce branch.",
+                "operationId": "updateCommerceBranch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCommerceBranchRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceBranchResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Commerce Branches"
+                ],
+                "summary": "Delete a branch",
+                "description": "Deletes a commerce branch (soft delete).",
+                "operationId": "deleteCommerceBranch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/commerces": {
             "get": {
                 "tags": [
@@ -1049,15 +1368,14 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "all",
+                            "default": "1",
                             "enum": [
                                 "1",
-                                "0",
-                                "all"
+                                "0"
                             ]
                         }
                     },
@@ -1138,7 +1456,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CommerceRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -1238,7 +1556,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CommerceRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -1302,6 +1620,341 @@
                     },
                     "404": {
                         "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerces/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "Update commerce status",
+                "description": "Updates the is_active status of a commerce (active/inactive).",
+                "operationId": "patchCommerceStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Commerce ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "is_active": {
+                                        "type": "integer",
+                                        "enum": [
+                                            1,
+                                            0
+                                        ],
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Commerce status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Commerce not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerces/{id}/verification": {
+            "patch": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "Update commerce verification status",
+                "description": "Updates the is_verified status of a commerce (verified/unverified).",
+                "operationId": "patchCommerceVerification",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Commerce ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_verified"
+                                ],
+                                "properties": {
+                                    "is_verified": {
+                                        "type": "integer",
+                                        "enum": [
+                                            1,
+                                            0
+                                        ],
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Commerce verification updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommerceResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Commerce not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerces/{commerce_id}/branches": {
+            "get": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "List branches by commerce",
+                "description": "Returns paginated list of branches for a specific commerce.",
+                "operationId": "getBranchesByCommerceId",
+                "parameters": [
+                    {
+                        "name": "commerce_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CommerceBranchResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Commerce not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerces/{commerce_id}/payout-methods": {
+            "get": {
+                "tags": [
+                    "Commerces"
+                ],
+                "summary": "List payout methods by commerce",
+                "description": "Returns paginated list of payout methods for a specific commerce.",
+                "operationId": "getPayoutMethodsByCommerceId",
+                "parameters": [
+                    {
+                        "name": "commerce_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "account_number",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CommercePayoutMethodResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Commerce not found"
                     }
                 },
                 "security": [
@@ -1400,7 +2053,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CountryRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -1511,7 +2164,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CountryRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -1677,7 +2330,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/DepartmentRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -1788,7 +2441,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/DepartmentRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -1871,6 +2524,121 @@
                 ]
             }
         },
+        "/api/v1/documents/presigned": {
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Generate presigned URL for document upload",
+                "description": "Generates a signed URL to upload a document to S3 and creates a temporary record.",
+                "operationId": "generatePresignedDocumentUrl",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreDocumentUploadRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Presigned URL generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "upload_token": {
+                                            "type": "string",
+                                            "example": "token123"
+                                        },
+                                        "presigned_url": {
+                                            "type": "string",
+                                            "example": "https://s3.amazonaws.com/..."
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "example": 3600
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/documents/confirm": {
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Confirm document upload",
+                "description": "Confirm that the document was uploaded successfully and update the record.",
+                "operationId": "confirmDocumentUpload",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchDocumentUploadRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Document confirmed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentUploadResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Document not exist or not in pending status"
+                    },
+                    "410": {
+                        "description": "Presigned URL expired"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/establishment-types": {
             "get": {
                 "tags": [
@@ -1929,7 +2697,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/EstablishmentTypeRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -2029,7 +2797,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/EstablishmentTypeRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -2084,6 +2852,284 @@
                 "responses": {
                     "204": {
                         "description": "Establishment type deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/password/forgot": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request password recovery",
+                "description": "Sends an email with the password recovery link.",
+                "operationId": "forgotPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Recovery email sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Recovery email sent successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Invalid data"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/password/reset": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset password",
+                "description": "Resets the user's password using the token sent by email.",
+                "operationId": "resetPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "token",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "token": {
+                                        "type": "string",
+                                        "example": "reset-token"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password reset successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Invalid data"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/legal-documents": {
+            "get": {
+                "tags": [
+                    "LegalDocuments"
+                ],
+                "summary": "Get list of legal documents",
+                "description": "Returns paginated list of legal documents. Permite filtrar por tipo, estado, cantidad por página y número de página.",
+                "operationId": "getLegalDocumentsList",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LegalDocumentResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/legal-documents/{type}": {
+            "get": {
+                "tags": [
+                    "LegalDocuments"
+                ],
+                "summary": "Get latest active legal document by type",
+                "description": "Returns the latest active legal document for a given type.",
+                "operationId": "getLegalDocumentByType",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LegalDocumentResource"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -2162,7 +3208,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/LegalRepresentativeRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -2260,7 +3306,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/LegalRepresentativeRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -2517,15 +3563,14 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "all",
+                            "default": "1",
                             "enum": [
                                 "1",
-                                "0",
-                                "all"
+                                "0"
                             ]
                         }
                     },
@@ -2576,7 +3621,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/NeighborhoodRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -2677,7 +3722,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/NeighborhoodRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -2812,7 +3857,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/StorePermissionRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -2952,7 +3997,28 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/StorePqrsTypeRequest"
+                                "required": [
+                                    "name",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Queja"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "example": "Q"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "maxLength": 1,
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -3054,7 +4120,24 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UpdatePqrsTypeRequest"
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Queja Actualizada"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "example": "QA"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "maxLength": 1,
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -3208,7 +4291,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/StorePriorityTypeRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -3319,7 +4402,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UpdatePriorityTypeRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -3400,6 +4483,769 @@
                         "sanctum": []
                     }
                 ]
+            }
+        },
+        "/api/v1/product-categories": {
+            "get": {
+                "tags": [
+                    "ProductCategories"
+                ],
+                "summary": "List product categories",
+                "description": "Returns paginated list of product categories",
+                "operationId": "indexProductCategory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "ProductCategories"
+                ],
+                "summary": "Create product category",
+                "description": "Creates a new product category",
+                "operationId": "storeProductCategory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreProductCategoryRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductCategoryResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/product-categories/{id}": {
+            "get": {
+                "tags": [
+                    "ProductCategories"
+                ],
+                "summary": "Show product category",
+                "description": "Returns a single product category",
+                "operationId": "showProductCategory",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductCategoryResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "ProductCategories"
+                ],
+                "summary": "Update product category",
+                "description": "Updates an existing product category",
+                "operationId": "updateProductCategory",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProductCategoryRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductCategoryResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "ProductCategories"
+                ],
+                "summary": "Delete product category",
+                "description": "Deletes a product category",
+                "operationId": "destroyProductCategory",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List products",
+                "description": "Returns paginated list of products",
+                "operationId": "indexProduct",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "commerce_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "product_category_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create product",
+                "description": "Creates a new product",
+                "operationId": "storeProduct",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreProductRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/{id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Show product",
+                "description": "Returns a single product",
+                "operationId": "showProduct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Update product",
+                "description": "Updates an existing product",
+                "operationId": "updateProduct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProductRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Delete product",
+                "description": "Deletes a product",
+                "operationId": "destroyProduct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/commerces/{commerce_id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List products by commerce",
+                "description": "Returns list of products for a specific commerce",
+                "operationId": "byCommerceProduct",
+                "parameters": [
+                    {
+                        "name": "commerce_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/branches/{branch_id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List products by commerce branch",
+                "description": "Returns list of products for a specific commerce branch",
+                "operationId": "byCommerceBranchProduct",
+                "parameters": [
+                    {
+                        "name": "branch_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/package-items": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Store product package items",
+                "description": "Stores items for a product package",
+                "operationId": "storeProductPackageItems",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreProductRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/package-items/{product_package_id}": {
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Update product package items",
+                "description": "Updates items for a product package",
+                "operationId": "updateProductPackageItems",
+                "parameters": [
+                    {
+                        "name": "product_package_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProductRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/provider/register": {
+            "post": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Register a new provider user",
+                "description": "Registers a new provider and returns the session token.",
+                "operationId": "f88837bb62c67bf7b9c78f5e33df8ff0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "last_name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Proveedor"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Juan"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret1234"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret1234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful registration and login",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                }
             }
         },
         "/api/v1/roles": {
@@ -3550,7 +5396,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UserAssignRolePermissionRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -3612,7 +5458,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/RoleAssignPermissionRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -3754,6 +5600,69 @@
                 ]
             }
         },
+        "/api/v1/roles/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Update role status",
+                "description": "Updates the status of a role (active/inactive).",
+                "operationId": "patchRoleStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Role ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Role status (1=active, 0=inactive)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                0
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/support-statuses": {
             "get": {
                 "tags": [
@@ -3793,15 +5702,14 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filtrar por estado: 1=activos, 0=inactivos, all=todos",
+                        "description": "Filtrar por estado: 1=activos, 0=inactivos",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "all",
+                            "default": "1",
                             "enum": [
                                 "1",
-                                "0",
-                                "all"
+                                "0"
                             ]
                         }
                     },
@@ -3852,7 +5760,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/SupportStatusStoreRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -3952,7 +5860,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/SupportStatusUpdateRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -4113,7 +6021,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UserRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -4213,7 +6121,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UserRequest"
+                                "type": "object"
                             }
                         }
                     }
@@ -4784,6 +6692,36 @@
                 },
                 "type": "object"
             },
+            "IndexCommercePayoutMethodRequest": {
+                "properties": {
+                    "per_page": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "bank"
+                    },
+                    "owner_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "account_number": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "status": {
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
             "IndexDepartmentRequest": {
                 "properties": {
                     "per_page": {
@@ -4967,6 +6905,41 @@
                 },
                 "type": "object"
             },
+            "PatchDocumentUploadRequest": {
+                "required": [
+                    "upload_token",
+                    "s3_metadata"
+                ],
+                "properties": {
+                    "upload_token": {
+                        "type": "string",
+                        "example": "token123"
+                    },
+                    "s3_metadata": {
+                        "required": [
+                            "etag",
+                            "object_size",
+                            "last_modified"
+                        ],
+                        "properties": {
+                            "etag": {
+                                "type": "string",
+                                "example": "etag123"
+                            },
+                            "object_size": {
+                                "type": "integer",
+                                "example": 123456
+                            },
+                            "last_modified": {
+                                "type": "string",
+                                "example": "2026-01-21T10:00:00Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "RoleAssignPermissionRequest": {
                 "required": [
                     "permissions"
@@ -5052,6 +7025,230 @@
                 },
                 "type": "object"
             },
+            "StoreCommerceBranchRequest": {
+                "required": [
+                    "commerce_branch",
+                    "commerce_branch_hours",
+                    "commerce_branch_photos"
+                ],
+                "properties": {
+                    "commerce_branch": {
+                        "required": [
+                            "commerce_id",
+                            "department_id",
+                            "city_id",
+                            "neighborhood_id",
+                            "name",
+                            "address",
+                            "status"
+                        ],
+                        "properties": {
+                            "commerce_id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "department_id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "city_id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "neighborhood_id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Sucursal Principal"
+                            },
+                            "address": {
+                                "type": "string",
+                                "example": "Calle 123 #45-67"
+                            },
+                            "latitude": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 4.6
+                            },
+                            "longitude": {
+                                "type": "number",
+                                "format": "float",
+                                "example": -74.1
+                            },
+                            "phone": {
+                                "type": "string",
+                                "example": "3001234567"
+                            },
+                            "email": {
+                                "type": "string",
+                                "example": "sucursal@comercio.com"
+                            },
+                            "status": {
+                                "type": "boolean",
+                                "example": true
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "commerce_branch_hours": {
+                        "required": [
+                            "day_of_week",
+                            "open_time",
+                            "close_time"
+                        ],
+                        "properties": {
+                            "day_of_week": {
+                                "description": "0=Domingo, 1=Lunes, ...",
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "open_time": {
+                                "type": "string",
+                                "example": "08:00"
+                            },
+                            "close_time": {
+                                "type": "string",
+                                "example": "18:00"
+                            },
+                            "note": {
+                                "type": "string",
+                                "example": "Horario normal"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "commerce_branch_photos": {
+                        "required": [
+                            "uploaded_by_id",
+                            "upload_token",
+                            "s3_etag",
+                            "s3_object_size",
+                            "s3_last_modified",
+                            "version_number",
+                            "failed_attempts",
+                            "file_path",
+                            "mime_type",
+                            "uploaded_at"
+                        ],
+                        "properties": {
+                            "uploaded_by_id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "upload_token": {
+                                "type": "string",
+                                "example": "token123"
+                            },
+                            "s3_etag": {
+                                "type": "string",
+                                "example": "etag123"
+                            },
+                            "s3_object_size": {
+                                "type": "integer",
+                                "example": 123456
+                            },
+                            "s3_last_modified": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2026-01-20 10:00:00"
+                            },
+                            "replacement_of_id": {
+                                "type": "integer",
+                                "example": null,
+                                "nullable": true
+                            },
+                            "version_of_id": {
+                                "type": "integer",
+                                "example": null,
+                                "nullable": true
+                            },
+                            "version_number": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "expires_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": null,
+                                "nullable": true
+                            },
+                            "failed_attempts": {
+                                "type": "integer",
+                                "example": 0
+                            },
+                            "photo_type": {
+                                "type": "string",
+                                "example": "front"
+                            },
+                            "file_path": {
+                                "type": "string",
+                                "example": "/photos/branch1.jpg"
+                            },
+                            "mime_type": {
+                                "type": "string",
+                                "example": "image/jpeg"
+                            },
+                            "uploaded_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2026-01-20 10:00:00"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreDocumentUploadRequest": {
+                "required": [
+                    "document_type",
+                    "file_name",
+                    "mime_type",
+                    "file_size_bytes",
+                    "commerce_id"
+                ],
+                "properties": {
+                    "document_type": {
+                        "type": "string",
+                        "example": "ID_CARD"
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "example": "documento.pdf"
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "example": "application/pdf"
+                    },
+                    "file_size_bytes": {
+                        "type": "integer",
+                        "example": 123456
+                    },
+                    "commerce_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "replace_document_id": {
+                        "type": "integer",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "versioning_enabled": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "example": {
+                            "key": "value"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "StorePermissionRequest": {
                 "required": [
                     "name",
@@ -5121,6 +7318,139 @@
                         "type": "string",
                         "maxLength": 1,
                         "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreProductCategoryRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Category name",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Bebidas"
+                    },
+                    "description": {
+                        "description": "Category description",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Categoría de bebidas",
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Status (1=Activo, 0=Inactivo)",
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreProductRequest": {
+                "required": [
+                    "product"
+                ],
+                "properties": {
+                    "product": {
+                        "required": [
+                            "commerce_id",
+                            "product_category_id",
+                            "title",
+                            "product_type",
+                            "original_price",
+                            "quantity_total",
+                            "quantity_available"
+                        ],
+                        "properties": {
+                            "commerce_id": {
+                                "description": "ID of the commerce",
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "product_category_id": {
+                                "description": "ID of the product category",
+                                "type": "integer",
+                                "example": 2
+                            },
+                            "title": {
+                                "description": "Product title",
+                                "type": "string",
+                                "maxLength": 100,
+                                "example": "Café Premium"
+                            },
+                            "description": {
+                                "description": "Product description",
+                                "type": "string",
+                                "maxLength": 255,
+                                "example": "Café de origen especial",
+                                "nullable": true
+                            },
+                            "product_type": {
+                                "description": "Type of product (single/package)",
+                                "type": "string",
+                                "enum": [
+                                    "single",
+                                    "package"
+                                ],
+                                "example": "single"
+                            },
+                            "original_price": {
+                                "description": "Original price",
+                                "type": "number",
+                                "format": "float",
+                                "example": 100
+                            },
+                            "discounted_price": {
+                                "description": "Discounted price",
+                                "type": "number",
+                                "format": "float",
+                                "example": 80,
+                                "nullable": true
+                            },
+                            "quantity_total": {
+                                "description": "Total quantity",
+                                "type": "integer",
+                                "example": 50
+                            },
+                            "quantity_available": {
+                                "description": "Available quantity",
+                                "type": "integer",
+                                "example": 50
+                            },
+                            "expires_at": {
+                                "description": "Expiration date",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2026-12-31T23:59:59",
+                                "nullable": true
+                            },
+                            "status": {
+                                "description": "Status (1=Activo, 0=Inactivo)",
+                                "type": "string",
+                                "maxLength": 1,
+                                "example": "1"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "commerce_branch_ids": {
+                        "type": "array",
+                        "items": {
+                            "description": "ID of a commerce branch",
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    "package_items": {
+                        "type": "array",
+                        "items": {
+                            "description": "ID of a product included in the package",
+                            "type": "integer",
+                            "example": 10
+                        }
                     }
                 },
                 "type": "object"
@@ -5249,6 +7579,53 @@
                 },
                 "type": "object"
             },
+            "UpdateCommerceBranchRequest": {
+                "properties": {
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "city_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "neighborhood_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Sucursal Editada"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "Calle 456 #78-90"
+                    },
+                    "latitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.7
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": -74.2
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "3009876543"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "editada@comercio.com"
+                    },
+                    "status": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
             "UpdatePqrsTypeRequest": {
                 "properties": {
                     "name": {
@@ -5289,6 +7666,127 @@
                         "type": "string",
                         "maxLength": 1,
                         "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateProductCategoryRequest": {
+                "properties": {
+                    "name": {
+                        "description": "Category name",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Bebidas"
+                    },
+                    "description": {
+                        "description": "Category description",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Categoría de bebidas",
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Status (1=Activo, 0=Inactivo)",
+                        "type": "string",
+                        "maxLength": 1,
+                        "example": "1"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateProductRequest": {
+                "required": [
+                    "product"
+                ],
+                "properties": {
+                    "product": {
+                        "properties": {
+                            "commerce_id": {
+                                "description": "ID of the commerce",
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "product_category_id": {
+                                "description": "ID of the product category",
+                                "type": "integer",
+                                "example": 2
+                            },
+                            "title": {
+                                "description": "Product title",
+                                "type": "string",
+                                "maxLength": 100,
+                                "example": "Café Premium"
+                            },
+                            "description": {
+                                "description": "Product description",
+                                "type": "string",
+                                "maxLength": 255,
+                                "example": "Café de origen especial",
+                                "nullable": true
+                            },
+                            "product_type": {
+                                "description": "Type of product (single/package)",
+                                "type": "string",
+                                "enum": [
+                                    "single",
+                                    "package"
+                                ],
+                                "example": "single"
+                            },
+                            "original_price": {
+                                "description": "Original price",
+                                "type": "number",
+                                "format": "float",
+                                "example": 100
+                            },
+                            "discounted_price": {
+                                "description": "Discounted price",
+                                "type": "number",
+                                "format": "float",
+                                "example": 80,
+                                "nullable": true
+                            },
+                            "quantity_total": {
+                                "description": "Total quantity",
+                                "type": "integer",
+                                "example": 50
+                            },
+                            "quantity_available": {
+                                "description": "Available quantity",
+                                "type": "integer",
+                                "example": 50
+                            },
+                            "expires_at": {
+                                "description": "Expiration date",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2026-12-31T23:59:59",
+                                "nullable": true
+                            },
+                            "status": {
+                                "description": "Status (1=Activo, 0=Inactivo)",
+                                "type": "string",
+                                "maxLength": 1,
+                                "example": "1"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "commerce_branches": {
+                        "type": "array",
+                        "items": {
+                            "description": "ID of a commerce branch",
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    "package_items": {
+                        "type": "array",
+                        "items": {
+                            "description": "ID of a product included in the package",
+                            "type": "integer",
+                            "example": 10
+                        }
                     }
                 },
                 "type": "object"
@@ -5698,6 +8196,170 @@
                 },
                 "type": "object"
             },
+            "CommerceBranchHoursResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_branch_id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "day_of_week": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "open_time": {
+                        "type": "string",
+                        "example": "08:00"
+                    },
+                    "close_time": {
+                        "type": "string",
+                        "example": "18:00"
+                    },
+                    "note": {
+                        "type": "string",
+                        "example": "Horario especial festivos"
+                    }
+                },
+                "type": "object"
+            },
+            "CommerceBranchPhotoResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_branch_id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "uploaded_by_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "upload_token": {
+                        "type": "string",
+                        "example": "uuid-1234"
+                    },
+                    "s3_etag": {
+                        "type": "string",
+                        "example": "etag-abc"
+                    },
+                    "s3_object_size": {
+                        "type": "integer",
+                        "example": 204800
+                    },
+                    "s3_last_modified": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-20T10:00:00Z"
+                    },
+                    "replacement_of_id": {
+                        "type": "integer",
+                        "example": null
+                    },
+                    "version_of_id": {
+                        "type": "integer",
+                        "example": null
+                    },
+                    "version_number": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-02-01T00:00:00Z"
+                    },
+                    "failed_attempts": {
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "photo_type": {
+                        "type": "string",
+                        "example": "EXTERIOR"
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "/uploads/branch_10_photo1.jpg"
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "example": "image/jpeg"
+                    },
+                    "uploaded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-20T10:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "CommerceBranchResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_id": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Sucursal Norte"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "Calle 123 #45-67"
+                    },
+                    "department": {
+                        "type": "string",
+                        "example": "Cundinamarca"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Bogotá"
+                    },
+                    "neighborhood": {
+                        "type": "string",
+                        "example": "Chapinero"
+                    },
+                    "latitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.6097
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": -74.0817
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "3001234567"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "norte@comercio.com"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "CommerceDocumentResource": {
                 "properties": {
                     "id": {
@@ -5723,6 +8385,55 @@
                     "uploaded_at": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "CommercePayoutMethodResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "bank"
+                    },
+                    "bank": {
+                        "$ref": "#/components/schemas/BankResource"
+                    },
+                    "account_type": {
+                        "type": "string",
+                        "example": "savings"
+                    },
+                    "account_number": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "owner": {
+                        "$ref": "#/components/schemas/UserResource"
+                    },
+                    "is_primary": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-21T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-21T10:00:00Z"
                     }
                 },
                 "type": "object"
@@ -5919,6 +8630,78 @@
                     "name": "DepartmentResource"
                 }
             },
+            "DocumentUploadResource": {
+                "title": "Document Upload Resource",
+                "description": "Recurso que representa un documento subido por comercio.",
+                "required": [
+                    "id",
+                    "commerce_id",
+                    "document_type",
+                    "upload_token",
+                    "upload_status",
+                    "file_path",
+                    "mime_type",
+                    "expires_at",
+                    "uploaded_by_id",
+                    "failed_attempts",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "commerce_id": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "example": "factura"
+                    },
+                    "upload_token": {
+                        "type": "string",
+                        "example": "uuid-token"
+                    },
+                    "upload_status": {
+                        "type": "string",
+                        "example": "pending"
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "documents/commerce_123/uuid-token/factura.pdf"
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "example": "application/pdf"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-21T12:00:00Z"
+                    },
+                    "uploaded_by_id": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "failed_attempts": {
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-21T11:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-21T11:05:00Z"
+                    }
+                },
+                "type": "object"
+            },
             "EstablishmentTypeResource": {
                 "title": "EstablishmentType Resource",
                 "description": "EstablishmentType resource representation",
@@ -5948,6 +8731,50 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-12-15T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
+            "LegalDocumentResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "terms"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Términos y Condiciones"
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "<h1>Términos</h1><p>Contenido...</p>"
+                    },
+                    "version": {
+                        "type": "string",
+                        "example": "v1.0"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active"
+                    },
+                    "effective_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-01-21"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-21T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-21T10:00:00Z"
                     }
                 },
                 "type": "object"
@@ -6144,6 +8971,91 @@
                     "status": {
                         "type": "string",
                         "example": "1"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "ProductCategoryResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "ProductResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "commerce_id": {
+                        "type": "integer"
+                    },
+                    "product_category_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "product_type": {
+                        "type": "string",
+                        "enum": [
+                            "single",
+                            "package"
+                        ]
+                    },
+                    "original_price": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "discounted_price": {
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "quantity_total": {
+                        "type": "integer"
+                    },
+                    "quantity_available": {
+                        "type": "integer"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string"
                     },
                     "created_at": {
                         "type": "string",
@@ -6621,6 +9533,10 @@
             "description": "Endpoints to create commerce with nested basic data"
         },
         {
+            "name": "Commerce Branches",
+            "description": "API Endpoints for Commerce Branches"
+        },
+        {
             "name": "Commerces",
             "description": "API Endpoints of Commerces"
         },
@@ -6635,6 +9551,10 @@
         {
             "name": "EstablishmentTypes",
             "description": "API Endpoints of Establishment Types"
+        },
+        {
+            "name": "LegalDocuments",
+            "description": "API Endpoints of Legal Documents"
         },
         {
             "name": "LegalRepresentatives",
@@ -6667,6 +9587,22 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Documents",
+            "description": "Documents"
+        },
+        {
+            "name": "ProductCategories",
+            "description": "ProductCategories"
+        },
+        {
+            "name": "Products",
+            "description": "Products"
+        },
+        {
+            "name": "Providers",
+            "description": "Providers"
         },
         {
             "name": "SupportStatuses",

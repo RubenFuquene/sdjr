@@ -22,7 +22,7 @@ class PatchCommerceVerificationTest extends TestCase
         parent::setUp();
 
         // Crear permiso
-        Permission::create(['name' => 'provider.commerces.update']);
+        Permission::create(['name' => 'provider.commerces.update', 'guard_name' => 'sanctum']);
 
         // Crear usuario con permiso
         $this->user = User::factory()->create();

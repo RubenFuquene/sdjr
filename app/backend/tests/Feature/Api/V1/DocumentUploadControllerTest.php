@@ -17,7 +17,7 @@ class DocumentUploadControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Permission::create(['name' => 'admin.providers.upload_documents']);
+        Permission::create(['name' => 'admin.providers.upload_documents', 'guard_name' => 'sanctum']);
     }
 
     /**

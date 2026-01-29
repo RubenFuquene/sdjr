@@ -23,11 +23,11 @@ class ProductFeatureTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Permission::create(['name' => 'provider.products.index']);
-        Permission::create(['name' => 'provider.products.create']);
-        Permission::create(['name' => 'provider.products.show']);
-        Permission::create(['name' => 'provider.products.update']);
-        Permission::create(['name' => 'provider.products.delete']);
+        Permission::create(['name' => 'provider.products.index', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'provider.products.create', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'provider.products.show', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'provider.products.update', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'provider.products.delete', 'guard_name' => 'sanctum']);
     }
 
     private function actingAsAdmin()

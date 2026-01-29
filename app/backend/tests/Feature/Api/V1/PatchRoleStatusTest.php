@@ -22,7 +22,7 @@ class PatchRoleStatusTest extends TestCase
         parent::setUp();
 
         // Crear permiso
-        Permission::create(['name' => 'admin.profiles.roles.update']);
+        Permission::create(['name' => 'admin.profiles.roles.update', 'guard_name' => 'sanctum']);
 
         // Crear usuario con permiso
         $this->user = User::factory()->create();
