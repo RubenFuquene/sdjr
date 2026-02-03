@@ -28,6 +28,17 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class DocumentUploadResource extends JsonResource
 {
+    protected array $fields;
+
+    /**
+     * @param  mixed  $resource
+     */
+    public function __construct($resource, ?array $fields = null)
+    {
+        parent::__construct($resource);
+        $this->fields = $fields ?? [];
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -36,17 +47,26 @@ class DocumentUploadResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
+        $resourceData = array_merge($this->fields, [
             'id' => $this->id,
-            'commerce_id' => $this->commerce_id,
-            'document_type' => $this->document_type,
+            'file_path' => $this->file_path,
+            'presigned_url' => $this->when(isset($this->presigned_url), $this->presigned_url),
             'upload_status' => $this->upload_status,
             's3_etag' => $this->s3_etag,
             's3_object_size' => $this->s3_object_size,
-            'file_path' => $this->file_path,
+            's3_last_modified' => $this->s3_last_modified,
+            'version_number' => $this->version_number,
+            'expires_at' => $this->expires_at,
             'uploaded_by_id' => $this->uploaded_by_id,
+            'failed_attempts' => $this->failed_attempts,
+            'mime_type' => $this->mime_type,
+            'verified' => $this->verified,
+            'uploaded_at' => $this->uploaded_at,
+            'verified_at' => $this->verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-        ];
+        ]);
+
+        return $resourceData;
     }
 }

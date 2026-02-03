@@ -34,8 +34,10 @@ class CommerceBranchPhoto extends Model
 
     protected $fillable = [
         'commerce_branch_id',
+        'verified_by_id',
         'uploaded_by_id',
         'upload_token',
+        'upload_status',
         's3_etag',
         's3_object_size',
         's3_last_modified',
@@ -44,15 +46,17 @@ class CommerceBranchPhoto extends Model
         'version_number',
         'expires_at',
         'failed_attempts',
-        'photo_type',
         'file_path',
+        'presigned_url',
         'mime_type',
         'uploaded_at',
+        'verified_at',
     ];
 
     protected $casts = [
         'id' => 'integer',
         'commerce_branch_id' => 'integer',
+        'verified_by_id' => 'integer',
         'uploaded_by_id' => 'integer',
         's3_object_size' => 'integer',
         'replacement_of_id' => 'integer',
@@ -61,8 +65,17 @@ class CommerceBranchPhoto extends Model
         'failed_attempts' => 'integer',
         'expires_at' => 'datetime',
         'uploaded_at' => 'datetime',
+        'verified_at' => 'datetime',
         's3_last_modified' => 'datetime',
     ];
+
+    /**
+     * Relationship: belongs to User (verified_by)
+     */
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by_id');
+    }
 
     /**
      * Relationship: belongs to CommerceBranch

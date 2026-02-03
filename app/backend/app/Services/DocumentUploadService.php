@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Constants\Constant;
-use App\Models\CommerceDocument;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -14,17 +14,17 @@ class DocumentUploadService
      *
      * @throws \Exception
      */
-    public function generatePresignedUrl(array $data): array
+    public function generatePresignedUrl(string $fileName, string $mimeType, int $id, string $source): array
     {
         // Generar token único
         $uploadToken = Str::uuid()->toString();
 
         // Construir path en S3
-        $fileName = $this->sanitizeFileName($data['file_name']);
+        $fileName = $this->sanitizeFileName($fileName);
 
         $path = sprintf(
-            '/commerce_%d/%s/%s',
-            $data['commerce_id'],
+            '/'.$source.'_%d/%s/%s',
+            $id,
             $uploadToken,
             $fileName
         );
@@ -36,7 +36,7 @@ class DocumentUploadService
             $path,
             now()->addHours(1),
             [
-                'ResponseContentType' => $data['mime_type'],
+                'ResponseContentType' => $mimeType,
                 'ResponseContentDisposition' => 'attachment',
             ]
         );
@@ -47,54 +47,6 @@ class DocumentUploadService
             'expires_in' => 3600,
             'path' => $path,
         ];
-    }
-
-    /**
-     * Confirmar carga completada
-     *
-     * @throws \Exception
-     */
-    public function confirmUpload(string $uploadToken, array $metadata): array
-    {
-        // Lógica de confirmación
-        // - Validar token existe
-        // - Validar no está expirado
-        // - Actualizar BD con metadata
-        // - Marcar como 'confirmed'
-
-        return [
-            'success' => true,
-            'document_id' => $documentId,
-            'status' => 'confirmed',
-        ];
-    }
-
-    /**
-     * Validar entrada de presigned URL
-     *
-     * @throws \Exception
-     */
-    private function validateInput(array $data): void
-    {
-        $maxSizeMB = config('filesystems.upload_max_size_mb', 50);
-        $maxSizeBytes = $maxSizeMB * 1024 * 1024;
-
-        // Validaciones
-        if (empty($data['commerce_id'])) {
-            throw new \Exception('commerce_id requerido', 422);
-        }
-
-        if (! in_array($data['mime_type'], $this->getAllowedMimeTypes())) {
-            throw new \Exception('mime_type no permitido', 422);
-        }
-
-        if ($data['file_size_bytes'] > $maxSizeBytes) {
-            throw new \Exception("Tamaño máximo: {$maxSizeMB}MB", 422);
-        }
-
-        if (strlen($data['file_name']) > 255) {
-            throw new \Exception('file_name muy largo', 422);
-        }
     }
 
     /**
@@ -110,25 +62,11 @@ class DocumentUploadService
     }
 
     /**
-     * MIME types permitidos
-     */
-    private function getAllowedMimeTypes(): array
-    {
-        return [
-            'application/pdf',
-            'image/jpeg',
-            'image/png',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-            'application/msword', // .doc
-        ];
-    }
-
-    /**
      * Almacenar registro de documento
      */
-    public function store(array $data, array $result): CommerceDocument
+    public function store($class, array $data, array $result): mixed
     {
-        return CommerceDocument::create([
+        return $class::create([
             'commerce_id' => $data['commerce_id'],
             'document_type' => $data['document_type'],
             'upload_token' => $result['upload_token'],
@@ -144,17 +82,17 @@ class DocumentUploadService
     /**
      * Obtener documento por token de carga
      */
-    public function getDocumentPendingByToken(string $uploadToken): ?CommerceDocument
+    public function getDocumentPendingByToken($class, string $uploadToken): mixed
     {
-        return CommerceDocument::where(['upload_token' => $uploadToken, 'upload_status' => Constant::UPLOAD_STATUS_PENDING])->firstOrFail();
+        return $class::where(['upload_token' => $uploadToken, 'upload_status' => Constant::UPLOAD_STATUS_PENDING])->firstOrFail();
     }
 
     /**
      * Actualizar documento tras confirmación
      */
-    public function update(CommerceDocument $document, array $data): bool
+    public function confirmUpload($model, array $data): bool
     {
-        return $document->update([
+        return $model->update([
             'upload_status' => Constant::UPLOAD_STATUS_CONFIRMED,
             's3_etag' => $data['s3_metadata']['etag'],
             's3_object_size' => $data['s3_metadata']['object_size'],
@@ -172,12 +110,28 @@ class DocumentUploadService
      *
      * @return int Número de documentos actualizados
      */
-    public function markExpiredPendingAsOrphaned(): int
+    public function markExpiredPendingAsOrphaned($model): int
     {
-        return CommerceDocument::where([
+        return $model::where([
             'upload_status' => Constant::UPLOAD_STATUS_PENDING,
         ])
             ->where('expires_at', '<', now())
             ->update(['upload_status' => Constant::UPLOAD_STATUS_ORPHANED]);
+    }
+
+    /**
+     * Remove product photo.
+     *
+     * @throws Exception
+     */
+    public function removeDocument($class, $document_id): bool
+    {
+        try {
+            $document = $class::findOrFail($document_id);
+
+            return $document->delete();
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DestroyProductRequest extends FormRequest
+class DestroyDocumentUploadRequest extends FormRequest
 {
     public function authorize(): bool
     {

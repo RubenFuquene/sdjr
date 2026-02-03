@@ -49,9 +49,15 @@ class ProductResource extends JsonResource
             'quantity_total' => $this->quantity_total,
             'quantity_available' => $this->quantity_available,
             'expires_at' => $this->expires_at,
+            'photos' => $this->whenLoaded('photos', function () {
+                return $this->photos->map(function ($photo) {
+                    return new DocumentUploadResource($photo, ['product_id' => $this->id]);
+                });
+            }),
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+
         ];
     }
 }

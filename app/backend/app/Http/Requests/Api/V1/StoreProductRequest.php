@@ -69,6 +69,12 @@ class StoreProductRequest extends FormRequest
             'commerce_branch_ids.*' => ['required', 'integer', 'exists:commerce_branches,id'],
 
             // Fotos
+            'photos' => ['array', 'max:'.Constant::MAX_PHOTOS_PER_PRODUCT],
+            'photos.*.file_name' => ['required', 'string', 'max:255'],
+            'photos.*.mime_type' => ['required', 'string', 'in:'.implode(',', Constant::ALLOWED_PHOTO_EXTENSIONS)],
+            'photos.*.file_size_bytes' => ['required', 'integer', 'min:1', 'max:'.Constant::ALLOWED_PHOTO_SIZE_BYTES],
+            'photos.*.versioning_enabled' => ['string'],
+            'photos.*.metadata' => ['nullable', 'array'],
 
             // Package
             'package_items.*' => ['sometimes', 'integer', 'exists:products,id'],

@@ -88,7 +88,7 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -105,6 +105,7 @@ class DocumentUploadControllerTest extends TestCase
                     'updated_at',
                 ],
                 'message',
+                'status',
             ]);
     }
 
@@ -126,11 +127,11 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
-        $response->assertStatus(422)
+        $response->assertStatus(404)
             ->assertJson([
-                'message' => 'The selected upload token is invalid.',
+                'message' => 'Document not found',
             ]);
     }
 
@@ -158,7 +159,7 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
         $response->assertStatus(404)
             ->assertJson([
@@ -189,7 +190,7 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
         $response->assertStatus(410)
             ->assertJson([
