@@ -12,6 +12,11 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        Department::factory(5)->create();
+        if(env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if(env('DEMO_SEEDING') == 'true') {
+            Department::factory(5)->create();
+        }
     }
 }

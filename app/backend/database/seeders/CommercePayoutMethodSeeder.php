@@ -11,6 +11,11 @@ class CommercePayoutMethodSeeder extends Seeder
 {
     public function run(): void
     {
-        CommercePayoutMethod::factory()->count(10)->create();
+        if(env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if(env('DEMO_SEEDING') == 'true') {
+            CommercePayoutMethod::factory()->count(10)->create();
+        }
     }
 }

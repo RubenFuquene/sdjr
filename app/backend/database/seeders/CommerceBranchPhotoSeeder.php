@@ -11,6 +11,11 @@ class CommerceBranchPhotoSeeder extends Seeder
 {
     public function run(): void
     {
-        CommerceBranchPhoto::factory()->count(20)->create();
+        if(env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if(env('DEMO_SEEDING') == 'true') {
+            CommerceBranchPhoto::factory()->count(20)->create();
+        }
     }
 }

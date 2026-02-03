@@ -11,6 +11,11 @@ class CommerceBranchHourSeeder extends Seeder
 {
     public function run(): void
     {
-        CommerceBranchHour::factory()->count(30)->create();
+        if(env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if(env('DEMO_SEEDING') == 'true') {
+            CommerceBranchHour::factory()->count(30)->create();
+        }
     }
 }
