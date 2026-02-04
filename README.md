@@ -1,6 +1,6 @@
 # SDJR
 
-A modern full-stack monorepo application built with Next.js and Laravel.
+A full-stack monorepo application built with Next.js and Laravel. (Three applications in one)
 
 ## 🏗️ Project Structure
 
