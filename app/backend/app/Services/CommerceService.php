@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Commerce;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -89,5 +90,41 @@ class CommerceService
         }
 
         return $query->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    /**
+     * Update the is_active status of a commerce.
+     *
+     * @throws ModelNotFoundException
+     */
+    public function updateStatus(int $commerceId, int $isActive): Commerce
+    {
+        try {
+            $commerce = Commerce::findOrFail($commerceId);
+            $commerce->is_active = $isActive;
+            $commerce->save();
+
+            return $commerce;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Update the is_verified status of a commerce.
+     *
+     * @throws ModelNotFoundException
+     */
+    public function updateVerification(int $commerceId, int $isVerified): Commerce
+    {
+        try {
+            $commerce = Commerce::findOrFail($commerceId);
+            $commerce->is_verified = $isVerified;
+            $commerce->save();
+
+            return $commerce;
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

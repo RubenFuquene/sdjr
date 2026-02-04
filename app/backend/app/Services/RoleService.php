@@ -43,6 +43,12 @@ class RoleService
                 $q->where('name', 'like', "%{$filters['permission']}%");
             });
         }
+        if (! empty($filters['q'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', "%{$filters['q']}%")
+                    ->orWhere('description', 'like', "%{$filters['q']}%");
+            });
+        }
 
         $roles = $query->paginate($perPage);
 
@@ -144,6 +150,25 @@ class RoleService
             $sync ? $role->syncPermissions($permissions) : $role->givePermissionTo($permissions);
         } catch (Exception $e) {
             Log::error('Error assigning permissions to role', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Update the status of a role.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function updateStatus(int $roleId, int $status): Role
+    {
+        try {
+            $role = Role::findOrFail($roleId);
+            $role->status = $status;
+            $role->save();
+
+            return $role;
+        } catch (Exception $e) {
+            Log::error('Error updating role status', ['error' => $e->getMessage()]);
             throw $e;
         }
     }

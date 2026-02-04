@@ -20,6 +20,7 @@ class CommerceDocumentService
      */
     public function store(array $data): CommerceDocument
     {
+
         return CommerceDocument::create($data);
     }
 

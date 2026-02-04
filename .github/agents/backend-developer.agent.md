@@ -206,6 +206,7 @@ FormRequest → Service → Controller → API Resource
 
 - ✅ Happy Path (éxito)
 - ✅ Al menos un caso de error (validación fallida o sin autorización)
+- El nombre de las funciones de los tests debe ser descriptivo y seguir la convención `test_[acción]_[resultado esperado]`
 
 ### 5.5 Instrucción: Validación y sanitización obligatoria en todos los modelos
 
