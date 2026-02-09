@@ -22,6 +22,7 @@ import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
 import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
 import { UserVisualizationModal } from '@/components/admin/modals';
+import { TablePagination } from '@/components/admin/shared/table-pagination';
 
 /**
  * Props de la vista
@@ -44,7 +45,21 @@ export function UsersView({
 }: UsersViewProps) {
   // Hook de gestión de usuarios
   const userManagement = useUserManagement();
-  const { usuarios, loading, error, handleSearch, handleToggle, handleDelete, handleRetry, refresh } = userManagement;
+  const {
+    usuarios,
+    loading,
+    error,
+    handleSearch,
+    handleToggle,
+    handleDelete,
+    handleRetry,
+    refresh,
+    currentPage,
+    lastPage,
+    total,
+    perPage,
+    handlePageChange,
+  } = userManagement;
 
   // Estado del confirmation dialog para eliminar
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -232,6 +247,14 @@ export function UsersView({
           onEdit={handleEditUser}
           onToggle={handleToggleUser}
           onDelete={handleDeleteUser}
+        />
+
+        <TablePagination
+          currentPage={currentPage}
+          lastPage={lastPage}
+          perPage={perPage}
+          total={total}
+          onPageChange={handlePageChange}
         />
       </div>
 

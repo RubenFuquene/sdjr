@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getNeighborhoods } from '@/lib/api/location';
 import type { Neighborhood } from '@/types/location';
 import {
@@ -44,6 +44,11 @@ export function NeighborhoodSelect({
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   /**
    * Effect: Fetch neighborhoods when cityId changes
@@ -52,7 +57,7 @@ export function NeighborhoodSelect({
   useEffect(() => {
     if (!cityId) {
       setNeighborhoods([]);
-      onChange(null); // Reset neighborhood selection when city is cleared
+      onChangeRef.current(null); // Reset neighborhood selection when city is cleared
       return;
     }
 
@@ -65,7 +70,7 @@ export function NeighborhoodSelect({
         const response = await getNeighborhoods({ per_page: 100 });
         const filtered = response.data.filter((nbh) => nbh.city_id === cityId);
         setNeighborhoods(filtered);
-        onChange(null); // Reset selection when loading new neighborhoods
+        onChangeRef.current(null); // Reset selection when loading new neighborhoods
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al cargar barrios';
         setFetchError(errorMessage);
@@ -75,7 +80,7 @@ export function NeighborhoodSelect({
     };
 
     fetchNeighborhoods();
-  }, [cityId]); // onChange omitida intencionalmente para evitar loops infinitos (es callback estable)
+  }, [cityId]);
 
   const hasNeighborhoods = neighborhoods.length > 0;
   const isDisabled = disabled || !cityId;
@@ -94,7 +99,7 @@ export function NeighborhoodSelect({
         // Show Select if neighborhoods exist
         <Select
           value={value?.toString() || ''}
-          onValueChange={(val) => onChange(val || null)}
+          onValueChange={(val) => onChangeRef.current(val || null)}
           disabled={isDisabled}
         >
           <SelectTrigger
@@ -127,7 +132,7 @@ export function NeighborhoodSelect({
             id="neighborhood-input"
             type="text"
             value={value || ''}
-            onChange={(e) => onChange(e.target.value || null)}
+            onChange={(e) => onChangeRef.current(e.target.value || null)}
             disabled={isDisabled}
             placeholder={
               !cityId

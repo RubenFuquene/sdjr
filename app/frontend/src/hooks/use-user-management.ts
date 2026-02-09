@@ -270,6 +270,9 @@ export function useUserManagement(perPage: number = 15) {
     currentPage,
     totalPages,
     totalUsers,
+    lastPage: totalPages,
+    total: totalUsers,
+    perPage: filters.perPage ?? perPage,
 
     // Filters & Pagination
     filters,

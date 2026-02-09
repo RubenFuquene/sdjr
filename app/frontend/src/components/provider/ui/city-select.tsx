@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getCities } from '@/lib/api/location';
 import type { City } from '@/types/location';
 import {
@@ -41,6 +41,11 @@ export function CitySelect({
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   /**
    * Effect: Fetch cities when departmentId changes
@@ -49,7 +54,7 @@ export function CitySelect({
   useEffect(() => {
     if (!departmentId) {
       setCities([]);
-      onChange(null); // Reset city selection when department is cleared
+      onChangeRef.current(null); // Reset city selection when department is cleared
       return;
     }
 
@@ -62,7 +67,7 @@ export function CitySelect({
         const response = await getCities({ per_page: 100 });
         const filtered = response.data.filter((city) => city.department_id === departmentId);
         setCities(filtered);
-        onChange(null); // Reset selection when loading new cities
+        onChangeRef.current(null); // Reset selection when loading new cities
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al cargar ciudades';
         setFetchError(errorMessage);
@@ -72,7 +77,7 @@ export function CitySelect({
     };
 
     fetchCities();
-  }, [departmentId]); // onChange omitida intencionalmente para evitar loops infinitos (es callback estable)
+  }, [departmentId]);
 
   const isDisabled = disabled || !departmentId || loading;
 
@@ -85,7 +90,7 @@ export function CitySelect({
 
       <Select
         value={value?.toString() || ''}
-        onValueChange={(val) => onChange(val ? parseInt(val, 10) : null)}
+        onValueChange={(val) => onChangeRef.current(val ? parseInt(val, 10) : null)}
         disabled={isDisabled}
       >
         <SelectTrigger

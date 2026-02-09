@@ -50,6 +50,11 @@ export function useCommerceManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Estado de paginación (metadata del backend)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [totalCommerces, setTotalCommerces] = useState(0);
+
   // Estado de filtros y paginación
   const [filters, setFilters] = useState<CommerceFilters>({
     page: 1,
@@ -75,6 +80,10 @@ export function useCommerceManagement() {
 
       const mappedCommerces = response.data.map(commerceToProveedorListItem);
       setCommerces(mappedCommerces);
+
+      setCurrentPage(response.meta.current_page);
+      setLastPage(response.meta.last_page);
+      setTotalCommerces(response.meta.total);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -114,6 +123,10 @@ export function useCommerceManagement() {
 
       const mappedCommerces = response.data.map(commerceToProveedorListItem);
       setCommerces(mappedCommerces);
+
+      setCurrentPage(response.meta.current_page);
+      setLastPage(response.meta.last_page);
+      setTotalCommerces(response.meta.total);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -146,6 +159,10 @@ export function useCommerceManagement() {
 
       const mappedCommerces = response.data.map(commerceToProveedorListItem);
       setCommerces(mappedCommerces);
+
+      setCurrentPage(response.meta.current_page);
+      setLastPage(response.meta.last_page);
+      setTotalCommerces(response.meta.total);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -266,6 +283,12 @@ export function useCommerceManagement() {
     commerces,
     loading,
     error,
+
+    // Pagination metadata
+    currentPage,
+    lastPage,
+    totalCommerces,
+    perPage: filters.perPage ?? 15,
 
     // Filters & Pagination
     filters,
