@@ -22,7 +22,7 @@ class UserSeeder extends ControlledSeeder
      */
     protected function runSeeder(): void
     {
-         User::insert([            
+        User::insert([
             [
                 'name' => 'Admin',
                 'last_name' => 'User',

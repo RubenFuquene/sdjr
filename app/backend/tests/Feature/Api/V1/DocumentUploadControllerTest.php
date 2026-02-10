@@ -6,16 +6,14 @@ use App\Models\Commerce;
 use App\Models\CommerceDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Mockery;
-use Tests\Traits\MockS3DiskTrait;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
+use Tests\Traits\MockS3DiskTrait;
 
 class DocumentUploadControllerTest extends TestCase
 {
-    use RefreshDatabase, MockS3DiskTrait;
+    use MockS3DiskTrait, RefreshDatabase;
 
     protected function setUp(): void
     {

@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Mockery;
-use Tests\Traits\MockS3DiskTrait;
-use Tests\TestCase;
 use App\Models\City;
-use App\Models\User;
 use App\Models\Commerce;
+use App\Models\CommerceBranch;
 use App\Models\Department;
 use App\Models\Neighborhood;
-use App\Models\CommerceBranch;
-use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
+use Tests\Traits\MockS3DiskTrait;
 
 class CommerceBranchTest extends TestCase
 {
-    use RefreshDatabase, MockS3DiskTrait;
+    use MockS3DiskTrait, RefreshDatabase;
 
     protected function setUp(): void
     {

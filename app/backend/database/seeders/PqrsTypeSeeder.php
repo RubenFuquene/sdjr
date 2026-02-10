@@ -14,10 +14,10 @@ class PqrsTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        if(env('APP_ENV') == 'prd') {
+        if (env('APP_ENV') == 'prd') {
             // Aquí puedes agregar datos fijos para producción si aplica
         }
-        if(env('DEMO_SEEDING') == 'true') {
+        if (env('DEMO_SEEDING') == 'true') {
             PqrsType::factory()->count(10)->create();
         }
     }

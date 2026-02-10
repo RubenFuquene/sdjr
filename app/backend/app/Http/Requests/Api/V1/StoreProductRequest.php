@@ -28,7 +28,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="expires_at", type="string", format="date-time", nullable=true, example="2026-12-31T23:59:59", description="Expiration date"),
  *     @OA\Property(property="status", type="string", maxLength=1, example="1", description="Status (1=Activo, 0=Inactivo)"),
  *     @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
- * 
+ *
  *   ),
  *   @OA\Property(
  *     property="commerce_branch_ids",

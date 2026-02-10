@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
-use Mockery;
-use Tests\Traits\MockS3DiskTrait;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Commerce;
 use App\Models\ProductCategory;
-use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
+use Tests\Traits\MockS3DiskTrait;
 
 class ProductStoreTest extends TestCase
 {
-    use RefreshDatabase, MockS3DiskTrait;
+    use MockS3DiskTrait, RefreshDatabase;
 
     protected function setUp(): void
     {

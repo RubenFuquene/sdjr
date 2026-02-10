@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
-    use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
+use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
 use App\Http\Requests\Api\V1\ShowProductRequest;
 use App\Http\Requests\Api\V1\StoreProductRequest;
@@ -327,14 +327,17 @@ class ProductController extends Controller
      *
      *   @OA\RequestBody(
      *     required=true,
+     *
      *     @OA\JsonContent(ref="#/components/schemas/PatchProductPhotoUploadRequest")
      *   ),
      *
      *   @OA\Response(
      *     response=200,
      *     description="Product photo confirmed successfully",
+     *
      *     @OA\JsonContent(ref="#/components/schemas/DocumentUploadResource")
      *   ),
+     *
      *   @OA\Response(response=404, description="Photo not exist or not in pending status"),
      *   @OA\Response(response=410, description="Presigned URL expired"),
      *   @OA\Response(response=401, description="Unauthenticated"),

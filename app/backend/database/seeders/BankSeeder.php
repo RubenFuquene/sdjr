@@ -11,8 +11,8 @@ class BankSeeder extends Seeder
 {
     public function run(): void
     {
-        if(env('APP_ENV') == 'prd') {
-            
+        if (env('APP_ENV') == 'prd') {
+
             Bank::insert([
                 ['name' => 'Bank of America', 'code' => '001', 'created_at' => now(), 'updated_at' => now()],
                 ['name' => 'Chase Bank', 'code' => '002', 'created_at' => now(), 'updated_at' => now()],
@@ -20,11 +20,11 @@ class BankSeeder extends Seeder
                 ['name' => 'Citibank', 'code' => '004', 'created_at' => now(), 'updated_at' => now()],
                 ['name' => 'US Bank', 'code' => '005', 'created_at' => now(), 'updated_at' => now()],
             ]);
-                        
+
         }
-            
-        if(env('DEMO_SEEDING') == 'true') {
-            Bank::factory()->count(10)->create();            
+
+        if (env('DEMO_SEEDING') == 'true') {
+            Bank::factory()->count(10)->create();
         }
 
     }
