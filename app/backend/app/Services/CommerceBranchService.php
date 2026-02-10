@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
+use App\Models\CommerceBranchPhoto;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,14 @@ use Illuminate\Support\Facades\Log;
  */
 class CommerceBranchService
 {
+    /**
+     * @var DocumentUploadService Document upload service instance.
+     */
+    protected $documentUploadService;
+
+    /**
+     * Constructor
+     */
     private CommerceBranchHoursService $commerceBranchHoursService;
 
     private CommerceBranchPhotoService $commerceBranchPhotoService;
@@ -26,6 +35,8 @@ class CommerceBranchService
     ) {
         $this->commerceBranchHoursService = $commerceBranchHoursService;
         $this->commerceBranchPhotoService = $commerceBranchPhotoService;
+
+        $this->documentUploadService = new DocumentUploadService;
     }
 
     /**
@@ -100,13 +111,46 @@ class CommerceBranchService
             }
 
             if (! empty($data['commerce_branch_photos'])) {
-                $commerceBranchPhotosData = $data['commerce_branch_photos'];
-                $commerceBranchPhotosData['commerce_branch_id'] = $commerceBranch->id;
-                $this->commerceBranchPhotoService->store($commerceBranchPhotosData);
+                $this->storeCommerceBranchPhotos(
+                    $commerceBranch->id,
+                    $data['commerce_branch_photos']
+                );
             }
 
             return $commerceBranch->load(['commerce', 'commerceBranchPhotos', 'commerceBranchHours']);
         });
+    }
+
+    /**
+     * Store commerce branch photos.
+     */
+    protected function storeCommerceBranchPhotos(int $commerceBranchId, array $photos): void
+    {
+        $commerce_branch_photos = [];
+        foreach ($photos as $photo) {
+
+            $presignedUrlData = $this->documentUploadService->generatePresignedUrl(
+                $photo['file_name'],
+                $photo['mime_type'],
+                $commerceBranchId,
+                'commerce_branch_photos'
+            );
+
+            $commerce_branch_photos[] = [
+                'commerce_branch_id' => $commerceBranchId,
+                'file_path' => $presignedUrlData['path'],
+                'upload_token' => $presignedUrlData['upload_token'],
+                'presigned_url' => $presignedUrlData['presigned_url'],
+                'mime_type' => $photo['mime_type'],
+                'uploaded_at' => now(),
+                'expires_at' => now()->addHour(),
+                'uploaded_by_id' => auth()->id(),
+                'failed_attempts' => 0,
+            ];
+
+        }
+
+        CommerceBranchPhoto::insert($commerce_branch_photos);
     }
 
     /**

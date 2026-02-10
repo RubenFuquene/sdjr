@@ -11,13 +11,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('commerce_branch_photos', function (Blueprint $table) {
+        Schema::create('product_photos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('commerce_branch_id')->constrained('commerce_branches')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->foreignId('verified_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('uploaded_by_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('replacement_of_id')->nullable()->constrained('commerce_branch_photos')->nullOnDelete();
-            $table->foreignId('version_of_id')->nullable()->constrained('commerce_branch_photos')->nullOnDelete();
+            $table->foreignId('replacement_of_id')->nullable()->constrained('product_photos')->nullOnDelete();
+            $table->foreignId('version_of_id')->nullable()->constrained('product_photos')->nullOnDelete();
             $table->string('file_path')->nullable();
             $table->string('presigned_url', 2048)->nullable();
             $table->string('upload_token', 255)->unique()->nullable();
@@ -42,13 +42,12 @@ return new class extends Migration
             // Índices
             $table->index('upload_status');
             $table->index('expires_at');
-            $table->index(['commerce_branch_id', 'upload_status']);
-
+            $table->index(['product_id', 'upload_status']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('commerce_branch_photos');
+        Schema::dropIfExists('product_photos');
     }
 };

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *   schema="PatchDocumentUploadRequest",
+ *   schema="PatchProductPhotoUploadRequest",
  *   type="object",
  *   required={"upload_token", "s3_metadata"},
  *
@@ -23,11 +23,11 @@ use Illuminate\Foundation\Http\FormRequest;
  *   )
  * )
  */
-class PatchDocumentUploadRequest extends FormRequest
+class PatchProductPhotoUploadRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasAnyPermission(['admin.providers.upload_documents', 'provider.photos.upload']) ?? false;
+        return $this->user()?->can('provider.photos.upload') ?? false;
     }
 
     public function rules(): array

@@ -107,13 +107,17 @@ Route::prefix('v1')->group(function () {
         // Commerce Branches
         Route::apiResource('commerce-branches', CommerceBranchController::class);
 
+        Route::patch('commerce-branches/photos/confirm', [CommerceBranchController::class, 'confirmPhotoUpload']);
+        Route::delete('commerce-branches/photos/{photo}', [CommerceBranchController::class, 'removePhoto']);
+
         // Legal Representative routes
         Route::apiResource('legal-representatives', LegalRepresentativeController::class);
 
         // Document Upload Endpoints
         Route::prefix('documents')->group(function () {
             Route::post('/presigned', [DocumentUploadController::class, 'presigned']);
-            Route::post('/confirm', [DocumentUploadController::class, 'confirm']);
+            Route::patch('/confirm', [DocumentUploadController::class, 'confirm']);
+            Route::delete('/{document}', [DocumentUploadController::class, 'remove']);
         });
 
         // Product Management routes
@@ -128,6 +132,9 @@ Route::prefix('v1')->group(function () {
             Route::post('package-items', [ProductController::class, 'storePackageItems']);
             Route::put('package-items/{id}', [ProductController::class, 'updatePackageItems']);
         });
+
+        Route::patch('products/photos/confirm', [ProductController::class, 'confirmPhotoUpload']);
+        Route::delete('products/photos/{photo}', [ProductController::class, 'removePhoto']);
 
         Route::apiResource('product-categories', ProductCategoryController::class);
     });

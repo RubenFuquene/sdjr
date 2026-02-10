@@ -63,12 +63,22 @@ class Constant
     public const LEGAL_DOCUMENT_STATUS_ARCHIVED = 'archived';
 
     // Allowed file extensions for uploads
-    public const ALLOWED_FILE_EXTENSIONS = ['pdf', 'jpg', 'png', 'docx'];
+    public const ALLOWED_FILE_EXTENSIONS = ['pdf', 'jpg', 'png', 'docx', 'jpeg'];
 
     public const ALLOWED_SIZE_BYTES = 52428800; // 50 MB
+
+    // Allowed image extension
+    public const ALLOWED_PHOTO_EXTENSIONS = ['jpg', 'png', 'jpeg'];
+
+    public const ALLOWED_PHOTO_SIZE_BYTES = 5242880; // 5 MB
+
+    public const MAX_PHOTOS_PER_PRODUCT = 3;
 
     // Product Types
     public const PRODUCT_TYPE_SINGLE = 'single';
 
     public const PRODUCT_TYPE_PACKAGE = 'package';
+
+    // Commerce Branch Photos
+    public const MAX_PHOTOS_PER_COMMERCE_BRANCH = 5;
 }

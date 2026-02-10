@@ -178,6 +178,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Delete establishment types', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'View admin provider upload documents module', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.photos.upload', 'guard_name' => $guardName, 'description' => 'Update photos by provider', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'List product categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Create product categories', 'created_at' => now(), 'updated_at' => now()],

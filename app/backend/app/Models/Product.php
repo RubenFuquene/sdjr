@@ -118,4 +118,14 @@ class Product extends Model
     {
         return $this->belongsToMany(Product::class, 'product_package_items', 'product_package_id', 'product_id');
     }
+
+    /**
+     * Get the photos for the product.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function photos()
+    {
+        return $this->hasMany(ProductPhoto::class, 'product_id');
+    }
 }

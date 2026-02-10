@@ -11,6 +11,11 @@ class NeighborhoodSeeder extends Seeder
 {
     public function run(): void
     {
-        Neighborhood::factory(10)->create();
+        if (env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if (env('DEMO_SEEDING') == 'true') {
+            Neighborhood::factory(10)->create();
+        }
     }
 }

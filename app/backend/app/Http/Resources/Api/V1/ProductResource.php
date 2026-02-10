@@ -22,6 +22,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="quantity_total", type="integer"),
  *   @OA\Property(property="quantity_available", type="integer"),
  *   @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
+ *   @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
  *   @OA\Property(property="status", type="string"),
  *   @OA\Property(property="created_at", type="string", format="date-time"),
  *   @OA\Property(property="updated_at", type="string", format="date-time")
@@ -49,9 +50,15 @@ class ProductResource extends JsonResource
             'quantity_total' => $this->quantity_total,
             'quantity_available' => $this->quantity_available,
             'expires_at' => $this->expires_at,
+            'photos' => $this->whenLoaded('photos', function () {
+                return $this->photos->map(function ($photo) {
+                    return new DocumentUploadResource($photo, ['product_id' => $this->id]);
+                });
+            }),
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+
         ];
     }
 }

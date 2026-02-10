@@ -6,28 +6,20 @@ use App\Models\Commerce;
 use App\Models\CommerceDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Mockery;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
+use Tests\Traits\MockS3DiskTrait;
 
 class DocumentUploadControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use MockS3DiskTrait, RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'admin.providers.upload_documents', 'guard_name' => 'sanctum']);
-
-        // Mock del disco S3 para evitar dependencia de configuración real
-        $mockDisk = Mockery::mock();
-        $mockDisk->shouldReceive('temporaryUrl')
-            ->andReturn('https://fake-s3-bucket.amazonaws.com/presigned-url?signature=fake');
-
-        Storage::shouldReceive('disk')
-            ->andReturn($mockDisk);
+        $this->setUpMockS3Disk();
     }
 
     /**
@@ -88,7 +80,7 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -105,6 +97,7 @@ class DocumentUploadControllerTest extends TestCase
                     'updated_at',
                 ],
                 'message',
+                'status',
             ]);
     }
 
@@ -126,11 +119,11 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
-        $response->assertStatus(422)
+        $response->assertStatus(404)
             ->assertJson([
-                'message' => 'The selected upload token is invalid.',
+                'message' => 'Document not found',
             ]);
     }
 
@@ -158,7 +151,7 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
         $response->assertStatus(404)
             ->assertJson([
@@ -189,7 +182,7 @@ class DocumentUploadControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/documents/confirm', $payload);
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
 
         $response->assertStatus(410)
             ->assertJson([

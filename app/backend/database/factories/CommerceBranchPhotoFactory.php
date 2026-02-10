@@ -27,7 +27,6 @@ class CommerceBranchPhotoFactory extends Factory
             'version_number' => $this->faker->numberBetween(1, 10),
             'expires_at' => $this->faker->optional()->dateTimeBetween('now', '+2 years'),
             'failed_attempts' => $this->faker->numberBetween(0, 3),
-            'photo_type' => $this->faker->randomElement(['EXTERIOR', 'INTERIOR', 'PRODUCT']),
             'file_path' => '/tmp/'.$this->faker->uuid().'.jpg',
             'mime_type' => 'image/jpeg',
             'uploaded_at' => $this->faker->dateTimeBetween('-1 year', 'now'),

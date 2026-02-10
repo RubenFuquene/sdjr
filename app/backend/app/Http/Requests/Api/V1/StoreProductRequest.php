@@ -27,6 +27,8 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="quantity_available", type="integer", example=50, description="Available quantity"),
  *     @OA\Property(property="expires_at", type="string", format="date-time", nullable=true, example="2026-12-31T23:59:59", description="Expiration date"),
  *     @OA\Property(property="status", type="string", maxLength=1, example="1", description="Status (1=Activo, 0=Inactivo)"),
+ *     @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
+ *
  *   ),
  *   @OA\Property(
  *     property="commerce_branch_ids",
@@ -69,6 +71,12 @@ class StoreProductRequest extends FormRequest
             'commerce_branch_ids.*' => ['required', 'integer', 'exists:commerce_branches,id'],
 
             // Fotos
+            'photos' => ['array', 'max:'.Constant::MAX_PHOTOS_PER_PRODUCT],
+            'photos.*.file_name' => ['required', 'string', 'max:255'],
+            'photos.*.mime_type' => ['required', 'string', 'in:'.implode(',', Constant::ALLOWED_PHOTO_EXTENSIONS)],
+            'photos.*.file_size_bytes' => ['required', 'integer', 'min:1', 'max:'.Constant::ALLOWED_PHOTO_SIZE_BYTES],
+            'photos.*.versioning_enabled' => ['string'],
+            'photos.*.metadata' => ['nullable', 'array'],
 
             // Package
             'package_items.*' => ['sometimes', 'integer', 'exists:products,id'],
