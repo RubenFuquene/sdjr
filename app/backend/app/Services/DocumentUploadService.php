@@ -68,7 +68,7 @@ class DocumentUploadService
     {
         return $class::create([
             'commerce_id' => $data['commerce_id'],
-            'document_type' => $data['document_type'],
+            'document_type' => $data['document_type'] ?? null,
             'upload_token' => $result['upload_token'],
             'upload_status' => Constant::UPLOAD_STATUS_PENDING,
             'file_path' => $result['path'],

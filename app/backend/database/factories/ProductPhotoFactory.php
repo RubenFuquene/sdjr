@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Constants\Constant;
 use App\Models\Product;
 use App\Models\ProductPhoto;
 use App\Models\User;
@@ -27,7 +28,7 @@ class ProductPhotoFactory extends Factory
             'version_of_id' => null,
             'file_path' => $this->faker->imageUrl(),
             'upload_token' => Str::random(32),
-            'upload_status' => 'pending',
+            'upload_status' => Constant::UPLOAD_STATUS_PENDING,
             's3_etag' => Str::random(16),
             's3_object_size' => $this->faker->numberBetween(10000, 1000000),
             's3_last_modified' => $this->faker->dateTime(),

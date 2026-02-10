@@ -22,6 +22,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="quantity_total", type="integer"),
  *   @OA\Property(property="quantity_available", type="integer"),
  *   @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
+ *   @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
  *   @OA\Property(property="status", type="string"),
  *   @OA\Property(property="created_at", type="string", format="date-time"),
  *   @OA\Property(property="updated_at", type="string", format="date-time")
