@@ -9,25 +9,19 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Mockery;
+use Tests\Traits\MockS3DiskTrait;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class DocumentUploadControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, MockS3DiskTrait;
 
     protected function setUp(): void
     {
         parent::setUp();
         Permission::create(['name' => 'admin.providers.upload_documents', 'guard_name' => 'sanctum']);
-
-        // Mock del disco S3 para evitar dependencia de configuración real
-        $mockDisk = Mockery::mock();
-        $mockDisk->shouldReceive('temporaryUrl')
-            ->andReturn('https://fake-s3-bucket.amazonaws.com/presigned-url?signature=fake');
-
-        Storage::shouldReceive('disk')
-            ->andReturn($mockDisk);
+        $this->setUpMockS3Disk();
     }
 
     /**

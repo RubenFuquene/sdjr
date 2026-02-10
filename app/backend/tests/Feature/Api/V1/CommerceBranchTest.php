@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
+use Mockery;
+use Tests\Traits\MockS3DiskTrait;
+use Tests\TestCase;
 use App\Models\City;
+use App\Models\User;
 use App\Models\Commerce;
-use App\Models\CommerceBranch;
 use App\Models\Department;
 use App\Models\Neighborhood;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\CommerceBranch;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
-use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CommerceBranchTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, MockS3DiskTrait;
 
     protected function setUp(): void
     {
@@ -25,6 +28,7 @@ class CommerceBranchTest extends TestCase
         Permission::create(['name' => 'provider.commerces.update', 'guard_name' => 'sanctum']);
         Permission::create(['name' => 'provider.commerces.view', 'guard_name' => 'sanctum']);
         Permission::create(['name' => 'provider.commerces.delete', 'guard_name' => 'sanctum']);
+        $this->setUpMockS3Disk();
     }
 
     public function test_create_branch_success(): void

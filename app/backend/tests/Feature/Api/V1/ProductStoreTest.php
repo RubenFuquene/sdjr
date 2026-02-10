@@ -4,22 +4,26 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1;
 
+use Mockery;
+use Tests\Traits\MockS3DiskTrait;
+use Tests\TestCase;
+use App\Models\User;
 use App\Models\Commerce;
 use App\Models\ProductCategory;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
-use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ProductStoreTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, MockS3DiskTrait;
 
     protected function setUp(): void
     {
         parent::setUp();
         // Crear el permiso si no existe
         Permission::findOrCreate('provider.products.create', 'sanctum');
+        $this->setUpMockS3Disk();
     }
 
     public function test_store_product_success(): void
