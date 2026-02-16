@@ -13,10 +13,11 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
+use Tests\Traits\MockS3DiskTrait;
 
 class CommerceBranchTest extends TestCase
 {
-    use RefreshDatabase;
+    use MockS3DiskTrait, RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -25,6 +26,7 @@ class CommerceBranchTest extends TestCase
         Permission::create(['name' => 'provider.commerces.update', 'guard_name' => 'sanctum']);
         Permission::create(['name' => 'provider.commerces.view', 'guard_name' => 'sanctum']);
         Permission::create(['name' => 'provider.commerces.delete', 'guard_name' => 'sanctum']);
+        $this->setUpMockS3Disk();
     }
 
     public function test_create_branch_success(): void
@@ -56,22 +58,23 @@ class CommerceBranchTest extends TestCase
                 'note' => 'Horario normal',
             ],
             'commerce_branch_photos' => [
-                'uploaded_by_id' => $user->id,
-                'upload_token' => 'token123',
-                's3_etag' => 'etag123',
-                's3_object_size' => 123456,
-                's3_last_modified' => '2026-01-20 10:00:00',
-                'replacement_of_id' => null,
-                'version_of_id' => null,
-                'version_number' => 1,
-                'expires_at' => null,
-                'failed_attempts' => 0,
-                'photo_type' => 'front',
-                'file_path' => '/photos/branch1.jpg',
-                'mime_type' => 'image/jpeg',
-                'uploaded_at' => '2026-01-20 10:00:00',
+                [
+                    'file_name' => 'branch_photo.jpg',
+                    'mime_type' => 'png',
+                    'file_size_bytes' => 45000,
+                    'versioning_enabled' => 'false',
+                    'metadata' => ['description' => 'Foto de la sucursal'],
+                ],
+                [
+                    'file_name' => 'branch_photo.jpg',
+                    'mime_type' => 'jpeg',
+                    'file_size_bytes' => 45000,
+                    'versioning_enabled' => 'false',
+                    'metadata' => ['description' => 'Foto de la sucursal'],
+                ],
             ],
         ];
+
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/commerce-branches', $payload)
             ->assertCreated()

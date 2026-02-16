@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
 use App\Http\Requests\Api\V1\PatchDocumentUploadRequest;
 use App\Http\Requests\Api\V1\StoreDocumentUploadRequest;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
+use App\Models\CommerceDocument;
 use App\Services\DocumentUploadService;
 use App\Traits\ApiResponseTrait;
 use Dom\Document;
@@ -16,11 +18,11 @@ class DocumentUploadController extends Controller
 {
     use ApiResponseTrait;
 
-    private DocumentUploadService $uploadService;
+    private DocumentUploadService $documentUploadService;
 
-    public function __construct(DocumentUploadService $uploadService)
+    public function __construct(DocumentUploadService $documentUploadService)
     {
-        $this->uploadService = $uploadService;
+        $this->documentUploadService = $documentUploadService;
     }
 
     /**
@@ -60,15 +62,14 @@ class DocumentUploadController extends Controller
      */
     public function presigned(StoreDocumentUploadRequest $request): JsonResponse
     {
-
         try {
 
             $data = $request->validated();
 
-            $result = $this->uploadService->generatePresignedUrl($data);
+            $result = $this->documentUploadService->generatePresignedUrl($data['file_name'], $data['mime_type'], $data['commerce_id'], 'commerce');
 
             // Guardar registro temporal en la base de datos
-            $this->uploadService->store($data, $result);
+            $this->documentUploadService->store(CommerceDocument::class, $data, $result);
 
             return $this->successResponse([
                 'upload_token' => $result['upload_token'],
@@ -120,7 +121,7 @@ class DocumentUploadController extends Controller
         try {
             $data = $request->validated();
 
-            $document = $this->uploadService->getDocumentPendingByToken($data['upload_token']);
+            $document = $this->documentUploadService->getDocumentPendingByToken(CommerceDocument::class, $data['upload_token']);
 
             // Validations
             if ($document->expires_at < now()) {
@@ -128,13 +129,50 @@ class DocumentUploadController extends Controller
             }
 
             // Update document status to uploaded
-            $this->uploadService->update($document, $data);
+            $this->documentUploadService->confirmUpload($document, $data);
 
-            return $this->successResponse(new DocumentUploadResource($document), 'Document confirmed successfully', 200);
+            return $this->successResponse(new DocumentUploadResource($document, [
+                'commerce_id' => $document->commerce_id,
+                'document_type' => $document->document_type,
+            ]), 'Document confirmed successfully', 200);
 
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse('Document not found', 404);
 
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Remove a document.
+     *
+     * @OA\Delete(
+     *   path="/api/v1/documents/{document}",
+     *   operationId="removeDocument",
+     *   tags={"Documents"},
+     *   summary="Remove document",
+     *   description="Elimina un documento por su ID.",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="document", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *   @OA\Response(response=204, description="Document deleted successfully"),
+     *   @OA\Response(response=404, description="Document not found"),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function remove(DestroyDocumentUploadRequest $request, int $document_id): JsonResponse
+    {
+        try {
+
+            $this->documentUploadService->removeDocument(CommerceDocument::class, $document_id);
+
+            return $this->successResponse([], 'Document deleted successfully', 204);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Document not found', 404);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $e->getCode() ?: 500);
         }

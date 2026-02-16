@@ -22,24 +22,24 @@ class UserSeeder extends ControlledSeeder
      */
     protected function runSeeder(): void
     {
-        // Create a specific users for testing purposes
-        $users = env('SEEDING_USERS');
-        if ($users) {
-            $emails = explode(',', $users);
-            foreach ($emails as $email) {
-                $email = trim($email);
-                User::firstOrCreate(
-                    ['email' => $email],
-                    [
-                        'name' => explode('@', $email)[0],
-                        'last_name' => 'User',
-                        'phone' => '3000000000',
-                        'password' => Hash::make('password'),
-                        'email_verified_at' => now(),
-                    ]
-                );
-            }
-        }
+        User::insert([
+            [
+                'name' => 'Admin',
+                'last_name' => 'User',
+                'email' => 'admin@example.com',
+                'phone' => '3000000000',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'Provider',
+                'last_name' => 'User',
+                'email' => 'provider@example.com',
+                'phone' => '3000000001',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ],
+        ]);
 
         // Always create 10 additional test users
         User::factory(10)->create();

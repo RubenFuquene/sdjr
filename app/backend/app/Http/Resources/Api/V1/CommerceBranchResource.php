@@ -39,7 +39,11 @@ class CommerceBranchResource extends JsonResource
         return [
             'id' => $this->id,
             'commerce_id' => $this->commerce_id,
-            'photos' => CommerceBranchPhotoResource::collection($this->whenLoaded('commerceBranchPhotos')),
+            'photos' => $this->whenLoaded('commerceBranchPhotos', function () {
+                return $this->commerceBranchPhotos->map(function ($photo) {
+                    return new DocumentUploadResource($photo, ['commerce_branch_id' => $this->id]);
+                });
+            }),
             'hours' => CommerceBranchHoursResource::collection($this->whenLoaded('commerceBranchHours')),
             'name' => $this->name,
             'address' => $this->address,

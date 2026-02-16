@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\DestroyProductRequest;
+use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
+use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
 use App\Http\Requests\Api\V1\ShowProductRequest;
 use App\Http\Requests\Api\V1\StoreProductRequest;
 use App\Http\Requests\Api\V1\UpdateProductRequest;
+use App\Http\Resources\Api\V1\DocumentUploadResource;
 use App\Http\Resources\Api\V1\ProductResource;
+use App\Models\ProductPhoto;
+use App\Services\DocumentUploadService;
 use App\Services\ProductService;
 use App\Traits\ApiResponseTrait;
 use Exception;
@@ -25,9 +29,12 @@ class ProductController extends Controller
 
     private ProductService $productService;
 
+    private DocumentUploadService $documentUploadService;
+
     public function __construct(ProductService $service)
     {
         $this->productService = $service;
+        $this->documentUploadService = new DocumentUploadService;
     }
 
     /**
@@ -166,7 +173,7 @@ class ProductController extends Controller
      *   @OA\Response(response=404, description="Not found")
      * )
      */
-    public function destroy(DestroyProductRequest $request, int $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         try {
             $this->productService->destroy($id);
@@ -304,6 +311,96 @@ class ProductController extends Controller
             Log::error('Error updating product package items', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error updating product package items', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Confirm product photo upload.
+     *
+     * @OA\Patch(
+     *   path="/api/v1/products/photos/confirm",
+     *   operationId="confirmProductPhotoUpload",
+     *   tags={"Products"},
+     *   summary="Confirm product photo upload",
+     *   description="Confirma que la foto del producto fue subida exitosamente y actualiza el registro.",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\RequestBody(
+     *     required=true,
+     *
+     *     @OA\JsonContent(ref="#/components/schemas/PatchProductPhotoUploadRequest")
+     *   ),
+     *
+     *   @OA\Response(
+     *     response=200,
+     *     description="Product photo confirmed successfully",
+     *
+     *     @OA\JsonContent(ref="#/components/schemas/DocumentUploadResource")
+     *   ),
+     *
+     *   @OA\Response(response=404, description="Photo not exist or not in pending status"),
+     *   @OA\Response(response=410, description="Presigned URL expired"),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden"),
+     *   @OA\Response(response=422, description="Validation Error")
+     * )
+     */
+    public function confirmPhotoUpload(PatchProductPhotoUploadRequest $request): JsonResponse
+    {
+        try {
+
+            $data = $request->validated();
+
+            $product_photo = $this->documentUploadService->getDocumentPendingByToken(ProductPhoto::class, $data['upload_token']);
+
+            // Validations
+            if ($product_photo->expires_at < now()) {
+                return $this->errorResponse('The presigned URL has expired.', 410);
+            }
+
+            // Update photo status to uploaded
+            $this->documentUploadService->confirmUpload($product_photo, $data);
+
+            return $this->successResponse(new DocumentUploadResource($product_photo, ['product_id' => $product_photo->id]), 'Product photo confirmed successfully', 200);
+
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Photo not found', 404);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Remove a product photo.
+     *
+     * @OA\Delete(
+     *   path="/api/v1/products/photos/{photo}",
+     *   operationId="removeProductPhoto",
+     *   tags={"Products"},
+     *   summary="Remove product photo",
+     *   description="Elimina una foto de producto por su ID.",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="photo", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *   @OA\Response(response=204, description="Photo deleted successfully"),
+     *   @OA\Response(response=404, description="Photo not found"),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function removePhoto(DestroyDocumentUploadRequest $request, int $photo_id): JsonResponse
+    {
+        try {
+
+            $this->documentUploadService->removeDocument(ProductPhoto::class, $photo_id);
+
+            return $this->successResponse([], 'Photo deleted successfully', 204);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Photo not found', 404);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $e->getCode() ?: 500);
         }
     }
 }
