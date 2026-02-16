@@ -79,8 +79,10 @@ class DocumentUploadController extends Controller
             ], 'Presigned URL generate successful.', 201);
 
         } catch (\Exception $e) {
+            $code = (int) $e->getCode();
+            $httpCode = $code >= 100 ? $code : 500;
 
-            return $this->errorResponse($e->getMessage(), $e->getCode() ?: 500);
+            return $this->errorResponse($e->getMessage(), $httpCode);
         }
     }
 
@@ -140,7 +142,10 @@ class DocumentUploadController extends Controller
             return $this->errorResponse('Document not found', 404);
 
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $e->getCode() ?: 500);
+            $code = (int) $e->getCode();
+            $httpCode = $code >= 100 ? $code : 500;
+
+            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $httpCode);
         }
     }
 
@@ -174,7 +179,10 @@ class DocumentUploadController extends Controller
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Document not found', 404);
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $e->getCode() ?: 500);
+            $code = (int) $e->getCode();
+            $httpCode = $code >= 100 ? $code : 500;
+
+            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $httpCode);
         }
     }
 }
