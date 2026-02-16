@@ -20,16 +20,19 @@ export { getRoles, createRole, updateRole, updateRoleStatus, deleteRole } from "
 export { getCommerces, getCommerceById, updateCommerce, deleteCommerce } from "./commerces";
 
 // Users (Usuarios)
-export { 
-  getUsers, 
-  getUserById, 
-  createUser, 
-  updateUser, 
-  updateUserStatus, 
+export {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  updateUserStatus,
   deleteUser,
-  getAdministrators 
 } from "./users";
 export type { ApiSuccess } from "./users";
+
+// Administrators (Administradores)
+export { getAdministrators } from "./administrators";
+export type { ApiSuccess as AdminApiSuccess } from "./administrators";
 
 // Location (Geolocalización)
 export {
