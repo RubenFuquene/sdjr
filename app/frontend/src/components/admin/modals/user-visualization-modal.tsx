@@ -15,8 +15,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Check, AlertCircle } from 'lucide-react';
-import type { Usuario, UpdateUserPayload } from '@/types/admin';
-import { updateUser } from '@/lib/api';
+import type { Usuario } from '@/types/admin';
 import { UserInformacionTab } from './user-tabs';
 
 // ============================================
@@ -56,12 +55,6 @@ export function UserVisualizationModal({
   // Estado de validación
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Estado de guardado
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Estado de mensajes
-  const [saveError, setSaveError] = useState<string | null>(null);
-
   // Inicializar/resetear form data cuando cambia el usuario
   useEffect(() => {
     if (usuario) {
@@ -70,7 +63,6 @@ export function UserVisualizationModal({
       setFormData(null);
     }
     setErrors({});
-    setSaveError(null);
   }, [usuario, isOpen]);
 
   // Si el modal no está abierto, no renderizar
@@ -136,50 +128,18 @@ export function UserVisualizationModal({
 
   /**
    * Maneja el guardado de cambios
+   * Solo valida y delega al callback onSave
    */
   const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
-    if (!formData || !usuario) return;
+    if (!formData) return;
 
-    setIsSaving(true);
-    setSaveError(null);
-
-    try {
-      // Preparar payload con solo los cambios
-      const payload: UpdateUserPayload = {
-        name: formData.nombres,
-        last_name: formData.apellidos,
-        email: formData.email,
-        phone: formData.celular,
-        // roles será un array, pero la API puede esperar string o array según implementación
-        // Aquí enviamos el perfil como rol principal
-      };
-
-      // Llamar a la API
-      await updateUser(usuario.id, payload);
-
-      // Actualizar formData local para reflejar cambios
-      setFormData(formData);
-
-      // Llamar callback de guardado si existe
-      if (onSave) {
-        onSave(formData);
-      }
-
-      // Cerrar modal después de guardado exitoso
-      handleClose();
-    } catch (error) {
-      console.error('Error saving user:', error);
-      setSaveError(
-        error instanceof Error
-          ? error.message
-          : 'Error al guardar los cambios. Por favor intenta de nuevo.',
-      );
-    } finally {
-      setIsSaving(false);
+    // Delegar guardado al componente padre
+    if (onSave) {
+      await onSave(formData);
     }
   };
 
@@ -189,7 +149,6 @@ export function UserVisualizationModal({
   const handleClose = () => {
     setFormData(null);
     setErrors({});
-    setSaveError(null);
     onClose();
   };
 
@@ -208,8 +167,7 @@ export function UserVisualizationModal({
           <h2 className="text-2xl font-bold text-[#1A1A1A]">{title}</h2>
           <button
             onClick={handleClose}
-            disabled={isSaving}
-            className="text-[#6A6A6A] hover:text-[#1A1A1A] transition-colors disabled:opacity-50"
+            className="text-[#6A6A6A] hover:text-[#1A1A1A] transition-colors"
             aria-label="Cerrar modal"
           >
             <X size={24} />
@@ -218,17 +176,6 @@ export function UserVisualizationModal({
 
         {/* ===== Body ===== */}
         <div className="p-8">
-          {/* Error message */}
-          {saveError && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-              <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
-              <div>
-                <h3 className="font-medium text-red-900">Error al guardar</h3>
-                <p className="text-red-700 text-sm mt-1">{saveError}</p>
-              </div>
-            </div>
-          )}
-
           {/* Formulario */}
           <UserInformacionTab
             formData={formData}
@@ -243,8 +190,7 @@ export function UserVisualizationModal({
         <div className="flex gap-3 justify-end p-8 border-t border-[#E0E0E0] bg-[#F7F7F7]">
           <button
             onClick={handleClose}
-            disabled={isSaving}
-            className="px-6 h-[52px] rounded-xl border border-[#E0E0E0] text-[#1A1A1A] font-medium hover:bg-[#E0E0E0] transition-colors disabled:opacity-50"
+            className="px-6 h-[52px] rounded-xl border border-[#E0E0E0] text-[#1A1A1A] font-medium hover:bg-[#E0E0E0] transition-colors"
           >
             {isViewMode ? 'Cerrar' : 'Cancelar'}
           </button>
@@ -252,11 +198,10 @@ export function UserVisualizationModal({
           {!isViewMode && (
             <button
               onClick={handleSave}
-              disabled={isSaving}
-              className="px-6 h-[52px] rounded-xl bg-[#4B236A] text-white font-medium hover:bg-[#5D2B7D] transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-6 h-[52px] rounded-xl bg-[#4B236A] text-white font-medium hover:bg-[#5D2B7D] transition-colors flex items-center gap-2"
             >
               <Check size={20} />
-              {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+              Guardar Cambios
             </button>
           )}
         </div>

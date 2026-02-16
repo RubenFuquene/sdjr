@@ -15,7 +15,9 @@
 import { useState, useCallback, ReactNode, useMemo, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Usuario } from '@/types/admin';
+import type { UpdateUserPayload } from '@/types/user';
 import { useUserManagement } from '@/hooks/use-user-management';
+import { useRoleManagement } from '@/hooks/use-role-management';
 import { UsersTable } from './users-table';
 import { ProfilesFilters } from '../profiles-filters';
 import { TableLoadingState } from '@/components/admin/shared/loading-state';
@@ -60,6 +62,13 @@ export function UsersView({
     perPage,
     handlePageChange,
   } = userManagement;
+
+  // Hook de gestión de roles (para selector en modal)
+  const roleManagement = useRoleManagement();
+  const availableRoles = useMemo(
+    () => roleManagement.roles.map((role) => role.nombre),
+    [roleManagement.roles]
+  );
 
   // Estado del confirmation dialog para eliminar
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -152,12 +161,29 @@ export function UsersView({
   /**
    * Maneja el guardado de cambios en el modal de edición
    */
-  const handleModalSave = useCallback((updatedUsuario: Usuario) => {
-    console.log('Usuario actualizado:', updatedUsuario);
-    // Refrescar la tabla para mostrar cambios
-    refresh();
-    handleModalClose();
-  }, [refresh, handleModalClose]);
+  const handleModalSave = useCallback(async (updatedUsuario: Usuario) => {
+    try {
+      // Transformar Usuario a UpdateUserPayload
+      const payload: UpdateUserPayload = {
+        name: updatedUsuario.nombres,
+        last_name: updatedUsuario.apellidos,
+        email: updatedUsuario.email,
+        phone: updatedUsuario.celular,
+        roles: [updatedUsuario.perfil], // Backend espera array de roles
+        status: updatedUsuario.activo ? 'A' : 'I', // 'A' = Active, 'I' = Inactive
+      };
+
+      // Usar hook para actualizar (maneja API + refresh)
+      await userManagement.handleUpdate(updatedUsuario.id, payload);
+
+      // Cerrar modal después de guardado exitoso
+      handleModalClose();
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
+      // Re-lanzar error para que el modal lo maneje
+      throw error;
+    }
+  }, [userManagement, handleModalClose]);
 
   /**
    * Cancela la eliminación
@@ -286,7 +312,7 @@ export function UsersView({
         isOpen={modalState.isOpen}
         mode={modalState.mode}
         usuario={modalState.usuario}
-        roles={['admin', 'provider', 'customer']}
+        roles={availableRoles}
         onClose={handleModalClose}
         onSave={handleModalSave}
       />
