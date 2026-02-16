@@ -9,6 +9,7 @@ export { ProvidersTable } from "./management/providers/providers-table";
 export { ProvidersView } from "./management/providers/providers-view";
 export { UsersTable } from "./management/users/users-table";
 export { AdministratorsTable } from "./management/administrators/administrators-table";
+export { AdministratorsView } from "./management/administrators/administrators-view";
 
 export { Badge, StatusBadge } from "./shared/badge";
 export { TableActions } from "./shared/table-actions";

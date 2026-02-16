@@ -5,9 +5,19 @@ import { TABLE_STYLES } from "@/components/admin/shared/table-styles";
 
 interface AdministratorsTableProps {
   data: Administrador[];
+  onView?: (admin: Administrador) => void;
+  onEdit?: (admin: Administrador) => void;
+  onToggle?: (admin: Administrador) => void;
+  onDelete?: (admin: Administrador) => void;
 }
 
-export function AdministratorsTable({ data }: AdministratorsTableProps) {
+export function AdministratorsTable({
+  data,
+  onView,
+  onEdit,
+  onToggle,
+  onDelete,
+}: AdministratorsTableProps) {
   return (
     <div className={TABLE_STYLES.container}>
       <div className="overflow-x-auto">
@@ -48,7 +58,11 @@ export function AdministratorsTable({ data }: AdministratorsTableProps) {
                   <TableActions 
                     itemId={admin.id} 
                     itemName={`${admin.nombres} ${admin.apellidos}`} 
-                    activo={admin.activo} 
+                    activo={admin.activo}
+                    onView={onView ? () => onView(admin) : undefined}
+                    onEdit={onEdit ? () => onEdit(admin) : undefined}
+                    onToggle={onToggle ? () => onToggle(admin) : undefined}
+                    onDelete={onDelete ? () => onDelete(admin) : undefined}
                   />
                 </td>
               </tr>
