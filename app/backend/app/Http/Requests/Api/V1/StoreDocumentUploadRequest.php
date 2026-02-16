@@ -33,7 +33,7 @@ class StoreDocumentUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document_type' => ['required', 'string', 'in:'.implode(',', [
+            'document_type' => ['sometimes', 'string', 'in:'.implode(',', [
                 Constant::DOCUMENT_TYPE_LICENSE,
                 Constant::DOCUMENT_TYPE_OTHER,
                 Constant::DOCUMENT_TYPE_CAMARA_COMERCIO,
@@ -43,7 +43,7 @@ class StoreDocumentUploadRequest extends FormRequest
             ])],
             'file_name' => ['required', 'string', 'max:255'],
             'mime_type' => ['required', 'string', 'in:'.implode(',', Constant::ALLOWED_FILE_EXTENSIONS)],
-            'file_size_bytes' => ['required', 'integer', 'min:1'],
+            'file_size_bytes' => ['required', 'integer', 'min:1', 'max:'.Constant::ALLOWED_SIZE_BYTES],
             'commerce_id' => ['required', 'integer', 'exists:commerces,id'],
             'replace_document_id' => ['nullable', 'integer', 'exists:commerce_documents,id'],
             'versioning_enabled' => ['string'],

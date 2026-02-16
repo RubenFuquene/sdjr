@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\Constant;
 use App\Models\Product;
+use App\Models\ProductPhoto;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -17,6 +18,19 @@ use Illuminate\Support\Facades\Log;
  */
 class ProductService
 {
+    /**
+     * @var DocumentUploadService Document upload service instance.
+     */
+    protected $documentUploadService;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->documentUploadService = new DocumentUploadService;
+    }
+
     /**
      * Get paginated list of products with optional filters.
      */
@@ -53,18 +67,66 @@ class ProductService
         try {
 
             return DB::transaction(function () use ($data) {
-                $product = Product::create($data['product']);
-                $product->commerceBranches()->detach();
-                if (isset($data['commerce_branch_ids']) && is_array($data['commerce_branch_ids'])) {
-                    $product->commerceBranches()->attach($data['commerce_branch_ids']);
-                }
 
-                return $product;
+                $product = Product::create($data['product']);
+
+                // Commerce Branches
+                $this->storeCommerceBranches($product, $data['commerce_branch_ids'] ?? []);
+
+                // Photos
+                $this->storePhotos($product->id, $data['photos'] ?? []);
+
+                return $product->load(['photos', 'commerceBranches']);
             });
 
         } catch (Exception $e) {
             Log::error('Error creating Product', ['error' => $e->getMessage()]);
             throw $e;
+        }
+    }
+
+    /**
+     * Store product photos.
+     */
+    protected function storePhotos(int $productId, array $photos): void
+    {
+        $product_photo = [];
+
+        foreach ($photos as $photo) {
+
+            $presignedUrlData = $this->documentUploadService->generatePresignedUrl(
+                $photo['file_name'],
+                $photo['mime_type'],
+                $productId,
+                'product_photos'
+            );
+
+            $product_photo[] = [
+                'product_id' => $productId,
+                'file_path' => $presignedUrlData['path'],
+                'upload_token' => $presignedUrlData['upload_token'],
+                'presigned_url' => $presignedUrlData['presigned_url'],
+                'mime_type' => $photo['mime_type'],
+                'uploaded_at' => now(),
+                'expires_at' => now()->addHour(),
+                'uploaded_by_id' => auth()->id(),
+                'failed_attempts' => 0,
+            ];
+
+        }
+
+        ProductPhoto::insert($product_photo);
+    }
+
+    /**
+     * Store commerce branches for a product.
+     */
+    protected function storeCommerceBranches(Product $product, array $branchIds): void
+    {
+        $product->commerceBranches()->detach();
+
+        if (! empty($branchIds)) {
+            $product->commerceBranches()->attach($branchIds);
         }
     }
 
@@ -86,14 +148,22 @@ class ProductService
     public function update(int $id, array $data): Product
     {
         try {
-            $product = Product::findOrFail($id);
-            $product->update($data['product']);
-            $product->commerceBranches()->detach();
-            if (isset($data['commerce_branch_ids']) && is_array($data['commerce_branch_ids'])) {
-                $product->commerceBranches()->attach($data['commerce_branch_ids']);
-            }
 
-            return $product;
+            return DB::transaction(function () use ($data, $id) {
+
+                $product = Product::findOrFail($id);
+                $product->update($data['product']);
+
+                // Commerce Branches
+                $this->storeCommerceBranches($product, $data['commerce_branch_ids'] ?? []);
+
+                // Photos
+                $this->storePhotos($product->id, $data['photos'] ?? []);
+
+                return $product->load(['photos', 'commerceBranches']);
+
+            });
+
         } catch (Exception $e) {
             Log::error('Error updating Product', ['error' => $e->getMessage()]);
             throw $e;
@@ -123,7 +193,8 @@ class ProductService
      */
     public function getByCommerce(int $commerce_id)
     {
-        $products = Product::where('commerce_id', $commerce_id)->get();
+        $products = Product::with('photos')->where('commerce_id', $commerce_id)->get();
+
         if ($products->isEmpty()) {
             throw new ModelNotFoundException('No products found for the specified commerce.');
         }
@@ -138,7 +209,7 @@ class ProductService
      */
     public function getByCommerceBranch(int $branch_id)
     {
-        $products = Product::whereHas('commerce.commerceBranches', function ($query) use ($branch_id) {
+        $products = Product::with('photos')->whereHas('commerce.commerceBranches', function ($query) use ($branch_id) {
             $query->where('id', $branch_id);
         })->get();
 

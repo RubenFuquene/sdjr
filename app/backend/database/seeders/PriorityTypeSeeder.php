@@ -14,6 +14,11 @@ class PriorityTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        PriorityType::factory()->count(5)->create();
+        if (env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if (env('DEMO_SEEDING') == 'true') {
+            PriorityType::factory()->count(5)->create();
+        }
     }
 }

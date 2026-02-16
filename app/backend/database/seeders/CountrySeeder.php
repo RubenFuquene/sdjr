@@ -12,6 +12,11 @@ class CountrySeeder extends Seeder
      */
     public function run(): void
     {
-        Country::factory(5)->create();
+        if (env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if (env('DEMO_SEEDING') == 'true') {
+            Country::factory(5)->create();
+        }
     }
 }

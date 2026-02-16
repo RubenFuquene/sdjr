@@ -11,6 +11,11 @@ class LegalDocumentSeeder extends Seeder
 {
     public function run(): void
     {
-        LegalDocument::factory()->count(6)->create();
+        if (env('APP_ENV') == 'prd') {
+            // Aquí puedes agregar datos fijos para producción si aplica
+        }
+        if (env('DEMO_SEEDING') == 'true') {
+            LegalDocument::factory()->count(6)->create();
+        }
     }
 }
