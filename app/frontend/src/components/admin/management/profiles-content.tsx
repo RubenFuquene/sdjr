@@ -9,25 +9,19 @@
  * - Roles → RolesView (auto-contenido)
  * - Proveedores → ProvidersView (auto-contenido)
  * - Usuarios → UsersView (auto-contenido)
- * - Administradores → AdministratorsTable (presentación)
+ * - Administradores → AdministratorsView (auto-contenida)
  */
 
 import { useState, useCallback, ReactNode } from 'react';
 import { Users, Store, UserCog } from 'lucide-react';
-import { Vista, Administrador } from '@/types/admin';
+import { Vista } from '@/types/admin';
 import { RolesView } from './roles';
 import { ProvidersView } from './providers/providers-view';
 import { UsersView } from './users/users-view';
-import { AdministratorsTable } from './administrators/administrators-table';
+import { AdministratorsView } from './administrators/administrators-view';
 import { PageHeader } from '@/components/admin/shared/page-header';
 
-interface ProfilesContentProps {
-  administradores: Administrador[];
-}
-
-export function ProfilesContent({
-  administradores,
-}: ProfilesContentProps) {
+export function ProfilesContent() {
   const [vista, setVista] = useState<Vista>('perfiles');
   const [headerActions, setHeaderActions] = useState<ReactNode | null>(null);
 
@@ -111,7 +105,7 @@ export function ProfilesContent({
       {vista === 'perfiles' && <RolesView onSetHeaderActions={handleSetHeaderActions} />}
       {vista === 'proveedores' && <ProvidersView />}
       {vista === 'usuarios' && <UsersView />}
-      {vista === 'administradores' && <AdministratorsTable data={administradores} />}
+      {vista === 'administradores' && <AdministratorsView onSetHeaderActions={handleSetHeaderActions} />}
     </div>
   );
 }

@@ -26,6 +26,8 @@ import { RolesTable } from './roles-table';
 import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
 import { RoleCreationModal } from '@/components/admin/modals';
+import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
+import { TablePagination } from '@/components/admin/shared/table-pagination';
 
 /**
  * Modal state interface
@@ -61,6 +63,17 @@ export function RolesView({ onSetHeaderActions }: RolesViewProps) {
   // Estado de filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [perfilFilter, setPerfilFilter] = useState('todos');
+
+  // Estado del diálogo de confirmación de eliminación
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    role: Perfil | null;
+    isDeleting: boolean;
+  }>({
+    isOpen: false,
+    role: null,
+    isDeleting: false
+  });
 
   /**
    * Abre modal de creación
@@ -148,6 +161,43 @@ export function RolesView({ onSetHeaderActions }: RolesViewProps) {
     }
   };
 
+  /**
+   * Eliminar un rol
+   */
+  const handleDeleteRole = (role: Perfil) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      role,
+      isDeleting: false
+    });
+  };
+
+  /**
+   * Confirmar eliminación del rol
+   */
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmation.role) return;
+
+    setDeleteConfirmation(prev => ({ ...prev, isDeleting: true }));
+
+    try {
+      await roleManagement.handleDelete(deleteConfirmation.role.id);
+      // Cerrar diálogo después de eliminar
+      setDeleteConfirmation({ isOpen: false, role: null, isDeleting: false });
+    } catch (error) {
+      console.error('Error al eliminar rol:', error);
+      setDeleteConfirmation(prev => ({ ...prev, isDeleting: false }));
+      // TODO: Mostrar toast de error cuando tengamos sistema de notificaciones
+    }
+  };
+
+  /**
+   * Cancelar eliminación
+   */
+  const handleCancelDelete = () => {
+    setDeleteConfirmation({ isOpen: false, role: null, isDeleting: false });
+  };
+
   const buttonClass = 'flex items-center gap-2 px-4 h-[52px] bg-[#4B236A] text-white rounded-xl hover:bg-[#5D2B7D] transition shadow-lg hover:shadow-xl';
 
   // Header Actions: botón "Crear Rol" en el header superior
@@ -198,12 +248,22 @@ export function RolesView({ onSetHeaderActions }: RolesViewProps) {
 
       {/* Tabla de roles */}
       {!roleManagement.loading && !roleManagement.error && roleManagement.roles.length > 0 && (
-        <RolesTable
-          data={roleManagement.roles}
-          onView={handleViewRole}
-          onEdit={handleEditRole}
-          onToggle={handleToggleRoleStatus}
-        />
+        <>
+          <RolesTable
+            data={roleManagement.roles}
+            onView={handleViewRole}
+            onEdit={handleEditRole}
+            onToggle={handleToggleRoleStatus}
+            onDelete={handleDeleteRole}
+          />
+          <TablePagination
+            currentPage={roleManagement.currentPage}
+            lastPage={roleManagement.lastPage}
+            perPage={roleManagement.perPage}
+            total={roleManagement.totalRoles}
+            onPageChange={roleManagement.handlePageChange}
+          />
+        </>
       )}
 
       {/* Modal de creación/edición/vista */}
@@ -213,6 +273,28 @@ export function RolesView({ onSetHeaderActions }: RolesViewProps) {
         role={modalState.selectedRole}
         onClose={handleCloseModal}
         onSave={handleSaveRole}
+      />
+
+      {/* Diálogo de confirmación de eliminación */}
+      <ConfirmationDialog
+        isOpen={deleteConfirmation.isOpen}
+        title="Eliminar Rol"
+        description={
+          deleteConfirmation.role ? (
+            <>
+              ¿Estás seguro de eliminar el rol <strong>&ldquo;{deleteConfirmation.role.nombre}&rdquo;</strong>?
+              <br />
+              <br />
+              Esta acción no se puede deshacer y podría afectar a los usuarios asignados a este rol.
+            </>
+          ) : null
+        }
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={deleteConfirmation.isDeleting}
+        onConfirm={handleConfirmDelete}
+        onClose={handleCancelDelete}
       />
     </div>
   );

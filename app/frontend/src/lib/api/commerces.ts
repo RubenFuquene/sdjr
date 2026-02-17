@@ -4,6 +4,7 @@
  */
 
 import { ApiResponse, CommerceFromAPI } from "@/types/admin";
+import type { ProveedorPayload } from "@/types/provider";
 import { fetchWithErrorHandling } from "./client";
 
 export interface GetCommercesParams {
@@ -46,6 +47,22 @@ export interface ApiSuccess<T> {
   status: boolean;
   message?: string;
   data: T;
+}
+
+/**
+ * POST /api/v1/commerces
+ * Crea un nuevo comercio/proveedor
+ */
+export async function createCommerce(
+  payload: ProveedorPayload
+): Promise<ApiSuccess<CommerceFromAPI>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
+    `/api/v1/commerces`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
 }
 
 /**

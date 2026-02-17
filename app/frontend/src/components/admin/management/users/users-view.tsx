@@ -15,12 +15,16 @@
 import { useState, useCallback, ReactNode, useMemo, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Usuario } from '@/types/admin';
+import type { UpdateUserPayload } from '@/types/user';
 import { useUserManagement } from '@/hooks/use-user-management';
+import { useRoleManagement } from '@/hooks/use-role-management';
 import { UsersTable } from './users-table';
 import { ProfilesFilters } from '../profiles-filters';
 import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
 import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
+import { UserVisualizationModal } from '@/components/admin/modals';
+import { TablePagination } from '@/components/admin/shared/table-pagination';
 
 /**
  * Props de la vista
@@ -43,7 +47,27 @@ export function UsersView({
 }: UsersViewProps) {
   // Hook de gestión de usuarios
   const userManagement = useUserManagement();
-  const { usuarios, loading, error, handleSearch, handleToggle, handleDelete, handleRetry } = userManagement;
+  const {
+    usuarios,
+    loading,
+    error,
+    handleSearch,
+    handleToggle,
+    handleDelete,
+    handleRetry,
+    currentPage,
+    lastPage,
+    total,
+    perPage,
+    handlePageChange,
+  } = userManagement;
+
+  // Hook de gestión de roles (para selector en modal)
+  const roleManagement = useRoleManagement();
+  const availableRoles = useMemo(
+    () => roleManagement.roles.map((role) => role.nombre),
+    [roleManagement.roles]
+  );
 
   // Estado del confirmation dialog para eliminar
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -51,6 +75,13 @@ export function UsersView({
     user: Usuario | null;
   }>({ isOpen: false, user: null });
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Estado del modal de visualización/edición
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    mode: 'view' | 'edit';
+    usuario: Usuario | null;
+  }>({ isOpen: false, mode: 'view', usuario: null });
 
   // Estado de filtros locales
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,22 +95,24 @@ export function UsersView({
 
   /**
    * Abre modal de vista (solo lectura)
-   * TODO: Implementar cuando tengamos useUserManagement + modal
    */
-  const handleViewUser = useCallback(async (usuario: Usuario) => {
-    console.log('Ver usuario:', usuario);
-    // TODO: Fetch usuario completo desde API
-    // TODO: Abrir modal en modo view
+  const handleViewUser = useCallback((usuario: Usuario) => {
+    setModalState({
+      isOpen: true,
+      mode: 'view',
+      usuario,
+    });
   }, []);
 
   /**
    * Abre modal de edición
-   * TODO: Implementar cuando tengamos useUserManagement + modal
    */
-  const handleEditUser = useCallback(async (usuario: Usuario) => {
-    console.log('Editar usuario:', usuario);
-    // TODO: Fetch usuario completo desde API
-    // TODO: Abrir modal en modo edit
+  const handleEditUser = useCallback((usuario: Usuario) => {
+    setModalState({
+      isOpen: true,
+      mode: 'edit',
+      usuario,
+    });
   }, []);
 
   /**
@@ -116,6 +149,40 @@ export function UsersView({
       setIsDeleting(false);
     }
   }, [deleteDialog.user, handleDelete]);
+
+  /**
+   * Cierra el modal y resetea su estado
+   */
+  const handleModalClose = useCallback(() => {
+    setModalState({ isOpen: false, mode: 'view', usuario: null });
+  }, []);
+
+  /**
+   * Maneja el guardado de cambios en el modal de edición
+   */
+  const handleModalSave = useCallback(async (updatedUsuario: Usuario) => {
+    try {
+      // Transformar Usuario a UpdateUserPayload
+      const payload: UpdateUserPayload = {
+        name: updatedUsuario.nombres,
+        last_name: updatedUsuario.apellidos,
+        email: updatedUsuario.email,
+        phone: updatedUsuario.celular,
+        roles: [updatedUsuario.perfil], // Backend espera array de roles
+        status: updatedUsuario.activo ? 'A' : 'I', // 'A' = Active, 'I' = Inactive
+      };
+
+      // Usar hook para actualizar (maneja API + refresh)
+      await userManagement.handleUpdate(updatedUsuario.id, payload);
+
+      // Cerrar modal después de guardado exitoso
+      handleModalClose();
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
+      // Re-lanzar error para que el modal lo maneje
+      throw error;
+    }
+  }, [userManagement, handleModalClose]);
 
   /**
    * Cancela la eliminación
@@ -206,6 +273,14 @@ export function UsersView({
           onToggle={handleToggleUser}
           onDelete={handleDeleteUser}
         />
+
+        <TablePagination
+          currentPage={currentPage}
+          lastPage={lastPage}
+          perPage={perPage}
+          total={total}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       {/* Dialog de Confirmación de Eliminación */}
@@ -229,6 +304,17 @@ export function UsersView({
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onClose={handleCancelDelete}
+      />
+
+      {/* Modal de Visualización/Edición de Usuarios */}
+      <UserVisualizationModal
+        key={`${modalState.usuario?.id ?? 'new'}-${modalState.mode}-${modalState.isOpen ? 'open' : 'closed'}`}
+        isOpen={modalState.isOpen}
+        mode={modalState.mode}
+        usuario={modalState.usuario}
+        roles={availableRoles}
+        onClose={handleModalClose}
+        onSave={handleModalSave}
       />
     </>
   );

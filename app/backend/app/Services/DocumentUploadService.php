@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Constants\Constant;
+use Aws\S3\S3Client;
 use Exception;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DocumentUploadService
@@ -23,30 +23,57 @@ class DocumentUploadService
         $fileName = $this->sanitizeFileName($fileName);
 
         $path = sprintf(
-            '/'.$source.'_%d/%s/%s',
+            '%s_%d/%s/%s',
+            $source,
             $id,
             $uploadToken,
             $fileName
         );
 
-        // Generar presigned URL
-        $disk = Storage::disk(config('filesystems.default') === 'documents' ? 'documents' : 's3');
-
-        $presignedUrl = $disk->temporaryUrl(
-            $path,
-            now()->addHours(1),
-            [
-                'ResponseContentType' => $mimeType,
-                'ResponseContentDisposition' => 'attachment',
-            ]
-        );
+        // Generar presigned URL con cliente S3 apuntando a localhost público
+        $presignedUrl = $this->generatePresignedUrlWithPublicUrl($path, $mimeType);
 
         return [
             'upload_token' => $uploadToken,
             'presigned_url' => $presignedUrl,
             'expires_in' => 3600,
-            'path' => $path,
+            'path' => '/'.$path,
         ];
+    }
+
+    /**
+     * Generar presigned URL usando AWS SDK con URL pública
+     * Esto asegura que la firma sea válida para localhost:9000
+     */
+    private function generatePresignedUrlWithPublicUrl(string $key, string $mimeType = ''): string
+    {
+        $config = config('filesystems.disks.documents');
+        $publicUrl = config('filesystems.disks.documents.url'); // http://localhost:9000
+
+        // Crear cliente S3 apuntando a localhost (donde se accede desde navegador)
+        $s3Client = new S3Client([
+            'version' => 'latest',
+            'region' => $config['region'],
+            'endpoint' => $publicUrl, // ⭐ Usar URL pública para que la firma sea válida
+            'use_path_style_endpoint' => $config['use_path_style_endpoint'],
+            'credentials' => [
+                'key' => $config['key'],
+                'secret' => $config['secret'],
+            ],
+        ]);
+
+        // Construir comando PutObject
+        $cmd = $s3Client->getCommand('PutObject', [
+            'Bucket' => $config['bucket'],
+            'Key' => $key,
+            'ContentType' => $mimeType ?: 'application/octet-stream',
+        ]);
+
+        // Generar presigned request
+        $request = $s3Client->createPresignedRequest($cmd, '+1 hour');
+        $presignedUrl = (string) $request->getUri();
+
+        return $presignedUrl;
     }
 
     /**
@@ -92,11 +119,22 @@ class DocumentUploadService
      */
     public function confirmUpload($model, array $data): bool
     {
+        // Convertir last_modified de ISO 8601 a formato MySQL (YYYY-MM-DD HH:MM:SS)
+        $lastModified = $data['s3_metadata']['last_modified'];
+        if ($lastModified) {
+            try {
+                $lastModified = \Carbon\Carbon::parse($lastModified)->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                // Fallback: usar fecha actual si falla el parsing
+                $lastModified = now()->format('Y-m-d H:i:s');
+            }
+        }
+
         return $model->update([
             'upload_status' => Constant::UPLOAD_STATUS_CONFIRMED,
             's3_etag' => $data['s3_metadata']['etag'],
             's3_object_size' => $data['s3_metadata']['object_size'],
-            's3_last_modified' => $data['s3_metadata']['last_modified'],
+            's3_last_modified' => $lastModified,
             'expires_at' => null,
             'failed_attempts' => 0,
         ]);

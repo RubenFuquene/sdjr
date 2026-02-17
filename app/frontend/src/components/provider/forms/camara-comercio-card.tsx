@@ -16,6 +16,9 @@ import { AlertCircle } from 'lucide-react';
 interface CamaraComercioCardProps {
   formData: BasicInfoFormData;
   onFieldChange: (field: string, value: string | number | null) => void;
+  onFileSelected?: (file: File | null) => void;
+  uploadStatus?: 'idle' | 'uploading' | 'success' | 'error';
+  uploadError?: string | null;
   errors?: Partial<FormErrors>;
 }
 
@@ -28,6 +31,9 @@ interface CamaraComercioCardProps {
 export function CamaraComercioCard({
   formData,
   onFieldChange,
+  onFileSelected,
+  uploadStatus = 'idle',
+  uploadError = null,
   errors = {},
 }: CamaraComercioCardProps) {
   const { documents } = formData;
@@ -59,12 +65,28 @@ export function CamaraComercioCard({
                 if (validation.isValid) {
                   const generatedName = generateFileName(file.name);
                   onFieldChange('documents.commerceChamber', generatedName);
+                  onFileSelected?.(file);
                 }
               }
             }}
-            onRemove={() => onFieldChange('documents.commerceChamber', null)}
-            disabled={isUploadingCamara}
+            onRemove={() => {
+              onFieldChange('documents.commerceChamber', null);
+              onFileSelected?.(null);
+            }}
+            disabled={isUploadingCamara || uploadStatus === 'uploading'}
           />
+          {uploadStatus === 'uploading' && (
+            <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
+          )}
+          {uploadStatus === 'success' && (
+            <p className="text-xs text-green-600">Documento cargado correctamente.</p>
+          )}
+          {uploadStatus === 'error' && uploadError && (
+            <div className="flex items-center gap-2 text-xs text-red-600">
+              <AlertCircle size={14} />
+              <span>{uploadError}</span>
+            </div>
+          )}
           {errors.commerceChamber && (
             <div className="flex items-center gap-2 text-xs text-red-600">
               <AlertCircle size={14} />

@@ -146,23 +146,3 @@ export async function deleteUser(id: number): Promise<void> {
   );
 }
 
-// ============================================
-// Administrators - GET /api/v1/administrators
-// ============================================
-
-/**
- * GET /api/v1/administrators
- * Obtiene listado paginado de usuarios administradores
- */
-export async function getAdministrators({
-  page = 1,
-  perPage = 15,
-}: GetUsersParams = {}): Promise<ApiResponse<UserFromAPI>> {
-  const params = new URLSearchParams();
-  params.set("page", String(page));
-  params.set("per_page", String(perPage));
-
-  return fetchWithErrorHandling<ApiResponse<UserFromAPI>>(
-    `/api/v1/administrators?${params.toString()}`
-  );
-}

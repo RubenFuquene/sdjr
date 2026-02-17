@@ -28,7 +28,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getRoles, createRole, updateRole, updateRoleStatus, ApiError } from "@/lib/api/index";
+import { getRoles, createRole, updateRole, updateRoleStatus, deleteRole, ApiError } from "@/lib/api/index";
 import { adaptPermissions } from "@/components/admin/adapters/permission-adapter";
 import { CreateRoleRequest } from "@/types/role-form-types";
 import { Perfil, RoleFromAPI } from "@/types/admin";
@@ -73,6 +73,17 @@ export function useRoleManagement(perPage: number = 15) {
   const [roles, setRoles] = useState<Perfil[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Estado de filtros y paginación
+  const [filters, setFilters] = useState({
+    page: 1,
+    perPage,
+  });
+
+  // Estado de paginación (metadata del backend)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [totalRoles, setTotalRoles] = useState(0);
   
   // Error handler centralizado
   const handleError = useApiErrorHandler();
@@ -100,15 +111,23 @@ export function useRoleManagement(perPage: number = 15) {
    * Fetch inicial y refresh de roles desde API
    * GET /api/v1/roles?per_page={perPage}
    */
-  const fetchRoles = useCallback(async () => {
+  const fetchRoles = useCallback(async (customFilters?: { page?: number; perPage?: number }) => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await getRoles(perPage);
+      const currentFilters = customFilters || filters;
+      const response = await getRoles({
+        page: currentFilters.page,
+        perPage: currentFilters.perPage,
+      });
       const mappedRoles = response.data.map(mapRoleToPerfil);
 
       setRoles(mappedRoles);
+
+      setCurrentPage(response.meta.current_page);
+      setLastPage(response.meta.last_page);
+      setTotalRoles(response.meta.total);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -119,7 +138,7 @@ export function useRoleManagement(perPage: number = 15) {
     } finally {
       setLoading(false);
     }
-  }, [perPage]);
+  }, [filters]);
 
   /**
    * Cargar roles al montar el componente
@@ -127,6 +146,40 @@ export function useRoleManagement(perPage: number = 15) {
   useEffect(() => {
     fetchRoles();
   }, [fetchRoles]);
+
+  /**
+   * Cambia de página
+   */
+  const handlePageChange = useCallback(async (page: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const newFilters = { ...filters, page };
+      setFilters(newFilters);
+
+      const response = await getRoles({
+        page: newFilters.page,
+        perPage: newFilters.perPage,
+      });
+
+      const mappedRoles = response.data.map(mapRoleToPerfil);
+      setRoles(mappedRoles);
+
+      setCurrentPage(response.meta.current_page);
+      setLastPage(response.meta.last_page);
+      setTotalRoles(response.meta.total);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Error al cambiar página");
+      }
+      console.error("Error changing page:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
 
   /**
    * Crea un nuevo rol
@@ -211,16 +264,48 @@ export function useRoleManagement(perPage: number = 15) {
     }
   }, [handleError]);
 
+  /**
+   * Elimina un rol
+   * DELETE /api/v1/roles/{id}
+   */
+  const handleDelete = async (id: number): Promise<void> => {
+    try {
+      console.log(`🗑️ Eliminando rol ${id}`);
+      
+      await deleteRole(id);
+      
+      console.log('✅ Rol eliminado exitosamente');
+      
+      // Refrescar lista de roles
+      await fetchRoles();
+    } catch (error) {
+      console.error('❌ Error al eliminar rol:', error);
+      throw error;
+    }
+  };
+
   return {
     // Data
     roles,
     loading,
     error,
+
+    // Pagination metadata
+    currentPage,
+    lastPage,
+    totalRoles,
+    perPage: filters.perPage,
+
+    // Filters & Pagination
+    filters,
+    setFilters,
     
     // Handlers
     handleCreate,
     handleUpdate,
     handleToggleRoleStatus,
+    handleDelete,
+    handlePageChange,
     
     // Transformaciones
     adaptProfileToRole,

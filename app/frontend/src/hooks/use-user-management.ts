@@ -29,10 +29,13 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   getUsers,
+  createUser,
+  updateUser,
   updateUserStatus,
   deleteUser,
   ApiError,
 } from "@/lib/api/index";
+import type { CreateUserPayload, UpdateUserPayload } from "@/types/user";
 import type { Usuario } from "@/types/admin";
 import { usersFromAPIToUsuarios } from "@/types/user.adapters";
 
@@ -190,6 +193,48 @@ export function useUserManagement(perPage: number = 15) {
   }, [filters]);
 
   /**
+   * Crea un nuevo usuario
+   * POST /api/v1/users
+   */
+  const handleCreate = useCallback(
+    async (payload: CreateUserPayload): Promise<void> => {
+      try {
+        await createUser(payload);
+        // Refrescar lista después de crear
+        await fetchUsuarios();
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw err; // Re-lanzar para que el componente lo maneje
+        } else {
+          throw new Error("Error al crear usuario");
+        }
+      }
+    },
+    [fetchUsuarios]
+  );
+
+  /**
+   * Actualiza un usuario existente
+   * PUT /api/v1/users/{id}
+   */
+  const handleUpdate = useCallback(
+    async (id: number, payload: UpdateUserPayload): Promise<void> => {
+      try {
+        await updateUser(id, payload);
+        // Refrescar lista después de actualizar
+        await fetchUsuarios();
+      } catch (err) {
+        if (err instanceof ApiError) {
+          throw err; // Re-lanzar para que el componente lo maneje
+        } else {
+          throw new Error("Error al actualizar usuario");
+        }
+      }
+    },
+    [fetchUsuarios]
+  );
+
+  /**
    * Activa/Desactiva un usuario (toggle status)
    * PATCH /api/v1/users/{id}/status
    */
@@ -270,6 +315,9 @@ export function useUserManagement(perPage: number = 15) {
     currentPage,
     totalPages,
     totalUsers,
+    lastPage: totalPages,
+    total: totalUsers,
+    perPage: filters.perPage ?? perPage,
 
     // Filters & Pagination
     filters,
@@ -278,6 +326,8 @@ export function useUserManagement(perPage: number = 15) {
     // Handlers
     handleSearch,
     handlePageChange,
+    handleCreate,
+    handleUpdate,
     handleToggle,
     handleDelete,
     handleRetry,

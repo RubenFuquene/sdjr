@@ -23,6 +23,7 @@ import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
 import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
 import { ProviderVisualizationModal } from '@/components/admin/modals';
+import { TablePagination } from '@/components/admin/shared/table-pagination';
 
 /**
  * Props de la vista
@@ -43,6 +44,7 @@ interface ProvidersViewProps {
 export function ProvidersView({ 
   onSetHeaderActions,
 }: ProvidersViewProps) {  // onSetHeaderActions puede ser usado en el futuro
+  void onSetHeaderActions;
   // Hook de gestión de comercios
   const commerceManagement = useCommerceManagement();
 
@@ -236,6 +238,14 @@ export function ProvidersView({
           onEdit={handleEditProvider}
           onToggle={handleToggleProvider}
           onDelete={handleDeleteProvider}
+        />
+
+        <TablePagination
+          currentPage={commerceManagement.currentPage}
+          lastPage={commerceManagement.lastPage}
+          perPage={commerceManagement.perPage}
+          total={commerceManagement.totalCommerces}
+          onPageChange={commerceManagement.handlePageChange}
         />
       </div>
 

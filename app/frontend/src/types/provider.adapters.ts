@@ -13,7 +13,9 @@ import type {
   Sucursal,
   InformacionBancaria,
   Legal,
+  ProveedorPayload,
 } from './provider';
+import type { BasicInfoFormData, DocumentType } from './basic-info';
 
 // ============================================
 // Mapeadores Principales
@@ -348,4 +350,64 @@ export const obtenerLabelEstado = (activo: boolean, verificado: boolean): string
   if (!activo) return 'Inactivo';
   if (!verificado) return 'Pendiente verificación';
   return 'Activo y Verificado';
+};
+
+// ============================================
+// Mapper: BasicInfoFormData -> ProveedorPayload
+// ============================================
+
+export const basicInfoToProveedorPayload = (
+  formData: BasicInfoFormData,
+  ownerUserId: number
+): ProveedorPayload => {
+  const departmentId = requireNumber(formData.departmentId, 'department_id');
+  const cityId = requireNumber(formData.cityId, 'city_id');
+  const neighborhoodId = parseNeighborhoodId(formData.neighborhood);
+
+  return {
+    name: formData.commercialName.trim(),
+    description: formData.observations?.trim() || undefined,
+    tax_id: formData.documentNumber.trim(),
+    tax_id_type: mapDocumentTypeToTaxIdType(formData.documentType),
+    address: formData.mainAddress.trim(),
+    phone: formData.phone.trim(),
+    email: formData.email.trim(),
+    department_id: departmentId,
+    city_id: cityId,
+    neighborhood_id: neighborhoodId,
+    owner_user_id: ownerUserId,
+  };
+};
+
+const mapDocumentTypeToTaxIdType = (
+  documentType: DocumentType | ''
+): ProveedorPayload['tax_id_type'] => {
+  switch (documentType) {
+    case 'nit':
+      return 'NIT';
+    case 'ce':
+      return 'CE';
+    case 'passport':
+      return 'PASAPORTE';
+    case 'cc':
+    default:
+      return 'NIT';
+  }
+};
+
+const requireNumber = (value: number | null, field: string): number => {
+  if (typeof value !== 'number') {
+    throw new Error(`${field}_required`);
+  }
+
+  return value;
+};
+
+const parseNeighborhoodId = (value: string): number => {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) {
+    throw new Error('neighborhood_id_invalid');
+  }
+
+  return parsed;
 };

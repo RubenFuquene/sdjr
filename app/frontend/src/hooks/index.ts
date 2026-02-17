@@ -7,4 +7,5 @@ export { usePermissions } from './use-permissions';
 export { useRoleManagement } from './use-role-management';
 export { useUserManagement } from './use-user-management';
 export { useFileUpload } from './use-file-upload';
+export { useAdministratorManagement } from './use-administrator-management';
 

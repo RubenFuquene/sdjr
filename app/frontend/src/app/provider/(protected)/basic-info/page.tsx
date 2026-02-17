@@ -5,6 +5,10 @@ import { toast } from 'sonner';
 import { EstablecimientoCard, RepresentanteLegalCard, CamaraComercioCard, ObservacionesCard } from '@/components/provider/forms';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { INITIAL_BASIC_INFO_FORM } from '@/types/basic-info';
+import { createCommerce, createPresignedDocument, confirmDocumentUpload } from '@/lib/api';
+import { getSessionFromCookie } from '@/lib/session';
+import { basicInfoToProveedorPayload } from '@/types/provider.adapters';
+import { uploadFileToPresignedUrl, getBackendMimeType } from '@/lib/utils/document-upload';
 
 /**
  * Página: Datos Básicos del Proveedor
@@ -19,7 +23,21 @@ import { INITIAL_BASIC_INFO_FORM } from '@/types/basic-info';
 export default function BasicInfoPage() {
   const [formData, setFormData] = useState<BasicInfoFormData>(INITIAL_BASIC_INFO_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [documentFiles, setDocumentFiles] = useState<{
+    commerceChamber: File | null;
+    legalRepresentativeId: File | null;
+  }>({
+    commerceChamber: null,
+    legalRepresentativeId: null,
+  });
+  const [documentStatus, setDocumentStatus] = useState<{
+    commerceChamber: { status: 'idle' | 'uploading' | 'success' | 'error'; error: string | null };
+    legalRepresentativeId: { status: 'idle' | 'uploading' | 'success' | 'error'; error: string | null };
+  }>({
+    commerceChamber: { status: 'idle', error: null },
+    legalRepresentativeId: { status: 'idle', error: null },
+  });
 
   /**
    * Actualiza un campo del formulario
@@ -174,17 +192,132 @@ export default function BasicInfoPage() {
     }
 
     try {
-      // TODO: Integrar con API cuando esté lista
-      console.log('Enviando datos válidos:', formData);
+      setIsLoading(true);
+      setDocumentStatus({
+        commerceChamber: { status: 'idle', error: null },
+        legalRepresentativeId: { status: 'idle', error: null },
+      });
+      const session = getSessionFromCookie();
+      const ownerUserId = session?.userId ? Number.parseInt(session.userId, 10) : Number.NaN;
+      if (Number.isNaN(ownerUserId)) {
+        throw new Error('missing_owner_user_id');
+      }
+
+      const payload = basicInfoToProveedorPayload(formData, ownerUserId);
+      const commerceResponse = await createCommerce(payload);
+      const commerceId = commerceResponse.data.id;
+
+      await uploadCommerceDocuments(commerceId);
+
       toast.success('Datos básicos guardados correctamente', {
         description: 'Procederemos con la siguiente sección de tu registro',
       });
       // TODO: Navegar a siguiente página
     } catch (err) {
       console.error('Error al guardar:', err);
+      const errorMessage = err instanceof Error ? err.message : '';
+      if (errorMessage === 'missing_owner_user_id') {
+        toast.error('Sesión inválida', {
+          description: 'No pudimos identificar tu usuario. Vuelve a iniciar sesión.',
+        });
+        return;
+      }
+      if (errorMessage === 'neighborhood_id_invalid') {
+        toast.error('Barrio inválido', {
+          description: 'Selecciona un barrio válido desde la lista.',
+        });
+        return;
+      }
       toast.error('Error al guardar', {
         description: 'Ocurrió un error al intentar guardar los datos. Por favor, intenta de nuevo.',
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadCommerceDocuments = async (commerceId: number) => {
+    const uploads: Array<Promise<void>> = [];
+
+    if (documentFiles.commerceChamber) {
+      uploads.push(
+        uploadDocumentForCommerce(
+          commerceId,
+          documentFiles.commerceChamber,
+          'CAMARA_COMERCIO',
+          'commerceChamber'
+        )
+      );
+    }
+
+    if (documentFiles.legalRepresentativeId) {
+      uploads.push(
+        uploadDocumentForCommerce(
+          commerceId,
+          documentFiles.legalRepresentativeId,
+          'ID_CARD',
+          'legalRepresentativeId'
+        )
+      );
+    }
+
+    if (uploads.length > 0) {
+      await Promise.all(uploads);
+    }
+  };
+
+  const uploadDocumentForCommerce = async (
+    commerceId: number,
+    file: File,
+    documentType: 'CAMARA_COMERCIO' | 'ID_CARD',
+    statusKey: 'commerceChamber' | 'legalRepresentativeId'
+  ) => {
+    setDocumentStatus((prev) => ({
+      ...prev,
+      [statusKey]: { status: 'uploading', error: null },
+    }));
+    const backendMimeType = getBackendMimeType(file);
+    if (!backendMimeType) {
+      setDocumentStatus((prev) => ({
+        ...prev,
+        [statusKey]: { status: 'error', error: 'Tipo de archivo no permitido.' },
+      }));
+      throw new Error('invalid_document_type');
+    }
+
+    try {
+      const presignedResponse = await createPresignedDocument({
+        document_type: documentType,
+        file_name: file.name,
+        mime_type: backendMimeType,
+        file_size_bytes: file.size,
+        commerce_id: commerceId,
+      });
+
+      const uploadResult = await uploadFileToPresignedUrl(
+        file,
+        presignedResponse.data.presigned_url,
+        { contentType: file.type }
+      );
+
+      await confirmDocumentUpload({
+        upload_token: presignedResponse.data.upload_token,
+        s3_metadata: uploadResult,
+      });
+
+      setDocumentStatus((prev) => ({
+        ...prev,
+        [statusKey]: { status: 'success', error: null },
+      }));
+    } catch (error) {
+      setDocumentStatus((prev) => ({
+        ...prev,
+        [statusKey]: {
+          status: 'error',
+          error: 'No se pudo cargar el documento. Intenta nuevamente.',
+        },
+      }));
+      throw error;
     }
   };
 
@@ -194,6 +327,11 @@ export default function BasicInfoPage() {
   const handleCancel = () => {
     setFormData(INITIAL_BASIC_INFO_FORM);
     setErrors({});
+    setDocumentFiles({ commerceChamber: null, legalRepresentativeId: null });
+    setDocumentStatus({
+      commerceChamber: { status: 'idle', error: null },
+      legalRepresentativeId: { status: 'idle', error: null },
+    });
     toast.info('Cambios descartados', {
       description: 'El formulario ha sido reiniciado',
     });
@@ -230,6 +368,11 @@ export default function BasicInfoPage() {
         <RepresentanteLegalCard
           formData={formData}
           onFieldChange={handleFieldChange}
+          onFileSelected={(file) =>
+            setDocumentFiles((prev) => ({ ...prev, legalRepresentativeId: file }))
+          }
+          uploadStatus={documentStatus.legalRepresentativeId.status}
+          uploadError={documentStatus.legalRepresentativeId.error}
           errors={errors}
         />
 
@@ -239,6 +382,11 @@ export default function BasicInfoPage() {
         <CamaraComercioCard
           formData={formData}
           onFieldChange={handleFieldChange}
+          onFileSelected={(file) =>
+            setDocumentFiles((prev) => ({ ...prev, commerceChamber: file }))
+          }
+          uploadStatus={documentStatus.commerceChamber.status}
+          uploadError={documentStatus.commerceChamber.error}
           errors={errors}
         />
 

@@ -14,9 +14,19 @@ import { fetchWithErrorHandling } from "./client";
  * GET /api/v1/roles
  * Obtiene listado paginado de roles con permisos y conteo de usuarios
  */
-export async function getRoles(perPage: number = 15): Promise<ApiResponse<RoleFromAPI>> {
+export async function getRoles({
+  page = 1,
+  perPage = 15,
+}: {
+  page?: number;
+  perPage?: number;
+} = {}): Promise<ApiResponse<RoleFromAPI>> {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("per_page", String(perPage));
+
   return fetchWithErrorHandling<ApiResponse<RoleFromAPI>>(
-    `/api/v1/roles?per_page=${perPage}`
+    `/api/v1/roles?${params.toString()}`
   );
 }
 
