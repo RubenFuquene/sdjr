@@ -13,8 +13,8 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import type { Administrador, Usuario } from '@/types/admin';
+import { useMemo } from 'react';
+import type { Usuario } from '@/types/admin';
 import type { CreateUserPayload } from '@/types/user';
 import { UserVisualizationModal } from './user-visualization-modal';
 
@@ -23,7 +23,6 @@ import { UserVisualizationModal } from './user-visualization-modal';
 // ============================================
 
 const DEFAULT_ADMIN_ROLE = 'admin';
-const DEFAULT_AREA = 'Sin área';
 const ADMIN_ROLE_WILDCARD = 'admin';
 
 // ============================================
@@ -81,22 +80,12 @@ export function AdministratorCreationModal({
   onSave,
   defaultRole = DEFAULT_ADMIN_ROLE,
 }: AdministratorCreationModalProps) {
-  // Usuario vacío para creación
-  const [emptyUser, setEmptyUser] = useState<Usuario | null>(null);
-
   // Filtrar roles disponibles a solo roles administrativos
   const adminRoles = useMemo(() => {
     return availableRoles.filter(isAdminRole);
   }, [availableRoles]);
 
-  // Inicializar usuario vacío cuando se abre el modal
-  useEffect(() => {
-    if (isOpen) {
-      setEmptyUser(createEmptyAdminUser(defaultRole));
-    } else {
-      setEmptyUser(null);
-    }
-  }, [isOpen, defaultRole]);
+  const emptyUser = isOpen ? createEmptyAdminUser(defaultRole) : null;
 
   // ============================================
   // Handlers
@@ -135,7 +124,6 @@ export function AdministratorCreationModal({
    * Cierra el modal y limpia estados
    */
   const handleClose = () => {
-    setEmptyUser(null);
     onClose();
   };
 
@@ -148,6 +136,7 @@ export function AdministratorCreationModal({
 
   return (
     <UserVisualizationModal
+      key={`admin-create-${isOpen ? 'open' : 'closed'}`}
       isOpen={isOpen}
       mode="edit"
       usuario={emptyUser}

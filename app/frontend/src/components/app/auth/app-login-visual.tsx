@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -17,10 +18,13 @@ export default function AppLoginVisual() {
 
       <div className="px-6 py-6 text-center">
         <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-white">
-          <img
+          <Image
             src="/brand/logo-sumass.png"
             alt="Sumass Logo"
+            width={112}
+            height={112}
             className="h-28 w-28 object-contain"
+            priority
           />
         </div>
         <h2 className="mb-2 text-2xl text-[#5A1E6B]">Sumass</h2>

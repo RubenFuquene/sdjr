@@ -13,8 +13,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, Check, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { X, Check } from 'lucide-react';
 import type { Usuario } from '@/types/admin';
 import { UserInformacionTab } from './user-tabs';
 
@@ -50,20 +50,12 @@ export function UserVisualizationModal({
   onSave,
 }: UserVisualizationModalProps) {
   // Estado del formulario
-  const [formData, setFormData] = useState<Usuario | null>(null);
+  const [formData, setFormData] = useState<Usuario | null>(() =>
+    usuario ? { ...usuario } : null
+  );
 
   // Estado de validación
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Inicializar/resetear form data cuando cambia el usuario
-  useEffect(() => {
-    if (usuario) {
-      setFormData({ ...usuario });
-    } else {
-      setFormData(null);
-    }
-    setErrors({});
-  }, [usuario, isOpen]);
 
   // Si el modal no está abierto, no renderizar
   if (!isOpen || !formData) return null;

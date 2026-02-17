@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Constants\Constant;
 use Aws\S3\S3Client;
 use Exception;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DocumentUploadService
@@ -72,7 +71,7 @@ class DocumentUploadService
 
         // Generar presigned request
         $request = $s3Client->createPresignedRequest($cmd, '+1 hour');
-        $presignedUrl = (string)$request->getUri();
+        $presignedUrl = (string) $request->getUri();
 
         return $presignedUrl;
     }

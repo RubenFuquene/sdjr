@@ -11,12 +11,6 @@ import { Input } from "@/components/app/ui/input";
 
 type ActiveTab = "login" | "register";
 
-type FormValues = {
-  name: string;
-  email: string;
-  password: string;
-};
-
 export default function AppLoginForm() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("login");
   const [name, setName] = useState("");

@@ -55,7 +55,6 @@ export function UsersView({
     handleToggle,
     handleDelete,
     handleRetry,
-    refresh,
     currentPage,
     lastPage,
     total,
@@ -309,6 +308,7 @@ export function UsersView({
 
       {/* Modal de Visualización/Edición de Usuarios */}
       <UserVisualizationModal
+        key={`${modalState.usuario?.id ?? 'new'}-${modalState.mode}-${modalState.isOpen ? 'open' : 'closed'}`}
         isOpen={modalState.isOpen}
         mode={modalState.mode}
         usuario={modalState.usuario}
