@@ -13,7 +13,9 @@ class CountrySeeder extends Seeder
     public function run(): void
     {
         if (env('APP_ENV') == 'prd') {
-            // Aquí puedes agregar datos fijos para producción si aplica
+            Country::insert([
+                ['name' => 'Colombia', 'code' => 'CO', 'created_at' => now(), 'updated_at' => now()],
+            ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
             Country::factory(5)->create();

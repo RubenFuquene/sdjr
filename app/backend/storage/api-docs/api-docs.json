@@ -1347,6 +1347,97 @@
                 ]
             }
         },
+        "/api/v1/commerce-branches/photos/confirm": {
+            "patch": {
+                "tags": [
+                    "Commerce Branches"
+                ],
+                "summary": "Confirm commerce branch photo upload",
+                "description": "Confirma que la foto de la sucursal del comercio fue subida exitosamente y actualiza el registro.",
+                "operationId": "confirmCommerceBranchPhotoUpload",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchProductPhotoUploadRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product photo confirmed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentUploadResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Photo not exist or not in pending status"
+                    },
+                    "410": {
+                        "description": "Presigned URL expired"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/commerce-branches/photos/{photo}": {
+            "delete": {
+                "tags": [
+                    "Commerce Branches"
+                ],
+                "summary": "Remove commerce branch photo",
+                "description": "Elimina una foto de la sucursal del comercio por su ID.",
+                "operationId": "removeCommerceBranchPhoto",
+                "parameters": [
+                    {
+                        "name": "photo",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Photo deleted successfully"
+                    },
+                    "404": {
+                        "description": "Photo not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/commerces": {
             "get": {
                 "tags": [
@@ -2630,6 +2721,45 @@
                     },
                     "422": {
                         "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/documents/{document}": {
+            "delete": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Remove document",
+                "description": "Elimina un documento por su ID.",
+                "operationId": "removeDocument",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Document deleted successfully"
+                    },
+                    "404": {
+                        "description": "Document not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
                     }
                 },
                 "security": [
@@ -5180,6 +5310,97 @@
                 ]
             }
         },
+        "/api/v1/products/photos/confirm": {
+            "patch": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Confirm product photo upload",
+                "description": "Confirma que la foto del producto fue subida exitosamente y actualiza el registro.",
+                "operationId": "confirmProductPhotoUpload",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchProductPhotoUploadRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product photo confirmed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentUploadResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Photo not exist or not in pending status"
+                    },
+                    "410": {
+                        "description": "Presigned URL expired"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/photos/{photo}": {
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Remove product photo",
+                "description": "Elimina una foto de producto por su ID.",
+                "operationId": "removeProductPhoto",
+                "parameters": [
+                    {
+                        "name": "photo",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Photo deleted successfully"
+                    },
+                    "404": {
+                        "description": "Photo not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/provider/register": {
             "post": {
                 "tags": [
@@ -6940,6 +7161,41 @@
                 },
                 "type": "object"
             },
+            "PatchProductPhotoUploadRequest": {
+                "required": [
+                    "upload_token",
+                    "s3_metadata"
+                ],
+                "properties": {
+                    "upload_token": {
+                        "type": "string",
+                        "example": "token123"
+                    },
+                    "s3_metadata": {
+                        "required": [
+                            "etag",
+                            "object_size",
+                            "last_modified"
+                        ],
+                        "properties": {
+                            "etag": {
+                                "type": "string",
+                                "example": "etag123"
+                            },
+                            "object_size": {
+                                "type": "integer",
+                                "example": 123456
+                            },
+                            "last_modified": {
+                                "type": "string",
+                                "example": "2026-01-21T10:00:00Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "RoleAssignPermissionRequest": {
                 "required": [
                     "permissions"
@@ -7432,6 +7688,12 @@
                                 "type": "string",
                                 "maxLength": 1,
                                 "example": "1"
+                            },
+                            "photos": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DocumentUploadResource"
+                                }
                             }
                         },
                         "type": "object"
@@ -8225,78 +8487,6 @@
                 },
                 "type": "object"
             },
-            "CommerceBranchPhotoResource": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "commerce_branch_id": {
-                        "type": "integer",
-                        "example": 10
-                    },
-                    "uploaded_by_id": {
-                        "type": "integer",
-                        "example": 2
-                    },
-                    "upload_token": {
-                        "type": "string",
-                        "example": "uuid-1234"
-                    },
-                    "s3_etag": {
-                        "type": "string",
-                        "example": "etag-abc"
-                    },
-                    "s3_object_size": {
-                        "type": "integer",
-                        "example": 204800
-                    },
-                    "s3_last_modified": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2026-01-20T10:00:00Z"
-                    },
-                    "replacement_of_id": {
-                        "type": "integer",
-                        "example": null
-                    },
-                    "version_of_id": {
-                        "type": "integer",
-                        "example": null
-                    },
-                    "version_number": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "expires_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2026-02-01T00:00:00Z"
-                    },
-                    "failed_attempts": {
-                        "type": "integer",
-                        "example": 0
-                    },
-                    "photo_type": {
-                        "type": "string",
-                        "example": "EXTERIOR"
-                    },
-                    "file_path": {
-                        "type": "string",
-                        "example": "/uploads/branch_10_photo1.jpg"
-                    },
-                    "mime_type": {
-                        "type": "string",
-                        "example": "image/jpeg"
-                    },
-                    "uploaded_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2026-01-20T10:00:00Z"
-                    }
-                },
-                "type": "object"
-            },
             "CommerceBranchResource": {
                 "properties": {
                     "id": {
@@ -9053,6 +9243,12 @@
                         "type": "string",
                         "format": "date-time",
                         "nullable": true
+                    },
+                    "photos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DocumentUploadResource"
+                        }
                     },
                     "status": {
                         "type": "string"

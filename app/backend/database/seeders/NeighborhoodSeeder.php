@@ -12,7 +12,14 @@ class NeighborhoodSeeder extends Seeder
     public function run(): void
     {
         if (env('APP_ENV') == 'prd') {
-            // Aquí puedes agregar datos fijos para producción si aplica
+            Neighborhood::insert([
+                ['name' => 'Chapinero', 'city_id' => 1, 'code' => '11001', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'La Candelaria', 'city_id' => 1, 'code' => '11002', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'El Poblado', 'city_id' => 2, 'code' => '05001', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Laureles', 'city_id' => 2, 'code' => '05002', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'San Antonio', 'city_id' => 3, 'code' => '76001', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Granada', 'city_id' => 3, 'code' => '76002', 'created_at' => now(), 'updated_at' => now()],
+            ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
             Neighborhood::factory(10)->create();
