@@ -14,9 +14,9 @@ class DepartmentSeeder extends Seeder
     {
         if (env('APP_ENV') == 'prd') {
             Department::insert([
-                ['name' => 'Cundinamarca', 'country_id' => 1],
-                ['name' => 'Antioquia', 'country_id' => 1],
-                ['name' => 'Valle del Cauca', 'country_id' => 1],
+                ['name' => 'Cundinamarca', 'country_id' => 1, 'code' => '11', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Antioquia', 'country_id' => 1, 'code' => '05', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Valle del Cauca', 'country_id' => 1, 'code' => '76', 'created_at' => now(), 'updated_at' => now()],
             ]);
         }
         if (env('DEMO_SEEDING') == 'true') {

@@ -14,9 +14,9 @@ class CitySeeder extends Seeder
     {
         if (env('APP_ENV') == 'prd') {
             City::insert([
-                ['name' => 'Bogotá', 'department_id' => 1],
-                ['name' => 'Medellín', 'department_id' => 2],
-                ['name' => 'Cali', 'department_id' => 3],
+                ['name' => 'Bogotá', 'department_id' => 1, 'code' => '11001', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Medellín', 'department_id' => 2, 'code' => '05001', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Cali', 'department_id' => 3, 'code' => '76001', 'created_at' => now(), 'updated_at' => now()],
             ]);
         }
         if (env('DEMO_SEEDING') == 'true') {

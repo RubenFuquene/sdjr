@@ -14,7 +14,7 @@ class CountrySeeder extends Seeder
     {
         if (env('APP_ENV') == 'prd') {
             Country::insert([
-                ['name' => 'Colombia', 'code' => 'CO'],
+                ['name' => 'Colombia', 'code' => 'CO', 'created_at' => now(), 'updated_at' => now()],
             ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
