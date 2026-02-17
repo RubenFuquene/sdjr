@@ -15,7 +15,12 @@ class PriorityTypeSeeder extends Seeder
     public function run(): void
     {
         if (env('APP_ENV') == 'prd') {
-            // Aquí puedes agregar datos fijos para producción si aplica
+            PriorityType::insert([
+                ['name' => 'Prioritaria', 'code' => 'PR', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Baja', 'code' => 'BA', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Media', 'code' => 'ME', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Alta', 'code' => 'AL', 'created_at' => now(), 'updated_at' => now()],
+            ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
             PriorityType::factory()->count(5)->create();

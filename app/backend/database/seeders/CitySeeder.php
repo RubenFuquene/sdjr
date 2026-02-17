@@ -13,7 +13,11 @@ class CitySeeder extends Seeder
     public function run(): void
     {
         if (env('APP_ENV') == 'prd') {
-            // Aquí puedes agregar datos fijos para producción si aplica
+            City::insert([
+                ['name' => 'Bogotá', 'department_id' => 1],
+                ['name' => 'Medellín', 'department_id' => 2],
+                ['name' => 'Cali', 'department_id' => 3],
+            ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
             City::factory(5)->create();

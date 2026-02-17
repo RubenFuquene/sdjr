@@ -13,7 +13,11 @@ class DepartmentSeeder extends Seeder
     public function run(): void
     {
         if (env('APP_ENV') == 'prd') {
-            // Aquí puedes agregar datos fijos para producción si aplica
+            Department::insert([
+                ['name' => 'Cundinamarca', 'country_id' => 1],
+                ['name' => 'Antioquia', 'country_id' => 1],
+                ['name' => 'Valle del Cauca', 'country_id' => 1],
+            ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
             Department::factory(5)->create();
