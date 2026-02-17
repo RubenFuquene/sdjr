@@ -63,6 +63,24 @@
   --color-provider-bg: var(--color-provider-bg);
 }
 
+/* Ñapa Landing Page Colors */
+:root {
+  /* Verde Tomatillo Palette */
+  --color-napa-verde-tomatillo: #87ab69;
+  --color-napa-verde-claro: #d9e6b3;
+  
+  /* Púrpura oscuro */
+  --color-napa-purple: #4b0082;
+  
+  /* Text colors */
+  --color-napa-text-dark: #1a1a1a;
+  --color-napa-text-gray: #6a6a6a;
+  
+  /* Backgrounds */
+  --color-napa-bg-light: #fafaf9;
+  --color-napa-bg-white: #ffffff;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -76,4 +94,79 @@ body {
 
 .shadow-login-card {
   box-shadow: var(--color-shadow);
+}
+
+/* Ñapa Landing Page Animations */
+@keyframes bounce-soft {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation utility classes for landing page */
+.animate-bounce-soft {
+  animation: bounce-soft 2.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+.animate-slide-from-left {
+  animation: slide-from-left 0.6s ease-out;
+}
+
+.animate-slide-from-right {
+  animation: slide-from-right 0.6s ease-out;
+}
+
+.animate-scale-fade {
+  animation: scale-fade 0.4s ease-out;
 }
