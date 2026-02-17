@@ -14,13 +14,18 @@ import {
   SelectTrigger,
   SelectValue,
   FileUploadBox,
-} from '@/components/provider/ui';import { useFileUpload } from '@/hooks';import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
+} from '@/components/provider/ui';
+import { useFileUpload } from '@/hooks';
+import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { LEGAL_REP_DOCUMENT_TYPE_OPTIONS } from '@/types/basic-info';
 import { AlertCircle } from 'lucide-react';
 
 interface RepresentanteLegalCardProps {
   formData: BasicInfoFormData;
   onFieldChange: (field: string, value: string | number | null) => void;
+  onFileSelected?: (file: File | null) => void;
+  uploadStatus?: 'idle' | 'uploading' | 'success' | 'error';
+  uploadError?: string | null;
   errors?: Partial<FormErrors>;
 }
 
@@ -36,6 +41,9 @@ interface RepresentanteLegalCardProps {
 export function RepresentanteLegalCard({
   formData,
   onFieldChange,
+  onFileSelected,
+  uploadStatus = 'idle',
+  uploadError = null,
   errors = {},
 }: RepresentanteLegalCardProps) {
   const { legalRepresentative } = formData;
@@ -204,12 +212,28 @@ export function RepresentanteLegalCard({
                   if (validation.isValid) {
                     const generatedName = generateFileName(file.name);
                     handleRepChange('documentFile', generatedName);
+                    onFileSelected?.(file);
                   }
                 }
               }}
-              onRemove={() => handleRepChange('documentFile', null)}
-              disabled={isUploadingDoc}
+              onRemove={() => {
+                handleRepChange('documentFile', null);
+                onFileSelected?.(null);
+              }}
+              disabled={isUploadingDoc || uploadStatus === 'uploading'}
             />
+            {uploadStatus === 'uploading' && (
+              <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
+            )}
+            {uploadStatus === 'success' && (
+              <p className="text-xs text-green-600">Documento cargado correctamente.</p>
+            )}
+            {uploadStatus === 'error' && uploadError && (
+              <div className="flex items-center gap-2 text-xs text-red-600">
+                <AlertCircle size={14} />
+                <span>{uploadError}</span>
+              </div>
+            )}
             {errors.legalRepresentativeDocumentFile && (
               <div className="flex items-center gap-2 text-xs text-red-600">
                 <AlertCircle size={14} />

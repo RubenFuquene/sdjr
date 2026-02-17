@@ -17,7 +17,27 @@ export type { LoginResult } from "./auth";
 export { getRoles, createRole, updateRole, updateRoleStatus, deleteRole } from "./roles";
 
 // Commerces (Proveedores)
-export { getCommerces, getCommerceById, updateCommerce, deleteCommerce } from "./commerces";
+export {
+  getCommerces,
+  getCommerceById,
+  createCommerce,
+  updateCommerce,
+  deleteCommerce,
+} from "./commerces";
+
+// Documents (Carga de archivos)
+export {
+  createPresignedDocument,
+  confirmDocumentUpload,
+  deleteDocumentUpload,
+} from "./documents";
+export type {
+  DocumentType,
+  PresignedDocumentRequest,
+  PresignedDocumentResponse,
+  ConfirmDocumentRequest,
+  DocumentUploadResource,
+} from "./documents";
 
 // Users (Usuarios)
 export {

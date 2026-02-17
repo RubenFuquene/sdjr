@@ -79,8 +79,16 @@ class DocumentUploadController extends Controller
             ], 'Presigned URL generate successful.', 201);
 
         } catch (\Exception $e) {
-            $code = (int) $e->getCode();
-            $httpCode = $code >= 100 ? $code : 500;
+            // Log the exception for debugging
+            \Log::error('Document presigned error: '.$e->getMessage(), [
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            // Only use exception code if it's a valid HTTP status (100-599)
+            $exceptionCode = (int) $e->getCode();
+            $httpCode = ($exceptionCode >= 100 && $exceptionCode < 600) ? $exceptionCode : 500;
 
             return $this->errorResponse($e->getMessage(), $httpCode);
         }
@@ -142,10 +150,18 @@ class DocumentUploadController extends Controller
             return $this->errorResponse('Document not found', 404);
 
         } catch (\Exception $e) {
-            $code = (int) $e->getCode();
-            $httpCode = $code >= 100 ? $code : 500;
+            // Log the exception for debugging
+            \Log::error('Document confirm error: '.$e->getMessage(), [
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
 
-            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $httpCode);
+            // Only use exception code if it's a valid HTTP status (100-599)
+            $exceptionCode = (int) $e->getCode();
+            $httpCode = ($exceptionCode >= 100 && $exceptionCode < 600) ? $exceptionCode : 500;
+
+            return $this->errorResponse($e->getMessage(), $httpCode);
         }
     }
 
@@ -179,10 +195,18 @@ class DocumentUploadController extends Controller
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Document not found', 404);
         } catch (\Exception $e) {
-            $code = (int) $e->getCode();
-            $httpCode = $code >= 100 ? $code : 500;
+            // Log the exception for debugging
+            \Log::error('Document remove error: '.$e->getMessage(), [
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
 
-            return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $httpCode);
+            // Only use exception code if it's a valid HTTP status (100-599)
+            $exceptionCode = (int) $e->getCode();
+            $httpCode = ($exceptionCode >= 100 && $exceptionCode < 600) ? $exceptionCode : 500;
+
+            return $this->errorResponse($e->getMessage(), $httpCode);
         }
     }
 }
