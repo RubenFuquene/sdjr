@@ -15,7 +15,13 @@ class PqrsTypeSeeder extends Seeder
     public function run(): void
     {
         if (env('APP_ENV') == 'prd') {
-            // Aquí puedes agregar datos fijos para producción si aplica
+            PqrsType::insert([
+                ['name' => 'Pedidos', 'code' => 'PE', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Pagos', 'code' => 'PA', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Bloqueo de cuenta', 'code' => 'BC', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Falla técnica', 'code' => 'FT', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Desconocimiento funcional', 'code' => 'DF', 'created_at' => now(), 'updated_at' => now()],
+            ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
             PqrsType::factory()->count(10)->create();

@@ -15,7 +15,13 @@ class ProductCategorySeeder extends Seeder
     public function run(): void
     {
         if (env('APP_ENV') == 'prd') {
-            // Aquí puedes agregar datos fijos para producción si aplica
+            ProductCategory::insert([
+                ['name' => 'Cómida rápida', 'description' => 'Hamburguesas, pizzas, tacos, etc.', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Restaurantes', 'description' => 'Lugares donde se sirven comidas completas.', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Postres', 'description' => 'Dulces y postres variados.', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Bebidas', 'description' => 'Bebidas alcohólicas y no alcohólicas.', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Supermercados', 'description' => 'Productos de supermercado y tiendas de conveniencia.', 'created_at' => now(), 'updated_at' => now()],
+            ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
             ProductCategory::factory()->count(10)->create();

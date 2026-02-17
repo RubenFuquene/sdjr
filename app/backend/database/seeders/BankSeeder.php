@@ -14,11 +14,13 @@ class BankSeeder extends Seeder
         if (env('APP_ENV') == 'prd') {
 
             Bank::insert([
-                ['name' => 'Bank of America', 'code' => '001', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Chase Bank', 'code' => '002', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Wells Fargo', 'code' => '003', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Citibank', 'code' => '004', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'US Bank', 'code' => '005', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Bancolombia', 'code' => 'BCO', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Davivienda', 'code' => 'DAV', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Banco de Bogotá', 'code' => 'BDB', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Banco de Occidente', 'code' => 'BDO', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Banco Popular', 'code' => 'BP', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'BBVA', 'code' => 'BBVA', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Scotiabank', 'code' => 'SCO', 'created_at' => now(), 'updated_at' => now()],
             ]);
 
         }
