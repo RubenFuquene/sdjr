@@ -20,7 +20,7 @@ class CommerceServiceTest extends TestCase
     {
         $user = \App\Models\User::factory()->create();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
-        $service = new CommerceService();
+        $service = new CommerceService;
         $result = $service->myCommerce($user->id);
         $this->assertNotNull($result);
         $this->assertEquals($commerce->id, $result->id);
@@ -32,7 +32,7 @@ class CommerceServiceTest extends TestCase
     public function test_my_commerce_returns_null_if_no_commerce()
     {
         $user = \App\Models\User::factory()->create();
-        $service = new CommerceService();
+        $service = new CommerceService;
         $result = $service->myCommerce($user->id);
         $this->assertNull($result);
     }

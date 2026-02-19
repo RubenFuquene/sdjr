@@ -130,9 +130,6 @@ class CommerceService
 
     /**
      * Get the commerce for the authenticated user
-     *
-     * @param int $userId
-     * @return Commerce|null
      */
     public function myCommerce(int $userId): ?Commerce
     {

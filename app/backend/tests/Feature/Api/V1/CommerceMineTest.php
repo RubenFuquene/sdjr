@@ -45,7 +45,7 @@ class CommerceMineTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo('provider.commerces.mine');
         $this->actingAs($user, 'sanctum');
-    
+
         $response = $this->getJson('/api/v1/me/commerce');
         $response->assertStatus(404);
         $response->assertJsonPath('status', false);

@@ -457,29 +457,30 @@ class CommerceController extends Controller
      *     summary="Get the commerce of the authenticated user",
      *     description="Returns the commerce associated to the authenticated user.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/CommerceResource")
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=404, description="Commerce not found")
      * )
-     *
-     * @param MyCommerceRequest $request
-     * @return JsonResponse
      */
     public function myCommerce(MyCommerceRequest $request): JsonResponse
     {
         try {
             $userId = $request->user()->id;
             $commerce = $this->commerceService->myCommerce($userId);
-            if (!$commerce) {
+            if (! $commerce) {
                 return $this->errorResponse('Commerce not found', 404);
             }
+
             return $this->successResponse(new CommerceResource($commerce), 'Commerce retrieved successfully');
-        } catch (\Throwable $e) {            
+        } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving my commerce', 500, ['exception' => $e->getMessage()]);
         }
     }

@@ -101,7 +101,7 @@ Route::prefix('v1')->group(function () {
             Route::get('{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
             Route::get('{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
             Route::post('basic', [CommerceBasicDataController::class, 'store']);
-            
+
         });
         Route::get('me/commerce', [CommerceController::class, 'myCommerce']);
 
