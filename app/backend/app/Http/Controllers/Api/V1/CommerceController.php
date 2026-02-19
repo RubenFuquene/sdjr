@@ -9,6 +9,7 @@ use App\Http\Requests\Api\V1\CommerceRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
 use App\Http\Requests\Api\V1\IndexCommerceRequest;
+use App\Http\Requests\Api\V1\MyCommerceRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
@@ -445,6 +446,41 @@ class CommerceController extends Controller
             Log::error('Error listing payout methods', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error listing payout methods', 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/commerces/mine",
+     *     operationId="myCommerce",
+     *     tags={"Commerces"},
+     *     summary="Get the commerce of the authenticated user",
+     *     description="Returns the commerce associated to the authenticated user.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceResource")
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Commerce not found")
+     * )
+     *
+     * @param MyCommerceRequest $request
+     * @return JsonResponse
+     */
+    public function myCommerce(MyCommerceRequest $request): JsonResponse
+    {
+        try {
+            $userId = $request->user()->id;
+            $commerce = $this->commerceService->myCommerce($userId);
+            if (!$commerce) {
+                return $this->errorResponse('Commerce not found', 404);
+            }
+            return $this->successResponse(new CommerceResource($commerce), 'Commerce retrieved successfully');
+        } catch (\Throwable $e) {            
+            return $this->errorResponse('Error retrieving my commerce', 500, ['exception' => $e->getMessage()]);
         }
     }
 }

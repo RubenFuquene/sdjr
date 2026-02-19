@@ -158,6 +158,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Update commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Delete commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerce_payout_methods.index', 'guard_name' => $guardName, 'description' => 'List provider commerce payout methods', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerces.mine', 'guard_name' => $guardName, 'description' => 'Show my commerces', 'created_at' => now(), 'updated_at' => now()],
 
             // Legal Representatives
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'List legal representatives', 'created_at' => now(), 'updated_at' => now()],
@@ -179,6 +180,7 @@ class RolePermissionSeeder extends Seeder
 
             ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'View admin provider upload documents module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.photos.upload', 'guard_name' => $guardName, 'description' => 'Update photos by provider', 'created_at' => now(), 'updated_at' => now()],
+            
 
             ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'List product categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Create product categories', 'created_at' => now(), 'updated_at' => now()],

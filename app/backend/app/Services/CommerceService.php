@@ -127,4 +127,15 @@ class CommerceService
             throw $e;
         }
     }
+
+    /**
+     * Get the commerce for the authenticated user
+     *
+     * @param int $userId
+     * @return Commerce|null
+     */
+    public function myCommerce(int $userId): ?Commerce
+    {
+        return Commerce::where('owner_user_id', $userId)->first();
+    }
 }
