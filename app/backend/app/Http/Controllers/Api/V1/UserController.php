@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ShowAdministratorRequest;
 use App\Http\Requests\Api\V1\UserIndexRequest;
 use App\Http\Requests\Api\V1\UserRequest;
 use App\Http\Requests\Api\V1\UserStatusRequest;
@@ -239,7 +240,8 @@ class UserController extends Controller
 
             return $this->noContentResponse();
         } catch (\Throwable $e) {
-            Log::error('Error deleting user', ['id' => $user?->id, 'error' => $e->getMessage()]);
+
+            Log::error('Error deleting user', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error deleting users', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -302,10 +304,12 @@ class UserController extends Controller
      *     summary="Get list of administrator users",
      *     description="Returns a list of users with the administrator role.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="name", in="query", required=false, description="Filter by user name (partial text)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="last_name", in="query", required=false, description="Filter by user last name (partial text)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="email", in="query", required=false, description="Filter by user email (partial text)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by user status", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Number of results per page", @OA\Schema(type="integer"))
      *
      *     @OA\Response(
      *         response=200,
@@ -318,7 +322,7 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function administrators(UserIndexRequest $request): AnonymousResourceCollection|JsonResponse
+    public function administrators(ShowAdministratorRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $filters = $request->validatedFilters();
@@ -326,7 +330,7 @@ class UserController extends Controller
             $users = $this->userService->getAdministrators($filters, $perPage);
             $resource = UserResource::collection($users);
 
-            return $this->paginatedResponse($users, $resource, 'Administrators retrieved successfully');            
+            return $this->paginatedResponse($users, $resource, 'Administrators retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error listing administrators', ['error' => $e->getMessage()]);
 

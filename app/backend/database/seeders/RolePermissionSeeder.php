@@ -124,6 +124,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.profiles.users.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.users.assign_roles_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign roles and permissions to users', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.users.update_status', 'guard_name' => $guardName, 'description' => 'Permission to update user status', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.profiles.administrators.show', 'guard_name' => $guardName, 'description' => 'Permission to view administrator details', 'created_at' => now(), 'updated_at' => now()],
 
             // Administrator Modules
             ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
@@ -180,7 +181,6 @@ class RolePermissionSeeder extends Seeder
 
             ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'View admin provider upload documents module', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.photos.upload', 'guard_name' => $guardName, 'description' => 'Update photos by provider', 'created_at' => now(), 'updated_at' => now()],
-            
 
             ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'List product categories', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Create product categories', 'created_at' => now(), 'updated_at' => now()],
