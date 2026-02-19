@@ -20,6 +20,7 @@ export { getRoles, createRole, updateRole, updateRoleStatus, deleteRole } from "
 export {
   getCommerces,
   getCommerceById,
+  getMyCommerce,
   createCommerce,
   updateCommerce,
   deleteCommerce,

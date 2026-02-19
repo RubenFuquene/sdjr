@@ -111,3 +111,93 @@ El frontend esta enviando el rol como arreglo en el campo `roles`:
 
 ---
 
+## D) Solicitud: GET /api/v1/me/commerce - Obtener comercio del usuario autenticado
+
+### Contexto
+- El panel del proveedor necesita cargar el comercio asociado al usuario autenticado cuando navega a `/provider/basic-info`.
+- Actualmente solo existen:
+  - `GET /api/v1/commerces` - Lista todos los comercios (paginado)
+  - `GET /api/v1/commerces/{id}` - Obtiene por ID específico
+- No hay forma de obtener el comercio por `owner_user_id` del usuario autenticado.
+
+### Endpoint solicitado
+**Ruta:** `GET /api/v1/me/commerce` o `GET /api/v1/commerces/mine`
+
+### Lógica esperada
+1. Obtener el usuario autenticado (`auth()->user()`)
+2. Buscar el comercio donde `owner_user_id = auth()->id()`
+3. Retornar el comercio completo con relaciones necesarias
+
+### Respuesta esperada (200 OK - Comercio existe)
+```json
+{
+  "status": true,
+  "message": "Commerce retrieved successfully",
+  "data": {
+    "id": 5,
+    "commercial_name": "Restaurante El Buen Sabor",
+    "document_type": "nit",
+    "document_number": "900123456-7",
+    "establishment_type": "restaurant",
+    "phone": "3001234567",
+    "email": "contacto@elbuen sabor.com",
+    "department_id": 11,
+    "city_id": 149,
+    "neighborhood": "Chapinero",
+    "main_address": "Calle 45 #23-10",
+    "legal_representatives": [
+      {
+        "id": 1,
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "document_type": "cc",
+        "document_number": "1234567890",
+        "document_file": "path/to/document.pdf"
+      }
+    ],
+    "documents": {
+      "commerce_chamber": "path/to/chamber.pdf",
+      "identity": "path/to/id.pdf"
+    },
+    "observations": "Observaciones del comercio",
+    "owner_user_id": 42,
+    "is_active": true,
+    "is_verified": false,
+    "created_at": "2026-02-18T10:00:00Z",
+    "updated_at": "2026-02-18T10:00:00Z"
+  }
+}
+```
+
+### Respuesta esperada (200 OK - Comercio no existe)
+```json
+{
+  "status": true,
+  "message": "No commerce found for authenticated user",
+  "data": null
+}
+```
+
+### Validaciones
+- Usuario autenticado requerido (middleware `auth:sanctum`)
+- No requiere permisos especiales (el usuario solo ve su propio comercio)
+
+### Relaciones a incluir
+- `legalRepresentatives` (representantes legales)
+- `documents` (documentos del comercio)
+- `department`, `city` (información de ubicación)
+
+### Uso en frontend
+- Al navegar a `/provider/basic-info`, el frontend llamará a este endpoint
+- Si `data !== null`, pre-llenará el formulario con los datos existentes (modo edición)
+- Si `data === null`, mostrará el formulario vacío (modo creación)
+
+### Controlador sugerido
+- **Opción 1:** Agregar método `myCommerce()` en `MeController`
+- **Opción 2:** Agregar método `mine()` en `CommerceController`
+
+### Prioridad
+**ALTA** - Bloqueador para flujo de edición de datos del proveedor
+
+---
+
