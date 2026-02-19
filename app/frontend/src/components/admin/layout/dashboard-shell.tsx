@@ -9,7 +9,7 @@ import { Users, Settings, ShieldCheck, Megaphone, Headphones, Bell, User, BarCha
 const navItems = [
   { label: "Perfiles", href: "/admin/dashboard", icon: Users },
   { label: "Parametrización", href: "/admin/settings", icon: Settings },
-  { label: "Validación de Proveedores", href: "/admin/providers", icon: ShieldCheck },
+  { label: "Validación de Proveedores", href: "/admin/validacion", icon: ShieldCheck },
   { label: "Marketing", href: "/admin/marketing", icon: Megaphone },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Soporte", href: "/admin/support", icon: Headphones },
