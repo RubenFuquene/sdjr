@@ -7,7 +7,7 @@
  * - Controlar apertura/cierre del modal
  * - Guardar cambios del proveedor
  * 
- * Nota: Los componentes de cada tab están en provider-tabs/
+ * Nota: Los componentes de cada tab están en shared/provider-details-tabs/
  * Basado en: PROVIDER_VISUALIZATION_MODAL_ANALYSIS.md
  */
 
@@ -21,7 +21,7 @@ import {
   ProviderSucursalesTab,
   ProviderBancariaTab,
   ProviderLegalTab,
-} from './provider-tabs';
+} from '@/components/admin/shared/provider-details-tabs';
 
 // ============================================
 // Props Interface
