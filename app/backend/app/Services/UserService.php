@@ -47,8 +47,8 @@ class UserService
         if (! empty($filters['phone'])) {
             $query->where('phone', 'like', "%{$filters['phone']}%");
         }
-        if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+        if (! empty( str($filters['status'])->trim() )) {            
+            $query->where('status', str($filters['status'])->trim());
         }
 
         return $query->paginate($perPage);
@@ -122,5 +122,33 @@ class UserService
         $user->save();
 
         return $user;
+    }
+
+    /**
+     * Get all administrator users (those with 'superadmin' or 'admin' roles).
+     * @param  array<string, mixed>  $filters  Optional filters (not currently used)
+     * @param  int  $perPage  Number of users per page (not currently used)
+     * @return LengthAwarePaginator Paginated list of administrator users
+     */
+    public function getAdministrators(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = User::with('roles')->whereHas('roles', function ($roles) {
+            $roles->whereIn('name', ['superadmin', 'admin']);
+        });
+
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (! empty($filters['last_name'])) {
+            $query->where('last_name', 'like', "%{$filters['last_name']}%");
+        }
+        if (! empty($filters['email'])) {
+            $query->where('email', 'like', "%{$filters['email']}%");
+        }
+        if (! empty( str($filters['status'])->trim() )) {            
+            $query->where('status', str($filters['status'])->trim());
+        }
+
+        return $query->paginate($perPage);
     }
 }

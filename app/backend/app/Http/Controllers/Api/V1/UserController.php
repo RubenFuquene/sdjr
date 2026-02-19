@@ -9,7 +9,6 @@ use App\Http\Requests\Api\V1\UserIndexRequest;
 use App\Http\Requests\Api\V1\UserRequest;
 use App\Http\Requests\Api\V1\UserStatusRequest;
 use App\Http\Resources\Api\V1\UserResource;
-use App\Models\User;
 use App\Services\UserService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -303,6 +302,10 @@ class UserController extends Controller
      *     summary="Get list of administrator users",
      *     description="Returns a list of users with the administrator role.",
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="name", in="query", required=false, description="Filter by user name (partial text)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="last_name", in="query", required=false, description="Filter by user last name (partial text)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="email", in="query", required=false, description="Filter by user email (partial text)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by user status", @OA\Schema(type="string")),
      *
      *     @OA\Response(
      *         response=200,
@@ -315,14 +318,15 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function administrators(): AnonymousResourceCollection|JsonResponse
+    public function administrators(UserIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $users = User::with('roles')->get()->filter(
-                fn ($user) => $user->roles->whereIn('name', ['superadmin', 'admin'])->toArray()
-            );
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
+            $users = $this->userService->getAdministrators($filters, $perPage);
+            $resource = UserResource::collection($users);
 
-            return $this->successResponse(UserResource::collection($users), 'Administrators retrieved successfully', Response::HTTP_OK);
+            return $this->paginatedResponse($users, $resource, 'Administrators retrieved successfully');            
         } catch (\Throwable $e) {
             Log::error('Error listing administrators', ['error' => $e->getMessage()]);
 
