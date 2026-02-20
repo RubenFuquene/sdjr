@@ -64,9 +64,31 @@ trait ApiResponseTrait
     {
         return $this->errorResponse($message ?? 'Validation error', 422, $errors);
     }
-
+    
     /**
-     * Return a paginated response with uniform structure.
+     * @OA\Schema(
+     *     schema="PaginatedResponse",
+     *     type="object",
+     *     title="Paginated Response",
+     *     description="Respuesta paginada estándar para recursos.",
+     *     @OA\Property(property="status", type="boolean", example=true),
+     *     @OA\Property(property="message", type="string", example="Operación exitosa"),
+     *     @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *     @OA\Property(property="meta", type="object",
+     *         @OA\Property(property="current_page", type="integer", example=1),
+     *         @OA\Property(property="from", type="integer", example=1),
+     *         @OA\Property(property="last_page", type="integer", example=10),
+     *         @OA\Property(property="per_page", type="integer", example=15),
+     *         @OA\Property(property="to", type="integer", example=15),
+     *         @OA\Property(property="total", type="integer", example=150)
+     *     ),
+     *     @OA\Property(property="links", type="object",
+     *         @OA\Property(property="first", type="string", example="/api/v1/resource?page=1"),
+     *         @OA\Property(property="last", type="string", example="/api/v1/resource?page=10"),
+     *         @OA\Property(property="prev", type="string", example=null),
+     *         @OA\Property(property="next", type="string", example="/api/v1/resource?page=2")
+     *     )
+     * )
      */
     protected function paginatedResponse(LengthAwarePaginator $paginator, AnonymousResourceCollection $resourceCollection, ?string $message = null): JsonResponse
     {

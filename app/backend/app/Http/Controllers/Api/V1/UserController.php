@@ -40,19 +40,20 @@ class UserController extends Controller
      *     operationId="indexUsers",
      *     tags={"Users"},
      *     summary="List users",
-     *     description="Get paginated list of users. Permite filtrar por nombre (name), email, estado (status) y cantidad por página (per_page).",
+     *     description="Get paginated list of users. Permite filtrar por nombre (name), apellido (last_name), teléfono (phone), email, estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
      *
      *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre de usuario (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="last_name", in="query", required=false, description="Filtrar por apellido de usuario (texto parcial)", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="phone", in="query", required=false, description="Filtrar por teléfono de usuario (texto parcial)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="email", in="query", required=false, description="Filtrar por email de usuario", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activo, 0=inactivo", @OA\Schema(type="string", enum={"1","0"}, default="1")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Cantidad de resultados por página (1-100)", @OA\Schema(type="integer", minimum=1, maximum=100, example=15)),
      *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *
-     *         @OA\JsonContent(type="object")
+     *         @OA\JsonContent(ref="#/components/schemas/PaginatedResponse")
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -87,7 +88,7 @@ class UserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(type="object")
+     *         @OA\JsonContent(type="object", ref="#/components/schemas/UserRequest")
      *     ),
      *
      *     @OA\Response(
@@ -169,13 +170,7 @@ class UserController extends Controller
      *     description="Updates a user.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(
-     *         name="user",
-     *         in="path",
-     *         required=true,
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
+     *     @OA\Parameter(name="user", in="path", required=true, @OA\Schema(type="integer")),
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -309,13 +304,13 @@ class UserController extends Controller
      *     @OA\Parameter(name="last_name", in="query", required=false, description="Filter by user last name (partial text)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="email", in="query", required=false, description="Filter by user email (partial text)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by user status", @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Number of results per page", @OA\Schema(type="integer"))
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Number of results per page", @OA\Schema(type="integer")),
      *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/UserResource"))
+     *         @OA\JsonContent(ref="#/components/schemas/PaginatedResponse")
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),

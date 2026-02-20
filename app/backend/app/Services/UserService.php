@@ -61,11 +61,14 @@ class UserService
      * @return User The created user instance
      */
     public function create(array $data): User
-    {
-        // Password hashing is handled by the User model cast 'hashed'
+    {        
         $data['remember_token'] = Str::random(10);
 
-        return User::create($data);
+        $user = User::create($data);
+
+        $user->syncRoles($data['roles'] ?? []);
+
+        return $user;
     }
 
     /**
@@ -93,6 +96,10 @@ class UserService
         }
         $user = User::findOrFail($user_id);
         $user->update($data);
+
+        if (isset($data['roles'])) {
+            $user->syncRoles($data['roles']);
+        }
 
         return $user;
     }
