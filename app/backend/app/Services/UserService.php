@@ -61,7 +61,7 @@ class UserService
      * @return User The created user instance
      */
     public function create(array $data): User
-    {        
+    {
         $data['remember_token'] = Str::random(10);
 
         $user = User::create($data);

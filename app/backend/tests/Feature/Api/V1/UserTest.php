@@ -15,7 +15,7 @@ class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Permission::firstOrCreate(['name' => 'admin.profiles.users.index', 'guard_name' => 'sanctum']);
@@ -33,7 +33,7 @@ class UserTest extends TestCase
      */
     public function test_authenticated_user_can_list_users(): void
     {
-        
+
         $user = User::factory()->create();
         $user->givePermissionTo('admin.profiles.users.index');
         User::factory()->count(3)->create();
@@ -63,7 +63,7 @@ class UserTest extends TestCase
      * Prueba que un usuario autenticado y con permiso puede crear un usuario.
      */
     public function test_authenticated_user_can_create_user(): void
-    {        
+    {
         $admin = User::factory()->create();
         $admin->givePermissionTo('admin.profiles.users.create');
         Sanctum::actingAs($admin);
@@ -87,7 +87,7 @@ class UserTest extends TestCase
      * Prueba que un usuario autenticado y con permiso puede ver el detalle de un usuario.
      */
     public function test_authenticated_user_can_view_single_user(): void
-    {        
+    {
         $admin = User::factory()->create();
         $admin->givePermissionTo('admin.profiles.users.show');
         $user = User::factory()->create();
@@ -102,7 +102,7 @@ class UserTest extends TestCase
      * Prueba que un usuario autenticado y con permiso puede actualizar un usuario.
      */
     public function test_authenticated_user_can_update_user(): void
-    {        
+    {
         $admin = User::factory()->create();
         $admin->givePermissionTo('admin.profiles.users.update');
         $user = User::factory()->create();
@@ -118,7 +118,7 @@ class UserTest extends TestCase
      * Prueba que un usuario autenticado y con permiso puede eliminar (soft delete) un usuario.
      */
     public function test_authenticated_user_can_delete_user(): void
-    {        
+    {
         $admin = User::factory()->create();
         $admin->givePermissionTo('admin.profiles.users.delete');
         $user = User::factory()->create();

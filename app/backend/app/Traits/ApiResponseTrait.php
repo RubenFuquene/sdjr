@@ -64,13 +64,14 @@ trait ApiResponseTrait
     {
         return $this->errorResponse($message ?? 'Validation error', 422, $errors);
     }
-    
+
     /**
      * @OA\Schema(
      *     schema="PaginatedResponse",
      *     type="object",
      *     title="Paginated Response",
      *     description="Respuesta paginada estándar para recursos.",
+     *
      *     @OA\Property(property="status", type="boolean", example=true),
      *     @OA\Property(property="message", type="string", example="Operación exitosa"),
      *     @OA\Property(property="data", type="array", @OA\Items(type="object")),
