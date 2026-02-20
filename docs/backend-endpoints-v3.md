@@ -5,7 +5,7 @@ Este documento unifica los requerimientos del endpoint de administradores y nuev
 
 ---
 
-## A) Solicitud: /api/v1/administrators
+## A) Solicitud: /api/v1/administrators -> ✅ IMPLEMENTADO
 
 ### Estado actual
 - Controlador: `UserController::administrators()`
@@ -63,7 +63,7 @@ Este documento unifica los requerimientos del endpoint de administradores y nuev
 
 ---
 
-## B) Observacion: POST /api/v1/users (roles en payload)
+## B) Observacion: POST /api/v1/users (roles en payload) -> ✅ CORREGIDO
 
 ### Duda actual
 El frontend esta enviando el rol como arreglo en el campo `roles`:
@@ -102,7 +102,7 @@ El frontend esta enviando el rol como arreglo en el campo `roles`:
 
 ---
 
-## C) Observacion: PUT /api/v1/users/{id} (status)
+## C) Observacion: PUT /api/v1/users/{id} (status) -> ⚠️ No se detectó el error, se da como solucionado
 
 - `UpdateUserPayload` usa `status: 'A' | 'I'`.
 - `CreateUserPayload` usa `status: '1' | '0'`.

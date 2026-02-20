@@ -94,11 +94,16 @@ Route::prefix('v1')->group(function () {
 
         // Commerce routes
         Route::apiResource('commerces', CommerceController::class);
-        Route::patch('commerces/{id}/status', [CommerceController::class, 'patchStatus']);
-        Route::patch('commerces/{id}/verification', [CommerceController::class, 'patchVerification']);
-        Route::get('commerces/{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
-        Route::get('commerces/{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
-        Route::post('commerces/basic', [CommerceBasicDataController::class, 'store']);
+        Route::group(['prefix' => 'commerces'], function () {
+
+            Route::patch('{id}/status', [CommerceController::class, 'patchStatus']);
+            Route::patch('{id}/verification', [CommerceController::class, 'patchVerification']);
+            Route::get('{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
+            Route::get('{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
+            Route::post('basic', [CommerceBasicDataController::class, 'store']);
+
+        });
+        Route::get('me/commerce', [CommerceController::class, 'myCommerce']);
 
         // Legal Documents
         Route::get('legal-documents', [LegalDocumentController::class, 'index']);
