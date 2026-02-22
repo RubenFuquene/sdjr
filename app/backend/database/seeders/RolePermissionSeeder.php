@@ -124,6 +124,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.profiles.users.delete', 'guard_name' => $guardName, 'description' => 'Permission to delete permissions', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.users.assign_roles_permissions', 'guard_name' => $guardName, 'description' => 'Permission to assign roles and permissions to users', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.profiles.users.update_status', 'guard_name' => $guardName, 'description' => 'Permission to update user status', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.profiles.administrators.show', 'guard_name' => $guardName, 'description' => 'Permission to view administrator details', 'created_at' => now(), 'updated_at' => now()],
 
             // Administrator Modules
             ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'View admin profiles module', 'created_at' => now(), 'updated_at' => now()],
@@ -158,6 +159,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Update commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Delete commerces', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerce_payout_methods.index', 'guard_name' => $guardName, 'description' => 'List provider commerce payout methods', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerces.mine', 'guard_name' => $guardName, 'description' => 'Show my commerces', 'created_at' => now(), 'updated_at' => now()],
 
             // Legal Representatives
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'List legal representatives', 'created_at' => now(), 'updated_at' => now()],

@@ -62,10 +62,13 @@ class UserService
      */
     public function create(array $data): User
     {
-        // Password hashing is handled by the User model cast 'hashed'
         $data['remember_token'] = Str::random(10);
 
-        return User::create($data);
+        $user = User::create($data);
+
+        $user->syncRoles($data['roles'] ?? []);
+
+        return $user;
     }
 
     /**
@@ -93,6 +96,10 @@ class UserService
         }
         $user = User::findOrFail($user_id);
         $user->update($data);
+
+        if (isset($data['roles'])) {
+            $user->syncRoles($data['roles']);
+        }
 
         return $user;
     }
@@ -122,5 +129,34 @@ class UserService
         $user->save();
 
         return $user;
+    }
+
+    /**
+     * Get all administrator users (those with 'superadmin' or 'admin' roles).
+     *
+     * @param  array<string, mixed>  $filters  Optional filters (not currently used)
+     * @param  int  $perPage  Number of users per page (not currently used)
+     * @return LengthAwarePaginator Paginated list of administrator users
+     */
+    public function getAdministrators(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = User::with('roles')->whereHas('roles', function ($roles) {
+            $roles->whereIn('name', ['superadmin', 'admin']);
+        });
+
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (! empty($filters['last_name'])) {
+            $query->where('last_name', 'like', "%{$filters['last_name']}%");
+        }
+        if (! empty($filters['email'])) {
+            $query->where('email', 'like', "%{$filters['email']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->paginate($perPage);
     }
 }
