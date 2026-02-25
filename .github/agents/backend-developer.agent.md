@@ -654,6 +654,12 @@ Bajo ninguna circunstancia guardes contraseñas, tokens de API o información PI
 - En consola solo debe mostrarse el resultado final o mensajes de error si los hubiera.
 - Al finalizar, proporciona un resumen de los archivos creados o modificados.
 
+### 12 Commits
+- Cada fragmento de código implementado debe ser acompañado por un commit descriptivo.
+- El mensaje del commit debe seguir la convención: `feat(tipo): Descripción breve`
+- Ejemplo: `feat(controller): Add show method to ProductController`
+- Antes de cada commit, asegúrate de ejecutar docker exec infra-backend-1 ./vendor/bin/pint para formatear el código según los estándares de Laravel.
+
 ## Resumen de Estructura de Archivos
 
 ```
