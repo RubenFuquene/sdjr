@@ -10,8 +10,8 @@ export function mapLaravelRoleToRole(laravelRole: string): Role {
   switch (laravelRole) {
     case "provider":
       return "provider";
-    case "customer":
-      return "app";
+    case "user":
+      return "user";
     case "admin":
     case "superadmin":
       return "admin";
@@ -29,7 +29,7 @@ export function getDashboardPath(role: Role): string {
   const paths: Record<Role, string> = {
     admin: "/admin/dashboard",
     provider: "/provider/dashboard",
-    app: "/app/dashboard",
+    user: "/app/dashboard",
   };
   return paths[role];
 }

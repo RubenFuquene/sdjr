@@ -13,9 +13,9 @@
  */
 
 import { useState, useCallback, ReactNode, useMemo } from 'react';
-import { ProveedorListItem, Proveedor, Perfil, CommerceFromAPI } from '@/types/admin';
-import { getCommerceById, updateCommerce } from '@/lib/api/index';
-import { commerceToProveedor, proveedorToBackendPayload } from '@/types/provider.adapters';
+import { ProveedorListItem, Proveedor, Perfil } from '@/types/admin';
+import { updateCommerce } from '@/lib/api/index';
+import { proveedorToBackendPayload } from '@/types/provider.adapters';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { ProvidersTable } from './providers-table';
 import { ProfilesFilters } from '../profiles-filters';
@@ -75,10 +75,7 @@ export function ProvidersView({
    */
   const handleViewProvider = useCallback(async (proveedor: ProveedorListItem) => {
     try {
-      // Fetch proveedor completo desde API
-      const response = await getCommerceById(proveedor.id);
-      const commerce: CommerceFromAPI = response.data;
-      const fullProvider: Proveedor = commerceToProveedor(commerce);
+      const fullProvider: Proveedor = await commerceManagement.fetchCommerceById(proveedor.id);
       
       setSelectedProvider(fullProvider);
       setModalMode('view');
@@ -86,17 +83,14 @@ export function ProvidersView({
     } catch (error) {
       console.error('Error al cargar proveedor:', error);
     }
-  }, []);
+  }, [commerceManagement]);
 
   /**
    * Abre modal de edición
    */
   const handleEditProvider = useCallback(async (proveedor: ProveedorListItem) => {
     try {
-      // Fetch proveedor completo desde API
-      const response = await getCommerceById(proveedor.id);
-      const commerce: CommerceFromAPI = response.data;
-      const fullProvider: Proveedor = commerceToProveedor(commerce);
+      const fullProvider: Proveedor = await commerceManagement.fetchCommerceById(proveedor.id);
       
       setSelectedProvider(fullProvider);
       setModalMode('edit');
@@ -104,7 +98,7 @@ export function ProvidersView({
     } catch (error) {
       console.error('Error al cargar proveedor:', error);
     }
-  }, []);
+  }, [commerceManagement]);
 
   /**
    * Activa/Desactiva proveedor

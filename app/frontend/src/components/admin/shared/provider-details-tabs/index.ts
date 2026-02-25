@@ -1,7 +1,10 @@
 /**
- * Provider Tabs - Re-exports
+ * Provider Details Tabs - Componentes Compartidos
  * 
- * Facilita imports de tabs del modal de proveedores
+ * Tabs reutilizables para mostrar detalles de proveedores.
+ * Usados en:
+ * - Modal de visualización/edición (provider-visualization-modal.tsx)
+ * - Pantalla de validación (provider-validation-detail.tsx)
  */
 
 export { ProviderDatosBasicosTab } from './provider-datos-basicos-tab';

@@ -8,7 +8,7 @@ type AppProtectedLayoutProps = {
 };
 
 export default async function AppProtectedLayout({ children }: AppProtectedLayoutProps) {
-  await getSessionOrRedirect("app");
+  await getSessionOrRedirect("user");
 
   return <div className="min-h-screen bg-[#F5F5F5]">{children}</div>;
 }

@@ -19,3 +19,7 @@ export { PageHeader } from "./shared/page-header";
 
 // Modales
 export * from "./modals";
+
+// Módulo de Validación de Proveedores
+export { ProviderValidationLayout } from "./validacion-proveedores";
+

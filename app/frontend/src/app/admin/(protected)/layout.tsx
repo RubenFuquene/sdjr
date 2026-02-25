@@ -8,5 +8,5 @@ export const dynamic = 'force-dynamic';
 export default async function AdminProtectedLayout({ children }: { children: ReactNode }) {
   // Guard server-side (dummy mientras no hay backend real). Requiere cookies seteadas en el login stub.
   await getSessionOrRedirect("admin");
-  return <DashboardShell activePath="/admin/dashboard">{children}</DashboardShell>;
+  return <DashboardShell>{children}</DashboardShell>;
 }

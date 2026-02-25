@@ -3,13 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ReactNode, useState } from "react";
+import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/admin/logout-button";
 import { Users, Settings, ShieldCheck, Megaphone, Headphones, Bell, User, BarChart3, Menu, X } from "lucide-react";
 
 const navItems = [
   { label: "Perfiles", href: "/admin/dashboard", icon: Users },
   { label: "Parametrización", href: "/admin/settings", icon: Settings },
-  { label: "Validación de Proveedores", href: "/admin/providers", icon: ShieldCheck },
+  { label: "Validación de Proveedores", href: "/admin/validacion", icon: ShieldCheck },
   { label: "Marketing", href: "/admin/marketing", icon: Megaphone },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Soporte", href: "/admin/support", icon: Headphones },
@@ -20,8 +21,10 @@ type DashboardShellProps = {
   activePath?: string;
 };
 
-export function DashboardShell({ children, activePath = "/admin/dashboard" }: DashboardShellProps) {
+export function DashboardShell({ children, activePath }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const currentPath = activePath ?? pathname;
 
   return (
     <div className="flex h-screen bg-gray-50 text-[var(--color-text)]">
@@ -57,7 +60,7 @@ export function DashboardShell({ children, activePath = "/admin/dashboard" }: Da
         </div>
         <nav className="flex flex-col gap-2 px-4 py-4 flex-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = activePath.startsWith(item.href);
+            const isActive = currentPath.startsWith(item.href);
             const Icon = item.icon;
             return (
               <Link

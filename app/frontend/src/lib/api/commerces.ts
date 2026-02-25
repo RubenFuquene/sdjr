@@ -106,3 +106,18 @@ export async function deleteCommerce(id: number): Promise<void> {
     }
   );
 }
+
+/**
+ * GET /api/v1/me/commerce
+ * Obtiene el comercio del usuario autenticado (por owner_user_id)
+ * 
+ * ⚠️ PENDIENTE IMPLEMENTACIÓN BACKEND
+ * Ver: docs/backend-endpoints-v3.md sección D
+ * 
+ * @returns Commerce del usuario o null si no tiene comercio registrado
+ */
+export async function getMyCommerce(): Promise<ApiSuccess<CommerceFromAPI | null>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI | null>>(
+    `/api/v1/me/commerce`
+  );
+}
