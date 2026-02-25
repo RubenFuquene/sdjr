@@ -11,7 +11,7 @@ const BYPASS_AUTH = process.env.NEXT_PUBLIC_BYPASS_AUTH === "true";
 const LOGIN_PATH_BY_ROLE: Record<Role, string> = {
   admin: "/admin/login",
   provider: "/provider/login",
-  app: "/app/login",
+  user: "/app/login",
 };
 
 /**
@@ -40,7 +40,7 @@ export async function getSessionOrRedirect(requiredRole: Role, redirectTo?: stri
   if (!session) {
     return redirect(buildLoginUrl(requiredRole, redirectTo));
   }
-
+  
   if (session.role !== requiredRole) {
     // Dummy: si roles no coinciden, redirige a home. Ajustar a página de 403 si se requiere.
     return redirect("/");

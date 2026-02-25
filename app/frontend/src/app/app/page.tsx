@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function AppIndexPage() {
   const session = await getSession();
 
-  if (!session || session.role !== "app") {
+  if (!session || session.role !== "user") {
     redirect("/app/login");
   }
 

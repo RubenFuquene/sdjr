@@ -57,9 +57,10 @@ export function useUserLocation(
   const fetchLocation = useCallback(async (skipCache: boolean = false) => {
     setState("loading");
     setError(null);
-
+    
     try {
       const result = await retryGetUserLocation({ skipCache });
+      console.debug("[useUserLocation] Ubicación obtenida:", result);
       setLocation(result);
       setState("ready");
       onSuccess?.(result);

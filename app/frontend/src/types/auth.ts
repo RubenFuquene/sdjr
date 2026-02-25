@@ -3,7 +3,7 @@
  * Shared across the application for type safety
  */
 
-export type Role = "admin" | "provider" | "app";
+export type Role = "admin" | "provider" | "user";
 
 /**
  * User session data structure

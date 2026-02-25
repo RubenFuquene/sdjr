@@ -1,0 +1,65 @@
+/* Estilos custom para Leaflet siguiendo diseño Figma */
+
+/* Ocultar attribution por defecto en mobile (mostrar solo hover en desktop) */
+.leaflet-container-custom .leaflet-control-attribution {
+  font-size: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-top-left-radius: 0.5rem;
+  color: #7A2E9A;
+  padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .leaflet-container-custom .leaflet-control-attribution {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  .leaflet-container-custom .leaflet-control-attribution:hover {
+    opacity: 1;
+  }
+}
+
+/* Popup custom styling - Figma colors */
+.location-popup-custom .leaflet-popup-content-wrapper {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #E6E6E6;
+  padding: 0.75rem;
+  font-family: inherit;
+}
+
+.location-popup-custom .leaflet-popup-tip {
+  background-color: white;
+  border-color: #E6E6E6;
+}
+
+.location-popup-custom .leaflet-popup-close-button {
+  color: #5A1E6B;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.location-popup-custom .leaflet-popup-close-button:hover {
+  color: #7A2E9A;
+}
+
+/* Mejorar contraste de tiles en mobile */
+.leaflet-container-custom {
+  background-color: #F5F5F5;
+}
+
+/* Marker clusters (para futuro) - preview */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: #B4CB7A;
+  color: white;
+  border-radius: 9999px;
+}
+
+/* Controles de zoom personalizados ya están inline en el componente */
