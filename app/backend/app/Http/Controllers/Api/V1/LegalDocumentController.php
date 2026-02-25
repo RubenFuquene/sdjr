@@ -9,6 +9,7 @@ use App\Http\Requests\Api\V1\IndexLegalDocumentRequest;
 use App\Http\Resources\Api\V1\LegalDocumentResource;
 use App\Services\LegalDocumentService;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -92,11 +93,12 @@ class LegalDocumentController extends Controller
     {
         try {
             $document = $this->legalDocumentService->getLatestByType($type);
-            if (! $document) {
-                return $this->errorResponse('Legal document not found', Response::HTTP_NOT_FOUND);
-            }
 
             return $this->successResponse(new LegalDocumentResource($document), 'Legal document retrieved successfully');
+
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Legal document not found', Response::HTTP_NOT_FOUND);
+
         } catch (\Throwable $e) {
             Log::error('Error retrieving legal document', ['error' => $e->getMessage()]);
 
