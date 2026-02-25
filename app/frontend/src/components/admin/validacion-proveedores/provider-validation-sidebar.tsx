@@ -18,8 +18,6 @@ import type { Proveedor, ProveedorListItem } from '@/types/admin';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
-import { getCommerceById } from '@/lib/api/index';
-import { commerceToProveedor } from '@/types/provider.adapters';
 
 // ============================================
 // Props Interface
@@ -100,10 +98,9 @@ export function ProviderValidationSidebar({
               provider={provider}
               isSelected={provider.id === selectedProviderId}
               onClick={async () => {
-                // Fetch proveedor completo desde API
+                // Fetch proveedor completo desde hook centralizado
                 try {
-                  const response = await getCommerceById(provider.id);
-                  const fullProvider = commerceToProveedor(response.data);
+                  const fullProvider = await commerceManagement.fetchCommerceById(provider.id);
                   onSelectProvider(fullProvider);
                 } catch (error) {
                   console.error('Error al cargar proveedor:', error);

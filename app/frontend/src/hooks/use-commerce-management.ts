@@ -27,9 +27,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getCommerces, updateCommerce, deleteCommerce, ApiError } from "@/lib/api/index";
-import type { ProveedorListItem, Proveedor } from "@/types/admin";
-import { commerceToProveedorListItem } from "@/types/provider.adapters";
+import { getCommerces, getCommerceById, updateCommerce, deleteCommerce, ApiError } from "@/lib/api/index";
+import type { ProveedorListItem, Proveedor, CommerceFromAPI } from "@/types/admin";
+import { commerceToProveedorListItem, commerceToProveedor } from "@/types/provider.adapters";
 
 /**
  * Parámetros de búsqueda y filtrado
@@ -260,6 +260,29 @@ export function useCommerceManagement() {
   }, [fetchCommerces]);
 
   /**
+   * Obtiene el detalle completo de un comercio por ID
+   * GET /api/v1/commerces/{id}
+   */
+  const fetchCommerceById = useCallback(async (id: number): Promise<Proveedor> => {
+    try {
+      setError(null);
+
+      const response = await getCommerceById(id);
+      const commerce: CommerceFromAPI = response.data;
+
+      return commerceToProveedor(commerce);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Error al cargar detalle del comercio");
+      }
+      console.error("Error fetching commerce by id:", err);
+      throw err;
+    }
+  }, []);
+
+  /**
    * Reintentar cargar datos en caso de error
    */
   const handleRetry = useCallback(async () => {
@@ -301,6 +324,7 @@ export function useCommerceManagement() {
     handleUpdate,
     handleToggle,
     handleDelete,
+    fetchCommerceById,
     handleRetry,
 
     // Utilities
