@@ -1,6 +1,5 @@
 import {
   UserLocation,
-  LocationErrorCode,
   GeoLocationError,
   GeoProviderOptions,
 } from "./types";

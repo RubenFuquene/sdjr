@@ -1,4 +1,5 @@
 import { useContext, useCallback } from "react";
+import type L from "leaflet";
 import { MapControlContext } from "@/lib/maps/map-control-context";
 
 /**
@@ -62,7 +63,7 @@ export function useMapControl() {
     ) => {
       if (!mapRef.current) return;
 
-      const options: any = {
+      const options: L.ZoomPanOptions = {
         animate,
         duration: animate ? 0.5 : 0,
       };
@@ -103,7 +104,7 @@ export function useMapControl() {
    */
   const fitBounds = useCallback(
     (
-      bounds: [[number, number], [number, number]] | any,
+      bounds: L.LatLngBoundsExpression,
       padding: number = 50
     ) => {
       if (!mapRef.current) return;

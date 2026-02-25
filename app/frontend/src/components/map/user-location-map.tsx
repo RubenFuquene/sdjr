@@ -7,7 +7,7 @@ import "leaflet/dist/leaflet.css";
 import "./leaflet-custom.css";
 
 import type { UserLocation } from "@/lib/geolocation/types";
-import { OPENSTREETMAP_TILES, ZOOM_LEVELS } from "@/lib/maps/tile-configs";
+import { OPENSTREETMAP_TILES } from "@/lib/maps/tile-configs";
 import {
   calculateZoomLevel,
   getUserMarkerIcon,

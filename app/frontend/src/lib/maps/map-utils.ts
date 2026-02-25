@@ -3,7 +3,6 @@ import { GeoSource, UserLocation } from "@/lib/geolocation/types";
 import {
   calculateZoomLevel as getZoomLevel,
   isValidCoordinates,
-  COORDINATE_BOUNDS,
 } from "@/lib/maps/tile-configs";
 import {
   createGpsMarkerIcon,

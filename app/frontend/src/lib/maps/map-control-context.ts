@@ -1,9 +1,30 @@
-/**
- * Este archivo es un shim que re-exporta desde map-control-context.tsx
- * No intentes importar con extensión .tsx - TypeScript lo rechazará
- */
+"use client";
 
-// @ts-ignore - allow import from .tsx in re-export
-export * from "./map-control-context.tsx";
+import { createContext, createElement, type ReactNode } from "react";
+import type L from "leaflet";
+
+export interface MapControlContextType {
+	mapRef: React.MutableRefObject<L.Map | null>;
+}
+
+export const MapControlContext = createContext<MapControlContextType | null>(
+	null
+);
+
+type MapControlProviderProps = {
+	mapRef: React.MutableRefObject<L.Map | null>;
+	children: ReactNode;
+};
+
+export function MapControlProvider({
+	mapRef,
+	children,
+}: MapControlProviderProps) {
+	return createElement(
+		MapControlContext.Provider,
+		{ value: { mapRef } },
+		children
+	);
+}
 
 

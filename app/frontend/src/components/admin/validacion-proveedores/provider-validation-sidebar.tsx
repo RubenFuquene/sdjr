@@ -37,11 +37,12 @@ export function ProviderValidationSidebar({
   onSelectProvider,
 }: ProviderValidationSidebarProps) {
   const commerceManagement = useCommerceManagement();
+  const { refresh } = commerceManagement;
 
   // Cargar proveedores al montar (TODO: filtrar por estado "pendiente")
   useEffect(() => {
-    commerceManagement.refresh();
-  }, []);
+    void refresh();
+  }, [refresh]);
 
   // TODO: Filtrar solo proveedores con estado "pendiente"
   // Por ahora mostramos todos
@@ -53,7 +54,7 @@ export function ProviderValidationSidebar({
       <div className="h-full flex items-center justify-center">
         <ErrorState 
           message={commerceManagement.error} 
-          onRetry={commerceManagement.refresh} 
+          onRetry={refresh} 
         />
       </div>
     );

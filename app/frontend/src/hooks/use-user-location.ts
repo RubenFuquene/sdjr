@@ -9,7 +9,6 @@ import {
   LocationErrorCode,
 } from "@/lib/geolocation/types";
 import {
-  resolveUserLocation,
   retryGetUserLocation,
   clearLocationCache,
 } from "@/lib/geolocation/client";
@@ -87,7 +86,13 @@ export function useUserLocation(
       return;
     }
 
-    fetchLocation(false);
+    const timeoutId = window.setTimeout(() => {
+      void fetchLocation(false);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [autoFetch, fetchLocation]);
 
   /**
