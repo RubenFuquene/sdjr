@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Constants\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CommerceRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
@@ -21,6 +22,7 @@ use App\Services\CommerceService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -145,6 +147,7 @@ class CommerceController extends Controller
      *     security={{"sanctum":{}}},
      *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="upload_status", in="query", required=false, description="Filtrar por estado de carga de documentos: CONFIRMADO, PENDIENTE, FALLIDO, OLVIDADO", @OA\Schema(type="string", enum={"confirm","pending","failed", "orphanet"}, default="confirm")),
      *
      *     @OA\Response(
      *         response=200,
@@ -158,10 +161,13 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function show(int $commerce_id): JsonResponse
+    public function show(Request $request, int $commerce_id): JsonResponse
     {
         try {
-            return $this->successResponse(new CommerceResource($this->commerceService->show($commerce_id)), 'Commerce retrieved successfully');
+            $uploadStatus = $request->query('upload_status', Constant::UPLOAD_STATUS_CONFIRMED);
+            $commerce = $this->commerceService->show($commerce_id);
+
+            return $this->successResponse(new CommerceResource($commerce, $uploadStatus), 'Commerce retrieved successfully');
         } catch (\Throwable $e) {
             Log::error('Error showing commerce', ['error' => $e->getMessage()]);
 

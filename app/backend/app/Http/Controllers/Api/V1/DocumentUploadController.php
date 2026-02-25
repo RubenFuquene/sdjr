@@ -8,11 +8,12 @@ use App\Http\Requests\Api\V1\PatchDocumentUploadRequest;
 use App\Http\Requests\Api\V1\StoreDocumentUploadRequest;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
 use App\Models\CommerceDocument;
+use App\Services\CommerceDocumentService;
 use App\Services\DocumentUploadService;
 use App\Traits\ApiResponseTrait;
-use Dom\Document;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class DocumentUploadController extends Controller
 {
@@ -20,8 +21,12 @@ class DocumentUploadController extends Controller
 
     private DocumentUploadService $documentUploadService;
 
-    public function __construct(DocumentUploadService $documentUploadService)
+    private CommerceDocumentService $commerceDocumentService;
+
+    public function __construct(DocumentUploadService $documentUploadService, CommerceDocumentService $commerceDocumentService)
     {
+        $this->commerceDocumentService = $commerceDocumentService;
+
         $this->documentUploadService = $documentUploadService;
     }
 
@@ -80,7 +85,7 @@ class DocumentUploadController extends Controller
 
         } catch (\Exception $e) {
             // Log the exception for debugging
-            \Log::error('Document presigned error: '.$e->getMessage(), [
+            Log::error('Document presigned error: '.$e->getMessage(), [
                 'code' => $e->getCode(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -207,6 +212,67 @@ class DocumentUploadController extends Controller
             $httpCode = ($exceptionCode >= 100 && $exceptionCode < 600) ? $exceptionCode : 500;
 
             return $this->errorResponse($e->getMessage(), $httpCode);
+        }
+    }
+
+    /**
+     * Generate a presigned download URL for a commerce document.
+     *
+     * @OA\Get(
+     *   path="/api/v1/documents/{id}/download-url",
+     *   operationId="downloadCommerceDocumentUrl",
+     *   tags={"Documents"},
+     *   summary="Generate presigned download URL for a commerce document",
+     *   description="Generates a temporary signed URL to securely download a document from S3.",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="id", in="path", required=true, description="Document ID", @OA\Schema(type="integer")),
+     *
+     *   @OA\Response(
+     *     response=200,
+     *     description="Download URL generated successfully",
+     *
+     *     @OA\JsonContent(type="object",
+     *
+     *       @OA\Property(property="document_id", type="integer", example=123),
+     *       @OA\Property(property="url", type="string", example="https://localhost:9000/bucket/..."),
+     *       @OA\Property(property="expires_at", type="string", format="date-time", example="2026-02-25T12:00:00Z"),
+     *       @OA\Property(property="expired_in_seconds", type="integer", example=900)
+     *     )
+     *   ),
+     *
+     *   @OA\Response(response=404, description="Document not found"),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden"),
+     *   @OA\Response(response=500, description="Internal Server Error")
+     * )
+     */
+    public function downloadCommerceDocumentUrl(int $id): JsonResponse
+    {
+        try {
+            $commerce_document = $this->commerceDocumentService->find($id);
+
+            $downloadUrl = $this->documentUploadService->generateDownloadUrl($commerce_document->file_path);
+
+            return $this->successResponse([
+                'document_id' => $id,
+                'url' => $downloadUrl,
+                'expires_at' => now()->addMinutes(15)->toISOString(),
+                'expired_in_seconds' => 900,
+            ], 'Download URL generated successfully');
+
+        } catch (ModelNotFoundException $e) {
+
+            return $this->errorResponse('Document not found', 404);
+        } catch (\Exception $e) {
+
+            Log::error('Document download URL error: '.$e->getMessage(), [
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 }

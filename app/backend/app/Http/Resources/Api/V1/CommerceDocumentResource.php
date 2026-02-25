@@ -30,8 +30,16 @@ class CommerceDocumentResource extends JsonResource
         return [
             'id' => $this->id,
             'document_type' => $this->document_type,
-            'file_path' => $this->file_path,
             'mime_type' => $this->mime_type,
+            'file_size_bytes' => $this->s3_object_size,
+            'upload_status' => $this->upload_status,
+            'version_number' => $this->version_number,
+            'uploaded_at' => $this->uploaded_at?->toISOString(),
+            'download' => [
+                'mode' => 'url',
+                'endpoint' => route('api.v1.document-download', ['id' => $this->id]),
+            ],
+            'file_path' => $this->file_path,
             'verified' => $this->verified,
             'uploaded_at' => $this->uploaded_at?->toISOString(),
             'verified_at' => $this->verified_at?->toISOString(),
