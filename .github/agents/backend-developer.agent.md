@@ -654,11 +654,13 @@ Bajo ninguna circunstancia guardes contraseñas, tokens de API o información PI
 - En consola solo debe mostrarse el resultado final o mensajes de error si los hubiera.
 - Al finalizar, proporciona un resumen de los archivos creados o modificados.
 
-### 12 Commits
+### 12 Commits & Pushes
 - Cada fragmento de código implementado debe ser acompañado por un commit descriptivo.
 - El mensaje del commit debe seguir la convención: `feat(tipo): Descripción breve`
 - Ejemplo: `feat(controller): Add show method to ProductController`
-- Antes de cada commit, asegúrate de ejecutar docker exec infra-backend-1 ./vendor/bin/pint para formatear el código según los estándares de Laravel.
+- Antes de cada push, asegúrate de ejecutar los siguientes dos comando:
+  1. `docker exec infra-backend-1 ./vendor/bin/pint` para formatear el código según los estándares de Laravel.
+  2. `docker exec infra-backend-1 ./vendor/bin/phpunit` para ejecutar las pruebas y asegurarte de que todo funciona correctamente.
 
 ## Resumen de Estructura de Archivos
 
