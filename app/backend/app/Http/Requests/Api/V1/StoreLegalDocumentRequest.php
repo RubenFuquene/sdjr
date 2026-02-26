@@ -7,15 +7,13 @@ namespace App\Http\Requests\Api\V1;
 use App\Constants\Constant;
 use Illuminate\Foundation\Http\FormRequest;
 
-
-class StoreLegalDocumentRequest extends FormRequest
-
 /**
  * @OA\Schema(
  *     schema="StoreLegalDocumentRequest",
  *     title="Store Legal Document Request",
  *     description="Request body for creating a legal document",
  *     required={"type", "title", "content", "status"},
+ *
  *     @OA\Property(property="type", type="string", example="terms", enum={"terms", "privacy", "service_contract"}),
  *     @OA\Property(property="title", type="string", example="Términos y condiciones"),
  *     @OA\Property(property="content", type="string", example="<html>...</html>"),
@@ -24,6 +22,7 @@ class StoreLegalDocumentRequest extends FormRequest
  *     @OA\Property(property="effective_date", type="string", format="date", example="2026-02-25")
  * )
  */
+class StoreLegalDocumentRequest extends FormRequest
 {
     public function authorize(): bool
     {

@@ -45,8 +45,6 @@ class LegalDocumentService
     /**
      * Store a new legal document.
      *
-     * @param array $data
-     * @return LegalDocument
      * @throws \Throwable
      */
     public function store(array $data): LegalDocument

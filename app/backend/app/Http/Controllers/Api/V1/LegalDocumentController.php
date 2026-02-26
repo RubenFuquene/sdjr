@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\IndexLegalDocumentRequest;
-use App\Http\Resources\Api\V1\LegalDocumentResource;
 use App\Http\Requests\Api\V1\StoreLegalDocumentRequest;
+use App\Http\Resources\Api\V1\LegalDocumentResource;
 use App\Services\LegalDocumentService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -115,30 +115,34 @@ class LegalDocumentController extends Controller
      *     summary="Create a new legal document",
      *     description="Creates a new legal document.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(ref="#/components/schemas/StoreLegalDocumentRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Legal document created successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/LegalDocumentResource")
      *     ),
+     *
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
-     *
-     * @param StoreLegalDocumentRequest $request
-     * @return JsonResponse
      */
     public function store(StoreLegalDocumentRequest $request): JsonResponse
     {
         try {
             $document = $this->legalDocumentService->store($request->validated());
+
             return $this->successResponse(new LegalDocumentResource($document), 'Legal document created successfully', 201);
         } catch (\Throwable $e) {
             Log::error('Error creating legal document', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Error creating legal document', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
         }
     }

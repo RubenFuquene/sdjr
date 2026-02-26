@@ -37,8 +37,8 @@ class LegalDocumentStoreTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'type', 'title', 'content', 'version', 'status', 'effective_date', 'created_at', 'updated_at'
-                ]
+                    'id', 'type', 'title', 'content', 'version', 'status', 'effective_date', 'created_at', 'updated_at',
+                ],
             ]);
         $this->assertDatabaseHas('legal_documents', ['type' => 'terms', 'title' => 'Términos y condiciones']);
     }
