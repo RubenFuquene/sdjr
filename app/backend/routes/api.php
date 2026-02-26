@@ -108,6 +108,7 @@ Route::prefix('v1')->group(function () {
         // Legal Documents
         Route::get('legal-documents', [LegalDocumentController::class, 'index']);
         Route::get('legal-documents/{type}', [LegalDocumentController::class, 'showByType']);
+        Route::post('legal-documents', [LegalDocumentController::class, 'store']);
 
         // Commerce Branches
         Route::apiResource('commerce-branches', CommerceBranchController::class);

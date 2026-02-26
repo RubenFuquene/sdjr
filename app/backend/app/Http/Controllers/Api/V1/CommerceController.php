@@ -16,6 +16,7 @@ use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
+use App\Notifications\CommerceVerifiedNotification;
 use App\Services\CommerceBranchService;
 use App\Services\CommercePayoutMethodService;
 use App\Services\CommerceService;
@@ -355,6 +356,14 @@ class CommerceController extends Controller
         try {
             $commerce = $this->commerceService->updateVerification($id, (int) $request->validated('is_verified'));
 
+            // Si el comercio fue verificado, enviar notificación
+            if ($commerce->is_verified === Constant::COMMERCE_VERIFIED) {
+                $user = $commerce->ownerUser;
+                if ($user && $user->email) {
+                    $user->notify(new CommerceVerifiedNotification($commerce));
+                }
+            }
+
             return $this->successResponse(new CommerceResource($commerce), 'Commerce verification updated successfully', 200);
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse('Commerce not found', 404);
@@ -413,16 +422,16 @@ class CommerceController extends Controller
      *     operationId="getPayoutMethodsByCommerceId",
      *     tags={"Commerces"},
      *     summary="List payout methods by commerce",
-     *     description="Returns paginated list of payout methods for a specific commerce.",
+     *     description="Returns paginated list of payout methods for a specific commerce. Permite filtrar por tipo, owner_id, account_number y status.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(name="commerce_id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
-     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer", default=1)),
-     *     @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="owner_id", in="query", required=false, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="account_number", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string", maxLength=1)),
+     *     @OA\Parameter(name="commerce_id", in="path", required=true, description="ID del comercio", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items por página (1-100)", @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="page", in="query", required=false, description="Número de página", @OA\Schema(type="integer", default=1)),
+     *     @OA\Parameter(name="type", in="query", required=false, description="Tipo de método de pago", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="owner_id", in="query", required=false, description="ID del propietario de la cuenta", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="account_number", in="query", required=false, description="Número de cuenta", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Estado del método de pago (1=activo, 0=inactivo)", @OA\Schema(type="string", maxLength=1)),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
      *
@@ -433,7 +442,8 @@ class CommerceController extends Controller
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=404, description="Commerce not found")
+     *     @OA\Response(response=404, description="Commerce not found"),
+     *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function getPayoutMethodsByCommerceId(int $commerce_id, IndexCommercePayoutMethodRequest $request): JsonResponse
