@@ -41,4 +41,20 @@ class LegalDocumentService
             ->orderByDesc('effective_date')
             ->firstOrFail();
     }
+
+    /**
+     * Store a new legal document.
+     *
+     * @param array $data
+     * @return LegalDocument
+     * @throws \Throwable
+     */
+    public function store(array $data): LegalDocument
+    {
+        try {
+            return LegalDocument::create($data);
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+    }
 }

@@ -150,6 +150,7 @@ class RolePermissionSeeder extends Seeder
 
             // Legal Documents
             ['name' => 'legal_documents.index', 'guard_name' => $guardName, 'description' => 'List legal documents', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'legal_documents.create', 'guard_name' => $guardName, 'description' => 'Create legal documents', 'created_at' => now(), 'updated_at' => now()],
 
             // Commerces Modules
             ['name' => 'provider.commerces.index', 'guard_name' => $guardName, 'description' => 'List commerces', 'created_at' => now(), 'updated_at' => now()],
