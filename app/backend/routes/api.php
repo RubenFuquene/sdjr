@@ -123,6 +123,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/presigned', [DocumentUploadController::class, 'presigned']);
             Route::patch('/confirm', [DocumentUploadController::class, 'confirm']);
             Route::delete('/{document}', [DocumentUploadController::class, 'remove']);
+            Route::post('/{id}/download-url', [DocumentUploadController::class, 'downloadCommerceDocumentUrl'])->name('api.v1.document-download');
         });
 
         // Product Management routes

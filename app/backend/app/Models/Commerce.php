@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Constants\Constant;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -192,5 +193,16 @@ class Commerce extends Model
     public function setEmailAttribute($value)
     {
         $this->attributes['email'] = $this->sanitizeEmail($value);
+    }
+
+    /**
+     * Get confirmed commerce documents.
+     * This method retrieves only the commerce documents that have an upload status of "confirmed".
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getConfirmedCommerceDocuments()
+    {
+        return $this->commerceDocuments()->where('upload_status', Constant::UPLOAD_STATUS_CONFIRMED)->get();
     }
 }
