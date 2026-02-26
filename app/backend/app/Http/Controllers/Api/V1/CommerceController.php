@@ -7,11 +7,13 @@ namespace App\Http\Controllers\Api\V1;
 use App\Constants\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CommerceRequest;
+use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
 use App\Http\Requests\Api\V1\IndexCommerceRequest;
 use App\Http\Requests\Api\V1\MyCommerceRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
+use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
 use App\Notifications\CommerceVerifiedNotification;
@@ -369,6 +371,48 @@ class CommerceController extends Controller
             Log::error('Error updating commerce verification', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error updating commerce verification', 500, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/commerces/{commerce_id}/branches",
+     *     operationId="getBranchesByCommerceId",
+     *     tags={"Commerces"},
+     *     summary="List branches by commerce",
+     *     description="Returns paginated list of branches for a specific commerce.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="commerce_id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer", default=1)),
+     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
+     *
+     *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommerceBranchResource")),
+     *         @OA\Property(property="meta", type="object"),
+     *         @OA\Property(property="links", type="object")
+     *     )),
+     *
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Commerce not found")
+     * )
+     */
+    public function getBranchesByCommerceId(int $commerce_id, IndexCommerceBranchRequest $request): JsonResponse
+    {
+        try {
+            $perPage = $request->query('per_page', 15);
+            $branches = $this->commerceBranchService->getBranchesByCommerceId($commerce_id, (int) $perPage);
+            $resource = CommerceBranchResource::collection($branches);
+
+            return $this->paginatedResponse($branches, $resource, 'Branches retrieved successfully');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
+        } catch (\Throwable $e) {
+            Log::error('Error listing branches', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error listing branches', 500);
         }
     }
 
