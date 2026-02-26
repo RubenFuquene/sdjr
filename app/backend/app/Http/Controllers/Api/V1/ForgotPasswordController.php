@@ -112,7 +112,6 @@ class ForgotPasswordController extends Controller
      */
     public function reset(ResetPasswordRequest $request): JsonResponse
     {
-        // return response()->json([ $request->validated()]);
         try {
             $this->service->resetPassword($request->validated());
 
