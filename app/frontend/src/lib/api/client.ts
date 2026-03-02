@@ -5,7 +5,15 @@
 
 import { getAuthToken } from "@/lib/session";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const SERVER_API_URL = process.env.API_URL_SERVER || "http://backend:8000";
+
+/**
+ * Selecciona la URL base de API según el contexto de ejecución.
+ * - Browser: URL pública accesible desde el cliente
+ * - Server (RSC/SSR): URL interna del contenedor backend
+ */
+export const API_URL = typeof window === "undefined" ? SERVER_API_URL : PUBLIC_API_URL;
 
 // ============================================
 // Error Handling

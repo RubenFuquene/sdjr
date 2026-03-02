@@ -26,6 +26,43 @@ export {
   deleteCommerce,
 } from "./commerces";
 
+// Branches (Sucursales)
+export { getCommerceBranches, createCommerceBranch, updateCommerceBranch } from "./branches";
+export type {
+  ApiSuccess as BranchApiSuccess,
+  CommerceBranchFromAPI,
+  CommerceBranchHourFromAPI,
+  CommerceBranchPhotoFromAPI,
+  CreateCommerceBranchHourInput,
+  CreateCommerceBranchPhotoInput,
+  CreateCommerceBranchPayload,
+  GetCommerceBranchesParams,
+  UpdateCommerceBranchPayload,
+} from "./branches";
+
+// Products (Productos)
+export {
+  getProductsByCommerce,
+  getProductCategories,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  mapProductFormToCreatePayload,
+  mapProductFormToUpdatePayload,
+} from "./products";
+export type {
+  ApiSuccess as ProductApiSuccess,
+  CreateProductPayload,
+  CreateProductPhotoInput,
+  GetProductCategoriesParams,
+  ProductCategoryFromAPI,
+  ProductFormInput,
+  ProductFromAPI,
+  ProductPhotoFromAPI,
+  ProductType,
+  UpdateProductPayload,
+} from "./products";
+
 // Documents (Carga de archivos)
 export {
   createPresignedDocument,

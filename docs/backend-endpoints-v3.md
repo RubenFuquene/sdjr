@@ -499,3 +499,102 @@ Pero puede ir en **tasks futuras** (no bloquea MVP).
 **MEDIA** - No bloquea validación de proveedores, pero crítico para compliance/legal.
 
 ---
+
+## G) Solicitud Backend (Jira): Contrato de listado de productos sin resultados
+
+### Tipo
+**Bugfix / API Contract Alignment**
+
+### Contexto
+En Provider Frontend (`/provider/products`) el flujo de listado usa:
+- `GET /api/v1/me/commerce`
+- `GET /api/v1/products/commerce/{commerce_id}`
+
+Actualmente, cuando un comercio existe pero no tiene productos, el backend responde `404` con mensaje `No products found for the specified commerce.`
+
+Para endpoints de listado filtrado, el contrato REST recomendado es `200` con colección vacía.
+
+### Problema
+- `404` mezcla dos escenarios distintos:
+  1. Comercio inexistente
+  2. Comercio existente sin productos
+- Esto obliga al frontend a manejo especial transitorio y complica semántica de errores.
+
+### Solicitud
+Actualizar `GET /api/v1/products/commerce/{commerce_id}` para que:
+
+1. **Comercio existe y no tiene productos**
+  - Respuesta: `200 OK`
+  - Payload: `data: []`
+
+2. **Comercio no existe**
+  - Mantener `404 Not Found`
+
+3. **Errores de autenticación/autorización**
+  - Mantener `401/403` actuales
+
+### Respuesta esperada (comercio con 0 productos)
+```json
+{
+  "status": true,
+  "message": "Products retrieved successfully",
+  "data": []
+}
+```
+
+### Criterios de aceptación
+- [ ] `GET /api/v1/products/commerce/{commerce_id}` retorna `200` + `data: []` cuando no hay productos.
+- [ ] `404` se usa solo cuando `commerce_id` no existe (o recurso inválido equivalente).
+- [ ] Se mantiene compatibilidad con permisos `provider.products.index`.
+- [ ] Documentación Swagger/README actualizada con el nuevo comportamiento.
+
+### Prioridad
+**ALTA** - Mejora de contrato para soportar empty states de productos de forma estándar en frontend.
+
+---
+
+## H) Solicitud Backend (Jira): Unificar naming de sucursales en payload de productos (create/update)
+
+### Tipo
+**Bugfix / API Contract Consistency**
+
+### Contexto
+En el módulo Provider Products, el frontend debe enviar sucursales del producto en create y update.
+
+Actualmente el contrato usa nombres distintos:
+- `POST /api/v1/products` (`StoreProductRequest`): `commerce_branch_ids[]`
+- `PUT /api/v1/products/{id}` (`UpdateProductRequest`): `commerce_branches[]`
+
+Esto obliga al frontend a mantener mappers separados para el mismo concepto de negocio y aumenta riesgo de errores de integración.
+
+### Problema
+- Inconsistencia semántica para un mismo dominio (`branches del producto`).
+- Mayor complejidad de mantenimiento y QA en frontend.
+- Riesgo de regresión al reutilizar formulario único create/edit.
+
+### Solicitud
+Unificar el naming de sucursales entre create y update.
+
+#### Opción recomendada
+Adoptar `commerce_branch_ids[]` en ambas operaciones:
+1. `POST /api/v1/products` -> mantener `commerce_branch_ids[]`
+2. `PUT /api/v1/products/{id}` -> aceptar `commerce_branch_ids[]`
+
+#### Compatibilidad sugerida
+Durante transición, `PUT` puede aceptar ambos:
+- `commerce_branch_ids[]` (nuevo/objetivo)
+- `commerce_branches[]` (legacy)
+
+### Respuesta esperada
+- No cambia estructura general de respuesta.
+- Solo se alinea contrato de entrada para campos de sucursal.
+
+### Criterios de aceptación
+- [ ] `POST /api/v1/products` y `PUT /api/v1/products/{id}` aceptan el mismo campo de sucursales.
+- [ ] Swagger/OpenAPI actualizado con naming unificado.
+- [ ] Se documenta ventana de compatibilidad si se mantiene alias legacy.
+- [ ] No se rompe comportamiento actual de permisos (`provider.products.create`, `provider.products.update`).
+
+### Prioridad
+**MEDIA-ALTA** - No bloquea (frontend puede mapear), pero reduce fricción y deuda técnica en el formulario unificado create/edit.
+

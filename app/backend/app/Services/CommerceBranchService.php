@@ -105,9 +105,10 @@ class CommerceBranchService
             $commerceBranch = CommerceBranch::create($commerceBranchData);
 
             if (! empty($data['commerce_branch_hours'])) {
-                $commerceBranchHoursData = $data['commerce_branch_hours'];
-                $commerceBranchHoursData['commerce_branch_id'] = $commerceBranch->id;
-                $this->commerceBranchHoursService->store($commerceBranchHoursData);
+                foreach ($data['commerce_branch_hours'] as $commerceBranchHoursData) {
+                    $commerceBranchHoursData['commerce_branch_id'] = $commerceBranch->id;
+                    $this->commerceBranchHoursService->store($commerceBranchHoursData);
+                }
             }
 
             if (! empty($data['commerce_branch_photos'])) {

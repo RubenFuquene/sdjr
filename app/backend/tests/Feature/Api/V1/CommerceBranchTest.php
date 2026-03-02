@@ -52,10 +52,18 @@ class CommerceBranchTest extends TestCase
                 'status' => true,
             ],
             'commerce_branch_hours' => [
-                'day_of_week' => 1,
-                'open_time' => '08:00',
-                'close_time' => '18:00',
-                'note' => 'Horario normal',
+                [
+                    'day_of_week' => 1,
+                    'open_time' => '08:00',
+                    'close_time' => '18:00',
+                    'note' => 'Horario normal',
+                ],
+                [
+                    'day_of_week' => 2,
+                    'open_time' => '09:00',
+                    'close_time' => '15:00',
+                    'note' => 'Horario reducido',
+                ],
             ],
             'commerce_branch_photos' => [
                 [
@@ -75,10 +83,24 @@ class CommerceBranchTest extends TestCase
             ],
         ];
 
-        $this->actingAs($user, 'sanctum')
+        $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/commerce-branches', $payload)
             ->assertCreated()
             ->assertJsonFragment(['name' => 'Sucursal test']);
+
+        $branchId = $response->json('data.id');
+        $this->assertDatabaseHas('commerce_branch_hours', [
+            'commerce_branch_id' => $branchId,
+            'day_of_week' => 1,
+            'open_time' => '08:00',
+            'close_time' => '18:00',
+        ]);
+        $this->assertDatabaseHas('commerce_branch_hours', [
+            'commerce_branch_id' => $branchId,
+            'day_of_week' => 2,
+            'open_time' => '09:00',
+            'close_time' => '15:00',
+        ]);
     }
 
     public function test_update_branch_success(): void

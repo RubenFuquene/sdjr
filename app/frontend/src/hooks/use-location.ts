@@ -107,7 +107,7 @@ export function useLocation(): UseLocationReturn {
       try {
         // TODO: Backend should support department_id filter
         // For now: fetch all cities, frontend will filter if needed
-        const response = await getCities({ per_page: 500 });
+        const response = await getCities({ per_page: 100 });
         
         // Optional client-side filtering if backend doesn't support it
         // const filtered = response.data.filter((city) => city.department_id === selectedDept);
@@ -141,7 +141,7 @@ export function useLocation(): UseLocationReturn {
       try {
         // TODO: Backend should support city_id filter
         // For now: fetch all neighborhoods, frontend will filter if needed
-        const response = await getNeighborhoods({ per_page: 500 });
+        const response = await getNeighborhoods({ per_page: 100 });
         
         // Optional client-side filtering if backend doesn't support it
         // const filtered = response.data.filter((nbh) => nbh.city_id === selectedCity);
