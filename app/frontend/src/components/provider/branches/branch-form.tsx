@@ -84,6 +84,29 @@ function applyInitialHours(hours: BranchHourInitialData[] | undefined): DaySched
   });
 }
 
+function getInitialBranchFormValues(
+  mode: BranchFormMode,
+  initialData?: BranchFormInitialData | null
+) {
+  if (mode === "create" || !initialData) {
+    return {
+      name: "",
+      address: "",
+      phone: "",
+      email: "",
+      schedule: buildDefaultSchedule(),
+    };
+  }
+
+  return {
+    name: initialData.name ?? "",
+    address: initialData.address ?? "",
+    phone: initialData.phone ?? "",
+    email: initialData.email ?? "",
+    schedule: applyInitialHours(initialData.hours),
+  };
+}
+
 export function BranchForm({
   mode,
   initialData,
@@ -106,48 +129,19 @@ export function BranchForm({
     setSelectedNeighborhood,
   } = useLocation();
 
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [schedule, setSchedule] = useState<DaySchedule[]>(buildDefaultSchedule);
+  const initialValues = getInitialBranchFormValues(mode, initialData);
+
+  const [name, setName] = useState(initialValues.name);
+  const [address, setAddress] = useState(initialValues.address);
+  const [phone, setPhone] = useState(initialValues.phone);
+  const [email, setEmail] = useState(initialValues.email);
+  const [schedule, setSchedule] = useState<DaySchedule[]>(initialValues.schedule);
   const [localErrors, setLocalErrors] = useState<ProviderBranchFormFieldErrors>({});
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     nameInputRef.current?.focus();
   }, [mode, initialData]);
-
-  useEffect(() => {
-    if (mode === "create" || !initialData) {
-      setName("");
-      setAddress("");
-      setPhone("");
-      setEmail("");
-      setSchedule(buildDefaultSchedule());
-      setLocalErrors({});
-      setSelectedDept(null);
-      setSelectedCity(null);
-      setSelectedNeighborhood(null);
-      return;
-    }
-
-    setName(initialData.name ?? "");
-    setAddress(initialData.address ?? "");
-    setPhone(initialData.phone ?? "");
-    setEmail(initialData.email ?? "");
-    setSchedule(applyInitialHours(initialData.hours));
-    setLocalErrors({});
-    setSelectedDept(null);
-    setSelectedCity(null);
-    setSelectedNeighborhood(null);
-  }, [
-    mode,
-    initialData,
-    setSelectedDept,
-    setSelectedCity,
-    setSelectedNeighborhood,
-  ]);
 
   const filteredCities = useMemo(() => {
     if (!selectedDept) return [];
