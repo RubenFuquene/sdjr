@@ -6,6 +6,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\Bank;
 use App\Models\City;
+use App\Models\Commerce;
 use App\Models\Department;
 use App\Models\Neighborhood;
 use App\Models\User;
@@ -146,5 +147,73 @@ class CommerceBasicDataTest extends TestCase
             'my_account.account_number',
             'my_account.owner_id',
         ]);
+    }
+
+    /**
+     * Ensure a commerce with duplicate name, owner, and address is rejected.
+     */
+    public function test_cannot_create_duplicate_commerce_by_name_owner_and_address(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.commerces.create');
+        $this->actingAs($user, 'sanctum');
+
+        $bank = Bank::factory()->create();
+        $department = Department::factory()->create();
+        $city = City::factory()->create(['department_id' => $department->id]);
+        $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id]);
+
+        Commerce::factory()->create([
+            'owner_user_id' => $user->id,
+            'department_id' => $department->id,
+            'city_id' => $city->id,
+            'neighborhood_id' => $neighborhood->id,
+            'name' => 'Comercio duplicado',
+            'address' => 'Calle duplicada 123',
+        ]);
+
+        $payload = [
+            'commerce' => [
+                'owner_user_id' => $user->id,
+                'department_id' => $department->id,
+                'city_id' => $city->id,
+                'neighborhood_id' => $neighborhood->id,
+                'name' => 'Comercio duplicado',
+                'description' => 'Comercio duplicado prueba',
+                'tax_id' => '987654321',
+                'tax_id_type' => 'NIT',
+                'address' => 'Calle duplicada 123',
+                'phone' => '3001234567',
+                'email' => 'dup@example.com',
+                'is_verified' => false,
+                'is_active' => true,
+            ],
+            'legal_representative' => [
+                'name' => 'Rep',
+                'last_name' => 'Legal',
+                'document' => '55555555',
+                'document_type' => 'CC',
+                'email' => 'rep@example.com',
+                'phone' => '3000000000',
+                'is_primary' => true,
+            ],
+            'my_account' => [
+                'type' => 'bank',
+                'account_type' => 'savings',
+                'bank_id' => $bank->id,
+                'account_number' => '1234567890',
+                'owner_id' => $user->id,
+                'is_primary' => true,
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/commerces/basic', $payload);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['commerce.name']);
+        $errors = $response->json('errors');
+        $this->assertSame(
+            'There is already a commerce registered with the same name, owner, and address.',
+            $errors['commerce.name'][0] ?? null
+        );
     }
 }
