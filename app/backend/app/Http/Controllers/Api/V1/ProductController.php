@@ -14,6 +14,7 @@ use App\Http\Requests\Api\V1\UpdateProductRequest;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
 use App\Http\Resources\Api\V1\ProductResource;
 use App\Models\ProductPhoto;
+use App\Services\CommerceService;
 use App\Services\DocumentUploadService;
 use App\Services\ProductService;
 use App\Traits\ApiResponseTrait;
@@ -31,10 +32,13 @@ class ProductController extends Controller
 
     private DocumentUploadService $documentUploadService;
 
+    private CommerceService $commerceService;
+
     public function __construct(ProductService $service)
     {
         $this->productService = $service;
         $this->documentUploadService = new DocumentUploadService;
+        $this->commerceService = new CommerceService;
     }
 
     /**
@@ -205,6 +209,7 @@ class ProductController extends Controller
     public function byCommerce(int $commerce_id): JsonResponse
     {
         try {
+            $this->commerceService->show($commerce_id); // Validar que el comercio exista antes de consultar los productos
             $products = $this->productService->getByCommerce($commerce_id);
 
             return $this->successResponse(ProductResource::collection($products), 'Products fetched successfully', Response::HTTP_OK);
