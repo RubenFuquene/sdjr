@@ -101,7 +101,7 @@ class DocumentUploadService
             'file_path' => $result['path'],
             'mime_type' => $data['mime_type'],
             'expires_at' => now()->addHour(),
-            'uploaded_by_id' => auth()->id(),
+            'uploaded_by_id' => auth()?->id(),
             'failed_attempts' => 0,
         ]);
     }
@@ -171,5 +171,37 @@ class DocumentUploadService
         } catch (Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * Generar URL de descarga para un documento confirmado
+     *
+     * @param  string  $filePath  Ruta del archivo en el bucket (ej: /commerce_123/upload_token/filename.pdf)
+     * @return string URL de descarga temporal válida por 15 minutos
+     */
+    public function generateDownloadUrl(string $filePath): string
+    {
+        $config = config('filesystems.disks.documents');
+        $publicUrl = config('filesystems.disks.documents.url');
+
+        $s3Client = new S3Client([
+            'version' => 'latest',
+            'region' => $config['region'],
+            'endpoint' => $publicUrl,
+            'use_path_style_endpoint' => $config['use_path_style_endpoint'],
+            'credentials' => [
+                'key' => $config['key'],
+                'secret' => $config['secret'],
+            ],
+        ]);
+
+        $cmd = $s3Client->getCommand('GetObject', [
+            'Bucket' => $config['bucket'],
+            'Key' => ltrim($filePath, '/'),
+        ]);
+
+        $request = $s3Client->createPresignedRequest($cmd, '+15 minutes');
+
+        return (string) $request->getUri();
     }
 }

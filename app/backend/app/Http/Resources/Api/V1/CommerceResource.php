@@ -33,6 +33,19 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class CommerceResource extends JsonResource
 {
+    protected ?string $uploadStatus;
+
+    /**
+     * CommerceResource constructor.
+     *
+     * @param  mixed  $resource
+     */
+    public function __construct($resource, ?string $uploadStatus = null)
+    {
+        parent::__construct($resource);
+        $this->uploadStatus = $uploadStatus;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -47,6 +60,7 @@ class CommerceResource extends JsonResource
             'city' => new CityResource($this->city),
             'neighborhood' => new NeighborhoodResource($this->neighborhood),
             'legal_representatives' => new LegalRepresentativeResourceCollection($this->legalRepresentativesActive),
+            'documents' => new CommerceDocumentResourceCollection($this->getFilteredCommerceDocuments()),
             'name' => $this->name,
             'description' => $this->description,
             'tax_id' => $this->tax_id,
@@ -59,5 +73,19 @@ class CommerceResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    /**
+     * Get filtered commerce documents by upload status.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getFilteredCommerceDocuments()
+    {
+        if ($this->uploadStatus) {
+            return $this->commerceDocuments()->where('upload_status', $this->uploadStatus)->get();
+        }
+
+        return $this->commerceDocuments;
     }
 }

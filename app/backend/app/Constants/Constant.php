@@ -81,4 +81,6 @@ class Constant
 
     // Commerce Branch Photos
     public const MAX_PHOTOS_PER_COMMERCE_BRANCH = 5;
+
+    public const COMMERCE_VERIFIED = true;
 }

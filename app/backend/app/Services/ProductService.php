@@ -193,13 +193,12 @@ class ProductService
      */
     public function getByCommerce(int $commerce_id)
     {
-        $products = Product::with('photos')->where('commerce_id', $commerce_id)->get();
-
-        if ($products->isEmpty()) {
-            throw new ModelNotFoundException('No products found for the specified commerce.');
+        try {
+            return Product::with('photos')->where('commerce_id', $commerce_id)->get();
+        } catch (ModelNotFoundException $e) {
+            Log::error('Error fetching products by commerce ID', ['error' => $e->getMessage()]);
+            throw $e;
         }
-
-        return $products;
     }
 
     /**
