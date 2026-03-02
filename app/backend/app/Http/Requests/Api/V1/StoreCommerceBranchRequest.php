@@ -31,12 +31,17 @@ use Illuminate\Foundation\Http\FormRequest;
  *   ),
  *   @OA\Property(
  *     property="commerce_branch_hours",
- *     type="object",
- *     required={"day_of_week", "open_time", "close_time"},
- *     @OA\Property(property="day_of_week", type="integer", example=1, description="0=Domingo, 1=Lunes, ..."),
- *     @OA\Property(property="open_time", type="string", example="08:00"),
- *     @OA\Property(property="close_time", type="string", example="18:00"),
- *     @OA\Property(property="note", type="string", example="Horario normal")
+ *     type="array",
+ *
+ *     @OA\Items(
+ *       type="object",
+ *       required={"day_of_week", "open_time", "close_time"},
+ *
+ *       @OA\Property(property="day_of_week", type="integer", example=1, description="0=Domingo, 1=Lunes, ..."),
+ *       @OA\Property(property="open_time", type="string", example="08:00"),
+ *       @OA\Property(property="close_time", type="string", example="18:00"),
+ *       @OA\Property(property="note", type="string", example="Horario normal")
+ *     )
  *   ),
  *   @OA\Property(
  *     property="commerce_branch_photos",
@@ -82,10 +87,11 @@ class StoreCommerceBranchRequest extends FormRequest
             'commerce_branch.email' => ['nullable', 'email', 'max:100'],
             'commerce_branch.status' => ['boolean'],
 
-            'commerce_branch_hours.day_of_week' => ['required', 'integer', 'between:0,6'],
-            'commerce_branch_hours.open_time' => ['required', 'date_format:H:i'],
-            'commerce_branch_hours.close_time' => ['required', 'date_format:H:i'],
-            'commerce_branch_hours.note' => ['nullable'],
+            'commerce_branch_hours' => ['required', 'array', 'min:1'],
+            'commerce_branch_hours.*.day_of_week' => ['required', 'integer', 'between:0,6', 'distinct'],
+            'commerce_branch_hours.*.open_time' => ['required', 'date_format:H:i'],
+            'commerce_branch_hours.*.close_time' => ['required', 'date_format:H:i'],
+            'commerce_branch_hours.*.note' => ['nullable'],
 
             'commerce_branch_photos' => ['array', 'max:'.Constant::MAX_PHOTOS_PER_COMMERCE_BRANCH],
             'commerce_branch_photos.*.file_name' => ['required', 'string', 'max:255'],
