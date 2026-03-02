@@ -26,6 +26,20 @@ export {
   deleteCommerce,
 } from "./commerces";
 
+// Branches (Sucursales)
+export { getCommerceBranches, createCommerceBranch, updateCommerceBranch } from "./branches";
+export type {
+  ApiSuccess as BranchApiSuccess,
+  CommerceBranchFromAPI,
+  CommerceBranchHourFromAPI,
+  CommerceBranchPhotoFromAPI,
+  CreateCommerceBranchHourInput,
+  CreateCommerceBranchPhotoInput,
+  CreateCommerceBranchPayload,
+  GetCommerceBranchesParams,
+  UpdateCommerceBranchPayload,
+} from "./branches";
+
 // Documents (Carga de archivos)
 export {
   createPresignedDocument,
