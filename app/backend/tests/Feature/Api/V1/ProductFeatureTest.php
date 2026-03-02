@@ -155,10 +155,11 @@ class ProductFeatureTest extends TestCase
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
         $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
-        $response->assertStatus(404)
+        $response->assertStatus(200)
             ->assertJson([
-                'status' => false,
-                'message' => 'No products found for the specified commerce.',
+                'status' => true,
+                'message' => 'Products fetched successfully',
+                'data' => [],
             ]);
     }
 
@@ -170,6 +171,18 @@ class ProductFeatureTest extends TestCase
             ->assertJson([
                 'status' => false,
                 'message' => 'No products found for the given commerce branch.',
+            ]);
+    }
+
+    public function test_get_products_by_commerce_returns_404_when_commerce_not_found()
+    {
+        $this->actingAsAdmin();
+        $invalidId = 999999;
+        $response = $this->getJson('/api/v1/products/commerce/'.$invalidId);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => false,
+                'message' => 'Commerce not found with the specified ID.',
             ]);
     }
 }

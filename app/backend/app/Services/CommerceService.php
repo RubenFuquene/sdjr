@@ -65,7 +65,11 @@ class CommerceService
      */
     public function show(int $commerce_id): Commerce
     {
-        return Commerce::findOrFail($commerce_id);
+        try {
+            return Commerce::findOrFail($commerce_id);
+        } catch (ModelNotFoundException $e) {
+            throw new ModelNotFoundException('Commerce not found with the specified ID.');
+        }
     }
 
     /**
