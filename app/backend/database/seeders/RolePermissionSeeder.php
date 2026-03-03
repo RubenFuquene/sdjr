@@ -113,26 +113,26 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.profiles.administrators.show', 'guard_name' => $guardName, 'description' => 'Permiso para ver detalles de administrador', 'created_at' => now(), 'updated_at' => now()],
 
             // Módulos de Administrador
-            ['name' => 'admin.profiles.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de perfiles de administrador', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de parametrización de administrador', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.provider_validate.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de validación de proveedor de administrador', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.marketing.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de marketing de administrador', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.dashboard.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de dashboard de administrador', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.support.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de soporte de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.profiles.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de perfiles de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.params.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de parametrización de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.provider_validate.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de validación de proveedor de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.marketing.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de marketing de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.dashboard.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de dashboard de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.support.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de soporte de administrador', 'created_at' => now(), 'updated_at' => now()],
 
             // Módulos PQRS
-            ['name' => 'admin.my_pqrs.view', 'guard_name' => $guardName, 'description' => 'Ver módulo Mis PQRS de administrador', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.manage_pqrs.view', 'guard_name' => $guardName, 'description' => 'Ver módulo gestión PQRS de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.my_pqrs.show', 'guard_name' => $guardName, 'description' => 'Ver módulo Mis PQRS de administrador', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.manage_pqrs.show', 'guard_name' => $guardName, 'description' => 'Ver módulo gestión PQRS de administrador', 'created_at' => now(), 'updated_at' => now()],
 
             // Módulos de Proveedor
-            ['name' => 'provider.basic_data.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de datos básicos de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerces.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de comercios de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.products.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de productos de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.my_account.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de mi cuenta de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.my_wallet.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de mi billetera de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.dashboard.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de dashboard de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.review.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de reseñas de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.support.view', 'guard_name' => $guardName, 'description' => 'Ver módulo de soporte de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.basic_data.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de datos básicos de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de comercios de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.products.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de productos de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.my_account.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de mi cuenta de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.my_wallet.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de mi billetera de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.dashboard.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de dashboard de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.review.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de reseñas de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.support.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de soporte de proveedor', 'created_at' => now(), 'updated_at' => now()],
 
             // Documentos Legales
             ['name' => 'admin.legal_documents.index', 'guard_name' => $guardName, 'description' => 'Listar documentos legales', 'created_at' => now(), 'updated_at' => now()],
@@ -151,7 +151,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'Listar representantes legales', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.legal_representatives.create', 'guard_name' => $guardName, 'description' => 'Crear representante legal', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.legal_representatives.show', 'guard_name' => $guardName, 'description' => 'Ver representante legal', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.legal_representatives.view', 'guard_name' => $guardName, 'description' => 'Ver representante legal', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.legal_representatives.update', 'guard_name' => $guardName, 'description' => 'Actualizar representante legal', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.legal_representatives.delete', 'guard_name' => $guardName, 'description' => 'Eliminar representante legal', 'created_at' => now(), 'updated_at' => now()],
 
@@ -159,7 +158,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.establishment_types.index', 'guard_name' => $guardName, 'description' => 'Listar tipos de establecimiento', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.create', 'guard_name' => $guardName, 'description' => 'Crear tipo de establecimiento', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.show', 'guard_name' => $guardName, 'description' => 'Ver tipo de establecimiento', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.establishment_types.view', 'guard_name' => $guardName, 'description' => 'Ver tipo de establecimiento', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.update', 'guard_name' => $guardName, 'description' => 'Actualizar tipo de establecimiento', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Eliminar tipo de establecimiento', 'created_at' => now(), 'updated_at' => now()],
 
@@ -169,14 +167,12 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'Listar categorías de producto', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Crear categoría de producto', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.show', 'guard_name' => $guardName, 'description' => 'Ver categoría de producto', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.product_categories.view', 'guard_name' => $guardName, 'description' => 'Ver categoría de producto', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.update', 'guard_name' => $guardName, 'description' => 'Actualizar categoría de producto', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.delete', 'guard_name' => $guardName, 'description' => 'Eliminar categoría de producto', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'provider.products.index', 'guard_name' => $guardName, 'description' => 'Listar productos por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.create', 'guard_name' => $guardName, 'description' => 'Crear productos por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.show', 'guard_name' => $guardName, 'description' => 'Ver producto por comercio', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.products.view', 'guard_name' => $guardName, 'description' => 'Ver producto por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.update', 'guard_name' => $guardName, 'description' => 'Actualizar productos por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.delete', 'guard_name' => $guardName, 'description' => 'Eliminar producto por comercio', 'created_at' => now(), 'updated_at' => now()],
 

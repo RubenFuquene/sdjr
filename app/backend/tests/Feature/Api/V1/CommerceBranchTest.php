@@ -24,7 +24,7 @@ class CommerceBranchTest extends TestCase
         parent::setUp();
         Permission::create(['name' => 'provider.commerces.create', 'guard_name' => 'sanctum']);
         Permission::create(['name' => 'provider.commerces.update', 'guard_name' => 'sanctum']);
-        Permission::create(['name' => 'provider.commerces.view', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'provider.commerces.show', 'guard_name' => 'sanctum']);
         Permission::create(['name' => 'provider.commerces.delete', 'guard_name' => 'sanctum']);
         $this->setUpMockS3Disk();
     }
@@ -95,7 +95,7 @@ class CommerceBranchTest extends TestCase
     public function test_show_branch_success(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.commerces.view');
+        $user->givePermissionTo('provider.commerces.show');
         $branch = CommerceBranch::factory()->create();
         $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/commerce-branches/{$branch->id}")
@@ -117,7 +117,7 @@ class CommerceBranchTest extends TestCase
     public function test_index_by_commerce(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.commerces.view');
+        $user->givePermissionTo('provider.commerces.show');
         $commerce = Commerce::factory()->create();
         CommerceBranch::factory()->count(2)->create(['commerce_id' => $commerce->id]);
         $this->actingAs($user, 'sanctum')

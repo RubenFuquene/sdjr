@@ -23,7 +23,7 @@ class LegalRepresentativeFeatureTest extends TestCase
         $this->user = User::factory()->create();
         $permissions = [
             'provider.legal_representatives.create',
-            'provider.legal_representatives.view',
+            'provider.legal_representatives.show',
             'provider.legal_representatives.update',
             'provider.legal_representatives.delete',
         ];

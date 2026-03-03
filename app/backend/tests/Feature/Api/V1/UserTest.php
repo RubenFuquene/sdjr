@@ -86,7 +86,7 @@ class UserTest extends TestCase
     /**
      * Prueba que un usuario autenticado y con permiso puede ver el detalle de un usuario.
      */
-    public function test_authenticated_user_can_view_single_user(): void
+    public function test_authenticated_user_can_show_single_user(): void
     {
         $admin = User::factory()->create();
         $admin->givePermissionTo('admin.profiles.users.show');
