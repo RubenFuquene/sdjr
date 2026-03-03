@@ -22,26 +22,41 @@ class UserSeeder extends ControlledSeeder
      */
     protected function runSeeder(): void
     {
-        User::insert([
-            [
-                'name' => 'Admin',
-                'last_name' => 'User',
-                'email' => 'admin@example.com',
-                'phone' => '3000000000',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ],
-            [
-                'name' => 'Provider',
-                'last_name' => 'User',
-                'email' => 'provider@example.com',
-                'phone' => '3000000001',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ],
-        ]);
+        if (env('APP_ENV') == 'prd') {
+            User::insert([
+                    'name' => 'Administrator',
+                    'last_name' => 'Ñapa App',
+                    'email' => 'admin@napaapp.com',
+                    'phone' => '3000000000',
+                    'password' => Hash::make('secret'),
+                    'email_verified_at' => now(),
+                ]);
+        }
 
-        // Always create 10 additional test users
-        User::factory(10)->create();
+        if (env('DEMO_SEEDING') == 'true') {
+            
+            User::insert([
+                [
+                    'name' => 'Admin',
+                    'last_name' => 'User',
+                    'email' => 'admin@example.com',
+                    'phone' => '3000000000',
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ],
+                [
+                    'name' => 'Provider',
+                    'last_name' => 'User',
+                    'email' => 'provider@example.com',
+                    'phone' => '3000000001',
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ],
+            ]);
+
+            // Always create 10 additional test users
+            User::factory(10)->create();
+
+        }
     }
 }
