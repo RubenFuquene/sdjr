@@ -10,8 +10,8 @@ class IndexLegalDocumentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Permiso: admin.admin.legal_documents.index
-        return $this->user()?->can('admin.admin.legal_documents.index') ?? false;
+        // Permiso: admin.legal_documents.index
+        return $this->user()?->can('admin.legal_documents.index') ?? false;
     }
 
     public function rules(): array

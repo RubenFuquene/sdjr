@@ -150,9 +150,9 @@ class CommerceBasicDataTest extends TestCase
     }
 
     /**
-     * Ensure a commerce with duplicate name, owner, and address is rejected.
+     * Ensure a commerce with duplicate tax_id, tax_id_type
      */
-    public function test_cannot_create_duplicate_commerce_by_name_owner_and_address(): void
+    public function test_cannot_create_duplicate_commerce_by_tax_id_and_tax_id_type(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.commerces.create');
@@ -163,6 +163,7 @@ class CommerceBasicDataTest extends TestCase
         $city = City::factory()->create(['department_id' => $department->id]);
         $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id]);
 
+        // Creamos un comercio existente con los mismos tax_id y tax_id_type
         Commerce::factory()->create([
             'owner_user_id' => $user->id,
             'department_id' => $department->id,
@@ -170,6 +171,8 @@ class CommerceBasicDataTest extends TestCase
             'neighborhood_id' => $neighborhood->id,
             'name' => 'Comercio duplicado',
             'address' => 'Calle duplicada 123',
+            'tax_id' => '987654321',
+            'tax_id_type' => 'NIT',
         ]);
 
         $payload = [
@@ -209,11 +212,11 @@ class CommerceBasicDataTest extends TestCase
 
         $response = $this->postJson('/api/v1/commerces/basic', $payload);
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['commerce.name']);
+        $response->assertJsonValidationErrors(['commerce.tax_id']);
         $errors = $response->json('errors');
         $this->assertSame(
-            'There is already a commerce registered with the same name, owner, and address.',
-            $errors['commerce.name'][0] ?? null
+            'A commerce with the same tax ID and document type already exists.',
+            $errors['commerce.tax_id'][0] ?? null
         );
     }
 }
