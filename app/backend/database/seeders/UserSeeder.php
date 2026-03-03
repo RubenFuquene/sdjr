@@ -24,17 +24,17 @@ class UserSeeder extends ControlledSeeder
     {
         if (env('APP_ENV') == 'prd') {
             User::insert([
-                    'name' => 'Administrator',
-                    'last_name' => 'Ñapa App',
-                    'email' => 'admin@napaapp.com',
-                    'phone' => '3000000000',
-                    'password' => Hash::make('secret'),
-                    'email_verified_at' => now(),
-                ]);
+                'name' => 'Administrator',
+                'last_name' => 'Ñapa App',
+                'email' => 'admin@napaapp.com',
+                'phone' => '3000000000',
+                'password' => Hash::make('secret'),
+                'email_verified_at' => now(),
+            ]);
         }
 
         if (env('DEMO_SEEDING') == 'true') {
-            
+
             User::insert([
                 [
                     'name' => 'Admin',

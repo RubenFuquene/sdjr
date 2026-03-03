@@ -21,7 +21,7 @@ class PermissionEndpointTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        Permission::create(['name' => 'admin.profiles.users.index']);        
+        Permission::create(['name' => 'admin.profiles.users.index']);
 
         $response = $this->getJson('/api/v1/permissions');
 

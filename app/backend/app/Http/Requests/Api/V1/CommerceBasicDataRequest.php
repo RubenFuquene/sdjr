@@ -36,7 +36,7 @@ class CommerceBasicDataRequest extends FormRequest
             'commerce.department_id' => ['required', 'integer', 'exists:departments,id'],
             'commerce.city_id' => ['required', 'integer', 'exists:cities,id'],
             'commerce.neighborhood_id' => ['required', 'integer', 'exists:neighborhoods,id'],
-            'commerce.name' => ['required','string','max:255'],
+            'commerce.name' => ['required', 'string', 'max:255'],
             'commerce.description' => ['nullable', 'string', 'max:500'],
             'commerce.tax_id' => [
                 'required',
@@ -50,7 +50,7 @@ class CommerceBasicDataRequest extends FormRequest
                 Constant::COMMERCE_DOCUMENT_TYPE_NIT,
                 Constant::COMMERCE_DOCUMENT_TYPE_CC,
                 Constant::COMMERCE_DOCUMENT_TYPE_PS,
-                Constant::COMMERCE_DOCUMENT_TYPE_CE
+                Constant::COMMERCE_DOCUMENT_TYPE_CE,
             ])],
             'commerce.address' => ['required', 'string', 'max:255'],
             'commerce.phone' => ['nullable', 'string', 'max:20'],
