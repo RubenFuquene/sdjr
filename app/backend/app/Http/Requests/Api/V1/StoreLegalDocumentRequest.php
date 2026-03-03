@@ -26,7 +26,7 @@ class StoreLegalDocumentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('legal_documents.create') ?? false;
+        return $this->user()?->can('admin.legal_documents.create') ?? false;
     }
 
     public function rules(): array
