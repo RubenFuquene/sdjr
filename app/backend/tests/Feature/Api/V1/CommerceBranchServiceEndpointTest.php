@@ -18,13 +18,13 @@ class CommerceBranchServiceEndpointTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Permission::create(['name' => 'provider.commerces.view', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'provider.commerces.show', 'guard_name' => 'sanctum']);
     }
 
     public function test_get_branches_by_commerce_id_returns_paginated(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.commerces.view');
+        $user->givePermissionTo('provider.commerces.show');
         $commerce = Commerce::factory()->create();
         CommerceBranch::factory()->count(5)->create(['commerce_id' => $commerce->id]);
         $this->actingAs($user, 'sanctum');
@@ -37,7 +37,7 @@ class CommerceBranchServiceEndpointTest extends TestCase
     public function test_get_branches_by_commerce_id_throws_for_nonexistent(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.commerces.view');
+        $user->givePermissionTo('provider.commerces.show');
         $this->actingAs($user, 'sanctum');
         $response = $this->getJson('/api/v1/commerces/99999/branches');
         $response->assertNotFound();

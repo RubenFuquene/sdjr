@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Constants\Constant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -35,20 +36,22 @@ class CommerceBasicDataRequest extends FormRequest
             'commerce.department_id' => ['required', 'integer', 'exists:departments,id'],
             'commerce.city_id' => ['required', 'integer', 'exists:cities,id'],
             'commerce.neighborhood_id' => ['required', 'integer', 'exists:neighborhoods,id'],
-            'commerce.name' => [
+            'commerce.name' => ['required', 'string', 'max:255'],
+            'commerce.description' => ['nullable', 'string', 'max:500'],
+            'commerce.tax_id' => [
                 'required',
                 'string',
-                'max:255',
-                Rule::unique('commerces', 'name')
-                    ->where(fn ($query) => $query
-                        ->where('owner_user_id', $this->input('commerce.owner_user_id'))
-                        ->where('address', $this->input('commerce.address'))
-                        ->whereNull('deleted_at')
-                    ),
+                'max:50',
+                Rule::unique('commerces', 'tax_id')->where(function ($query) {
+                    return $query->where('tax_id_type', $this->input('commerce.tax_id_type'));
+                }),
             ],
-            'commerce.description' => ['nullable', 'string', 'max:500'],
-            'commerce.tax_id' => ['required', 'string', 'max:50'],
-            'commerce.tax_id_type' => ['required', 'string', 'max:10'],
+            'commerce.tax_id_type' => ['required', 'string', 'max:10', Rule::in([
+                Constant::COMMERCE_DOCUMENT_TYPE_NIT,
+                Constant::COMMERCE_DOCUMENT_TYPE_CC,
+                Constant::COMMERCE_DOCUMENT_TYPE_PS,
+                Constant::COMMERCE_DOCUMENT_TYPE_CE,
+            ])],
             'commerce.address' => ['required', 'string', 'max:255'],
             'commerce.phone' => ['nullable', 'string', 'max:20'],
             'commerce.email' => ['nullable', 'string', 'email', 'max:100'],
@@ -91,6 +94,7 @@ class CommerceBasicDataRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'commerce.tax_id.unique' => 'A commerce with the same tax ID and document type already exists.',
             'commerce.name.unique' => 'There is already a commerce registered with the same name, owner, and address.',
         ];
     }

@@ -21,7 +21,7 @@ class CommerceTest extends TestCase
         // Crear permisos necesarios con guard sanctum
         Permission::findOrCreate('provider.commerces.create', 'sanctum');
         Permission::findOrCreate('provider.commerces.update', 'sanctum');
-        Permission::findOrCreate('provider.commerces.view', 'sanctum');
+        Permission::findOrCreate('provider.commerces.show', 'sanctum');
         Permission::findOrCreate('provider.commerces.delete', 'sanctum');
     }
 
@@ -48,10 +48,10 @@ class CommerceTest extends TestCase
      *
      * Crea un usuario, le asigna el permiso y consulta un comercio existente, validando la respuesta.
      */
-    public function test_user_can_view_commerce()
+    public function test_user_can_show_commerce()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.commerces.view');
+        $user->givePermissionTo('provider.commerces.show');
         $this->actingAs($user, 'sanctum');
 
         $commerce = Commerce::factory()->create();

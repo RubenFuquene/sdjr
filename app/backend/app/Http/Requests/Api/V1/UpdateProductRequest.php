@@ -27,7 +27,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="status", type="string", maxLength=1, example="1", description="Status (1=Activo, 0=Inactivo)"),
  *   ),
  *   @OA\Property(
- *     property="commerce_branches",
+ *     property="commerce_branch_ids",
  *     type="array",
  *
  *     @OA\Items(type="integer", example=1, description="ID of a commerce branch")
@@ -64,7 +64,7 @@ class UpdateProductRequest extends FormRequest
             'product.expires_at' => ['nullable', 'date'],
             'product.status' => ['sometimes', 'string', 'max:1'],
 
-            'commerce_branches.*' => ['sometimes', 'integer', 'exists:commerce_branches,id'],
+            'commerce_branch_ids.*' => ['sometimes', 'integer', 'exists:commerce_branches,id'],
 
             // Fotos
 

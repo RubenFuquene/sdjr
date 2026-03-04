@@ -52,9 +52,9 @@ class SupportStatusTest extends TestCase
      */
     public function test_can_show_support_status()
     {
-        Permission::findOrCreate('admin.params.support_statuses.view', 'sanctum');
+        Permission::findOrCreate('admin.params.support_statuses.show', 'sanctum');
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.params.support_statuses.view');
+        $user->givePermissionTo('admin.params.support_statuses.show');
         Sanctum::actingAs($user);
         $status = SupportStatus::factory()->create();
         $response = $this->getJson('/api/v1/support-statuses/'.$status->id);

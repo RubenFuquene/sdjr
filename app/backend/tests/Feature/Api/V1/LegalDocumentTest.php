@@ -17,14 +17,14 @@ class LegalDocumentTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Permission::create(['name' => 'legal_documents.index', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.legal_documents.index', 'guard_name' => 'sanctum']);
     }
 
     public function test_index_legal_documents_success(): void
     {
 
         $user = User::factory()->create();
-        $user->givePermissionTo('legal_documents.index');
+        $user->givePermissionTo('admin.legal_documents.index');
         LegalDocument::factory()->count(3)->create();
         $this->actingAs($user, 'sanctum');
         $response = $this->getJson('/api/v1/legal-documents');
@@ -48,7 +48,7 @@ class LegalDocumentTest extends TestCase
     public function test_show_by_type_success(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('legal_documents.index');
+        $user->givePermissionTo('admin.legal_documents.index');
         $doc = LegalDocument::factory()->create(['type' => 'terms', 'status' => 'active']);
         $this->actingAs($user, 'sanctum');
         $response = $this->getJson('/api/v1/legal-documents/terms');
@@ -59,7 +59,7 @@ class LegalDocumentTest extends TestCase
     public function test_show_by_type_not_found(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('legal_documents.index');
+        $user->givePermissionTo('admin.legal_documents.index');
         $this->actingAs($user, 'sanctum');
         $response = $this->getJson('/api/v1/legal-documents/privacy');
         $response->assertNotFound();

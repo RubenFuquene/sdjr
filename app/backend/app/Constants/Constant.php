@@ -83,4 +83,13 @@ class Constant
     public const MAX_PHOTOS_PER_COMMERCE_BRANCH = 5;
 
     public const COMMERCE_VERIFIED = true;
+
+    // Commerce Document Types
+    public const COMMERCE_DOCUMENT_TYPE_NIT = 'NIT';
+
+    public const COMMERCE_DOCUMENT_TYPE_CC = 'CC';
+
+    public const COMMERCE_DOCUMENT_TYPE_PS = 'PS';
+
+    public const COMMERCE_DOCUMENT_TYPE_CE = 'CE';
 }

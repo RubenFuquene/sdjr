@@ -103,7 +103,7 @@ class CommerceController extends Controller
      *     path="/api/v1/commerces",
      *     operationId="storeCommerce",
      *     tags={"Commerces"},
-     *     summary="Create a new commerce",
+     *     summary="Create a new commerce, this endpoint does not create a commerce for providers, use /api/v1/commerces/basic instead",
      *     description="Creates a new commerce.",
      *     security={{"sanctum":{}}},
      *

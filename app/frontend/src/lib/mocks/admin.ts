@@ -11,9 +11,9 @@ export const mockPerfiles: Perfil[] = [
     nombre: "Super Administrador",
     descripcion: "Acceso completo a todas las funcionalidades",
     permisosAdmin: [
-      { name: "admin.profiles.view", description: "Ver perfiles" },
+      { name: "admin.profiles.show", description: "Ver perfiles" },
       { name: "admin.parametrization.view", description: "Ver parametrización" },
-      { name: "admin.provider_validate.view", description: "Validar proveedores" },
+      { name: "admin.provider_validate.show", description: "Validar proveedores" },
       { name: "admin.marketing.view", description: "Ver marketing" },
       { name: "admin.dashboard.view", description: "Ver dashboard" },
       { name: "admin.support.view", description: "Ver soporte" }

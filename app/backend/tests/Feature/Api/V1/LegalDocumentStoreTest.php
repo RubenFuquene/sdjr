@@ -16,14 +16,14 @@ class LegalDocumentStoreTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Permission::firstOrCreate(['name' => 'legal_documents.create', 'guard_name' => 'sanctum']);
+        Permission::firstOrCreate(['name' => 'admin.legal_documents.create', 'guard_name' => 'sanctum']);
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
     public function test_store_legal_document_success(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('legal_documents.create');
+        $user->givePermissionTo('admin.legal_documents.create');
         $this->actingAs($user, 'sanctum');
         $payload = [
             'type' => 'terms',
@@ -47,7 +47,7 @@ class LegalDocumentStoreTest extends TestCase
     public function test_store_legal_document_validation_error(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('legal_documents.create');
+        $user->givePermissionTo('admin.legal_documents.create');
         $this->actingAs($user, 'sanctum');
         $payload = [
             'type' => '',

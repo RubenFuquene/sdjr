@@ -10,7 +10,7 @@ class ShowCommerceBranchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.commerces.view') ?? false;
+        return $this->user()?->can('provider.commerces.show') ?? false;
     }
 
     public function rules(): array

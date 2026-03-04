@@ -21,7 +21,7 @@ class EstablishmentTypeTest extends TestCase
         // Crear permisos necesarios con guard sanctum
         Permission::findOrCreate('provider.establishment_types.create', 'sanctum');
         Permission::findOrCreate('provider.establishment_types.update', 'sanctum');
-        Permission::findOrCreate('provider.establishment_types.view', 'sanctum');
+        Permission::findOrCreate('provider.establishment_types.show', 'sanctum');
         Permission::findOrCreate('provider.establishment_types.delete', 'sanctum');
     }
 
@@ -43,10 +43,10 @@ class EstablishmentTypeTest extends TestCase
     /**
      * Prueba que un usuario con permiso puede ver el detalle de un tipo de establecimiento.
      */
-    public function test_user_can_view_establishment_type()
+    public function test_user_can_show_establishment_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.establishment_types.view');
+        $user->givePermissionTo('provider.establishment_types.show');
         $this->actingAs($user, 'sanctum');
 
         $type = EstablishmentType::factory()->create();
