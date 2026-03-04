@@ -22,6 +22,7 @@ export {
   getCommerceById,
   getMyCommerce,
   createCommerce,
+  createCommerceBasic,
   updateCommerce,
   deleteCommerce,
 } from "./commerces";

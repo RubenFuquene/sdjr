@@ -3,8 +3,8 @@
  * GET list of commerces
  */
 
-import { ApiResponse, CommerceFromAPI } from "@/types/admin";
-import type { ProveedorPayload } from "@/types/provider";
+import { ApiResponse } from "@/types/admin";
+import type { CommerceFromAPI, ProveedorPayload, CommerceBasicPayload, CommerceBasicDataResponse } from "@/types/commerces";
 import { fetchWithErrorHandling } from "./client";
 
 export interface GetCommercesParams {
@@ -51,13 +51,35 @@ export interface ApiSuccess<T> {
 
 /**
  * POST /api/v1/commerces
- * Crea un nuevo comercio/proveedor
+ * ⚠️ SOLO PARA PANEL ADMINISTRATIVO
+ * Crea un nuevo comercio/proveedor desde el panel admin
+ * 
+ * Para registro de proveedores, usar createCommerceBasic()
  */
 export async function createCommerce(
   payload: ProveedorPayload
 ): Promise<ApiSuccess<CommerceFromAPI>> {
   return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
     `/api/v1/commerces`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+/**
+ * POST /api/v1/commerces/basic
+ * Crea un nuevo comercio con datos básicos desde REGISTRO DE PROVEEDOR
+ * Incluye: comercio, representante legal, documentos y cuenta bancaria
+ * 
+ * Retorna CommerceBasicDataResponse con estructura específica del endpoint
+ */
+export async function createCommerceBasic(
+  payload: CommerceBasicPayload
+): Promise<ApiSuccess<CommerceBasicDataResponse>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceBasicDataResponse>>(
+    `/api/v1/commerces/basic`,
     {
       method: "POST",
       body: JSON.stringify(payload),

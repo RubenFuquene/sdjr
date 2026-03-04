@@ -29,7 +29,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getCommerces, getCommerceById, updateCommerce, deleteCommerce, ApiError } from "@/lib/api/index";
 import type { ProveedorListItem, Proveedor, CommerceFromAPI } from "@/types/admin";
-import { commerceToProveedorListItem, commerceToProveedor } from "@/types/provider.adapters";
+import { commerceToProveedorListItem, commerceToProveedor } from "@/types/commerces.adapters";
 
 /**
  * Parámetros de búsqueda y filtrado

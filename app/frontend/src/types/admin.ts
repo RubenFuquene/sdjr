@@ -1,11 +1,13 @@
 /**
  * Tipos para la gestión administrativa - Tipos genéricos
- * Para tipos específicos de Proveedores, ver: provider.ts
+ * Para tipos específicos:
+ * - Comercios (entidad): ver commerces.ts
+ * - Proveedores (rol): ver provider.ts
  *
  * Basado en diseños Figma para las 4 secciones: Perfiles, Proveedores, Usuarios, Administradores
  */
 
-// Re-exportar tipos de Provider (SRP: cada módulo en su archivo)
+// Re-exportar tipos de Comercios (entidad de negocio)
 export type { 
   Proveedor, 
   ProveedorListItem, 
@@ -16,14 +18,10 @@ export type {
   Legal,
   ProveedorPayload,
   ProveedorUpdateResponse,
-  DescargaDocumento,
-  BancoOption,
-  TipoCuenta,
-  TipoDocumentoIdentidad,
-  EstadoProveedor,
-} from './provider';
+  CommerceBasicPayload,
+} from './commerces';
 
-// Re-exportar adaptadores de Provider
+// Re-exportar adaptadores de Comercios
 export {
   commerceToProveedorListItem,
   commerceToProveedor,
@@ -38,7 +36,16 @@ export {
   normalizarEmail,
   normalizarTelefono,
   obtenerLabelEstado,
-} from './provider.adapters';
+} from './commerces.adapters';
+
+// Re-exportar tipos de Provider (rol/usuario)
+export type {
+  DescargaDocumento,
+  BancoOption,
+  TipoCuenta,
+  TipoDocumentoIdentidad,
+  EstadoProveedor,
+} from './provider';
 
 // Re-exportar constantes de Provider
 export { TIPOS_CUENTA, TIPOS_DOCUMENTO_IDENTIDAD } from './provider';
