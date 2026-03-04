@@ -18,7 +18,7 @@ import type { SessionData } from "@/types/auth";
 
 interface UseAuthFormReturn {
   handleLogin: (email: string, password: string) => Promise<{ redirectTo: string; user: SessionData }>;
-  handleRegister: (name: string, email: string, password: string) => Promise<{ redirectTo: string; user: SessionData }>;
+  handleRegister: (name: string, last_name: string, email: string, password: string, password_confirmation: string) => Promise<{ redirectTo: string; user: SessionData }>;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -104,13 +104,14 @@ export function useAuthForm(): UseAuthFormReturn {
    * Maneja registro de nuevo proveedor
    * Retorna { redirectTo, user } si es exitoso, throws Error si falla
    * 
-   * 🚨 NOTA: Requiere que backend haya implementado POST /api/v1/providers/register
-   * Si aún no está implementado, fallará con mensaje claro.
+   * Implementado en: POST /api/v1/provider/register
    */
   const handleRegister = async (
     name: string,
+    last_name: string,
     email: string,
-    password: string
+    password: string,
+    password_confirmation: string
   ): Promise<{ redirectTo: string; user: SessionData }> => {
     setLoading(true);
     setError(null);
@@ -118,11 +119,13 @@ export function useAuthForm(): UseAuthFormReturn {
     try {
       // Sanitizar inputs
       const sanitizedName = sanitizeName(name);
+      const sanitizedLastName = sanitizeName(last_name);
       const sanitizedEmail = sanitizeEmail(email);
       const sanitizedPassword = sanitizePassword(password);
+      const sanitizedPasswordConfirmation = sanitizePassword(password_confirmation);
 
       // Validación básica frontend
-      if (!sanitizedName || !sanitizedEmail || !sanitizedPassword) {
+      if (!sanitizedName || !sanitizedLastName || !sanitizedEmail || !sanitizedPassword || !sanitizedPasswordConfirmation) {
         throw new Error("Por favor completa todos los campos");
       }
 
@@ -130,19 +133,29 @@ export function useAuthForm(): UseAuthFormReturn {
         throw new Error("El nombre debe tener al menos 2 caracteres");
       }
 
+      if (sanitizedLastName.length < 2) {
+        throw new Error("El apellido debe tener al menos 2 caracteres");
+      }
+
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
         throw new Error("Por favor ingresa un correo válido");
       }
 
-      if (sanitizedPassword.length < 6) {
-        throw new Error("La contraseña debe tener al menos 6 caracteres");
+      if (sanitizedPassword.length < 8) {
+        throw new Error("La contraseña debe tener al menos 8 caracteres");
+      }
+
+      if (sanitizedPassword !== sanitizedPasswordConfirmation) {
+        throw new Error("Las contraseñas no coinciden");
       }
 
       // Llamar a API
       const result = await register({
         name: sanitizedName,
+        last_name: sanitizedLastName,
         email: sanitizedEmail,
         password: sanitizedPassword,
+        password_confirmation: sanitizedPasswordConfirmation,
       });
 
       if (!result.ok || !result.user) {

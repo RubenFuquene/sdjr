@@ -18,8 +18,10 @@ type LoginPayload = {
 
 type RegisterPayload = {
   name: string;
+  last_name: string;
   email: string;
   password: string;
+  password_confirmation: string;
 };
 
 export type LoginResult = {
@@ -112,10 +114,10 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
 }
 
 /**
- * POST /api/v1/providers/register
+ * POST /api/v1/provider/register
  * 
- * Endpoint ESPECIALIZADO para registro público de nuevos proveedores.
- * ⚠️ NO es POST /api/v1/users (ese requiere autenticación admin)
+ * Endpoint público para registro de nuevos proveedores.
+ * Auto-asigna rol "provider" y retorna token Sanctum para sesión inmediata.
  * 
  * Características:
  * - Público (sin requerir autenticación)
@@ -124,26 +126,27 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
  * - Responde con LoginResponse (mismo formato que /api/v1/login)
  * 
  * Validaciones esperadas (backend):
- * - email: debe ser único (422 si duplicado)
- * - password: min 6 caracteres
- * - name: min 2 caracteres
+ * - name: requerido, max 255 caracteres
+ * - last_name: requerido, max 255 caracteres
+ * - email: requerido, único, válido
+ * - password: requerido, min 8 caracteres
+ * - password_confirmation: debe coincidir con password
  * 
- * TODO: Implementar endpoint en backend (Task 11)
- * Documentado en: docs/backend-endpoints-v2.md #0
+ * Implementado en: app/Http/Controllers/Api/V1/ProviderRegisterController.php
  */
-export async function register({ name, email, password }: RegisterPayload): Promise<RegisterResult> {
-  if (!name || !email || !password) {
+export async function register({ name, last_name, email, password, password_confirmation }: RegisterPayload): Promise<RegisterResult> {
+  if (!name || !last_name || !email || !password || !password_confirmation) {
     throw new Error("Por favor completa todos los campos.");
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/providers/register`, {
+    const response = await fetch(`${API_URL}/api/v1/provider/register`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, last_name, email, password, password_confirmation }),
     });
 
     if (!response.ok) {
