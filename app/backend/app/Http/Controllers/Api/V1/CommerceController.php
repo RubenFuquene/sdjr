@@ -87,7 +87,7 @@ class CommerceController extends Controller
             $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $page = $request->validatedPage();
-            $commerces = $this->commerceService->paginateWithFilters($perPage, $page, $filters['search'] ?? null, $filters['status'] ?? null);
+            $commerces = $this->commerceService->paginateWithFilters($perPage, $page, $filters['search'] ?? null, $filters['status'] ?? null, $filters['verified'] ?? null);
             $resource = CommerceResource::collection($commerces);
 
             return $this->paginatedResponse($commerces, $resource, 'Commerces retrieved successfully');

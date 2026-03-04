@@ -25,6 +25,7 @@ class IndexCommerceRequest extends FormRequest
         return [
             'search' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', Rule::in(['1', '0', 'all'])],
+            'verified' => ['nullable', Rule::in(['1', '0', 'all'])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
         ];
@@ -51,6 +52,6 @@ class IndexCommerceRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['search', 'status']);
+        return $this->only(['search', 'status', 'verified']);
     }
 }

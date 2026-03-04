@@ -3,8 +3,8 @@
  * GET list of commerces
  */
 
-import { ApiResponse, CommerceFromAPI } from "@/types/admin";
-import type { ProveedorPayload } from "@/types/provider";
+import { ApiResponse } from "@/types/admin";
+import type { CommerceFromAPI, ProveedorPayload, CommerceBasicPayload, CommerceBasicDataResponse } from "@/types/commerces";
 import { fetchWithErrorHandling } from "./client";
 
 export interface GetCommercesParams {
@@ -12,6 +12,7 @@ export interface GetCommercesParams {
   perPage?: number;
   search?: string;
   status?: string; // optional: activo/inactivo o 0/1 según backend
+  verified?: string; // optional: 1 (verified) | 0 (not verified) | all
 }
 
 /**
@@ -23,12 +24,14 @@ export async function getCommerces({
   perPage = 15,
   search,
   status,
+  verified,
 }: GetCommercesParams = {}): Promise<ApiResponse<CommerceFromAPI>> {
   const params = new URLSearchParams();
   params.set("page", String(page));
   params.set("per_page", String(perPage));
   if (search) params.set("search", search);
   if (status) params.set("status", status);
+  if (verified) params.set("verified", verified);
 
   return fetchWithErrorHandling<ApiResponse<CommerceFromAPI>>(
     `/api/v1/commerces?${params.toString()}`
@@ -51,13 +54,35 @@ export interface ApiSuccess<T> {
 
 /**
  * POST /api/v1/commerces
- * Crea un nuevo comercio/proveedor
+ * ⚠️ SOLO PARA PANEL ADMINISTRATIVO
+ * Crea un nuevo comercio/proveedor desde el panel admin
+ * 
+ * Para registro de proveedores, usar createCommerceBasic()
  */
 export async function createCommerce(
   payload: ProveedorPayload
 ): Promise<ApiSuccess<CommerceFromAPI>> {
   return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
     `/api/v1/commerces`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+/**
+ * POST /api/v1/commerces/basic
+ * Crea un nuevo comercio con datos básicos desde REGISTRO DE PROVEEDOR
+ * Incluye: comercio, representante legal, documentos y cuenta bancaria
+ * 
+ * Retorna CommerceBasicDataResponse con estructura específica del endpoint
+ */
+export async function createCommerceBasic(
+  payload: CommerceBasicPayload
+): Promise<ApiSuccess<CommerceBasicDataResponse>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceBasicDataResponse>>(
+    `/api/v1/commerces/basic`,
     {
       method: "POST",
       body: JSON.stringify(payload),
@@ -120,4 +145,77 @@ export async function getMyCommerce(): Promise<ApiSuccess<CommerceFromAPI | null
   return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI | null>>(
     `/api/v1/me/commerce`
   );
+}
+// ============================================
+// Verification & Status Endpoints
+// ============================================
+
+/**
+ * PATCH /api/v1/commerces/{id}/verification
+ * Actualiza el estado de verificación de un comercio
+ * 
+ * Aprobación: is_verified = 1
+ * Rechazo: is_verified = 0
+ * 
+ * @param id - ID del comercio
+ * @param isVerified - 1 para aprobar, 0 para rechazar
+ * @returns Comercio actualizado
+ */
+export async function updateCommerceVerification(
+  id: number,
+  isVerified: 0 | 1
+): Promise<ApiSuccess<CommerceFromAPI>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
+    `/api/v1/commerces/${id}/verification`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ is_verified: isVerified }),
+    }
+  );
+}
+
+/**
+ * PATCH /api/v1/commerces/{id}/status
+ * Actualiza el estado activo/inactivo de un comercio
+ * 
+ * Activar: is_active = 1
+ * Desactivar: is_active = 0
+ * 
+ * @param id - ID del comercio
+ * @param isActive - 1 para activar, 0 para desactivar
+ * @returns Comercio actualizado
+ */
+export async function updateCommerceStatus(
+  id: number,
+  isActive: 0 | 1
+): Promise<ApiSuccess<CommerceFromAPI>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
+    `/api/v1/commerces/${id}/status`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ is_active: isActive }),
+    }
+  );
+}
+
+/**
+ * Convenience function: Aprobar un comercio/proveedor
+ * Equivalente a: updateCommerceVerification(id, 1)
+ * 
+ * @param id - ID del comercio
+ * @returns Comercio actualizado
+ */
+export async function approveCommerce(id: number): Promise<ApiSuccess<CommerceFromAPI>> {
+  return updateCommerceVerification(id, 1);
+}
+
+/**
+ * Convenience function: Rechazar un comercio/proveedor
+ * Equivalente a: updateCommerceVerification(id, 0)
+ * 
+ * @param id - ID del comercio
+ * @returns Comercio actualizado
+ */
+export async function rejectCommerce(id: number): Promise<ApiSuccess<CommerceFromAPI>> {
+  return updateCommerceVerification(id, 0);
 }

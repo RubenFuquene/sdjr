@@ -66,6 +66,17 @@ export function RepresentanteLegalCard({
     return value.replace(/[^0-9\-]/g, '').slice(0, 20);
   };
 
+  /**
+   * Formatea nombre/apellido: solo letras (incluyendo acentos) y espacios
+   * Acepta: a-z, A-Z, acentos (áéíóúñüÁÉÍÓÚÑÜ) y espacios
+   * Rechaza: números, caracteres especiales
+   */
+  const formatLettersOnly = (value: string) => {
+    return value
+      .replace(/[^a-záéíóúñüA-ZÁÉÍÓÚÑÜ\s]/g, '')
+      .slice(0, 50);
+  };
+
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -87,7 +98,7 @@ export function RepresentanteLegalCard({
               id="legalRep-firstName"
               placeholder="Ej: Juan Pedro"
               value={legalRepresentative.firstName}
-              onChange={(e) => handleRepChange('firstName', e.target.value)}
+              onChange={(e) => handleRepChange('firstName', formatLettersOnly(e.target.value))}
               className={`h-[50px] rounded-[14px] border ${
                 errors.legalRepresentativeFirstName
                   ? 'border-red-500 bg-red-50'
@@ -113,7 +124,7 @@ export function RepresentanteLegalCard({
               id="legalRep-lastName"
               placeholder="Ej: García López"
               value={legalRepresentative.lastName}
-              onChange={(e) => handleRepChange('lastName', e.target.value)}
+              onChange={(e) => handleRepChange('lastName', formatLettersOnly(e.target.value))}
               className={`h-[50px] rounded-[14px] border ${
                 errors.legalRepresentativeLastName
                   ? 'border-red-500 bg-red-50'

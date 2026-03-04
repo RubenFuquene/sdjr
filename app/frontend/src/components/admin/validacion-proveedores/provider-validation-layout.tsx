@@ -5,7 +5,10 @@
  * - Orquestar sidebar (lista de pendientes) + área de detalle
  * - Manejar selección de proveedor activo
  * - Coordinar estado entre sidebar y detalle
- * - Gestionar acciones de aprobación/rechazo
+ * - Callbacks opcionales para notificaciones de aprobación/rechazo
+ * 
+ * Nota: La aprobación/rechazo se maneja internamente en ProviderValidationActions
+ * con el hook useCommerceApproval()
  * 
  * Basado en diseño Figma: ValidacionProveedores.tsx
  * Patrón: Layout con estado compartido
@@ -34,33 +37,20 @@ export function ProviderValidationLayout() {
   }, []);
 
   /**
-   * Handler cuando se aprueba un proveedor
+   * Callback cuando se aprueba un proveedor
    */
-  const handleApprove = useCallback(async (providerId: number) => {
-    try {
-      // TODO: Implementar llamada a API
-      console.log('Aprobar proveedor:', providerId);
-      
-      // Limpiar selección
-      setSelectedProvider(null);
-    } catch (error) {
-      console.error('Error al aprobar proveedor:', error);
-    }
+  const handleApprovalSuccess = useCallback((message: string) => {
+    console.log('Success:', message);
+    // Limpiar selección después de aprobación
+    setSelectedProvider(null);
   }, []);
 
   /**
-   * Handler cuando se rechaza un proveedor
+   * Callback cuando hay error en aprobación/rechazo
    */
-  const handleReject = useCallback(async (providerId: number, reason: string) => {
-    try {
-      // TODO: Implementar llamada a API
-      console.log('Rechazar proveedor:', providerId, 'Razón:', reason);
-      
-      // Limpiar selección
-      setSelectedProvider(null);
-    } catch (error) {
-      console.error('Error al rechazar proveedor:', error);
-    }
+  const handleApprovalError = useCallback((error: string) => {
+    console.error('Error en aprobación:', error);
+    // El error se muestra en el toast/banner del componente de acciones
   }, []);
 
   return (
@@ -78,8 +68,8 @@ export function ProviderValidationLayout() {
         {selectedProvider ? (
           <ProviderValidationDetail
             provider={selectedProvider}
-            onApprove={handleApprove}
-            onReject={handleReject}
+            onApprovalSuccess={handleApprovalSuccess}
+            onApprovalError={handleApprovalError}
           />
         ) : (
           <div className="flex items-center justify-center h-full">

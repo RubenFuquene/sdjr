@@ -12,7 +12,6 @@
 
 'use client';
 
-import { useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import type { Proveedor, ProveedorListItem } from '@/types/admin';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
@@ -36,16 +35,11 @@ export function ProviderValidationSidebar({
   selectedProviderId,
   onSelectProvider,
 }: ProviderValidationSidebarProps) {
-  const commerceManagement = useCommerceManagement();
+  // Inicializar hook con filtro para mostrar solo proveedores pendientes (no verificados)
+  const commerceManagement = useCommerceManagement({ verified: '0' });
   const { refresh } = commerceManagement;
 
-  // Cargar proveedores al montar (TODO: filtrar por estado "pendiente")
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  // TODO: Filtrar solo proveedores con estado "pendiente"
-  // Por ahora mostramos todos
+  // Mostrar solo proveedores con estado "pendiente" (no verificados)
   const pendingProviders = commerceManagement.commerces;
 
   // Estados
@@ -128,6 +122,24 @@ interface ProviderPendingCardProps {
   onClick: () => void | Promise<void>;
 }
 
+/**
+ * Formatea fecha ISO a formato legible
+ * Ej: 2026-03-04T21:18:27.000000Z → 2026-03-04
+ */
+function formatDate(dateString?: string): string {
+  if (!dateString) return 'Sin fecha';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-CO', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    });
+  } catch {
+    return 'Fecha inválida';
+  }
+}
+
 function ProviderPendingCard({ provider, isSelected, onClick }: ProviderPendingCardProps) {
   return (
     <button
@@ -148,15 +160,13 @@ function ProviderPendingCard({ provider, isSelected, onClick }: ProviderPendingC
       </div>
 
       <p className="text-xs text-[#6A6A6A] mb-2">
-        {/* TODO: Agregar tipoEstablecimiento a ProveedorListItem */}
-        Restaurante
+        {provider.tipoEstablecimiento || 'Establecimiento'}
       </p>
 
       <div className="flex items-center justify-between text-xs text-[#6A6A6A]">
         <span>Solicitud:</span>
         <span className="font-medium">
-          {/* TODO: Usar fecha real de solicitud */}
-          2025-11-15
+          {formatDate(provider.createdAt)}
         </span>
       </div>
     </button>

@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { INITIAL_BASIC_INFO_FORM } from '@/types/basic-info';
-import { createCommerce, createPresignedDocument, confirmDocumentUpload } from '@/lib/api';
+import { createCommerceBasic, createPresignedDocument, confirmDocumentUpload } from '@/lib/api';
 import { getSessionFromCookie } from '@/lib/session';
-import { basicInfoToProveedorPayload } from '@/types/provider.adapters';
+import { basicInfoToCommerceBasicPayload } from '@/types/commerces.adapters';
 import { uploadFileToPresignedUrl, getBackendMimeType } from '@/lib/utils/document-upload';
 import { validateBasicInfoForm } from '@/lib/provider/validations/basic-info';
 
@@ -98,9 +98,11 @@ export const useBasicInfoForm = () => {
         throw new Error('missing_owner_user_id');
       }
 
-      const payload = basicInfoToProveedorPayload(formData, ownerUserId);
-      const commerceResponse = await createCommerce(payload);
-      const commerceId = commerceResponse.data.id;
+      const payload = basicInfoToCommerceBasicPayload(formData, ownerUserId);
+      const commerceResponse = await createCommerceBasic(payload);
+      // Extraer el commerce de la respuesta CommerceBasicDataResponse
+      const commerce = commerceResponse.data.commerce;
+      const commerceId = commerce.id;
 
       await uploadCommerceDocuments(commerceId);
 

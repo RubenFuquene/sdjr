@@ -77,12 +77,12 @@ class CommerceBasicDataRequest extends FormRequest
             'commerce_documents.*.uploaded_at' => ['nullable', 'date'],
             'commerce_documents.*.verified_at' => ['nullable', 'date'],
 
-            'my_account.type' => ['required', 'string', 'max:15'],
-            'my_account.account_type' => ['required', 'string', 'max:50'],
-            'my_account.bank_id' => ['required', 'exists:banks,id'],
-            'my_account.account_number' => ['required', 'string', 'max:50'],
-            'my_account.owner_id' => ['required', 'exists:users,id'],
-            'my_account.is_primary' => ['boolean'],
+            // 'my_account.type' => ['required', 'string', 'max:15'],
+            // 'my_account.account_type' => ['required', 'string', 'max:50'],
+            // 'my_account.bank_id' => ['required', 'exists:banks,id'],
+            // 'my_account.account_number' => ['required', 'string', 'max:50'],
+            // 'my_account.owner_id' => ['required', 'exists:users,id'],
+            // 'my_account.is_primary' => ['boolean'],
         ];
     }
 

@@ -19,6 +19,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   
   const [formData, setFormData] = useState({
     name: "",
+    last_name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -29,12 +30,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
   const validateName = (name: string) => name.trim().length >= 2;
+  const validateLastName = (lastName: string) => lastName.trim().length >= 2;
   const validateEmail = (email: string) => emailRegex.test(email);
-  const validatePassword = (password: string) => password.length >= 6;
+  const validatePassword = (password: string) => password.length >= 8;
   const validatePasswordMatch = (pwd: string, confirm: string) => pwd === confirm && pwd.length > 0;
 
   // Obtener estado de validación para cada campo
   const isNameValid = formData.name === "" || validateName(formData.name);
+  const isLastNameValid = formData.last_name === "" || validateLastName(formData.last_name);
   const isEmailValid = formData.email === "" || validateEmail(formData.email);
   const isPasswordValid = formData.password === "" || validatePassword(formData.password);
   const isConfirmPasswordValid = formData.confirmPassword === "" || validatePasswordMatch(formData.password, formData.confirmPassword);
@@ -42,6 +45,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   // Validar si el formulario está completo y válido
   const isFormValid =
     formData.name.trim().length >= 2 &&
+    formData.last_name.trim().length >= 2 &&
     validateEmail(formData.email) &&
     validatePassword(formData.password) &&
     validatePasswordMatch(formData.password, formData.confirmPassword);
@@ -75,8 +79,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       // Usar el hook para registro
       const { redirectTo } = await handleRegister(
         formData.name,
+        formData.last_name,
         formData.email,
-        formData.password
+        formData.password,
+        formData.confirmPassword
       );
       
       // Registro exitoso - redirigir al dashboard
@@ -115,6 +121,35 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         {touched.name && !isNameValid && (
           <p className="text-xs text-red-600">
             El nombre debe tener al menos 2 caracteres.
+          </p>
+        )}
+      </div>
+
+      {/* Campo Apellido */}
+      <div className="space-y-2">
+        <Label htmlFor="last_name" className="text-[#1A1A1A] font-semibold">
+          Apellido
+        </Label>
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <Input
+            id="last_name"
+            name="last_name"
+            type="text"
+            placeholder="Tu Apellido"
+            value={formData.last_name}
+            onChange={handleChange}
+            onBlur={() => handleBlur("last_name")}
+            disabled={loading}
+            className={cn(
+              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
+              touched.last_name && !isLastNameValid && "border-red-300 bg-red-50"
+            )}
+          />
+        </div>
+        {touched.last_name && !isLastNameValid && (
+          <p className="text-xs text-red-600">
+            El apellido debe tener al menos 2 caracteres.
           </p>
         )}
       </div>
@@ -172,7 +207,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
         {touched.password && !isPasswordValid && (
           <p className="text-xs text-red-600">
-            La contraseña debe tener al menos 6 caracteres.
+            La contraseña debe tener al menos 8 caracteres.
           </p>
         )}
       </div>

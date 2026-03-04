@@ -10,8 +10,8 @@
 export { API_URL, ApiError, getAuthHeaders, fetchWithErrorHandling } from "./client";
 
 // Authentication
-export { login, logout } from "./auth";
-export type { LoginResult } from "./auth";
+export { login, register, logout } from "./auth";
+export type { LoginResult, RegisterResult } from "./auth";
 
 // Roles (Perfiles)
 export { getRoles, createRole, updateRole, updateRoleStatus, deleteRole } from "./roles";
@@ -22,6 +22,7 @@ export {
   getCommerceById,
   getMyCommerce,
   createCommerce,
+  createCommerceBasic,
   updateCommerce,
   deleteCommerce,
 } from "./commerces";

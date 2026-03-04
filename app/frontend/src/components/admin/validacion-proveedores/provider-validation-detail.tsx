@@ -6,12 +6,14 @@
  * - Renderizar tabs (reutiliza tabs compartidos)
  * - Integrar sección de comentarios
  * - Mostrar acciones de aprobación/rechazo
+ * - Callback opcionales para notificaciones de éxito/error
  * 
  * Reutiliza:
  * - ProviderDatosBasicosTab
  * - ProviderSucursalesTab
  * - ProviderBancariaTab
  * - ProviderLegalTab
+ * - ProviderValidationActions (con hook interno de aprobación)
  */
 
 'use client';
@@ -33,8 +35,8 @@ import { ProviderValidationActions } from './provider-validation-actions';
 
 interface ProviderValidationDetailProps {
   provider: Proveedor;
-  onApprove: (providerId: number) => Promise<void>;
-  onReject: (providerId: number, reason: string) => Promise<void>;
+  onApprovalSuccess?: (message: string) => void;
+  onApprovalError?: (error: string) => void;
 }
 
 // ============================================
@@ -61,8 +63,8 @@ const TABS: Tab[] = [
 
 export function ProviderValidationDetail({
   provider,
-  onApprove,
-  onReject,
+  onApprovalSuccess,
+  onApprovalError,
 }: ProviderValidationDetailProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('basicos');
 
@@ -139,17 +141,14 @@ export function ProviderValidationDetail({
             <ProviderLegalTab formData={provider} />
           )}
         </div>
-
-        {/* Comments Section */}
-        <ProviderValidationComments providerId={provider.id} />
       </div>
 
       {/* Footer con acciones */}
       <div className="px-8 py-6 border-t border-[#E0E0E0]">
         <ProviderValidationActions
           providerId={provider.id}
-          onApprove={onApprove}
-          onReject={onReject}
+          onApprovalSuccess={onApprovalSuccess}
+          onApprovalError={onApprovalError}
         />
       </div>
     </div>

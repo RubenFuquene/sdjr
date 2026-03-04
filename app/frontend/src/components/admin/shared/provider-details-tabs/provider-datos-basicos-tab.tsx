@@ -9,8 +9,10 @@
 
 'use client';
 
-import { FileText, Download } from 'lucide-react';
+import { useState } from 'react';
+import { FileText, Download, Loader2, AlertCircle } from 'lucide-react';
 import type { Proveedor, Perfil, DocumentoProveedor } from '@/types/admin';
+import { descargarDocumentoPorEndpoint } from '@/lib/api/documents';
 
 // ============================================
 // Props Interface
@@ -208,26 +210,6 @@ export function ProviderDatosBasicosTab({
             placeholder="Ej: Calle 10 # 40-20"
           />
         </div>
-
-        {/* Perfil - Colspan-2 */}
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-            Perfil Asignado
-          </label>
-          <select
-            value={formData.perfil || ''}
-            onChange={(e) => onFieldChange('perfil', e.target.value)}
-            disabled={isViewMode}
-            className="w-full h-[50px] px-4 border border-[#E0E0E0] rounded-[14px] focus:outline-none focus:ring-2 focus:ring-[#4B236A] disabled:bg-[#F7F7F7] disabled:text-[#6A6A6A] transition-colors"
-          >
-            <option value="">Seleccionar perfil...</option>
-            {perfiles.map((perfil) => (
-              <option key={perfil.id} value={perfil.nombre}>
-                {perfil.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {/* Sección de Documentos */}
@@ -260,19 +242,47 @@ export function ProviderDatosBasicosTab({
 
 /**
  * Componente para mostrar un documento individual
+ * Maneja descarga con flujo presignado del backend
  */
 interface DocumentItemProps {
   documento: DocumentoProveedor;
 }
 
 function DocumentItem({ documento }: DocumentItemProps) {
-  const handleDownload = () => {
-    // TODO: Implementar descarga real
-    console.log('Descargar documento:', documento);
-    
-    // Abrir en nueva pestaña por ahora
-    if (documento.url && documento.url !== '#') {
-      window.open(documento.url, '_blank');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDownload = async () => {
+    if (!documento.url || documento.url === '#') {
+      setError('URL de descarga no disponible');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Extraer nombre del archivo desde el tipo de documento
+      const tipoMap: Record<DocumentoProveedor['tipo'], string> = {
+        cedula_ciudadania: 'cedula_ciudadania',
+        cedula_extranjeria: 'cedula_extranjeria',
+        pasaporte: 'pasaporte',
+        camara_comercio: 'camara_comercio',
+      };
+      
+      const nombreTipo = tipoMap[documento.tipo] || 'documento';
+      const nombreArchivo = `${nombreTipo}_${documento.id || 'sin-id'}.pdf`;
+
+      // Llamar a la función de descarga con presigned URL
+      // documento.url = /api/v1/documents/{id}/download-url
+      await descargarDocumentoPorEndpoint(documento.url, nombreArchivo);
+      
+    } catch (err) {
+      const mensaje = err instanceof Error ? err.message : 'Error desconocido al descargar';
+      setError(mensaje);
+      console.error('Error descargando documento:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -285,30 +295,57 @@ function DocumentItem({ documento }: DocumentItemProps) {
   };
 
   return (
-    <div className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-xl hover:bg-[#F7F7F7] transition-colors">
-      <div className="flex items-center gap-3">
-        <div className="flex-shrink-0 w-10 h-10 bg-[#4B236A]/10 rounded-lg flex items-center justify-center">
-          <FileText className="w-5 h-5 text-[#4B236A]" />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-[#1A1A1A]">
-            {tipoLabels[documento.tipo] || documento.nombre}
-          </p>
-          {documento.fechaSubida && (
-            <p className="text-xs text-[#6A6A6A]">
-              Subido: {new Date(documento.fechaSubida).toLocaleDateString('es-CO')}
+    <div className="border border-[#E0E0E0] rounded-xl overflow-hidden">
+      {/* Contenedor principal del documento */}
+      <div className="flex items-center justify-between p-3 hover:bg-[#F7F7F7] transition-colors">
+        <div className="flex items-center gap-3 flex-1">
+          <div className="flex-shrink-0 w-10 h-10 bg-[#4B236A]/10 rounded-lg flex items-center justify-center">
+            <FileText className="w-5 h-5 text-[#4B236A]" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-[#1A1A1A]">
+              {tipoLabels[documento.tipo] || documento.nombre}
             </p>
-          )}
+            {documento.fechaSubida && (
+              <p className="text-xs text-[#6A6A6A]">
+                Subido: {new Date(documento.fechaSubida).toLocaleDateString('es-CO')}
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* Botón de descarga */}
+        <button
+          onClick={handleDownload}
+          disabled={isLoading}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
+            isLoading
+              ? 'bg-[#4B236A]/20 text-[#4B236A] cursor-not-allowed'
+              : 'text-[#4B236A] hover:bg-[#4B236A] hover:text-white'
+          }`}
+          aria-label={`Descargar ${tipoLabels[documento.tipo]}`}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm">Descargando...</span>
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              <span className="text-sm">Descargar</span>
+            </>
+          )}
+        </button>
       </div>
-      <button
-        onClick={handleDownload}
-        className="flex items-center gap-2 px-3 py-2 text-[#4B236A] hover:bg-[#4B236A] hover:text-white rounded-lg transition-colors"
-        aria-label={`Descargar ${tipoLabels[documento.tipo]}`}
-      >
-        <Download className="w-4 h-4" />
-        <span className="text-sm">Descargar</span>
-      </button>
+
+      {/* Mostrar error si lo hay */}
+      {error && (
+        <div className="px-3 py-2 bg-red-50 border-t border-[#E0E0E0] flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <p className="text-xs text-red-600">{error}</p>
+        </div>
+      )}
     </div>
   );
 }

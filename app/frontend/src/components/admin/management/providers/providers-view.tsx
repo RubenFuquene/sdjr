@@ -15,7 +15,7 @@
 import { useState, useCallback, ReactNode, useMemo } from 'react';
 import { ProveedorListItem, Proveedor, Perfil } from '@/types/admin';
 import { updateCommerce } from '@/lib/api/index';
-import { proveedorToBackendPayload } from '@/types/provider.adapters';
+import { proveedorToBackendPayload } from '@/types/commerces.adapters';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { ProvidersTable } from './providers-table';
 import { ProfilesFilters } from '../profiles-filters';

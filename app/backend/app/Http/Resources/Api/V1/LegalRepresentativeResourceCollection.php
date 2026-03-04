@@ -24,10 +24,8 @@ class LegalRepresentativeResourceCollection extends ResourceCollection
      */
     public function toArray($request): array
     {
-        return [
-            $this->collection->map(function ($item) {
-                return new LegalRepresentativeResource($item);
-            }),
-        ];
+        return $this->collection->map(function ($item) {
+            return new LegalRepresentativeResource($item);
+        })->all();
     }
 }
