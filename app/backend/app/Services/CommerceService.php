@@ -73,9 +73,9 @@ class CommerceService
     }
 
     /**
-     * Get paginated commerces with filters: page, per_page, search, status
+     * Get paginated commerces with filters: page, per_page, search, status, verified
      */
-    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null): LengthAwarePaginator
+    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null, $verified = null): LengthAwarePaginator
     {
         $query = Commerce::query();
 
@@ -91,6 +91,10 @@ class CommerceService
 
         if (! is_null($status)) {
             $query->where('is_active', $status);
+        }
+
+        if (! is_null($verified)) {
+            $query->where('is_verified', $verified);
         }
 
         return $query->paginate($perPage, ['*'], 'page', $page);

@@ -37,10 +37,12 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
     nombreComercial: commerce.name,
     representanteLegal,
     telefono: commerce.phone || 'N/A',
-    email: commerce.email,
-    perfil: 'Proveedor', // TODO: Obtener del backend si está disponible
+    email: commerce.email || '',
+    perfil: 'Proveedor',
     estado: commerce.is_active,
     verificado: commerce.is_verified,
+    tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible (actualmente no proporcionado)
+    createdAt: commerce.created_at,
   };
 };
 
@@ -52,7 +54,7 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
  * @returns Estructura completa para el modal
  */
 export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
-  const representanteLegal = commerce.legal_representatives?.[0]?.name || '';
+  const representanteLegal = (commerce.legal_representatives?.[0]?.name || '') + ' ' + (commerce.legal_representatives?.[0]?.last_name || '');
   const barrio = commerce.neighborhood?.name || '';
 
   return {
@@ -60,10 +62,10 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     id: commerce.id,
     nombreComercial: commerce.name,
     nit: commerce.tax_id,
-    representanteLegal,
+    representanteLegal: representanteLegal.trim(),
     tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible
-    telefono: commerce.phone,
-    email: commerce.email,
+    telefono: commerce.phone || '',
+    email: commerce.email || '',
     departamento: commerce.department?.name || '',
     ciudad: commerce.city?.name || '',
     barrio,
@@ -75,8 +77,8 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     verificado: commerce.is_verified,
     descripcion: commerce.description,
 
-    // Relaciones (vacías por ahora - requieren endpoints adicionales)
-    documentos: [],
+    // Relaciones
+    documentos: mapearCommerceDocumentsADocumentos(commerce.documents),
     sucursales: [],
     informacionBancaria: undefined,
     legal: undefined,
@@ -103,9 +105,70 @@ export const commercesToProveedorListItems = (commerces: CommerceFromAPI[]): Pro
 // ============================================
 
 /**
- * Mapea documentos desde estructura del backend a tipos UI
+ * Mapea CommerceDocumentFromAPI a DocumentoProveedor
+ * Convierte documentos del backend a estructura UI
+ *
+ * IMPORTANTE: Para descargar, usar download.endpoint (no file_path)
+ * - download.endpoint: API endpoint que genera URL presignada (POST)
+ * - file_path: Ruta interna en S3 (uso interno backend, no descargable)
+ *
+ * Flujo de descarga:
+ * 1. Frontend hace POST a download.endpoint
+ * 2. Backend retorna {url, expires_at, expired_in_seconds}
+ * 3. Frontend descarga desde la URL presignada
+ *
+ * @param documents - Array de CommerceDocumentFromAPI del backend
+ * @returns Array de DocumentoProveedor para mostrar en UI
+ */
+export const mapearCommerceDocumentsADocumentos = (
+  documents?: Array<{
+    id: number;
+    document_type: string;
+    file_path: string;
+    mime_type: string;
+    file_size_bytes: number;
+    upload_status: string;
+    version_number: number;
+    verified: boolean;
+    download?: { mode: string; endpoint: string };
+    uploaded_at?: string | null;
+    created_at?: string;
+  }>
+): DocumentoProveedor[] => {
+  if (!documents || !Array.isArray(documents)) {
+    return [];
+  }
+
+  return documents.map((doc) => {
+    // Mapear document_type backend a tipo UI
+    const tipoMap: Record<string, DocumentoProveedor['tipo']> = {
+      'CEDULA_CIUDADANIA': 'cedula_ciudadania',
+      'CEDULA_EXTRANJERIA': 'cedula_extranjeria',
+      'PASAPORTE': 'pasaporte',
+      'CAMARA_COMERCIO': 'camara_comercio',
+      'ID_CARD': 'cedula_ciudadania', // Mapeo alternativo
+    };
+    
+    const tipo = tipoMap[doc.document_type] || 'cedula_ciudadania';
+    
+    // ✅ USAR: download.endpoint para obtener URL presignada
+    // ❌ NO USAR: file_path (ruta interna S3, no descargable directamente)
+    const downloadEndpoint = doc.download?.endpoint || '#';
+    
+    return {
+      id: doc.id.toString(),
+      tipo,
+      nombre: `${doc.document_type} (${doc.mime_type})`,
+      url: downloadEndpoint, // Endpoint API, no URL directa
+      fechaSubida: doc.uploaded_at || doc.created_at,
+    };
+  });
+};
+
+/**
+ * Mapea documentos desde estructura genérica del backend a tipos UI
  * Estructura backend esperada: Campo "documentos" o similar
- * (Actualizar según estructura real del backend)
+ * (Versión genérica - preferir mapearCommerceDocumentsADocumentos)
  *
  * @param backendDocumentos - Documentos del backend
  * @returns Array de DocumentoProveedor

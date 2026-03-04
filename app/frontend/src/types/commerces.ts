@@ -20,32 +20,64 @@ export interface CommerceFromAPI {
   owner_user: {
     id: number;
     name: string;
+    last_name?: string;
     email: string;
+    phone?: string;
+    roles?: string[];
+    status?: string;
+    created_at?: string | null;
+    updated_at?: string | null;
   };
   department: {
     id: number;
     name: string;
+    country_id?: number;
+    code?: string;
+    status?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   city: {
     id: number;
     name: string;
+    department_id?: number;
+    code?: string;
+    status?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   neighborhood?: {
     id: number;
     name: string;
+    city_id?: number;
+    code?: string;
+    status?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   legal_representatives: Array<{
     id: number;
+    commerce_id?: number;
     name: string;
-    email: string;
+    last_name: string;
+    document: string;
+    document_type: string;
+    email?: string | null;
+    phone?: string | null;
+    is_primary?: boolean;
+    status?: string;
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: string | null;
   }>;
+  documents: CommerceDocumentFromAPI[];
   name: string;
-  description: string;
+  description?: string;
   tax_id: string;
   tax_id_type: string;
   address: string;
-  phone: string;
-  email: string;
+  phone?: string;
+  email?: string;
   is_active: boolean;
   is_verified: boolean;
   created_at: string;
@@ -69,6 +101,8 @@ export interface ProveedorListItem {
   perfil: string;
   estado: boolean; // is_active
   verificado: boolean; // is_verified
+  tipoEstablecimiento?: string; // Tipo de establecimiento (Ej: Restaurante, Tienda, etc)
+  createdAt?: string; // Fecha de creación/solicitud (ISO 8601)
 }
 
 /**
@@ -246,34 +280,40 @@ export interface ProveedorUpdateResponse {
  */
 export interface CommerceDocumentFromAPI {
   id: number;
-  commerce_id: number;
   document_type: string;
   file_path: string;
   mime_type: string;
   file_size_bytes: number;
+  upload_status: string; // 'confirmed', 'pending', etc
+  version_number: number;
   verified: boolean;
   verified_by_id?: number;
   uploaded_by_id?: number;
-  uploaded_at?: string;
-  verified_at?: string;
-  created_at: string;
-  updated_at: string;
+  uploaded_at?: string | null;
+  verified_at?: string | null;
+  download?: {
+    mode: string; // 'url'
+    endpoint: string; // URL para descargar
+  };
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**
  * Método de pago del comercio en respuesta backend
- * Estructura de CommercePayoutMethodResource
+ * Estructura de CommercePayoutMethodResource (my_account en respuesta básica)
  */
 export interface CommercePayoutMethodFromAPI {
   id: number;
-  commerce_id: number;
+  commerce_id?: number;
   type: string;
   account_type: string;
   bank_id: number;
   account_number: string;
-  is_primary: boolean;
-  created_at: string;
-  updated_at: string;
+  owner_id?: number;
+  is_primary?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**

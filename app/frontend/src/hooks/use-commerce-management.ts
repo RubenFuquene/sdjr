@@ -39,12 +39,15 @@ export interface CommerceFilters {
   perPage?: number;
   search?: string;
   status?: string;
+  verified?: string; // opcional: 1 (verified) | 0 (not verified) | all
 }
 
 /**
  * Hook de gestión centralizado de comercios/proveedores
+ * 
+ * @param initialFilters - Filtros iniciales para cargar comercios (ej: { verified: '0' })
  */
-export function useCommerceManagement() {
+export function useCommerceManagement(initialFilters?: Partial<CommerceFilters>) {
   // Estado de datos
   const [commerces, setCommerces] = useState<ProveedorListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,23 +62,23 @@ export function useCommerceManagement() {
   const [filters, setFilters] = useState<CommerceFilters>({
     page: 1,
     perPage: 15,
+    ...initialFilters,
   });
 
   /**
-   * Fetch de comercios desde API
-   * GET /api/v1/commerces?page={page}&per_page={perPage}&search={search}&status={status}
+   * Fetch interno sin dependencia en filters para evitar ciclos
    */
-  const fetchCommerces = useCallback(async (customFilters?: CommerceFilters) => {
+  const performFetch = useCallback(async (filtersToUse: CommerceFilters) => {
     try {
       setLoading(true);
       setError(null);
 
-      const currentFilters = customFilters || filters;
       const response = await getCommerces({
-        page: currentFilters.page,
-        perPage: currentFilters.perPage,
-        search: currentFilters.search,
-        status: currentFilters.status,
+        page: filtersToUse.page,
+        perPage: filtersToUse.perPage,
+        search: filtersToUse.search,
+        status: filtersToUse.status,
+        verified: filtersToUse.verified,
       });
 
       const mappedCommerces = response.data.map(commerceToProveedorListItem);
@@ -94,14 +97,29 @@ export function useCommerceManagement() {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, []);
 
   /**
-   * Cargar comercios al montar el componente
+   * Fetch de comercios desde API - versión pública
+   * GET /api/v1/commerces?page={page}&per_page={perPage}&search={search}&status={status}&verified={verified}
+   */
+  const fetchCommerces = useCallback(async (customFilters?: CommerceFilters) => {
+    const filtersToUse = customFilters || filters;
+    return performFetch(filtersToUse);
+  }, [filters, performFetch]);
+
+  /**
+   * Cargar comercios al montar el componente (solo una vez con los filtros iniciales)
    */
   useEffect(() => {
-    fetchCommerces();
-  }, [fetchCommerces]);
+    // Usar los filtros finales después de que el estado se haya establecido
+    void performFetch({
+      page: 1,
+      perPage: 15,
+      ...initialFilters,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Buscar comercios con filtros
@@ -119,6 +137,7 @@ export function useCommerceManagement() {
         perPage: newFilters.perPage,
         search: newFilters.search,
         status: newFilters.status,
+        verified: newFilters.verified,
       });
 
       const mappedCommerces = response.data.map(commerceToProveedorListItem);
@@ -155,6 +174,7 @@ export function useCommerceManagement() {
         perPage: newFilters.perPage,
         search: newFilters.search,
         status: newFilters.status,
+        verified: newFilters.verified,
       });
 
       const mappedCommerces = response.data.map(commerceToProveedorListItem);
