@@ -141,11 +141,10 @@ class CommerceBasicDataTest extends TestCase
             'commerce.tax_id',
             'commerce.tax_id_type',
             'commerce.address',
-            'my_account.type',
-            'my_account.account_type',
-            'my_account.bank_id',
-            'my_account.account_number',
-            'my_account.owner_id',
+            'legal_representative.name',
+            'legal_representative.last_name',
+            'legal_representative.document',
+            'legal_representative.document_type',
         ]);
     }
 
