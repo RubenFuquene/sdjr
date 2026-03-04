@@ -15,6 +15,7 @@
 import { useState, useCallback, ReactNode, useMemo } from 'react';
 import { ProveedorListItem, Proveedor, Perfil } from '@/types/admin';
 import { updateCommerce } from '@/lib/api/index';
+import { proveedorToBackendPayload } from '@/types/commerces.adapters';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { ProvidersTable } from './providers-table';
 import { ProfilesFilters } from '../profiles-filters';
@@ -179,12 +180,8 @@ export function ProvidersView({
    */
   const handleSaveModal = useCallback(async (updatedProvider: Proveedor) => {
     try {
-      // Guardado real con API - enviar solo los datos editables
-      const payload = {
-        name: updatedProvider.nombre,
-        email: updatedProvider.email,
-        phone: updatedProvider.telefono,
-      };
+      // Guardado real con API
+      const payload = proveedorToBackendPayload(updatedProvider);
       const response = await updateCommerce(updatedProvider.id, payload);
       console.log('Proveedor actualizado:', response.message || 'OK');
       await commerceManagement.refresh();
