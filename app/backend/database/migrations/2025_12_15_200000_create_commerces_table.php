@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('phone', 20)->nullable();
             $table->string('email', 100)->nullable();
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_verified')->default(false);
+            $table->char('is_verified', 1)->default('0');
             $table->timestamps();
             $table->softDeletes();
             $table->index(['owner_user_id', 'department_id', 'city_id']);

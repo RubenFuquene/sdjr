@@ -10,6 +10,10 @@ class Constant
 
     public const STATUS_INACTIVE = 0;
 
+    public const STATUS_REJECTED = 2;
+
+    public const STATUS_PENDING = 3;
+
     public const DEFAULT_PER_PAGE = 15;
 
     // Payout methods
@@ -82,7 +86,11 @@ class Constant
     // Commerce Branch Photos
     public const MAX_PHOTOS_PER_COMMERCE_BRANCH = 5;
 
-    public const COMMERCE_VERIFIED = true;
+    public const COMMERCE_PENDING = 0;
+
+    public const COMMERCE_VERIFIED = 1;
+
+    public const COMMERCE_REJECTED = 2;
 
     // Commerce Document Types
     public const COMMERCE_DOCUMENT_TYPE_NIT = 'NIT';

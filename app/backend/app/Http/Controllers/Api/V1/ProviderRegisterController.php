@@ -78,7 +78,7 @@ class ProviderRegisterController extends Controller
                 'password' => $request->input('password'),
             ]);
 
-            // Enviar notificación de bienvenida            
+            // Enviar notificación de bienvenida
             $user->notify(new WelcomeProviderNotification($user));
 
             return $this->loginResponse(new UserResource($user), $tokenData['token']);

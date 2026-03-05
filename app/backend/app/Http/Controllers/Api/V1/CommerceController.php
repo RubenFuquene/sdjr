@@ -16,6 +16,7 @@ use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
+use App\Notifications\CommerceRejectedNotification;
 use App\Notifications\CommerceVerifiedNotification;
 use App\Services\CommerceBranchService;
 use App\Services\CommercePayoutMethodService;
@@ -334,7 +335,7 @@ class CommerceController extends Controller
      *         @OA\JsonContent(
      *             required={"is_verified"},
      *
-     *             @OA\Property(property="is_verified", type="integer", enum={1,0}, example=1)
+     *             @OA\Property(property="is_verified", type="integer", enum={0,1,2}, example=1)
      *         )
      *     ),
      *
@@ -357,15 +358,23 @@ class CommerceController extends Controller
 
             $commerce = $this->commerceService->updateVerification($id, (int) $request->validated('is_verified'));
 
-            // Si el comercio fue verificado, enviar notificación
-            if ($commerce->is_verified === Constant::COMMERCE_VERIFIED) {
-                $user = $commerce->ownerUser;
-                if ($user && $user->email) {
+            // Si el comercio fue verificado o rechazado enviar notificación
+            $user = $commerce->ownerUser;
+            Log::info('Commerce verification updated', ['commerce_id' => $commerce->id, 'is_verified' => $commerce->is_verified]);
+            switch ($commerce->is_verified) {
+                case Constant::COMMERCE_VERIFIED:
+                    $message = 'Commerce verified successfully';
                     $user->notify(new CommerceVerifiedNotification($commerce));
-                }
+                    break;
+                case Constant::COMMERCE_REJECTED:
+                    $message = 'Commerce rejected successfully';
+                    $user->notify(new CommerceRejectedNotification($commerce));
+                    break;
+                default:
+                    $message = 'Commerce verification updated successfully';
             }
 
-            return $this->successResponse(new CommerceResource($commerce), 'Commerce verification updated successfully', 200);
+            return $this->successResponse(new CommerceResource($commerce), $message, 200);
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse('Commerce not found', 404);
         } catch (\Throwable $e) {
