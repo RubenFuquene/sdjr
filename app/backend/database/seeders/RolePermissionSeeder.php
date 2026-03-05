@@ -126,7 +126,7 @@ class RolePermissionSeeder extends Seeder
 
             // Módulos de Proveedor
             ['name' => 'provider.basic_data.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de datos básicos de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de comercios de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.branches.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de sucursales de proveedor', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de productos de proveedor', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.my_account.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de mi cuenta de proveedor', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.my_wallet.show', 'guard_name' => $guardName, 'description' => 'Ver módulo de mi billetera de proveedor', 'created_at' => now(), 'updated_at' => now()],
@@ -138,14 +138,21 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.legal_documents.index', 'guard_name' => $guardName, 'description' => 'Listar documentos legales', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.legal_documents.create', 'guard_name' => $guardName, 'description' => 'Crear documentos legales', 'created_at' => now(), 'updated_at' => now()],
 
+            // Módulo de Sucursales
+            ['name' => 'provider.branches.index', 'guard_name' => $guardName, 'description' => 'Listar sucursales', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.branches.create', 'guard_name' => $guardName, 'description' => 'Crear sucursales', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.branches.show', 'guard_name' => $guardName, 'description' => 'Ver sucursales', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.branches.update', 'guard_name' => $guardName, 'description' => 'Actualizar sucursales', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.branches.delete', 'guard_name' => $guardName, 'description' => 'Eliminar sucursales', 'created_at' => now(), 'updated_at' => now()],
+
             // Módulos de Comercios
+            ['name' => 'provider.commerce_payout_methods.index', 'guard_name' => $guardName, 'description' => 'Listar métodos de pago de comercio de proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerces.mine', 'guard_name' => $guardName, 'description' => 'Mostrar mis comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.index', 'guard_name' => $guardName, 'description' => 'Listar comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.create', 'guard_name' => $guardName, 'description' => 'Crear comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'Ver comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Actualizar comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Eliminar comercios', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerce_payout_methods.index', 'guard_name' => $guardName, 'description' => 'Listar métodos de pago de comercio de proveedor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.commerces.mine', 'guard_name' => $guardName, 'description' => 'Mostrar mis comercios', 'created_at' => now(), 'updated_at' => now()],
 
             // Representantes Legales
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'Listar representantes legales', 'created_at' => now(), 'updated_at' => now()],

@@ -10,7 +10,7 @@ class DeleteCommerceBranchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.commerces.delete') ?? false;
+        return $this->user()?->can('provider.branches.delete') ?? false;
     }
 
     public function rules(): array

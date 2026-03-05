@@ -68,7 +68,7 @@ class StoreCommerceBranchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.commerces.create') ?? false;
+        return $this->user()?->can('provider.branches.create') ?? false;
     }
 
     public function rules(): array
