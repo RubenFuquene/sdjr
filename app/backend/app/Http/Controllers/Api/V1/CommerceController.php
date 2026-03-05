@@ -354,6 +354,7 @@ class CommerceController extends Controller
     public function patchVerification(PatchCommerceVerificationRequest $request, int $id): JsonResponse
     {
         try {
+
             $commerce = $this->commerceService->updateVerification($id, (int) $request->validated('is_verified'));
 
             // Si el comercio fue verificado, enviar notificación

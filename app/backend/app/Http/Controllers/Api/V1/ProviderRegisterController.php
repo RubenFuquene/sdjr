@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\ProviderRegisterRequest;
 use App\Http\Resources\Api\V1\UserResource;
+use App\Notifications\WelcomeProviderNotification;
 use App\Services\AuthService;
 use App\Services\RoleService;
 use App\Services\UserService;
@@ -77,7 +78,11 @@ class ProviderRegisterController extends Controller
                 'password' => $request->input('password'),
             ]);
 
+            // Enviar notificación de bienvenida            
+            $user->notify(new WelcomeProviderNotification($user));
+
             return $this->loginResponse(new UserResource($user), $tokenData['token']);
+
         } catch (Throwable $e) {
             Log::error('Error registering provider', ['error' => $e->getMessage()]);
 
