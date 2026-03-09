@@ -220,6 +220,25 @@ class ProductService
     }
 
     /**
+     * Get product package items by product ID.
+     *
+     * @return Product
+     *
+     * @throws ModelNotFoundException
+     */
+    public function getProductPackage(int $product_package_id)
+    {
+        try {
+            $product = Product::where(['id' => $product_package_id, 'product_type' => Constant::PRODUCT_TYPE_PACKAGE])->firstOrFail();
+
+            return $product;
+        } catch (ModelNotFoundException $e) {
+            Log::error('Error fetching package items for product ID: '.$product_package_id, ['error' => $e->getMessage()]);
+            throw new ModelNotFoundException('Product Package not found with the specified ID.');
+        }
+    }
+
+    /**
      * Store product package items.
      *
      * @throws Exception
