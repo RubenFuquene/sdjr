@@ -271,7 +271,7 @@ function DocumentItem({ documento }: DocumentItemProps) {
       };
       
       const nombreTipo = tipoMap[documento.tipo] || 'documento';
-      const nombreArchivo = `${nombreTipo}_${documento.id || 'sin-id'}.pdf`;
+      const nombreArchivo = `${nombreTipo}_${documento.id || 'sin-id'}`;
 
       // Llamar a la función de descarga con presigned URL
       // documento.url = /api/v1/documents/{id}/download-url

@@ -155,15 +155,15 @@ export async function getMyCommerce(): Promise<ApiSuccess<CommerceFromAPI | null
  * Actualiza el estado de verificación de un comercio
  * 
  * Aprobación: is_verified = 1
- * Rechazo: is_verified = 0
+ * Rechazo: is_verified = 2
  * 
  * @param id - ID del comercio
- * @param isVerified - 1 para aprobar, 0 para rechazar
+ * @param isVerified - 1 para aprobar, 2 para rechazar
  * @returns Comercio actualizado
  */
 export async function updateCommerceVerification(
   id: number,
-  isVerified: 0 | 1
+  isVerified: 1 | 2
 ): Promise<ApiSuccess<CommerceFromAPI>> {
   return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
     `/api/v1/commerces/${id}/verification`,
@@ -211,11 +211,11 @@ export async function approveCommerce(id: number): Promise<ApiSuccess<CommerceFr
 
 /**
  * Convenience function: Rechazar un comercio/proveedor
- * Equivalente a: updateCommerceVerification(id, 0)
+ * Equivalente a: updateCommerceVerification(id, 2)
  * 
  * @param id - ID del comercio
  * @returns Comercio actualizado
  */
 export async function rejectCommerce(id: number): Promise<ApiSuccess<CommerceFromAPI>> {
-  return updateCommerceVerification(id, 0);
+  return updateCommerceVerification(id, 2);
 }

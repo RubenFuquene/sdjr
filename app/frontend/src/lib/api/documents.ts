@@ -190,10 +190,7 @@ export async function descargarDocumento(
 ): Promise<void> {
   try {
     // Paso 1: Obtener URL presignada del backend
-    const { url, expires_at } = await obtenerUrlDescargaDocumento(documentId);
-    
-    // Log para debugging
-    console.log(`[Descarga] Documento ${documentId}: URL presignada obtenida, expira en ${expires_at}`);
+    const { url } = await obtenerUrlDescargaDocumento(documentId);
     
     // Paso 2: Descargar desde la URL presignada
     // Nota: La URL presignada es de S3, NO necesita autenticación (already signed)
@@ -208,7 +205,7 @@ export async function descargarDocumento(
     const urlBlob = window.URL.createObjectURL(blob);
     const enlace = document.createElement('a');
     enlace.href = urlBlob;
-    enlace.download = nombreArchivo;
+    enlace.download = ensureFilenameWithExtension(nombreArchivo, descargaResponse, url);
     document.body.appendChild(enlace);
     enlace.click();
     
@@ -219,6 +216,67 @@ export async function descargarDocumento(
   } catch (error) {
     console.error('Error descargando documento:', error);
     throw error;
+  }
+}
+
+function ensureFilenameWithExtension(
+  fileName: string,
+  response: Response,
+  sourceUrl: string
+): string {
+  if (hasFileExtension(fileName)) {
+    return fileName;
+  }
+
+  const extensionFromContentType = getExtensionFromContentType(
+    response.headers.get('content-type')
+  );
+
+  if (extensionFromContentType) {
+    return `${fileName}.${extensionFromContentType}`;
+  }
+
+  const extensionFromUrl = getExtensionFromUrlPath(sourceUrl);
+  if (extensionFromUrl) {
+    return `${fileName}.${extensionFromUrl}`;
+  }
+
+  return fileName;
+}
+
+function hasFileExtension(fileName: string): boolean {
+  const lastSegment = fileName.split('/').pop() || fileName;
+  return /\.[a-z0-9]{2,5}$/i.test(lastSegment);
+}
+
+function getExtensionFromContentType(contentType: string | null): string | null {
+  if (!contentType) return null;
+
+  const normalized = contentType.split(';')[0]?.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const extensionMap: Record<string, string> = {
+    'application/pdf': 'pdf',
+    'image/png': 'png',
+    'image/jpeg': 'jpeg',
+    'image/jpg': 'jpg',
+    'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  };
+
+  return extensionMap[normalized] || null;
+}
+
+function getExtensionFromUrlPath(sourceUrl: string): string | null {
+  try {
+    const parsedUrl = new URL(sourceUrl);
+    const lastSegment = parsedUrl.pathname.split('/').pop();
+    if (!lastSegment) return null;
+
+    const match = lastSegment.match(/\.([a-z0-9]{2,5})$/i);
+    return match?.[1]?.toLowerCase() || null;
+  } catch {
+    return null;
   }
 }
 
