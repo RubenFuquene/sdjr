@@ -141,7 +141,6 @@ class RolePermissionSeeder extends Seeder
             // Módulo de Sucursales
             ['name' => 'provider.branches.index', 'guard_name' => $guardName, 'description' => 'Listar sucursales', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.branches.create', 'guard_name' => $guardName, 'description' => 'Crear sucursales', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.branches.show', 'guard_name' => $guardName, 'description' => 'Ver sucursales', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.branches.update', 'guard_name' => $guardName, 'description' => 'Actualizar sucursales', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.branches.delete', 'guard_name' => $guardName, 'description' => 'Eliminar sucursales', 'created_at' => now(), 'updated_at' => now()],
 
@@ -179,19 +178,13 @@ class RolePermissionSeeder extends Seeder
 
             ['name' => 'provider.products.index', 'guard_name' => $guardName, 'description' => 'Listar productos por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.create', 'guard_name' => $guardName, 'description' => 'Crear productos por comercio', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'provider.products.show', 'guard_name' => $guardName, 'description' => 'Ver producto por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.update', 'guard_name' => $guardName, 'description' => 'Actualizar productos por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.delete', 'guard_name' => $guardName, 'description' => 'Eliminar producto por comercio', 'created_at' => now(), 'updated_at' => now()],
 
         ];
 
         // Crear permisos si no existen
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(
-                ['name' => $permission['name'], 'guard_name' => $permission['guard_name']],
-                $permission
-            );
-        }
+        Permission::insert($permissions);
 
         // Crear roles si no existen
         $roles = [
@@ -199,19 +192,206 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin', 'guard_name' => $guardName, 'description' => 'Rol Administrador', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'provider', 'guard_name' => $guardName, 'description' => 'Rol Proveedor', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'user', 'guard_name' => $guardName, 'description' => 'Rol Usuario', 'status' => Constant::STATUS_ACTIVE],
+            ['name' => 'support', 'guard_name' => $guardName, 'description' => 'Rol Soporte', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'guest', 'guard_name' => $guardName, 'description' => 'Rol Invitado', 'status' => Constant::STATUS_INACTIVE],
         ];
 
-        foreach ($roles as $roleData) {
-            Role::firstOrCreate(
-                ['name' => $roleData['name'], 'guard_name' => $roleData['guard_name']],
-                $roleData
-            );
-        }
+        Role::insert($roles);
 
         // Asignar permisos a roles
+        // Superadmin tiene todos los permisos
         $role = Role::where('name', 'superadmin')->first();
         $role->givePermissionTo(Permission::all());
+
+        // Admin tiene permisos específicos
+        $indexShowPermissions = [
+            // Index
+            'admin.params.countries.index',
+            'admin.params.departments.index',
+            'admin.params.cities.index',
+            'admin.params.neighborhoods.index',
+            'admin.params.categories.index',
+            'admin.params.banks.index',
+            'admin.params.support_statuses.index',
+            'admin.params.establishments.index',
+            'admin.params.pqrs_types.index',
+            'admin.params.priority_types.index',
+            'admin.profiles.roles.index',
+            'admin.profiles.permissions.index',
+            'admin.profiles.provider.index',
+            'admin.profiles.users.index',
+            'admin.legal_documents.index',
+            'provider.branches.index',
+            'provider.commerce_payout_methods.index',
+            'provider.commerces.index',
+            'provider.legal_representatives.index',
+            'provider.establishment_types.index',
+            'provider.product_categories.index',
+            'provider.products.index',
+            // Show
+            'admin.params.show',
+            'admin.params.countries.show',
+            'admin.params.departments.show',
+            'admin.params.cities.show',
+            'admin.params.neighborhoods.show',
+            'admin.params.categories.show',
+            'admin.params.banks.show',
+            'admin.params.support_statuses.show',
+            'admin.params.establishments.show',
+            'admin.params.pqrs_types.show',
+            'admin.params.priority_types.show',
+            'admin.profiles.show',
+            'admin.profiles.roles.show',
+            'admin.profiles.permissions.show',
+            'admin.profiles.provider.show',
+            'admin.profiles.users.show',
+            'admin.provider_validate.show',
+            'admin.marketing.show',
+            'admin.dashboard.show',
+            'admin.support.show',
+            'admin.profiles.administrators.show',
+            'provider.basic_data.show',
+            'provider.branches.show',
+            'provider.products.show',
+            'provider.my_account.show',
+            'provider.my_wallet.show',
+            'provider.dashboard.show',
+            'provider.review.show',
+            'provider.support.show',
+            'provider.commerces.mine',
+            'provider.commerces.show',
+            'provider.legal_representatives.show',
+            'provider.establishment_types.show',
+            'provider.product_categories.show',
+            'provider.products.show',
+            'admin.my_pqrs.show',
+            'admin.manage_pqrs.show',
+        ];
+
+        $adminPermissions = array_merge($indexShowPermissions, [
+            // Create
+            'admin.params.countries.create',
+            'admin.params.departments.create',
+            'admin.params.cities.create',
+            'admin.params.neighborhoods.create',
+            'admin.params.categories.create',
+            'admin.params.banks.create',
+            'admin.params.support_statuses.create',
+            'admin.params.establishments.create',
+            'admin.params.pqrs_types.create',
+            'admin.params.priority_types.create',
+            'admin.profiles.roles.create',
+            'admin.profiles.permissions.create',
+            'admin.profiles.provider.create',
+            'admin.profiles.users.create',
+            'admin.legal_documents.create',
+            'provider.branches.create',
+            'provider.commerces.create',
+            'provider.legal_representatives.create',
+            'provider.establishment_types.create',
+            'provider.product_categories.create',
+            'provider.products.create',
+
+            // Update
+            'admin.params.countries.update',
+            'admin.params.departments.update',
+            'admin.params.cities.update',
+            'admin.params.neighborhoods.update',
+            'admin.params.categories.update',
+            'admin.params.banks.update',
+            'admin.params.support_statuses.update',
+            'admin.params.establishments.update',
+            'admin.params.pqrs_types.update',
+            'admin.params.priority_types.update',
+            'admin.profiles.roles.update',
+            'admin.profiles.permissions.update',
+            'admin.profiles.provider.update',
+            'admin.profiles.users.update',
+            'provider.branches.update',
+            'provider.commerces.update',
+            'provider.legal_representatives.update',
+            'provider.establishment_types.update',
+            'provider.product_categories.update',
+            'provider.products.update',
+
+            // Delete
+            'admin.params.countries.delete',
+            'admin.params.departments.delete',
+            'admin.params.cities.delete',
+            'admin.params.neighborhoods.delete',
+            'admin.params.categories.delete',
+            'admin.params.banks.delete',
+            'admin.params.support_statuses.delete',
+            'admin.params.establishments.delete',
+            'admin.params.pqrs_types.delete',
+            'admin.params.priority_types.delete',
+            'admin.profiles.roles.delete',
+            'admin.profiles.permissions.delete',
+            'admin.profiles.provider.delete',
+            'admin.profiles.users.delete',
+            'provider.branches.delete',
+            'provider.commerces.delete',
+            'provider.legal_representatives.delete',
+            'provider.establishment_types.delete',
+            'provider.product_categories.delete',
+            'provider.products.delete',
+        ]);
+
+        $adminRole = Role::where('name', 'admin')->first();
+        $adminRole->givePermissionTo($adminPermissions);
+
+        // Proveedor tiene permisos específicos
+        $providerPermissions = array_merge($indexShowPermissions, [
+            // Create
+            'provider.branches.create',
+            'provider.commerces.create',
+            'provider.legal_representatives.create',
+            'provider.establishment_types.create',
+            'provider.product_categories.create',
+            'provider.products.create',
+
+            // Update
+            'provider.branches.update',
+            'provider.commerces.update',
+            'provider.legal_representatives.update',
+            'provider.establishment_types.update',
+            'provider.product_categories.update',
+            'provider.products.update',
+
+            // Delete
+            'provider.branches.delete',
+            'provider.commerces.delete',
+            'provider.legal_representatives.delete',
+            'provider.establishment_types.delete',
+            'provider.product_categories.delete',
+            'provider.products.delete',
+
+            // Permisos adicionales de proveedor
+            'admin.providers.upload_documents',
+            'provider.photos.upload',
+        ]);
+
+        $providerRole = Role::where('name', 'provider')->first();
+        $providerRole->givePermissionTo($providerPermissions);
+
+        // Usuario tiene permisos específicos
+        $userPermissions = array_merge($indexShowPermissions, [
+
+        ]);
+
+        $userRole = Role::where('name', 'user')->first();
+        $userRole->givePermissionTo($userPermissions);
+
+        // Soporte tiene permisos específicos
+        $supportPermissions = [
+            'admin.my_pqrs.show',
+            'admin.manage_pqrs.show',
+        ];
+
+        $supportRole = Role::where('name', 'support')->first();
+        $supportRole->givePermissionTo($supportPermissions);
+
+        // Invitado no tiene permisos asignados
 
         // Asignar rol a un usuario específico
         $user = User::first();
