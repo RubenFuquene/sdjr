@@ -54,6 +54,7 @@ class BankController extends Controller
      *         @OA\Property(property="meta", type="object"),
      *         @OA\Property(property="links", type="object")
      *     )),
+     *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
      * )

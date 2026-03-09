@@ -130,7 +130,7 @@ Route::prefix('v1')->group(function () {
         // Product Management routes
         Route::apiResource('products', ProductController::class);
 
-        Route::prefix('products/commerce')->group(function () {            
+        Route::prefix('products/commerce')->group(function () {
             Route::get('{commerce_id}', [ProductController::class, 'byCommerce']);
             Route::get('branch/{branch_id}', [ProductController::class, 'byCommerceBranch']);
             Route::post('/', [ProductController::class, 'store']);
