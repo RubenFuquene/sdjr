@@ -18,13 +18,13 @@ class CommerceBranchListTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Permission::create(['name' => 'provider.commerces.show', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'provider.branches.show', 'guard_name' => 'sanctum']);
     }
 
     public function test_list_branches_success(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.commerces.show');
+        $user->givePermissionTo('provider.branches.show');
         $commerce = Commerce::factory()->create();
         CommerceBranch::factory()->count(3)->create(['commerce_id' => $commerce->id]);
 
@@ -55,7 +55,7 @@ class CommerceBranchListTest extends TestCase
     public function test_list_branches_not_found_for_invalid_commerce(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('provider.commerces.show');
+        $user->givePermissionTo('provider.branches.show');
         $invalidId = 99999;
 
         $this->actingAs($user, 'sanctum')

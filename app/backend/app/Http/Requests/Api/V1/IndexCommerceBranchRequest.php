@@ -10,7 +10,7 @@ class IndexCommerceBranchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.commerces.show') ?? false;
+        return $this->user()?->can('provider.branches.show') ?? false;
     }
 
     public function rules(): array

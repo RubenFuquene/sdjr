@@ -27,7 +27,7 @@ class UpdateCommerceBranchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.commerces.update') ?? false;
+        return $this->user()?->can('provider.branches.update') ?? false;
     }
 
     public function rules(): array
