@@ -12,6 +12,12 @@
 // ============================================
 
 /**
+ * Estado de verificacion del comercio en backend:
+ * 0 = Pendiente, 1 = Activo, 2 = Rechazado
+ */
+export type CommerceVerificationStatus = 0 | 1 | 2;
+
+/**
  * Estructura del endpoint /api/v1/commerces (GET list)
  * Respuesta del backend Laravel - CommerceResource
  */
@@ -79,7 +85,7 @@ export interface CommerceFromAPI {
   phone?: string;
   email?: string;
   is_active: boolean;
-  is_verified: boolean;
+  is_verified: CommerceVerificationStatus;
   created_at: string;
   updated_at: string;
 }
@@ -99,8 +105,9 @@ export interface ProveedorListItem {
   telefono: string;
   email: string;
   perfil: string;
-  estado: boolean; // is_active
-  verificado: boolean; // is_verified
+  estado: boolean; // is_active (operativo)
+  estadoVerificacion: CommerceVerificationStatus; // is_verified (0=Pendiente, 1=Activo, 2=Rechazado)
+  verificado: boolean; // Deprecated: usar estadoVerificacion
   tipoEstablecimiento?: string; // Tipo de establecimiento (Ej: Restaurante, Tienda, etc)
   createdAt?: string; // Fecha de creación/solicitud (ISO 8601)
 }
@@ -229,7 +236,7 @@ export interface CommerceBasicPayload {
     address: string;
     phone?: string;
     email?: string;
-    is_verified?: boolean;
+    is_verified?: CommerceVerificationStatus;
     is_active?: boolean;
   };
   legal_representative?: {

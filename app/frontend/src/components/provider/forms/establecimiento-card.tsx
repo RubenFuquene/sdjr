@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useMemo, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ import {
 } from '@/components/provider/ui';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { DOCUMENT_TYPE_OPTIONS, ESTABLISHMENT_TYPE_OPTIONS } from '@/types/basic-info';
+import { useLocation } from '@/hooks';
 
 interface EstablecimientoCardProps {
   formData: BasicInfoFormData;
@@ -35,6 +37,86 @@ export function EstablecimientoCard({
   onFieldChange,
   errors = {},
 }: EstablecimientoCardProps) {
+  const {
+    departments,
+    cities,
+    neighborhoods,
+    loading,
+    selectedDept,
+    selectedCity,
+    selectedNeighborhood,
+    setSelectedDept,
+    setSelectedCity,
+    setSelectedNeighborhood,
+  } = useLocation();
+
+  const filteredCities = useMemo(() => {
+    if (!selectedDept) return [];
+    return cities.filter((city) => city.department_id === selectedDept);
+  }, [cities, selectedDept]);
+
+  const filteredNeighborhoods = useMemo(() => {
+    if (!selectedCity) return [];
+    return neighborhoods.filter((neighborhood) => neighborhood.city_id === selectedCity);
+  }, [neighborhoods, selectedCity]);
+
+  const hasInitializedLocationRef = useRef(false);
+
+  useEffect(() => {
+    if (hasInitializedLocationRef.current) {
+      return;
+    }
+
+    const hasInitialLocationData =
+      formData.departmentId !== null || formData.cityId !== null || formData.neighborhood !== '';
+    if (!hasInitialLocationData) {
+      return;
+    }
+
+    const parsedNeighborhood = formData.neighborhood ? Number(formData.neighborhood) : null;
+    const normalizedNeighborhood =
+      parsedNeighborhood !== null && Number.isNaN(parsedNeighborhood) ? null : parsedNeighborhood;
+
+    setSelectedDept(formData.departmentId);
+    setSelectedCity(formData.cityId);
+    setSelectedNeighborhood(normalizedNeighborhood);
+    hasInitializedLocationRef.current = true;
+  }, [
+    formData.departmentId,
+    formData.cityId,
+    formData.neighborhood,
+    setSelectedDept,
+    setSelectedCity,
+    setSelectedNeighborhood,
+  ]);
+
+  const handleDepartmentChange = (departmentId: number | null) => {
+    if (departmentId === null) {
+      return;
+    }
+
+    setSelectedDept(departmentId);
+    onFieldChange('departmentId', departmentId);
+    onFieldChange('cityId', null);
+    onFieldChange('neighborhood', '');
+  };
+
+  const handleCityChange = (cityId: number | null) => {
+    if (cityId === null) {
+      return;
+    }
+
+    setSelectedCity(cityId);
+    onFieldChange('cityId', cityId);
+    onFieldChange('neighborhood', '');
+  };
+
+  const handleNeighborhoodChange = (value: string) => {
+    const neighborhoodId = value ? Number(value) : null;
+    setSelectedNeighborhood(neighborhoodId);
+    onFieldChange('neighborhood', value);
+  };
+
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -208,8 +290,10 @@ export function EstablecimientoCard({
           {/* 7. Departamento */}
           {/* ============================================ */}
           <DepartmentSelect
+            departments={departments}
             value={formData.departmentId}
-            onChange={(id) => onFieldChange('departmentId', id)}
+            onChange={handleDepartmentChange}
+            loading={loading.departments}
             required
             error={errors.departmentId}
           />
@@ -218,9 +302,11 @@ export function EstablecimientoCard({
           {/* 8. Ciudad */}
           {/* ============================================ */}
           <CitySelect
-            departmentId={formData.departmentId}
+            cities={filteredCities}
+            departmentId={selectedDept}
             value={formData.cityId}
-            onChange={(id) => onFieldChange('cityId', id)}
+            onChange={handleCityChange}
+            loading={loading.cities}
             required
             error={errors.cityId}
           />
@@ -229,9 +315,11 @@ export function EstablecimientoCard({
           {/* 9. Barrio (Condicional: Select o Input) */}
           {/* ============================================ */}
           <NeighborhoodSelect
-            cityId={formData.cityId}
+            neighborhoods={filteredNeighborhoods}
+            cityId={selectedCity}
             value={formData.neighborhood}
-            onChange={(value) => onFieldChange('neighborhood', value)}
+            onChange={handleNeighborhoodChange}
+            loading={loading.neighborhoods}
             required
             error={errors.neighborhood}
           />

@@ -40,7 +40,8 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
     email: commerce.email || '',
     perfil: 'Proveedor',
     estado: commerce.is_active,
-    verificado: commerce.is_verified,
+    estadoVerificacion: commerce.is_verified,
+    verificado: commerce.is_verified === 1,
     tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible (actualmente no proporcionado)
     createdAt: commerce.created_at,
   };
@@ -74,7 +75,7 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     estado: commerce.is_active,
 
     // Datos secundarios
-    verificado: commerce.is_verified,
+    verificado: commerce.is_verified === 1 || commerce.is_verified === 0,
     descripcion: commerce.description,
 
     // Relaciones
@@ -450,7 +451,7 @@ export const basicInfoToCommerceBasicPayload = (
       address: formData.mainAddress.trim(),
       phone: formData.phone?.trim() || undefined,
       email: formData.email?.trim() || undefined,
-      is_verified: false,
+      is_verified: 0,
       is_active: true,
     },
     legal_representative: {

@@ -1,14 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { INITIAL_BASIC_INFO_FORM } from '@/types/basic-info';
-import { createCommerceBasic, createPresignedDocument, confirmDocumentUpload } from '@/lib/api';
+import {
+  createCommerceBasic,
+  createPresignedDocument,
+  confirmDocumentUpload,
+  updateCommerce,
+} from '@/lib/api';
 import { getSessionFromCookie } from '@/lib/session';
 import { basicInfoToCommerceBasicPayload } from '@/types/commerces.adapters';
 import { uploadFileToPresignedUrl, getBackendMimeType } from '@/lib/utils/document-upload';
 import { validateBasicInfoForm } from '@/lib/provider/validations/basic-info';
+import type { CommerceFromAPI } from '@/types/commerces';
+import { useProviderCommerce } from '@/components/provider/context/provider-commerce-context';
 
 type DocumentStatus = { status: 'idle' | 'uploading' | 'success' | 'error'; error: string | null };
 
@@ -25,9 +32,12 @@ type DocumentFiles = {
 type DocumentFileKey = keyof DocumentFiles;
 
 export const useBasicInfoForm = () => {
+  const { commerce, isLoadingCommerce, refreshCommerce } = useProviderCommerce();
   const [formData, setFormData] = useState<BasicInfoFormData>(INITIAL_BASIC_INFO_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [existingCommerceId, setExistingCommerceId] = useState<number | null>(null);
+  const [hasHydratedInitialData, setHasHydratedInitialData] = useState(false);
   const [documentFiles, setDocumentFiles] = useState<DocumentFiles>({
     commerceChamber: null,
     legalRepresentativeId: null,
@@ -36,6 +46,19 @@ export const useBasicInfoForm = () => {
     commerceChamber: { status: 'idle', error: null },
     legalRepresentativeId: { status: 'idle', error: null },
   });
+
+  useEffect(() => {
+    if (isLoadingCommerce || hasHydratedInitialData) {
+      return;
+    }
+
+    if (commerce) {
+      setExistingCommerceId(commerce.id);
+      setFormData(mapCommerceToBasicInfoForm(commerce));
+    }
+
+    setHasHydratedInitialData(true);
+  }, [commerce, hasHydratedInitialData, isLoadingCommerce]);
 
   const handleFieldChange = (fieldPath: string, value: string | number | null) => {
     setFormData((prev) => {
@@ -52,7 +75,6 @@ export const useBasicInfoForm = () => {
           },
         };
       }
-
       return {
         ...prev,
         [fieldPath]: value,
@@ -99,15 +121,36 @@ export const useBasicInfoForm = () => {
       }
 
       const payload = basicInfoToCommerceBasicPayload(formData, ownerUserId);
-      const commerceResponse = await createCommerceBasic(payload);
-      // Extraer el commerce de la respuesta CommerceBasicDataResponse
-      const commerce = commerceResponse.data.commerce;
-      const commerceId = commerce.id;
+      let commerceId = existingCommerceId;
+
+      if (commerceId) {
+        await updateCommerce(commerceId, {
+          name: payload.commerce.name,
+          description: payload.commerce.description,
+          tax_id: payload.commerce.tax_id,
+          tax_id_type: payload.commerce.tax_id_type,
+          address: payload.commerce.address,
+          phone: payload.commerce.phone,
+          email: payload.commerce.email,
+          department_id: payload.commerce.department_id,
+          city_id: payload.commerce.city_id,
+          neighborhood_id: payload.commerce.neighborhood_id,
+        });
+      } else {
+        const commerceResponse = await createCommerceBasic(payload);
+        // Extraer el commerce de la respuesta CommerceBasicDataResponse
+        const commerce = commerceResponse.data.commerce;
+        commerceId = commerce.id;
+        setExistingCommerceId(commerceId);
+      }
 
       await uploadCommerceDocuments(commerceId);
+      await refreshCommerce();
 
-      toast.success('Datos básicos guardados correctamente', {
-        description: 'Procederemos con la siguiente sección de tu registro',
+      toast.success(existingCommerceId ? 'Datos básicos actualizados correctamente' : 'Datos básicos guardados correctamente', {
+        description: existingCommerceId
+          ? 'Tus cambios fueron aplicados.'
+          : 'Procederemos con la siguiente sección de tu registro',
       });
     } catch (err) {
       console.error('Error al guardar:', err);
@@ -236,12 +279,68 @@ export const useBasicInfoForm = () => {
 
   return {
     documentStatus,
+    existingCommerceId,
     errors,
     formData,
     handleCancel,
     handleDocumentFileSelected,
     handleFieldChange,
     handleSubmit,
+    isInitializing: isLoadingCommerce,
     isLoading,
   };
+};
+
+const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormData => {
+  const primaryLegalRepresentative = commerce.legal_representatives?.[0];
+  const commerceChamberDocument = commerce.documents?.find(
+    (document) => document.document_type === 'CAMARA_COMERCIO'
+  );
+  const legalRepresentativeDocument = commerce.documents?.find(
+    (document) => document.document_type === 'ID_CARD'
+  );
+  
+  return {
+    commercialName: commerce.name || '',
+    documentType: mapBackendDocumentTypeToFrontend(commerce.tax_id_type),
+    documentNumber: commerce.tax_id || '',
+    establishmentType: '',
+    phone: commerce.phone || '',
+    email: commerce.email || '',
+    departmentId: commerce.department?.id ?? null,
+    cityId: commerce.city?.id ?? null,
+    neighborhood: commerce.neighborhood?.id ? String(commerce.neighborhood.id) : '',
+    mainAddress: commerce.address || '',
+    legalRepresentative: {
+      firstName: primaryLegalRepresentative?.name || '',
+      lastName: primaryLegalRepresentative?.last_name || '',
+      documentType: mapBackendDocumentTypeToFrontend(primaryLegalRepresentative?.document_type),
+      documentNumber: primaryLegalRepresentative?.document || '',
+      documentFile: legalRepresentativeDocument?.file_path || null,
+    },
+    documents: {
+      identity: legalRepresentativeDocument?.file_path || null,
+      commerceChamber: commerceChamberDocument?.file_path || null,
+    },
+    observations: commerce.description || '',
+  };
+};
+
+const mapBackendDocumentTypeToFrontend = (documentType?: string): BasicInfoFormData['documentType'] => {
+  const normalizedDocumentType = (documentType || '').toUpperCase();
+
+  switch (normalizedDocumentType) {
+    case 'NIT':
+      return 'nit';
+    case 'CC':
+      return 'cc';
+    case 'CE':
+      return 'ce';
+    case 'PS':
+    case 'PAS':
+    case 'PASAPORTE':
+      return 'passport';
+    default:
+      return '';
+  }
 };

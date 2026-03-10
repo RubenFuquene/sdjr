@@ -1,7 +1,7 @@
 'use client';
 
 import { ProveedorListItem } from "@/types/admin";
-import { Badge, StatusBadge } from "@/components/admin/shared/badge";
+import { Badge, StatusBadge, VerificationStatusBadge } from "@/components/admin/shared/badge";
 import { TableActions } from "@/components/admin/shared/table-actions";
 import { TABLE_STYLES } from "@/components/admin/shared/table-styles";
 
@@ -62,7 +62,7 @@ export function ProvidersTable({
                   <Badge variant="perfil">{proveedor.perfil}</Badge>
                 </td>
                 <td className={TABLE_STYLES.bodyCell}>
-                  <StatusBadge activo={proveedor.estado} />
+                  <VerificationStatusBadge estado={proveedor.estadoVerificacion} />
                 </td>
                 <td className={TABLE_STYLES.bodyCell}>
                   <TableActions 

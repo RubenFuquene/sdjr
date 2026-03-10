@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocation } from '@/hooks/use-location';
+import type { Department } from '@/types/location';
 import {
   Select,
   SelectContent,
@@ -12,29 +12,30 @@ import { Label } from '@/components/provider/ui/label';
 import { AlertCircle } from 'lucide-react';
 
 interface DepartmentSelectProps {
+  departments: Department[];
   value: number | null;
   onChange: (id: number | null) => void;
   disabled?: boolean;
+  loading?: boolean;
   label?: string;
   required?: boolean;
   error?: string | null;
 }
 
 /**
- * Department Select Component
- * Loads departments from API and displays them in a dropdown
- * Triggers cascading updates for cities and neighborhoods
+ * Department Select Component (presentational)
+ * Data loading and cascading logic should be handled by parent form.
  */
 export function DepartmentSelect({
+  departments,
   value,
   onChange,
   disabled = false,
+  loading = false,
   label = 'Departamento',
   required = false,
   error,
 }: DepartmentSelectProps) {
-  const { departments, loading } = useLocation();
-
   return (
     <div className="space-y-2 w-full">
       <Label htmlFor="department-select" className="text-sm font-medium text-[#1A1A1A]">
@@ -43,9 +44,9 @@ export function DepartmentSelect({
       </Label>
 
       <Select
-        value={value?.toString() || ''}
+        value={value?.toString()}
         onValueChange={(val) => onChange(val ? parseInt(val, 10) : null)}
-        disabled={disabled || loading.departments}
+        disabled={disabled || loading}
       >
         <SelectTrigger
           id="department-select"
@@ -72,7 +73,7 @@ export function DepartmentSelect({
         </div>
       )}
 
-      {loading.departments && (
+      {loading && (
         <p className="text-xs text-[#6A6A6A] mt-1">Cargando departamentos...</p>
       )}
     </div>

@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { ProviderShell } from "@/components/provider/shell/provider-shell";
+import { ProviderCommerceProvider } from "@/components/provider/context/provider-commerce-context";
 import type { SessionData } from "@/types/auth";
 import type { ReactNode } from "react";
 
@@ -14,8 +15,10 @@ export function ProviderShellWrapper({ children, userData }: ProviderShellWrappe
   const pathname = usePathname();
   
   return (
-    <ProviderShell activePath={pathname} userData={userData}>
-      {children}
-    </ProviderShell>
+    <ProviderCommerceProvider>
+      <ProviderShell activePath={pathname} userData={userData}>
+        {children}
+      </ProviderShell>
+    </ProviderCommerceProvider>
   );
 }

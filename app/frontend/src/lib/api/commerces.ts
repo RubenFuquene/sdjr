@@ -4,7 +4,13 @@
  */
 
 import { ApiResponse } from "@/types/admin";
-import type { CommerceFromAPI, ProveedorPayload, CommerceBasicPayload, CommerceBasicDataResponse } from "@/types/commerces";
+import type {
+  CommerceBasicDataResponse,
+  CommerceFromAPI,
+  CommerceVerificationStatus,
+  ProveedorPayload,
+  CommerceBasicPayload,
+} from "@/types/commerces";
 import { fetchWithErrorHandling } from "./client";
 
 export interface GetCommercesParams {
@@ -154,16 +160,17 @@ export async function getMyCommerce(): Promise<ApiSuccess<CommerceFromAPI | null
  * PATCH /api/v1/commerces/{id}/verification
  * Actualiza el estado de verificación de un comercio
  * 
+ * Pendiente: is_verified = 0
  * Aprobación: is_verified = 1
  * Rechazo: is_verified = 2
  * 
  * @param id - ID del comercio
- * @param isVerified - 1 para aprobar, 2 para rechazar
+ * @param isVerified - 0 pendiente, 1 aprobar, 2 rechazar
  * @returns Comercio actualizado
  */
 export async function updateCommerceVerification(
   id: number,
-  isVerified: 1 | 2
+  isVerified: CommerceVerificationStatus
 ): Promise<ApiSuccess<CommerceFromAPI>> {
   return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
     `/api/v1/commerces/${id}/verification`,
