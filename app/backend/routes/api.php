@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CityController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\CommerceBranchController;
+use App\Http\Controllers\Api\V1\CommerceCommentController;
 use App\Http\Controllers\Api\V1\CommerceController;
 use App\Http\Controllers\Api\V1\CountryController;
 use App\Http\Controllers\Api\V1\DepartmentController;
@@ -95,13 +96,18 @@ Route::prefix('v1')->group(function () {
         // Commerce routes
         Route::apiResource('commerces', CommerceController::class);
         Route::group(['prefix' => 'commerces'], function () {
-
             Route::patch('{id}/status', [CommerceController::class, 'patchStatus']);
             Route::patch('{id}/verification', [CommerceController::class, 'patchVerification']);
             Route::get('{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
             Route::get('{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
             Route::post('basic', [CommerceBasicDataController::class, 'store']);
 
+            // Commerce Comments endpoints
+            Route::get('{commerce_id}/comments', [CommerceCommentController::class, 'index']);
+            Route::post('{commerce_id}/comments', [CommerceCommentController::class, 'store']);
+            Route::get('{commerce_id}/comments/{id}', [CommerceCommentController::class, 'show']);
+            Route::put('{commerce_id}/comments/{id}', [CommerceCommentController::class, 'update']);
+            Route::delete('{commerce_id}/comments/{id}', [CommerceCommentController::class, 'destroy']);
         });
         Route::get('me/commerce', [CommerceController::class, 'myCommerce']);
 
