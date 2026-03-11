@@ -135,13 +135,13 @@ Route::prefix('v1')->group(function () {
             Route::get('branch/{branch_id}', [ProductController::class, 'byCommerceBranch']);
             Route::post('/', [ProductController::class, 'store']);
             Route::put('/{id}', [ProductController::class, 'update']);
-            Route::delete('/{commerce_id}', [ProductController::class, 'deleted']);
+            Route::get('package-items/{product_package_id}', [ProductController::class, 'getPackageItems']);
             Route::post('package-items', [ProductController::class, 'storePackageItems']);
             Route::put('package-items/{id}', [ProductController::class, 'updatePackageItems']);
+            Route::delete('package-items/{product_package_id}', [ProductController::class, 'deletePackageItems']);
+            Route::patch('photos/confirm', [ProductController::class, 'confirmPhotoUpload']);
+            Route::delete('photos/{photo}', [ProductController::class, 'removePhoto']);
         });
-
-        Route::patch('products/photos/confirm', [ProductController::class, 'confirmPhotoUpload']);
-        Route::delete('products/photos/{photo}', [ProductController::class, 'removePhoto']);
 
         Route::apiResource('product-categories', ProductCategoryController::class);
     });
