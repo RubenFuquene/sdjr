@@ -19,8 +19,8 @@ import {
   NeighborhoodSelect,
 } from '@/components/provider/ui';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
-import { DOCUMENT_TYPE_OPTIONS, ESTABLISHMENT_TYPE_OPTIONS } from '@/types/basic-info';
-import { useLocation } from '@/hooks';
+import { DOCUMENT_TYPE_OPTIONS } from '@/types/basic-info';
+import { useLocation, useEstablishmentTypes } from '@/hooks';
 
 interface EstablecimientoCardProps {
   formData: BasicInfoFormData;
@@ -49,6 +49,11 @@ export function EstablecimientoCard({
     setSelectedCity,
     setSelectedNeighborhood,
   } = useLocation();
+
+  const {
+    types: establishmentTypes,
+    loading: loadingEstablishmentTypes,
+  } = useEstablishmentTypes();
 
   const filteredCities = useMemo(() => {
     if (!selectedDept) return [];
@@ -218,6 +223,7 @@ export function EstablecimientoCard({
             <Select
               value={formData.establishmentType}
               onValueChange={(value) => onFieldChange('establishmentType', value)}
+              disabled={loadingEstablishmentTypes}
             >
               <SelectTrigger
                 id="establishment-type"
@@ -225,12 +231,12 @@ export function EstablecimientoCard({
                   errors.establishmentType ? 'border-red-500' : ''
                 }`}
               >
-                <SelectValue placeholder="Selecciona tipo" />
+                <SelectValue placeholder={loadingEstablishmentTypes ? 'Cargando tipos...' : 'Selecciona tipo'} />
               </SelectTrigger>
               <SelectContent>
-                {ESTABLISHMENT_TYPE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {Array.isArray(establishmentTypes) && establishmentTypes.map((type) => (
+                  <SelectItem key={type.id} value={type.code}>
+                    {type.name}
                   </SelectItem>
                 ))}
               </SelectContent>

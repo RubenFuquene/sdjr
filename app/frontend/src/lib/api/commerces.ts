@@ -12,6 +12,7 @@ import type {
   CommerceBasicPayload,
 } from "@/types/commerces";
 import { fetchWithErrorHandling } from "./client";
+import type { ApiSuccess } from "./types";
 
 export interface GetCommercesParams {
   page?: number;
@@ -47,16 +48,6 @@ export async function getCommerces({
 // ============================================
 // Detail & Update endpoints
 // ============================================
-
-/**
- * Estructura genérica de respuesta simple del backend (no paginada)
- * successResponse: { status: true, message?: string, data: T }
- */
-export interface ApiSuccess<T> {
-  status: boolean;
-  message?: string;
-  data: T;
-}
 
 /**
  * POST /api/v1/commerces

@@ -6,6 +6,11 @@
  * import { login, getRoles, ApiError } from '@/lib/api/index';
  */
 
+// ============================================
+// Shared Types & Utilities
+// ============================================
+export type { ApiSuccess, PaginatedApiResponse, PaginationMeta, PaginationLinks } from "./types";
+
 // Core utilities
 export { API_URL, ApiError, getAuthHeaders, fetchWithErrorHandling } from "./client";
 
@@ -30,7 +35,6 @@ export {
 // Branches (Sucursales)
 export { getCommerceBranches, createCommerceBranch, updateCommerceBranch } from "./branches";
 export type {
-  ApiSuccess as BranchApiSuccess,
   CommerceBranchFromAPI,
   CommerceBranchHourFromAPI,
   CommerceBranchPhotoFromAPI,
@@ -52,7 +56,6 @@ export {
   mapProductFormToUpdatePayload,
 } from "./products";
 export type {
-  ApiSuccess as ProductApiSuccess,
   CreateProductPayload,
   CreateProductPhotoInput,
   GetProductCategoriesParams,
@@ -87,11 +90,9 @@ export {
   updateUserStatus,
   deleteUser,
 } from "./users";
-export type { ApiSuccess } from "./users";
 
-// Administrators (Administradores)
+// Administrators (Administradores)  
 export { getAdministrators } from "./administrators";
-export type { ApiSuccess as AdminApiSuccess } from "./administrators";
 
 // Location (Geolocalización)
 export {
@@ -104,3 +105,7 @@ export {
   getNeighborhoods,
   getNeighborhood
 } from "./location";
+
+// Establishment Types (Tipos de Establecimiento)
+export { getEstablishmentTypes } from "./establishment-types";
+export type { EstablishmentType, EstablishmentTypesResponse } from "./establishment-types";

@@ -16,14 +16,7 @@ import type {
 // Response Types - Specific to Users
 // ============================================
 
-/**
- * Respuesta simple del backend (no paginada)
- */
-export interface ApiSuccess<T> {
-  status: boolean;
-  message?: string;
-  data: T;
-}
+import type { ApiSuccess } from './types';
 
 // ============================================
 // List & Search - GET /api/v1/users

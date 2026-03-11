@@ -4,6 +4,7 @@
  */
 
 import { fetchWithErrorHandling } from "./client";
+import type { ApiSuccess } from './types';
 
 // ============================================
 // Types
@@ -16,12 +17,6 @@ export type DocumentType =
   | "CAMARA_COMERCIO"
   | "RUT"
   | "REGISTRATION";
-
-export interface ApiSuccess<T> {
-  status: boolean;
-  message?: string;
-  data: T;
-}
 
 export interface PresignedDocumentRequest {
   document_type: DocumentType;
