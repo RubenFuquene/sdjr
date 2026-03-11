@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteProductRequest;
 use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
@@ -13,6 +14,7 @@ use App\Http\Requests\Api\V1\StoreProductRequest;
 use App\Http\Requests\Api\V1\UpdateProductRequest;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
 use App\Http\Resources\Api\V1\ProductResource;
+use App\Http\Resources\Api\V1\ProductResourceCollection;
 use App\Models\ProductPhoto;
 use App\Services\CommerceService;
 use App\Services\DocumentUploadService;
@@ -177,12 +179,21 @@ class ProductController extends Controller
      *   @OA\Response(response=404, description="Not found")
      * )
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(DeleteProductRequest $request, int $id): JsonResponse
     {
         try {
+            $product = $this->productService->show($id);
+            // Validation: do not delete if belongs to a package
+
+            if ($product->package()->count() > 0) {
+                return $this->errorResponse('Cannot delete product because it belongs to a package. Please delete the package first.', Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
             $this->productService->destroy($id);
 
             return response()->json([], Response::HTTP_NO_CONTENT);
+
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return $this->errorResponse('Error deleting product', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -192,7 +203,7 @@ class ProductController extends Controller
      * Get products by commerce ID.
      *
      * @OA\Get(
-     *   path="/api/v1/products/commerces/{commerce_id}",
+     *   path="/api/v1/products/commerce/{commerce_id}",
      *   operationId="byCommerceProduct",
      *   tags={"Products"},
      *   summary="List products by commerce",
@@ -224,7 +235,7 @@ class ProductController extends Controller
      * Get products by commerce branch ID.
      *
      * @OA\Get(
-     *   path="/api/v1/products/branches/{branch_id}",
+     *   path="/api/v1/products/commerce/branch/{branch_id}",
      *   operationId="byCommerceBranchProduct",
      *   tags={"Products"},
      *   summary="List products by commerce branch",
@@ -255,7 +266,7 @@ class ProductController extends Controller
      * Store product package items.
      *
      * @OA\Post(
-     *   path="/api/v1/products/package-items",
+     *   path="/api/v1/products/commerce/package-items",
      *   operationId="storeProductPackageItems",
      *   tags={"Products"},
      *   summary="Store product package items",
@@ -285,10 +296,43 @@ class ProductController extends Controller
     }
 
     /**
+     * Get package items for a product package.
+     *
+     * @OA\Get(
+     *   path="/api/v1/products/commerce/package-items/{product_package_id}",
+     *   operationId="getProductPackageItems",
+     *   tags={"Products"},
+     *   summary="Get package items",
+     *   description="Returns the items of a product package by product_id",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="product_id", in="query", required=true, @OA\Schema(type="integer")),
+     *
+     *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
+     *   @OA\Response(response=404, description="Product not found"),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function getPackageItems(ShowProductRequest $request, int $product_package_id): JsonResponse
+    {
+        try {
+            $product = $this->productService->getProductPackage($product_package_id);
+            $items = $product->packageItems;
+
+            return $this->successResponse(new ProductResourceCollection($items), 'Package items fetched successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Product not found with the specified ID.', 404);
+        } catch (Exception $e) {
+            return $this->errorResponse('Error fetching package items', 500);
+        }
+    }
+
+    /**
      * Update product package items.
      *
      * @OA\Put(
-     *   path="/api/v1/products/package-items/{product_package_id}",
+     *   path="/api/v1/products/commerce/package-items/{product_package_id}",
      *   operationId="updateProductPackageItems",
      *   tags={"Products"},
      *   summary="Update product package items",
@@ -320,10 +364,43 @@ class ProductController extends Controller
     }
 
     /**
+     * Delete package items from a product package.
+     *
+     * @OA\Delete(
+     *   path="/api/v1/products/commerce/package-items/{product_package_id}",
+     *   operationId="deleteProductPackageItems",
+     *   tags={"Products"},
+     *   summary="Delete package items",
+     *   description="Deletes all items from a product package",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="product_package_id", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *   @OA\Response(response=204, description="No Content"),
+     *   @OA\Response(response=404, description="Product package not found"),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function deletePackageItems(DeleteProductRequest $request, int $product_package_id): JsonResponse
+    {
+        try {
+            $product = $this->productService->getProductPackage($product_package_id);
+            $product->packageItems()->detach();
+
+            return response()->json([], Response::HTTP_NO_CONTENT);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Product package not found', Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return $this->errorResponse('Error deleting package items', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * Confirm product photo upload.
      *
      * @OA\Patch(
-     *   path="/api/v1/products/photos/confirm",
+     *   path="/api/v1/products/commerce/photos/confirm",
      *   operationId="confirmProductPhotoUpload",
      *   tags={"Products"},
      *   summary="Confirm product photo upload",
@@ -379,7 +456,7 @@ class ProductController extends Controller
      * Remove a product photo.
      *
      * @OA\Delete(
-     *   path="/api/v1/products/photos/{photo}",
+     *   path="/api/v1/products/commerce/photos/{photo}",
      *   operationId="removeProductPhoto",
      *   tags={"Products"},
      *   summary="Remove product photo",

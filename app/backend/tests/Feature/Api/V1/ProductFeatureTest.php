@@ -127,8 +127,42 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $product = Product::factory()->create();
-        $response = $this->deleteJson('/api/v1/products/'.$product->id);
+        $payload = ['id' => $product->id];
+        $response = $this->deleteJson('/api/v1/products/'.$product->id, $payload);
         $response->assertNoContent();
+    }
+
+    public function test_destroy_fails_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $product = Product::factory()->create();
+        $payload = ['id' => $product->id];
+        $response = $this->deleteJson('/api/v1/products/'.$product->id, $payload);
+        $response->assertForbidden();
+    }
+
+    public function test_delete_package_items_deletes_all()
+    {
+        $this->actingAsAdmin();
+        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        $item1 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
+        $item2 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
+        $package->packageItems()->attach([$item1->id, $item2->id]);
+        $payload = ['id' => $package->id];
+        $response = $this->deleteJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+        $response->assertNoContent();
+        $this->assertCount(0, $package->fresh()->packageItems);
+    }
+
+    public function test_delete_package_items_fails_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        $payload = ['id' => $package->id];
+        $response = $this->deleteJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+        $response->assertForbidden();
     }
 
     public function test_store_fails_without_permission()
@@ -183,6 +217,42 @@ class ProductFeatureTest extends TestCase
             ->assertJson([
                 'status' => false,
                 'message' => 'Commerce not found with the specified ID.',
+            ]);
+    }
+
+    public function test_get_package_items_returns_items()
+    {
+        $this->actingAsAdmin();
+        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        // Simular items de paquete
+        $item1 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
+        $item2 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
+        $package->packageItems()->attach([$item1->id, $item2->id]);
+
+        $response = $this->getJson('/api/v1/products/commerce/package-items/'.$package->id);
+        $response->assertOk()
+            ->assertJsonStructure(['data'])
+            ->assertJsonCount(2, 'data');
+    }
+
+    public function test_get_package_items_returns_empty_when_none()
+    {
+        $this->actingAsAdmin();
+        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        $response = $this->getJson('/api/v1/products/commerce/package-items/'.$package->id);
+        $response->assertOk()
+            ->assertJson(['data' => []]);
+    }
+
+    public function test_get_package_items_returns_404_for_invalid_product()
+    {
+        $this->actingAsAdmin();
+        $invalidId = 999999;
+        $response = $this->getJson('/api/v1/products/commerce/package-items/'.$invalidId);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => false,
+                'message' => 'Product not found with the specified ID.',
             ]);
     }
 }

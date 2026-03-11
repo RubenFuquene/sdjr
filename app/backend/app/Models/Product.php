@@ -120,6 +120,16 @@ class Product extends Model
     }
 
     /**
+     * The products that belong to the package (inverse relationship).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function package()
+    {
+        return $this->belongsToMany(Product::class, 'product_package_items', 'product_id', 'product_package_id');
+    }
+
+    /**
      * Get the photos for the product.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

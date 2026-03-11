@@ -28,7 +28,7 @@ class ProductPhotoRemoveTest extends TestCase
         $this->actingAs($user, 'sanctum');
         $photo = ProductPhoto::factory()->create();
 
-        $response = $this->deleteJson('/api/v1/products/photos/'.$photo->id);
+        $response = $this->deleteJson('/api/v1/products/commerce/photos/'.$photo->id);
         $response->assertStatus(204);
         $this->assertSoftDeleted('product_photos', ['id' => $photo->id]);
     }
@@ -38,7 +38,7 @@ class ProductPhotoRemoveTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo('provider.products.delete');
         $this->actingAs($user, 'sanctum');
-        $response = $this->deleteJson('/api/v1/products/photos/999999');
+        $response = $this->deleteJson('/api/v1/products/commerce/photos/999999');
         $response->assertStatus(404);
     }
 }

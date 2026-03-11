@@ -44,7 +44,7 @@ class ProductPhotoConfirmTest extends TestCase
             ],
         ];
 
-        $response = $this->patchJson('/api/v1/products/photos/confirm', $payload);
+        $response = $this->patchJson('/api/v1/products/commerce/photos/confirm', $payload);
         $response->assertStatus(200)
             ->assertJsonFragment(['upload_status' => Constant::UPLOAD_STATUS_CONFIRMED]);
     }
@@ -70,7 +70,7 @@ class ProductPhotoConfirmTest extends TestCase
             ],
         ];
 
-        $response = $this->patchJson('/api/v1/products/photos/confirm', $payload);
+        $response = $this->patchJson('/api/v1/products/commerce/photos/confirm', $payload);
         $response->assertStatus(410);
     }
 
@@ -89,7 +89,7 @@ class ProductPhotoConfirmTest extends TestCase
             ],
         ];
 
-        $response = $this->patchJson('/api/v1/products/photos/confirm', $payload);
+        $response = $this->patchJson('/api/v1/products/commerce/photos/confirm', $payload);
         $response->assertStatus(404);
     }
 }
