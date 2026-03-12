@@ -107,11 +107,14 @@ class CommerceController extends Controller
      *     summary="Create a new commerce, this endpoint does not create a commerce for providers, use /api/v1/commerces/basic instead",
      *     description="Creates a new commerce.",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         description="Commerce",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Commerce created successfully",
@@ -189,6 +192,7 @@ class CommerceController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         description="Commerce",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
      *     ),
      *
