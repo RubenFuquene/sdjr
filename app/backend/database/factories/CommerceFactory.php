@@ -22,6 +22,7 @@ class CommerceFactory extends Factory
             'department_id' => Department::factory(),
             'city_id' => City::factory(),
             'neighborhood_id' => Neighborhood::factory(),
+            'establishment_type_id' => $this->faker->randomElement([1, 2, 3]),
             'name' => $this->faker->company(),
             'description' => $this->faker->catchPhrase(),
             'tax_id' => $this->faker->numerify('#########'),
