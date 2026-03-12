@@ -100,4 +100,29 @@ class Constant
     public const COMMERCE_DOCUMENT_TYPE_PS = 'PS';
 
     public const COMMERCE_DOCUMENT_TYPE_CE = 'CE';
+
+    // Commerce Comment Priorities
+    public const COMMENT_PRIORITY = 'PR';
+
+    public const COMMENT_PRIORITY_HIGH = 'AL';
+
+    public const COMMENT_PRIORITY_MEDIUM = 'ME';
+
+    public const COMMENT_PRIORITY_LOW = 'BA';
+
+    // Commerce Comment Types
+    public const COMMENT_TYPE_PRODUCT = 'PR';
+
+    public const COMMENT_TYPE_SUPPORT = 'SU';
+
+    public const COMMENT_TYPE_INFO = 'IN';
+
+    public const COMMENT_TYPE_VALIDATION = 'VA';
+
+    public const COMMENT_TYPE_ARRAY = [
+        self::COMMENT_TYPE_PRODUCT => 'Producto',
+        self::COMMENT_TYPE_SUPPORT => 'Soporte',
+        self::COMMENT_TYPE_INFO => 'Información',
+        self::COMMENT_TYPE_VALIDATION => 'Validación',
+    ];
 }

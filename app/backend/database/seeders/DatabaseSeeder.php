@@ -54,6 +54,7 @@ class DatabaseSeeder extends Seeder
             LegalDocumentSeeder::class,
             ProductCategorySeeder::class,
             ProductSeeder::class,
+            CommerceCommentSeeder::class,
         ]);
 
         Log::info('Database seeding completed');

@@ -181,6 +181,13 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.products.update', 'guard_name' => $guardName, 'description' => 'Actualizar productos por comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.products.delete', 'guard_name' => $guardName, 'description' => 'Eliminar producto por comercio', 'created_at' => now(), 'updated_at' => now()],
 
+            // Permisos para comentarios de comercios
+            ['name' => 'provider.comments.create', 'guard_name' => $guardName, 'description' => 'Crear comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.comments.update', 'guard_name' => $guardName, 'description' => 'Actualizar comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.comments.index', 'guard_name' => $guardName, 'description' => 'Listar comentarios de comercio', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.comments.show', 'guard_name' => $guardName, 'description' => 'Ver comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.comments.delete', 'guard_name' => $guardName, 'description' => 'Eliminar comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
+
         ];
 
         // Crear permisos si no existen
@@ -228,6 +235,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.index',
             'provider.product_categories.index',
             'provider.products.index',
+            'provider.comments.index',
             // Show
             'admin.params.show',
             'admin.params.countries.show',
@@ -264,6 +272,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.show',
             'provider.product_categories.show',
             'provider.products.show',
+            'provider.comments.show',
             'admin.my_pqrs.show',
             'admin.manage_pqrs.show',
         ];
@@ -291,6 +300,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.create',
             'provider.product_categories.create',
             'provider.products.create',
+            'provider.comments.create',
 
             // Update
             'admin.params.countries.update',
@@ -313,6 +323,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.update',
             'provider.product_categories.update',
             'provider.products.update',
+            'provider.comments.update',
 
             // Delete
             'admin.params.countries.delete',
@@ -335,6 +346,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.delete',
             'provider.product_categories.delete',
             'provider.products.delete',
+            'provider.comments.delete',
         ]);
 
         $adminRole = Role::where('name', 'admin')->first();
@@ -349,6 +361,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.create',
             'provider.product_categories.create',
             'provider.products.create',
+            'provider.comments.create',
 
             // Update
             'provider.branches.update',
@@ -357,6 +370,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.update',
             'provider.product_categories.update',
             'provider.products.update',
+            'provider.comments.update',
 
             // Delete
             'provider.branches.delete',
@@ -365,6 +379,7 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.delete',
             'provider.product_categories.delete',
             'provider.products.delete',
+            'provider.comments.delete',
 
             // Permisos adicionales de proveedor
             'admin.providers.upload_documents',
