@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property string|null $description
  * @property string $status
+ * @property int|null $establishment_type_id
  */
 class ProductCategory extends Model
 {
@@ -28,6 +30,7 @@ class ProductCategory extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'establishment_type_id',
         'name',
         'description',
         'status',
@@ -43,7 +46,18 @@ class ProductCategory extends Model
         'name' => 'string',
         'description' => 'string',
         'status' => 'string',
+        'establishment_type_id' => 'integer',
     ];
+
+    /**
+     * Get the establishment type that owns the product category.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function establishmentType(): BelongsTo
+    {
+        return $this->belongsTo(EstablishmentType::class, 'establishment_type_id');
+    }
 
     /**
      * Set the name attribute with sanitization and normalization.

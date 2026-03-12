@@ -38,6 +38,7 @@ class ProductCategoryController extends Controller
      *   security={{"sanctum":{}}},
      *
      *   @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="establishment_type_id", in="query", required=false, @OA\Schema(type="integer")),
      *   @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
      *   @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
      *   @OA\Parameter(name="description", in="query", required=false, @OA\Schema(type="string")),
@@ -50,7 +51,10 @@ class ProductCategoryController extends Controller
     public function index(ProductCategoryIndexRequest $request): JsonResponse
     {
         try {
-            $categories = $this->service->index($request->validated(), $request->validatedPerPage());
+            $categories = $this->service->index(
+                $request->validated(),
+                $request->validatedPerPage()
+            );
 
             return $this->successResponse(ProductCategoryResource::collection($categories));
         } catch (Exception $e) {

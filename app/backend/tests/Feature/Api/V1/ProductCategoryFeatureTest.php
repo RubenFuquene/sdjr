@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Api\V1;
 
 use App\Models\ProductCategory;
+use App\Models\EstablishmentType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -50,13 +51,15 @@ class ProductCategoryFeatureTest extends TestCase
     public function test_store_creates_product_category()
     {
         $this->actingAsAdmin();
+        $type = EstablishmentType::factory()->create();
         $payload = [
+            'establishment_type_id' => $type->id,
             'name' => 'Bebidas',
             'description' => 'Bebidas frías y calientes',
         ];
         $response = $this->postJson('/api/v1/product-categories', $payload);
         $response->assertCreated()->assertJsonFragment(['name' => 'Bebidas']);
-        $this->assertDatabaseHas('product_categories', ['name' => 'Bebidas']);
+        $this->assertDatabaseHas('product_categories', ['name' => 'Bebidas', 'establishment_type_id' => $type->id]);
     }
 
     public function test_show_returns_product_category()
@@ -70,11 +73,12 @@ class ProductCategoryFeatureTest extends TestCase
     public function test_update_modifies_product_category()
     {
         $this->actingAsAdmin();
+        $type = EstablishmentType::factory()->create();
         $category = ProductCategory::factory()->create();
-        $payload = ['name' => 'Snacks'];
+        $payload = ['name' => 'Snacks', 'establishment_type_id' => $type->id];
         $response = $this->putJson('/api/v1/product-categories/'.$category->id, $payload);
         $response->assertOk()->assertJsonFragment(['name' => 'Snacks']);
-        $this->assertDatabaseHas('product_categories', ['id' => $category->id, 'name' => 'Snacks']);
+        $this->assertDatabaseHas('product_categories', ['id' => $category->id, 'name' => 'Snacks', 'establishment_type_id' => $type->id]);
     }
 
     public function test_destroy_deletes_product_category()

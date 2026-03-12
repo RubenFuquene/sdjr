@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Api\V1\EstablishmentTypeResource;
 
 /**
  * @OA\Schema(
@@ -12,6 +13,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   type="object",
  *
  *   @OA\Property(property="id", type="integer"),
+ *   @OA\Property(property="establishment_type_id", type="integer", nullable=true),
+ *   @OA\Property(property="establishment_type", ref="#/components/schemas/EstablishmentTypeResource"),
  *   @OA\Property(property="name", type="string"),
  *   @OA\Property(property="description", type="string", nullable=true),
  *   @OA\Property(property="status", type="string"),
@@ -31,6 +34,10 @@ class ProductCategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'establishment_type_id' => $this->establishment_type_id,
+            'establishment_type' => $this->whenLoaded('establishmentType', function () {
+                return new EstablishmentTypeResource($this->establishmentType);
+            }),
             'name' => $this->name,
             'description' => $this->description,
             'status' => $this->status,
