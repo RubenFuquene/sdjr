@@ -18,7 +18,7 @@ class ProductCategoryService
     /**
      * Get paginated list of product categories with optional filters.
      */
-    public function index(array $filters, int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = ProductCategory::query();
 
@@ -46,7 +46,7 @@ class ProductCategoryService
     public function store(array $data): ProductCategory
     {
         try {
-        return ProductCategory::create($data)->load(['establishmentType']);
+            return ProductCategory::create($data)->load(['establishmentType']);
         } catch (Exception $e) {
             Log::error('Error creating ProductCategory', ['error' => $e->getMessage()]);
             throw $e;

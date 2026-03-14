@@ -51,8 +51,6 @@ class ProductCategory extends Model
 
     /**
      * Get the establishment type that owns the product category.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function establishmentType(): BelongsTo
     {

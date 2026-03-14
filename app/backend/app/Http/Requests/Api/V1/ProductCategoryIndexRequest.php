@@ -12,6 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *   title="ProductCategoryIndexRequest",
  *   description="Request schema for listing product categories",
  *   type="object",
+ *
  *   @OA\Property(property="per_page", type="integer", description="Items per page (default: 15, max: 100)", minimum=1, maximum=100, example=15),
  *   @OA\Property(property="establishment_type_id", type="integer", description="Establishment type ID", example=2),
  *   @OA\Property(property="status", type="string", description="Status (1=active, 0=inactive)", maxLength=1, example="1"),

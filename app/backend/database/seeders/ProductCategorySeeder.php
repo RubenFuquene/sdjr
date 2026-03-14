@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\EstablishmentType;
 use App\Models\ProductCategory;
 use Illuminate\Database\Seeder;
 

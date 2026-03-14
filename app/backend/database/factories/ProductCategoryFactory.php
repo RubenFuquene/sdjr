@@ -20,7 +20,7 @@ class ProductCategoryFactory extends Factory
     {
         return [
             'establishment_type_id' => EstablishmentType::factory(),
-            'name' => $this->faker->unique()->words(2, true),
+            'name' => $this->faker->word(),
             'description' => $this->faker->sentence(6),
             'status' => Constant::STATUS_ACTIVE,
         ];
