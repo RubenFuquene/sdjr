@@ -7,6 +7,7 @@ namespace Database\Factories;
 use App\Models\City;
 use App\Models\Commerce;
 use App\Models\Department;
+use App\Models\EstablishmentType;
 use App\Models\Neighborhood;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +23,7 @@ class CommerceFactory extends Factory
             'department_id' => Department::factory(),
             'city_id' => City::factory(),
             'neighborhood_id' => Neighborhood::factory(),
-            'establishment_type_id' => $this->faker->randomElement([1, 2, 3]),
+            'establishment_type_id' => EstablishmentType::factory(),
             'name' => $this->faker->company(),
             'description' => $this->faker->catchPhrase(),
             'tax_id' => $this->faker->numerify('#########'),
