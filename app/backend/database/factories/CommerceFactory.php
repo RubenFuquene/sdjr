@@ -30,7 +30,7 @@ class CommerceFactory extends Factory
             'tax_id_type' => $this->faker->randomElement(['NIT', 'CC', 'CE']),
             'address' => $this->faker->address(),
             'phone' => $this->faker->phoneNumber(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'email' => $this->faker->safeEmail(),
             'is_active' => $this->faker->boolean(90),
             'is_verified' => $this->faker->boolean(10),
         ];

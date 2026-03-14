@@ -21,11 +21,11 @@ class ProductCategoryController extends Controller
 {
     use ApiResponseTrait;
 
-    private ProductCategoryService $service;
+    private ProductCategoryService $productCategoryService;
 
     public function __construct(ProductCategoryService $service)
     {
-        $this->service = $service;
+        $this->productCategoryService = $service;
     }
 
     /**
@@ -38,6 +38,7 @@ class ProductCategoryController extends Controller
      *   security={{"sanctum":{}}},
      *
      *   @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="establishment_type_id", in="query", required=false, @OA\Schema(type="integer")),
      *   @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
      *   @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
      *   @OA\Parameter(name="description", in="query", required=false, @OA\Schema(type="string")),
@@ -50,9 +51,13 @@ class ProductCategoryController extends Controller
     public function index(ProductCategoryIndexRequest $request): JsonResponse
     {
         try {
-            $categories = $this->service->index($request->validated(), $request->validatedPerPage());
+            $categories = $this->productCategoryService->getPaginated(
+                $request->validated(),
+                $request->validatedPerPage()
+            );
+            $resource = ProductCategoryResource::collection($categories);
 
-            return $this->successResponse(ProductCategoryResource::collection($categories));
+            return $this->paginatedResponse($categories, $resource, 'Product Categories retrieved successfully');
         } catch (Exception $e) {
             return $this->errorResponse('Error fetching product categories', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -78,7 +83,7 @@ class ProductCategoryController extends Controller
     public function store(StoreProductCategoryRequest $request): JsonResponse
     {
         try {
-            $category = $this->service->store($request->validated());
+            $category = $this->productCategoryService->store($request->validated());
 
             return $this->successResponse(new ProductCategoryResource($category), 'Product Category created successfully', Response::HTTP_CREATED);
         } catch (Exception $e) {
@@ -106,9 +111,9 @@ class ProductCategoryController extends Controller
     public function show(ShowProductCategoryRequest $request, int $id): JsonResponse
     {
         try {
-            $category = $this->service->show($id);
+            $category = $this->productCategoryService->show($id);
 
-            return $this->successResponse(new ProductCategoryResource($category));
+            return $this->successResponse(new ProductCategoryResource($category), 'Product Category retrieved successfully');
         } catch (Exception $e) {
             return $this->errorResponse('Product category not found', Response::HTTP_NOT_FOUND);
         }
@@ -137,7 +142,7 @@ class ProductCategoryController extends Controller
     public function update(UpdateProductCategoryRequest $request, int $id): JsonResponse
     {
         try {
-            $category = $this->service->update($id, $request->validated());
+            $category = $this->productCategoryService->update($id, $request->validated());
 
             return $this->successResponse(new ProductCategoryResource($category), 'Product Category updated successfully', Response::HTTP_OK);
         } catch (Exception $e) {
@@ -165,7 +170,7 @@ class ProductCategoryController extends Controller
     public function destroy(DestroyProductCategoryRequest $request, int $id): JsonResponse
     {
         try {
-            $this->service->destroy($id);
+            $this->productCategoryService->destroy($id);
 
             return response()->json([], Response::HTTP_NO_CONTENT);
         } catch (Exception $e) {

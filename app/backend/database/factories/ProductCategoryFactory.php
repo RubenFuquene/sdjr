@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Constants\Constant;
+use App\Models\EstablishmentType;
 use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,7 +19,8 @@ class ProductCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->words(2, true),
+            'establishment_type_id' => EstablishmentType::factory(),
+            'name' => $this->faker->word(),
             'description' => $this->faker->sentence(6),
             'status' => Constant::STATUS_ACTIVE,
         ];

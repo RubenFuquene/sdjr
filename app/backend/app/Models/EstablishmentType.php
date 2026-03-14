@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -49,5 +50,13 @@ class EstablishmentType extends Model
     public function setCodeAttribute($value)
     {
         $this->attributes['code'] = trim($value);
+    }
+
+    /**
+     * Get the product categories for the establishment type.
+     */
+    public function productCategories(): HasMany
+    {
+        return $this->hasMany(ProductCategory::class, 'establishment_type_id');
     }
 }
