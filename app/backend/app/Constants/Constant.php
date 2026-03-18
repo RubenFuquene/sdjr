@@ -125,4 +125,9 @@ class Constant
         self::COMMENT_TYPE_INFO => 'Información',
         self::COMMENT_TYPE_VALIDATION => 'Validación',
     ];
+
+    // Nearby search radius (km)
+    public const DEFAULT_SEARCH_RADIUS_KM = 10;
+
+    public const MAX_SEARCH_RADIUS_KM = 50;
 }
