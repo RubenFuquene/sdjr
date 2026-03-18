@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\LegalDocumentController;
 use App\Http\Controllers\Api\V1\LegalRepresentativeController;
 use App\Http\Controllers\Api\V1\LogoutController;
 use App\Http\Controllers\Api\V1\MeController;
+use App\Http\Controllers\Api\V1\NearbyController;
 use App\Http\Controllers\Api\V1\NeighborhoodController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\PqrsTypeController;
@@ -41,6 +42,12 @@ Route::prefix('v1')->group(function () {
     // Password forgot endpoint
     Route::post('password/forgot', [ForgotPasswordController::class, 'forgot']);
     Route::post('password/reset', [ForgotPasswordController::class, 'reset']);
+
+    // Nearby search (público)
+    Route::prefix('nearby')->name('nearby.')->group(function () {
+        Route::get('branches', [NearbyController::class, 'branches']);
+        Route::get('products', [NearbyController::class, 'products']);
+    });
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {

@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\SanitizesTextAttributes;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * Class CommerceBranch
  *
@@ -27,6 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class CommerceBranch extends Model
 {
     use HasFactory, SanitizesTextAttributes, SoftDeletes;
@@ -134,5 +135,24 @@ class CommerceBranch extends Model
     public function setAddressAttribute($value): void
     {
         $this->attributes['address'] = $this->sanitizeText($value);
+    }
+
+    /**
+     * Scope: filtra sucursales cercanas usando la fórmula de Haversine.
+     */
+    public function scopeNearby(Builder $query, float $lat, float $lng, float $radiusKm): Builder
+    {
+        // SQLite no soporta HAVING en campos calculados sin agregación
+        return $query
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->selectRaw(
+                '*, (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance_km',
+                [$lat, $lng, $lat]
+            )
+            ->whereRaw('6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude))) <= ?', [
+                $lat, $lng, $lat, $radiusKm,
+            ])
+            ->orderBy('distance_km');
     }
 }

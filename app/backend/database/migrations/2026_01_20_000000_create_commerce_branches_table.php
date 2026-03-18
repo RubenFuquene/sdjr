@@ -26,6 +26,7 @@ return new class extends Migration
             $table->boolean('status')->default(Constant::STATUS_ACTIVE);
             $table->timestamps();
             $table->softDeletes();
+            $table->index(['latitude', 'longitude']);
         });
     }
 
