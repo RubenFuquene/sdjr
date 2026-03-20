@@ -23,7 +23,8 @@ class UserSeeder extends ControlledSeeder
     protected function runSeeder(): void
     {
         if (env('APP_ENV') == 'prd') {
-            User::insert([
+
+            $superadmin = User::create([
                 'name' => 'Administrator',
                 'last_name' => 'Ñapa App',
                 'email' => 'admin@napaapp.com',
@@ -31,28 +32,33 @@ class UserSeeder extends ControlledSeeder
                 'password' => Hash::make('secret'),
                 'email_verified_at' => now(),
             ]);
+
+            $superadmin->assignRole('superadmin');
         }
 
         if (env('DEMO_SEEDING') == 'true') {
 
-            User::insert([
-                [
-                    'name' => 'Admin',
-                    'last_name' => 'User',
-                    'email' => 'admin@example.com',
-                    'phone' => '3000000000',
-                    'password' => Hash::make('password'),
-                    'email_verified_at' => now(),
-                ],
-                [
-                    'name' => 'Provider',
-                    'last_name' => 'User',
-                    'email' => 'provider@example.com',
-                    'phone' => '3000000001',
-                    'password' => Hash::make('password'),
-                    'email_verified_at' => now(),
-                ],
+            $admin = User::create([
+                'name' => 'Admin',
+                'last_name' => 'User',
+                'email' => 'admin@example.com',
+                'phone' => '3000000001',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
             ]);
+
+            $admin->assignRole('admin');
+
+            $provider = User::create([
+                'name' => 'Provider',
+                'last_name' => 'User',
+                'email' => 'provider@example.com',
+                'phone' => '3000000002',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]);
+
+            $provider->assignRole('provider');
 
             // Always create 10 additional test users
             User::factory(10)->create();
