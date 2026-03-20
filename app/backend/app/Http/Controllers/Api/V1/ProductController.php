@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteProductRequest;
 use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
+use App\Http\Requests\Api\V1\PatchProductStatusRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
 use App\Http\Requests\Api\V1\ShowProductRequest;
 use App\Http\Requests\Api\V1\StoreProductRequest;
@@ -159,6 +160,36 @@ class ProductController extends Controller
             return $this->successResponse(new ProductResource($product), 'Product updated successfully', Response::HTTP_OK);
         } catch (Exception $e) {
             return $this->errorResponse('Error updating product', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *   path="/api/v1/products/{id}/status",
+     *   operationId="patchProductStatus",
+     *   tags={"Products"},
+     *   summary="Patch product status",
+     *   description="Updates only the status of an existing product",
+     *   security={{"sanctum":{}}},
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/PatchProductStatusRequest")),
+     *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/ProductResource")),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden"),
+     *   @OA\Response(response=404, description="Not found"),
+     *   @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function patchStatus(PatchProductStatusRequest $request, int $id): JsonResponse
+    {
+        try {
+            $product = $this->productService->patchStatus($id, (string) $request->validated('status'));
+
+            return $this->successResponse(new ProductResource($product), 'Product status updated successfully', Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return $this->errorResponse('Error updating product status', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

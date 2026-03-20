@@ -26,7 +26,7 @@ return new class extends Migration
             $table->integer('quantity_total')->default(0);
             $table->integer('quantity_available')->default(0);
             $table->timestamp('expires_at')->nullable();
-            $table->char('status', 1)->default(Constant::STATUS_ACTIVE);
+            $table->char('status', 1)->default(Constant::STATUS_INACTIVE);
             $table->timestamps();
             $table->softDeletes();
 

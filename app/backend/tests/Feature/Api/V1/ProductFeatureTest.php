@@ -123,6 +123,35 @@ class ProductFeatureTest extends TestCase
         $this->assertDatabaseHas('products', ['id' => $product->id, 'title' => 'Té Verde']);
     }
 
+    public function test_patch_status_updates_product_status()
+    {
+        $this->actingAsAdmin();
+        $product = Product::factory()->create(['status' => (string) Constant::STATUS_ACTIVE]);
+
+        $response = $this->patchJson('/api/v1/products/'.$product->id.'/status', [
+            'status' => (string) Constant::STATUS_INACTIVE,
+        ]);
+
+        $response->assertOk()->assertJsonFragment(['status' => (string) Constant::STATUS_INACTIVE]);
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'status' => (string) Constant::STATUS_INACTIVE,
+        ]);
+    }
+
+    public function test_patch_status_fails_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $product = Product::factory()->create();
+
+        $response = $this->patchJson('/api/v1/products/'.$product->id.'/status', [
+            'status' => (string) Constant::STATUS_INACTIVE,
+        ]);
+
+        $response->assertForbidden();
+    }
+
     public function test_destroy_deletes_product()
     {
         $this->actingAsAdmin();
