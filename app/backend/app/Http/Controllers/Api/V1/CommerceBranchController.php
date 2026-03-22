@@ -8,12 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteCommerceBranchRequest;
 use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
+use App\Http\Requests\Api\V1\MyFavoriteCommerceBranchesRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\ShowCommerceBranchRequest;
 use App\Http\Requests\Api\V1\StoreCommerceBranchRequest;
 use App\Http\Requests\Api\V1\UpdateCommerceBranchRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
+use App\Http\Resources\Api\V1\FavoriteCommerceBranchResource;
 use App\Models\CommerceBranch;
 use App\Services\CommerceBranchService;
 use App\Services\DocumentUploadService;
@@ -301,6 +303,37 @@ class CommerceBranchController extends Controller
             return $this->errorResponse('Photo not found', 404);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage().' on line '.$e->getLine(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/commerce-branches/my-favorites",
+     *     operationId="myFavoriteCommerceBranches",
+     *     tags={"Commerce Branches"},
+     *     summary="Get my favorite commerce branches",
+     *     description="Returns top commerce branches where the authenticated user has placed the most orders.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="limit", in="query", required=false, description="Top results limit (1-10)", @OA\Schema(type="integer", minimum=1, maximum=10, default=5)),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="status", type="boolean", example=true), @OA\Property(property="message", type="string", example="Favorite commerce branches retrieved successfully"), @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/FavoriteCommerceBranchResource")))),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=500, description="Internal Server Error")
+     * )
+     */
+    public function myFavorites(MyFavoriteCommerceBranchesRequest $request): JsonResponse
+    {
+        try {
+            $favorites = $this->commerceService->myFavoriteCommerceBranches(
+                $request->user()->id,
+                $request->validatedLimit()
+            );
+
+            return $this->successResponse(FavoriteCommerceBranchResource::collection($favorites), 'Favorite commerce branches retrieved successfully');
+        } catch (\Throwable $e) {
+            Log::error('Error retrieving favorite commerce branches', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error retrieving favorite commerce branches', 500, ['exception' => $e->getMessage()]);
         }
     }
 }

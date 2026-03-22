@@ -196,6 +196,9 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.comments.show', 'guard_name' => $guardName, 'description' => 'Ver comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.comments.delete', 'guard_name' => $guardName, 'description' => 'Eliminar comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
 
+            // Usuario - Customer
+            ['name' => 'customer.commerce-branches.my-favorites', 'guard_name' => $guardName, 'description' => 'Ver mis comercios favoritos', 'created_at' => now(), 'updated_at' => now()],
+
         ];
 
         // Crear permisos si no existen
@@ -410,6 +413,7 @@ class RolePermissionSeeder extends Seeder
         $userPermissions = [
 
             'customer.orders.create',
+            'customer.commerce-branches.my-favorites'
         ];
 
         $userRole = Role::where('name', 'user')->first();
