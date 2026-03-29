@@ -5,19 +5,7 @@
 
 import { fetchWithErrorHandling } from "./client";
 import type { UserFromAPI } from "@/types/user";
-
-// ============================================
-// Response Types
-// ============================================
-
-/**
- * Respuesta simple del backend (no paginada)
- */
-export interface ApiSuccess<T> {
-  status: boolean;
-  message?: string;
-  data: T;
-}
+import type { ApiSuccess } from './types';
 
 // ============================================
 // List - GET /api/v1/administrators

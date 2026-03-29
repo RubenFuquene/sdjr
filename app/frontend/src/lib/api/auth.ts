@@ -18,7 +18,7 @@ type LoginPayload = {
 
 type RegisterPayload = {
   name: string;
-  last_name: string;
+  last_name?: string;
   email: string;
   password: string;
   password_confirmation: string;
@@ -135,9 +135,12 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
  * Implementado en: app/Http/Controllers/Api/V1/ProviderRegisterController.php
  */
 export async function register({ name, last_name, email, password, password_confirmation }: RegisterPayload): Promise<RegisterResult> {
-  if (!name || !last_name || !email || !password || !password_confirmation) {
+  if (!name || !email || !password || !password_confirmation) {
     throw new Error("Por favor completa todos los campos.");
   }
+
+  // Compatibilidad MVP: el modelo actual exige last_name para provider.
+  const normalizedLastName = (last_name || "").trim() || "provider";
 
   try {
     const response = await fetch(`${API_URL}/api/v1/provider/register`, {
@@ -146,7 +149,13 @@ export async function register({ name, last_name, email, password, password_conf
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      body: JSON.stringify({ name, last_name, email, password, password_confirmation }),
+      body: JSON.stringify({
+        name,
+        last_name: normalizedLastName,
+        email,
+        password,
+        password_confirmation,
+      }),
     });
 
     if (!response.ok) {

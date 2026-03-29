@@ -5,6 +5,7 @@
 
 import { fetchWithErrorHandling } from "./client";
 import type { DocumentUploadResource } from "./documents";
+import type { ApiSuccess } from "./types";
 
 export type ProductType = "single" | "package";
 
@@ -28,12 +29,6 @@ export interface ProductFromAPI {
   status: string;
   created_at: string;
   updated_at: string;
-}
-
-export interface ApiSuccess<T> {
-  status: boolean;
-  message?: string | null;
-  data: T;
 }
 
 export interface ProductCategoryFromAPI {

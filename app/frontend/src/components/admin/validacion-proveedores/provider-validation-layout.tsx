@@ -17,6 +17,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import type { Proveedor } from '@/types/admin';
 import { ProviderValidationSidebar } from './provider-validation-sidebar';
 import { ProviderValidationDetail } from './provider-validation-detail';
@@ -28,6 +29,7 @@ import { ProviderValidationDetail } from './provider-validation-detail';
 export function ProviderValidationLayout() {
   // Estado del proveedor seleccionado
   const [selectedProvider, setSelectedProvider] = useState<Proveedor | null>(null);
+  const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
 
   /**
    * Handler cuando se selecciona un proveedor del sidebar
@@ -40,17 +42,19 @@ export function ProviderValidationLayout() {
    * Callback cuando se aprueba un proveedor
    */
   const handleApprovalSuccess = useCallback((message: string) => {
-    console.log('Success:', message);
+    toast.success(message);
     // Limpiar selección después de aprobación
     setSelectedProvider(null);
+    setSidebarRefreshTrigger((prev) => prev + 1);
   }, []);
 
   /**
    * Callback cuando hay error en aprobación/rechazo
    */
   const handleApprovalError = useCallback((error: string) => {
-    console.error('Error en aprobación:', error);
-    // El error se muestra en el toast/banner del componente de acciones
+    toast.error('Error en aprobación', {
+      description: error,
+    });
   }, []);
 
   return (
@@ -60,6 +64,7 @@ export function ProviderValidationLayout() {
         <ProviderValidationSidebar
           selectedProviderId={selectedProvider?.id}
           onSelectProvider={handleSelectProvider}
+          refreshTrigger={sidebarRefreshTrigger}
         />
       </aside>
 

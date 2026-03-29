@@ -5,6 +5,7 @@
 
 import type { ApiResponse } from "@/types/admin";
 import { fetchWithErrorHandling } from "./client";
+import type { ApiSuccess } from "./types";
 
 export interface CommerceBranchHourFromAPI {
   id: number;
@@ -44,12 +45,6 @@ export interface CommerceBranchFromAPI {
 export interface GetCommerceBranchesParams {
   page?: number;
   perPage?: number;
-}
-
-export interface ApiSuccess<T> {
-  status: boolean;
-  message?: string;
-  data: T;
 }
 
 export interface CreateCommerceBranchHourInput {

@@ -12,6 +12,25 @@
 // ============================================
 
 /**
+ * Estado de verificacion del comercio en backend:
+ * 0 = Pendiente, 1 = Activo, 2 = Rechazado
+ */
+export type CommerceVerificationStatus = 0 | 1 | 2;
+export type CommerceVerificationStatusRaw = CommerceVerificationStatus | '0' | '1' | '2';
+
+export function normalizeCommerceVerificationStatus(
+  value: CommerceVerificationStatusRaw | null | undefined
+): CommerceVerificationStatus {
+  const normalizedValue = Number(value);
+
+  if (normalizedValue === 1 || normalizedValue === 2) {
+    return normalizedValue;
+  }
+
+  return 0;
+}
+
+/**
  * Estructura del endpoint /api/v1/commerces (GET list)
  * Respuesta del backend Laravel - CommerceResource
  */
@@ -73,13 +92,14 @@ export interface CommerceFromAPI {
   documents: CommerceDocumentFromAPI[];
   name: string;
   description?: string;
+  establishment_type?: string | null;
   tax_id: string;
   tax_id_type: string;
   address: string;
   phone?: string;
   email?: string;
   is_active: boolean;
-  is_verified: boolean;
+  is_verified: CommerceVerificationStatusRaw;
   created_at: string;
   updated_at: string;
 }
@@ -99,8 +119,9 @@ export interface ProveedorListItem {
   telefono: string;
   email: string;
   perfil: string;
-  estado: boolean; // is_active
-  verificado: boolean; // is_verified
+  estado: boolean; // is_active (operativo)
+  estadoVerificacion: CommerceVerificationStatus; // is_verified (0=Pendiente, 1=Activo, 2=Rechazado)
+  verificado: boolean; // Deprecated: usar estadoVerificacion
   tipoEstablecimiento?: string; // Tipo de establecimiento (Ej: Restaurante, Tienda, etc)
   createdAt?: string; // Fecha de creación/solicitud (ISO 8601)
 }
@@ -162,8 +183,11 @@ export interface Proveedor {
   // Datos básicos
   id: number;
   nombreComercial: string;
+  tipoDocumento: 'NIT' | 'Cédula de ciudadanía' | 'Pasaporte' | 'Cédula de extranjería';
   nit: string;
   representanteLegal: string;
+  tipoDocumentoRepresentante: 'Cédula de ciudadanía' | 'Cédula de extranjería' | 'Pasaporte';
+  documentoRepresentante: string;
   tipoEstablecimiento: string;
   telefono: string;
   email: string;
@@ -224,12 +248,13 @@ export interface CommerceBasicPayload {
     neighborhood_id: number;
     name: string;
     description?: string;
+    establishment_type?: string;
     tax_id: string;
     tax_id_type: 'NIT' | 'CC' | 'PS' | 'CE';
     address: string;
     phone?: string;
     email?: string;
-    is_verified?: boolean;
+    is_verified?: CommerceVerificationStatus;
     is_active?: boolean;
   };
   legal_representative?: {

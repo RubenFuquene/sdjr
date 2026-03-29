@@ -14,4 +14,5 @@ export { useProviderBranchForm } from './provider/use-provider-branch-form';
 export { useProviderBranches } from './provider/use-provider-branches';
 export { useProviderProductForm } from './provider/use-provider-product-form';
 export { useProviderProducts } from './provider/use-provider-products';
+export { useEstablishmentTypes } from './use-establishment-types';
 

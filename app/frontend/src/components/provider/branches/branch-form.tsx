@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "@/hooks";
+import { CitySelect, DepartmentSelect, NeighborhoodSelect } from "@/components/provider/ui";
 import type {
   ProviderBranchFormFieldErrors,
   ProviderBranchFormInput,
@@ -375,74 +376,38 @@ export function BranchForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <label htmlFor="branch-department" className="text-sm text-[#1A1A1A]">
-            Departamento *
-          </label>
-          <select
-            id="branch-department"
-            value={selectedDept ?? ""}
-            onChange={(event) => handleDepartmentChange(event.target.value)}
-            className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-white outline-none focus:ring-2 focus:ring-[#4B236A]/20"
-            disabled={loading.departments || submitting}
-          >
-            <option value="">Selecciona departamento</option>
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>
-                {department.name}
-              </option>
-            ))}
-          </select>
-          {getFieldError("commerce_branch.department_id") && (
-            <p className="text-sm text-red-600">{getFieldError("commerce_branch.department_id")}</p>
-          )}
-        </div>
+        <DepartmentSelect
+          departments={departments}
+          value={selectedDept}
+          onChange={(id) => handleDepartmentChange(id?.toString() ?? "")}
+          disabled={submitting}
+          loading={loading.departments}
+          required
+          error={getFieldError("commerce_branch.department_id")}
+        />
 
-        <div className="space-y-2">
-          <label htmlFor="branch-city" className="text-sm text-[#1A1A1A]">
-            Ciudad *
-          </label>
-          <select
-            id="branch-city"
-            value={selectedCity ?? ""}
-            onChange={(event) => handleCityChange(event.target.value)}
-            className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-white outline-none focus:ring-2 focus:ring-[#4B236A]/20"
-            disabled={!selectedDept || loading.cities || submitting}
-          >
-            <option value="">Selecciona ciudad</option>
-            {filteredCities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-          {getFieldError("commerce_branch.city_id") && (
-            <p className="text-sm text-red-600">{getFieldError("commerce_branch.city_id")}</p>
-          )}
-        </div>
+        <CitySelect
+          cities={filteredCities}
+          departmentId={selectedDept}
+          value={selectedCity}
+          onChange={(id) => handleCityChange(id?.toString() ?? "")}
+          disabled={submitting}
+          loading={loading.cities}
+          required
+          error={getFieldError("commerce_branch.city_id")}
+        />
 
-        <div className="space-y-2">
-          <label htmlFor="branch-neighborhood" className="text-sm text-[#1A1A1A]">
-            Barrio *
-          </label>
-          <select
-            id="branch-neighborhood"
-            value={selectedNeighborhood ?? ""}
-            onChange={(event) => handleNeighborhoodChange(event.target.value)}
-            className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-white outline-none focus:ring-2 focus:ring-[#4B236A]/20"
-            disabled={!selectedCity || loading.neighborhoods || submitting}
-          >
-            <option value="">Selecciona barrio</option>
-            {filteredNeighborhoods.map((neighborhood) => (
-              <option key={neighborhood.id} value={neighborhood.id}>
-                {neighborhood.name}
-              </option>
-            ))}
-          </select>
-          {getFieldError("commerce_branch.neighborhood_id") && (
-            <p className="text-sm text-red-600">{getFieldError("commerce_branch.neighborhood_id")}</p>
-          )}
-        </div>
+        <NeighborhoodSelect
+          neighborhoods={filteredNeighborhoods}
+          cityId={selectedCity}
+          value={selectedNeighborhood?.toString() ?? ""}
+          onChange={handleNeighborhoodChange}
+          disabled={submitting}
+          loading={loading.neighborhoods}
+          required
+          error={getFieldError("commerce_branch.neighborhood_id")}
+          allowManualEntry={false}
+        />
       </div>
 
       <div className="space-y-2">
