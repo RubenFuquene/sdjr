@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('department_id')->constrained('departments')->cascadeOnDelete();
             $table->foreignId('city_id')->constrained('cities')->cascadeOnDelete();
             $table->foreignId('neighborhood_id')->constrained('neighborhoods')->cascadeOnDelete();
+            $table->foreignId('establishment_type_id')->nullable()->constrained('establishment_types')->cascadeOnDelete();
             $table->string('name', 255);
             $table->string('description', 500)->nullable();
             $table->string('tax_id', 30);

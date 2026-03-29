@@ -83,6 +83,24 @@ class Constant
 
     public const PRODUCT_TYPE_PACKAGE = 'package';
 
+    // Order Status
+    public const ORDER_STATUS_PENDING = 'pending';
+
+    public const ORDER_STATUS_CONFIRMED = 'confirmed';
+
+    public const ORDER_STATUS_PREPARING = 'preparing';
+
+    public const ORDER_STATUS_READY = 'ready';
+
+    public const ORDER_STATUS_DELIVERED = 'delivered';
+
+    public const ORDER_STATUS_CANCELLED = 'cancelled';
+
+    // Order validations
+    public const MIN_ORDER_QUANTITY = 1;
+
+    public const MAX_ORDER_ITEMS = 50;
+
     // Commerce Branch Photos
     public const MAX_PHOTOS_PER_COMMERCE_BRANCH = 5;
 
@@ -100,4 +118,34 @@ class Constant
     public const COMMERCE_DOCUMENT_TYPE_PS = 'PS';
 
     public const COMMERCE_DOCUMENT_TYPE_CE = 'CE';
+
+    // Commerce Comment Priorities
+    public const COMMENT_PRIORITY = 'PR';
+
+    public const COMMENT_PRIORITY_HIGH = 'AL';
+
+    public const COMMENT_PRIORITY_MEDIUM = 'ME';
+
+    public const COMMENT_PRIORITY_LOW = 'BA';
+
+    // Commerce Comment Types
+    public const COMMENT_TYPE_PRODUCT = 'PR';
+
+    public const COMMENT_TYPE_SUPPORT = 'SU';
+
+    public const COMMENT_TYPE_INFO = 'IN';
+
+    public const COMMENT_TYPE_VALIDATION = 'VA';
+
+    public const COMMENT_TYPE_ARRAY = [
+        self::COMMENT_TYPE_PRODUCT => 'Producto',
+        self::COMMENT_TYPE_SUPPORT => 'Soporte',
+        self::COMMENT_TYPE_INFO => 'Información',
+        self::COMMENT_TYPE_VALIDATION => 'Validación',
+    ];
+
+    // Nearby search radius (km)
+    public const DEFAULT_SEARCH_RADIUS_KM = 10;
+
+    public const MAX_SEARCH_RADIUS_KM = 50;
 }

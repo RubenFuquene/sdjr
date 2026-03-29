@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *     @OA\Property(property="department_id", type="integer", example=1),
  *     @OA\Property(property="city_id", type="integer", example=1),
  *     @OA\Property(property="neighborhood_id", type="integer", example=1),
+ *     @OA\Property(property="establishment_type_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Comercial S.A.S"),
  *     @OA\Property(property="description", type="string", example="Comercio de tecnología"),
  *     @OA\Property(property="tax_id", type="string", example="900123456"),
@@ -44,6 +45,7 @@ class Commerce extends Model
         'department_id',
         'city_id',
         'neighborhood_id',
+        'establishment_type_id',
         'name',
         'description',
         'tax_id',
@@ -148,6 +150,16 @@ class Commerce extends Model
     public function myAccount()
     {
         return $this->hasMany(CommercePayoutMethod::class);
+    }
+
+    /**
+     * Get the establishment type of the commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function establishmentType()
+    {
+        return $this->belongsTo(EstablishmentType::class);
     }
 
     /**

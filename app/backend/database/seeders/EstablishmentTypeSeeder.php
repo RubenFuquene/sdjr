@@ -14,11 +14,8 @@ class EstablishmentTypeSeeder extends Seeder
         if (env('APP_ENV') == 'prd') {
             EstablishmentType::insert([
                 ['name' => 'Restaurante', 'code' => 'RE', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Cafetería', 'code' => 'CA', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Panadería', 'code' => 'PA', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Comida rápida', 'code' => 'CR', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Postres', 'code' => 'PO', 'created_at' => now(), 'updated_at' => now()],
-                ['name' => 'Otro', 'code' => 'OT', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Panadería y Pastelería', 'code' => 'PA', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Retail', 'code' => 'RT', 'created_at' => now(), 'updated_at' => now()],
             ]);
         }
         if (env('DEMO_SEEDING') == 'true') {

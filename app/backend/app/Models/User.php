@@ -93,4 +93,36 @@ class User extends Authenticatable
     {
         $this->attributes['name'] = $this->capitalizeText($value);
     }
+
+    /**
+     * Check if user has superadmin role
+     */
+    public function isSuperAdmin(): bool
+    {
+        return auth()->guard()->check() && $this->hasRole('superadmin');
+    }
+
+    /**
+     * Check if user has admin role
+     */
+    public function isAdmin(): bool
+    {
+        return auth()->guard()->check() && $this->hasRole('admin');
+    }
+
+    /**
+     * Get the first commerce branch ID owned by this user.
+     */
+    public function userCommerceBranch(): ?int
+    {
+        if (! $this->exists) {
+            return null;
+        }
+
+        return CommerceBranch::query()
+            ->whereHas('commerce', function ($query): void {
+                $query->where('owner_user_id', $this->id);
+            })
+            ->value('id');
+    }
 }

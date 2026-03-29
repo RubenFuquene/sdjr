@@ -18,7 +18,7 @@ class ProductSeeder extends Seeder
             // Aquí puedes agregar datos fijos para producción si aplica
         }
         if (env('DEMO_SEEDING') == 'true') {
-            Product::factory()->count(20)->create();
+            Product::factory()->count(5)->create();
         }
     }
 }

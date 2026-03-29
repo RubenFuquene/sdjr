@@ -18,12 +18,15 @@ class ProductCategoryService
     /**
      * Get paginated list of product categories with optional filters.
      */
-    public function index(array $filters, int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $query = ProductCategory::query();
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
+        }
+        if (isset($filters['establishment_type_id'])) {
+            $query->where('establishment_type_id', $filters['establishment_type_id']);
         }
         if (isset($filters['name'])) {
             $query->where('name', 'like', '%'.$filters['name'].'%');
@@ -32,7 +35,7 @@ class ProductCategoryService
             $query->where('description', 'like', '%'.$filters['description'].'%');
         }
 
-        return $query->paginate($perPage);
+        return $query->with(['establishmentType'])->paginate($perPage);
     }
 
     /**
@@ -43,7 +46,7 @@ class ProductCategoryService
     public function store(array $data): ProductCategory
     {
         try {
-            return ProductCategory::create($data);
+            return ProductCategory::create($data)->load(['establishmentType']);
         } catch (Exception $e) {
             Log::error('Error creating ProductCategory', ['error' => $e->getMessage()]);
             throw $e;
@@ -57,7 +60,7 @@ class ProductCategoryService
      */
     public function show(int $id): ProductCategory
     {
-        return ProductCategory::findOrFail($id);
+        return ProductCategory::with(['establishmentType'])->findOrFail($id);
     }
 
     /**
@@ -71,7 +74,7 @@ class ProductCategoryService
             $category = ProductCategory::findOrFail($id);
             $category->update($data);
 
-            return $category;
+            return $category->load(['establishmentType']);
         } catch (Exception $e) {
             Log::error('Error updating ProductCategory', ['error' => $e->getMessage()]);
             throw $e;

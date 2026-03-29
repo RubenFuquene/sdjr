@@ -110,8 +110,9 @@ class CommerceController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *         description="Commerce",
      *
-     *         @OA\JsonContent(type="object")
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
      *     ),
      *
      *     @OA\Response(
@@ -190,8 +191,9 @@ class CommerceController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
+     *         description="Commerce",
      *
-     *         @OA\JsonContent(type="object")
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
      *     ),
      *
      *     @OA\Response(
