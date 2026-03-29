@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\LogoutController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NearbyController;
 use App\Http\Controllers\Api\V1\NeighborhoodController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\PqrsTypeController;
 use App\Http\Controllers\Api\V1\PriorityTypeController;
@@ -157,5 +158,11 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::apiResource('product-categories', ProductCategoryController::class);
+
+        // Orders - CRUD completo
+        Route::apiResource('orders', OrderController::class);
+        Route::patch('orders/{id}/status', [OrderController::class, 'patchStatus']);
+        Route::get('my-orders', [OrderController::class, 'myOrders']);
+        Route::get('commerce-branches/{branchId}/orders', [OrderController::class, 'commerceBranchOrders']);
     });
 });

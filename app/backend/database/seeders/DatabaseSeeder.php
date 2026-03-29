@@ -32,13 +32,13 @@ class DatabaseSeeder extends Seeder
         Log::info('Starting database seeding...');
 
         $this->call([
+            RolePermissionSeeder::class,
             UserSeeder::class,
             CountrySeeder::class,
             DepartmentSeeder::class,
             CitySeeder::class,
             EstablishmentTypeSeeder::class,
             CategorySeeder::class,
-            RolePermissionSeeder::class,
             NeighborhoodSeeder::class,
             CommerceSeeder::class,
             LegalRepresentativeSeeder::class,
@@ -54,6 +54,7 @@ class DatabaseSeeder extends Seeder
             LegalDocumentSeeder::class,
             ProductCategorySeeder::class,
             ProductSeeder::class,
+            OrderSeeder::class,
             CommerceCommentSeeder::class,
         ]);
 

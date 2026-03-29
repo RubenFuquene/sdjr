@@ -83,6 +83,24 @@ class Constant
 
     public const PRODUCT_TYPE_PACKAGE = 'package';
 
+    // Order Status
+    public const ORDER_STATUS_PENDING = 'pending';
+
+    public const ORDER_STATUS_CONFIRMED = 'confirmed';
+
+    public const ORDER_STATUS_PREPARING = 'preparing';
+
+    public const ORDER_STATUS_READY = 'ready';
+
+    public const ORDER_STATUS_DELIVERED = 'delivered';
+
+    public const ORDER_STATUS_CANCELLED = 'cancelled';
+
+    // Order validations
+    public const MIN_ORDER_QUANTITY = 1;
+
+    public const MAX_ORDER_ITEMS = 50;
+
     // Commerce Branch Photos
     public const MAX_PHOTOS_PER_COMMERCE_BRANCH = 5;
 
