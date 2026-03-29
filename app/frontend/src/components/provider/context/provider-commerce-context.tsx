@@ -2,7 +2,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ApiError, getMyCommerce } from "@/lib/api";
-import type { CommerceFromAPI, CommerceVerificationStatus } from "@/types/commerces";
+import {
+  normalizeCommerceVerificationStatus,
+  type CommerceFromAPI,
+  type CommerceVerificationStatus,
+} from "@/types/commerces";
 
 export type RegistrationStatus = "Aprobado" | "Pendiente" | "Rechazado";
 
@@ -17,11 +21,11 @@ type ProviderCommerceContextValue = {
 const ProviderCommerceContext = createContext<ProviderCommerceContextValue | undefined>(undefined);
 
 function resolveRegistrationStatus(isVerifiedValue: CommerceVerificationStatus): RegistrationStatus {
-  if (isVerifiedValue === '1') {
+  if (isVerifiedValue === 1) {
     return "Aprobado";
   }
 
-  if (isVerifiedValue === '2') {
+  if (isVerifiedValue === 2) {
     return "Rechazado";
   }
 
@@ -54,7 +58,7 @@ export function ProviderCommerceProvider({ children }: ProviderCommerceProviderP
 
       setCommerce(commerce);
       setCommerceId(commerce.id);
-      setRegistrationStatus(resolveRegistrationStatus(commerce.is_verified));
+      setRegistrationStatus(resolveRegistrationStatus(normalizeCommerceVerificationStatus(commerce.is_verified)));
     } catch (error) {
       if (error instanceof ApiError && error.status === 404) {
         setCommerce(null);

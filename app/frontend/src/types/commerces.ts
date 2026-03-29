@@ -15,7 +15,20 @@
  * Estado de verificacion del comercio en backend:
  * 0 = Pendiente, 1 = Activo, 2 = Rechazado
  */
-export type CommerceVerificationStatus = '0' | '1' | '2';
+export type CommerceVerificationStatus = 0 | 1 | 2;
+export type CommerceVerificationStatusRaw = CommerceVerificationStatus | '0' | '1' | '2';
+
+export function normalizeCommerceVerificationStatus(
+  value: CommerceVerificationStatusRaw | null | undefined
+): CommerceVerificationStatus {
+  const normalizedValue = Number(value);
+
+  if (normalizedValue === 1 || normalizedValue === 2) {
+    return normalizedValue;
+  }
+
+  return 0;
+}
 
 /**
  * Estructura del endpoint /api/v1/commerces (GET list)
@@ -86,7 +99,7 @@ export interface CommerceFromAPI {
   phone?: string;
   email?: string;
   is_active: boolean;
-  is_verified: CommerceVerificationStatus;
+  is_verified: CommerceVerificationStatusRaw;
   created_at: string;
   updated_at: string;
 }

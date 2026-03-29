@@ -1,7 +1,7 @@
 'use client';
 
 import { ProveedorListItem } from "@/types/admin";
-import { Badge, StatusBadge, VerificationStatusBadge } from "@/components/admin/shared/badge";
+import { Badge, VerificationStatusBadge } from "@/components/admin/shared/badge";
 import { TableActions } from "@/components/admin/shared/table-actions";
 import { TABLE_STYLES } from "@/components/admin/shared/table-styles";
 

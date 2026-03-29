@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import type { CommerceVerificationStatus } from "@/types/commerces";
 
 type BadgeVariant = "success" | "inactive" | "perfil" | "permiso" | "warning";
 
@@ -31,7 +32,7 @@ export function StatusBadge({ activo }: { activo: boolean }) {
   );
 }
 
-export function VerificationStatusBadge({ estado }: { estado: 0 | 1 | 2 }) {
+export function VerificationStatusBadge({ estado }: { estado: CommerceVerificationStatus }) {
   const variantMap: Record<0 | 1 | 2, "inactive" | "success" | "warning"> = {
     0: "inactive",
     1: "success",
@@ -45,7 +46,7 @@ export function VerificationStatusBadge({ estado }: { estado: 0 | 1 | 2 }) {
   };
 
   return (
-    <Badge variant={variantMap[estado] as any}>
+    <Badge variant={variantMap[estado]}>
       {labelMap[estado]}
     </Badge>
   );

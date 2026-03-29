@@ -6,6 +6,7 @@
 
 import type {
   CommerceFromAPI,
+  CommerceVerificationStatus,
   Proveedor,
   ProveedorListItem,
   DocumentoProveedor,
@@ -15,6 +16,7 @@ import type {
   CommerceBasicPayload,
   CommerceBasicDataResponse,
 } from './commerces';
+import { normalizeCommerceVerificationStatus } from './commerces';
 import type { BasicInfoFormData, DocumentType } from './basic-info';
 
 // ============================================
@@ -30,6 +32,8 @@ import type { BasicInfoFormData, DocumentType } from './basic-info';
  */
 export const commerceToProveedorListItem = (commerce: CommerceFromAPI): ProveedorListItem => {
   const representanteLegal = commerce.legal_representatives?.[0]?.name || 'N/A';
+  const normalizedVerificationStatus: CommerceVerificationStatus =
+    normalizeCommerceVerificationStatus(commerce.is_verified);
 
   return {
     id: commerce.id,
@@ -39,8 +43,8 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
     email: commerce.email || '',
     perfil: 'Proveedor',
     estado: commerce.is_active,
-    estadoVerificacion: commerce.is_verified,
-    verificado: commerce.is_verified === 1,
+    estadoVerificacion: normalizedVerificationStatus,
+    verificado: normalizedVerificationStatus === 1,
     tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible (actualmente no proporcionado)
     createdAt: commerce.created_at,
   };
@@ -56,6 +60,8 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
 export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
   const representanteLegal = (commerce.legal_representatives?.[0]?.name || '') + ' ' + (commerce.legal_representatives?.[0]?.last_name || '');
   const barrio = commerce.neighborhood?.name || '';
+  const normalizedVerificationStatus: CommerceVerificationStatus =
+    normalizeCommerceVerificationStatus(commerce.is_verified);
 
   return {
     // Datos básicos
@@ -77,7 +83,7 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     estado: commerce.is_active,
 
     // Datos secundarios
-    verificado: commerce.is_verified === 1 || commerce.is_verified === 0,
+    verificado: normalizedVerificationStatus === 1 || normalizedVerificationStatus === 0,
     descripcion: commerce.description,
 
     // Relaciones
