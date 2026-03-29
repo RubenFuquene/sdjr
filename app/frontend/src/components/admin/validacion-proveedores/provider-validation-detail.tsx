@@ -26,7 +26,7 @@ import {
   ProviderBancariaTab,
   ProviderLegalTab,
 } from '@/components/admin/shared/provider-details-tabs';
-import { ProviderValidationComments } from './provider-validation-comments';
+import { formatDateDDMMYYYY } from '@/lib/utils/date';
 import { ProviderValidationActions } from './provider-validation-actions';
 
 // ============================================
@@ -81,7 +81,7 @@ export function ProviderValidationDetail({
               {provider.nombreComercial}
             </h2>
             <p className="text-sm text-[#6A6A6A]">
-              {provider.tipoEstablecimiento || 'Restaurante'} • Solicitud: 2025-11-15
+              {provider.tipoEstablecimiento || 'Restaurante'} • Solicitud: {formatDateDDMMYYYY(provider.fechaCreacion, { emptyFallback: 'N/A' })}
             </p>
           </div>
           

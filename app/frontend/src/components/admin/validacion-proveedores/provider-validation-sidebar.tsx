@@ -12,11 +12,13 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import type { Proveedor, ProveedorListItem } from '@/types/admin';
 import { useCommerceManagement } from '@/hooks/use-commerce-management';
 import { TableLoadingState } from '@/components/admin/shared/loading-state';
 import { ErrorState } from '@/components/admin/shared/error-state';
+import { formatDateDDMMYYYY } from '@/lib/utils/date';
 
 // ============================================
 // Props Interface
@@ -25,6 +27,7 @@ import { ErrorState } from '@/components/admin/shared/error-state';
 interface ProviderValidationSidebarProps {
   selectedProviderId?: number;
   onSelectProvider: (provider: Proveedor) => void;
+  refreshTrigger?: number;
 }
 
 // ============================================
@@ -34,6 +37,7 @@ interface ProviderValidationSidebarProps {
 export function ProviderValidationSidebar({
   selectedProviderId,
   onSelectProvider,
+  refreshTrigger = 0,
 }: ProviderValidationSidebarProps) {
   // Inicializar hook con filtro para mostrar solo proveedores pendientes (no verificados)
   const commerceManagement = useCommerceManagement({ verified: '0' });
@@ -41,6 +45,14 @@ export function ProviderValidationSidebar({
 
   // Mostrar solo proveedores con estado "pendiente" (no verificados)
   const pendingProviders = commerceManagement.commerces;
+
+  useEffect(() => {
+    if (refreshTrigger === 0) {
+      return;
+    }
+
+    void refresh();
+  }, [refresh, refreshTrigger]);
 
   // Estados
   if (commerceManagement.error) {
@@ -122,24 +134,6 @@ interface ProviderPendingCardProps {
   onClick: () => void | Promise<void>;
 }
 
-/**
- * Formatea fecha ISO a formato legible
- * Ej: 2026-03-04T21:18:27.000000Z → 2026-03-04
- */
-function formatDate(dateString?: string): string {
-  if (!dateString) return 'Sin fecha';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-CO', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    });
-  } catch {
-    return 'Fecha inválida';
-  }
-}
-
 function ProviderPendingCard({ provider, isSelected, onClick }: ProviderPendingCardProps) {
   return (
     <button
@@ -166,7 +160,10 @@ function ProviderPendingCard({ provider, isSelected, onClick }: ProviderPendingC
       <div className="flex items-center justify-between text-xs text-[#6A6A6A]">
         <span>Solicitud:</span>
         <span className="font-medium">
-          {formatDate(provider.createdAt)}
+          {formatDateDDMMYYYY(provider.createdAt, {
+            emptyFallback: 'Sin fecha',
+            invalidFallback: 'Fecha inválida',
+          })}
         </span>
       </div>
     </button>

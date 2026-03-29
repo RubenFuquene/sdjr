@@ -17,11 +17,11 @@ type ProviderCommerceContextValue = {
 const ProviderCommerceContext = createContext<ProviderCommerceContextValue | undefined>(undefined);
 
 function resolveRegistrationStatus(isVerifiedValue: CommerceVerificationStatus): RegistrationStatus {
-  if (isVerifiedValue === 1) {
+  if (isVerifiedValue === '1') {
     return "Aprobado";
   }
 
-  if (isVerifiedValue === 2) {
+  if (isVerifiedValue === '2') {
     return "Rechazado";
   }
 

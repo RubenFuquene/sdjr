@@ -15,7 +15,7 @@
  * Estado de verificacion del comercio en backend:
  * 0 = Pendiente, 1 = Activo, 2 = Rechazado
  */
-export type CommerceVerificationStatus = 0 | 1 | 2;
+export type CommerceVerificationStatus = '0' | '1' | '2';
 
 /**
  * Estructura del endpoint /api/v1/commerces (GET list)
@@ -170,8 +170,11 @@ export interface Proveedor {
   // Datos básicos
   id: number;
   nombreComercial: string;
+  tipoDocumento: 'NIT' | 'Cédula de ciudadanía' | 'Pasaporte' | 'Cédula de extranjería';
   nit: string;
   representanteLegal: string;
+  tipoDocumentoRepresentante: 'Cédula de ciudadanía' | 'Cédula de extranjería' | 'Pasaporte';
+  documentoRepresentante: string;
   tipoEstablecimiento: string;
   telefono: string;
   email: string;
