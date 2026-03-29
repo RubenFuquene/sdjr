@@ -79,6 +79,7 @@ export interface CommerceFromAPI {
   documents: CommerceDocumentFromAPI[];
   name: string;
   description?: string;
+  establishment_type?: string | null;
   tax_id: string;
   tax_id_type: string;
   address: string;
@@ -231,6 +232,7 @@ export interface CommerceBasicPayload {
     neighborhood_id: number;
     name: string;
     description?: string;
+    establishment_type?: string;
     tax_id: string;
     tax_id_type: 'NIT' | 'CC' | 'PS' | 'CE';
     address: string;

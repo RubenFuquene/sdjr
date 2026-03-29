@@ -44,7 +44,6 @@ export function EstablecimientoCard({
     loading,
     selectedDept,
     selectedCity,
-    selectedNeighborhood,
     setSelectedDept,
     setSelectedCity,
     setSelectedNeighborhood,
@@ -53,6 +52,7 @@ export function EstablecimientoCard({
   const {
     types: establishmentTypes,
     loading: loadingEstablishmentTypes,
+    error: establishmentTypesError,
   } = useEstablishmentTypes();
 
   const filteredCities = useMemo(() => {
@@ -162,6 +162,7 @@ export function EstablecimientoCard({
               Tipo de Documento <span className="text-red-500">*</span>
             </Label>
             <Select
+              key={formData.documentType !== '' ? 'doc-type-hydrated' : 'doc-type-empty'}
               value={formData.documentType}
               onValueChange={(value) => onFieldChange('documentType', value)}
             >
@@ -221,6 +222,7 @@ export function EstablecimientoCard({
               Tipo de Establecimiento <span className="text-red-500">*</span>
             </Label>
             <Select
+              key={formData.establishmentType !== '' ? 'est-type-hydrated' : 'est-type-empty'}
               value={formData.establishmentType}
               onValueChange={(value) => onFieldChange('establishmentType', value)}
               disabled={loadingEstablishmentTypes}
@@ -243,6 +245,9 @@ export function EstablecimientoCard({
             </Select>
             {errors.establishmentType && (
               <p className="text-sm text-red-600">{errors.establishmentType}</p>
+            )}
+            {!errors.establishmentType && establishmentTypesError && (
+              <p className="text-sm text-red-600">No fue posible cargar los tipos de establecimiento.</p>
             )}
           </div>
 

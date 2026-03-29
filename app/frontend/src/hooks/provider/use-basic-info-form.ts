@@ -37,7 +37,6 @@ export const useBasicInfoForm = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [existingCommerceId, setExistingCommerceId] = useState<number | null>(null);
-  const [hasHydratedInitialData, setHasHydratedInitialData] = useState(false);
   const [documentFiles, setDocumentFiles] = useState<DocumentFiles>({
     commerceChamber: null,
     legalRepresentativeId: null,
@@ -48,17 +47,13 @@ export const useBasicInfoForm = () => {
   });
 
   useEffect(() => {
-    if (isLoadingCommerce || hasHydratedInitialData) {
+    if (isLoadingCommerce || !commerce) {
       return;
     }
 
-    if (commerce) {
-      setExistingCommerceId(commerce.id);
-      setFormData(mapCommerceToBasicInfoForm(commerce));
-    }
-
-    setHasHydratedInitialData(true);
-  }, [commerce, hasHydratedInitialData, isLoadingCommerce]);
+    setExistingCommerceId(commerce.id);
+    setFormData(mapCommerceToBasicInfoForm(commerce));
+  }, [commerce, isLoadingCommerce]);
 
   const handleFieldChange = (fieldPath: string, value: string | number | null) => {
     setFormData((prev) => {
@@ -125,8 +120,10 @@ export const useBasicInfoForm = () => {
 
       if (commerceId) {
         await updateCommerce(commerceId, {
+          owner_user_id: ownerUserId,
           name: payload.commerce.name,
           description: payload.commerce.description,
+          establishment_type: payload.commerce.establishment_type,
           tax_id: payload.commerce.tax_id,
           tax_id_type: payload.commerce.tax_id_type,
           address: payload.commerce.address,
@@ -292,7 +289,9 @@ export const useBasicInfoForm = () => {
 };
 
 const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormData => {
-  const primaryLegalRepresentative = commerce.legal_representatives?.[0];
+  const primaryLegalRepresentative =
+    commerce.legal_representatives?.find((representative) => representative.is_primary) ||
+    commerce.legal_representatives?.[0];
   const commerceChamberDocument = commerce.documents?.find(
     (document) => document.document_type === 'CAMARA_COMERCIO'
   );
@@ -304,7 +303,7 @@ const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormDat
     commercialName: commerce.name || '',
     documentType: mapBackendDocumentTypeToFrontend(commerce.tax_id_type),
     documentNumber: commerce.tax_id || '',
-    establishmentType: '',
+    establishmentType: mapBackendEstablishmentTypeToFrontend(commerce.establishment_type),
     phone: commerce.phone || '',
     email: commerce.email || '',
     departmentId: commerce.department?.id ?? null,
@@ -327,19 +326,46 @@ const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormDat
 };
 
 const mapBackendDocumentTypeToFrontend = (documentType?: string): BasicInfoFormData['documentType'] => {
-  const normalizedDocumentType = (documentType || '').toUpperCase();
+  const normalizedDocumentType = (documentType || '')
+    .trim()
+    .toUpperCase()
+    .replace(/[.\s_-]/g, '');
 
   switch (normalizedDocumentType) {
     case 'NIT':
       return 'nit';
+    case 'CEDULACIUDADANIA':
+    case 'CEDULADECIUDADANIA':
     case 'CC':
       return 'cc';
+    case 'CEDULAEXTRANJERIA':
+    case 'CEDULADEEXTRANJERIA':
     case 'CE':
       return 'ce';
+    case 'PASSPORT':
     case 'PS':
     case 'PAS':
     case 'PASAPORTE':
       return 'passport';
+    default:
+      return '';
+  }
+};
+
+const mapBackendEstablishmentTypeToFrontend = (
+  establishmentType?: string | null
+): BasicInfoFormData['establishmentType'] => {
+  const normalizedEstablishmentType = (establishmentType || '').trim().toLowerCase();
+
+  switch (normalizedEstablishmentType) {
+    case 'restaurant':
+    case 'cafeteria':
+    case 'bakery':
+    case 'fast_food':
+    case 'desserts':
+    case 'drinks':
+    case 'other':
+      return normalizedEstablishmentType;
     default:
       return '';
   }

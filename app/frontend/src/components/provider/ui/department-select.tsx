@@ -44,7 +44,7 @@ export function DepartmentSelect({
       </Label>
 
       <Select
-        value={value?.toString()}
+        value={value !== null ? value.toString() : ''}
         onValueChange={(val) => onChange(val ? parseInt(val, 10) : null)}
         disabled={disabled || loading}
       >

@@ -47,6 +47,11 @@ export function RepresentanteLegalCard({
   errors = {},
 }: RepresentanteLegalCardProps) {
   const { legalRepresentative } = formData;
+  const normalizedDocumentType = LEGAL_REP_DOCUMENT_TYPE_OPTIONS.some(
+    (option) => option.value === legalRepresentative.documentType
+  )
+    ? legalRepresentative.documentType
+    : '';
   const { isUploading: isUploadingDoc } = useFileUpload(
     (fileName) => handleRepChange('documentFile', fileName)
   );
@@ -57,6 +62,14 @@ export function RepresentanteLegalCard({
    */
   const handleRepChange = (field: string, value: string | number | null) => {
     onFieldChange(`legalRepresentative.${field}`, value);
+  };
+
+  const handleDocumentTypeChange = (value: string) => {
+    if (!value) {
+      return;
+    }
+
+    handleRepChange('documentType', value);
   };
 
   /**
@@ -147,8 +160,8 @@ export function RepresentanteLegalCard({
               Tipo de Documento <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={legalRepresentative.documentType}
-              onValueChange={(value) => handleRepChange('documentType', value)}
+              value={normalizedDocumentType}
+              onValueChange={handleDocumentTypeChange}
             >
               <SelectTrigger
                 id="legalRep-docType"

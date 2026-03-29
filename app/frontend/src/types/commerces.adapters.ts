@@ -12,7 +12,6 @@ import type {
   Sucursal,
   InformacionBancaria,
   Legal,
-  ProveedorPayload,
   CommerceBasicPayload,
   CommerceBasicDataResponse,
 } from './commerces';
@@ -446,6 +445,7 @@ export const basicInfoToCommerceBasicPayload = (
       neighborhood_id: neighborhoodId,
       name: formData.commercialName.trim(),
       description: formData.observations?.trim() || undefined,
+      establishment_type: formData.establishmentType || undefined,
       tax_id: formData.documentNumber.trim(),
       tax_id_type: mapDocumentTypeToBackendTaxIdType(formData.documentType),
       address: formData.mainAddress.trim(),

@@ -1,5 +1,4 @@
 import { fetchWithErrorHandling } from './client';
-import type { ApiSuccess } from './types';
 
 export interface EstablishmentType {
   id: number;
@@ -12,6 +11,8 @@ export interface EstablishmentType {
 }
 
 export interface EstablishmentTypesResponse {
+  status: boolean;
+  message?: string;
   data: EstablishmentType[];
   meta: {
     current_page: number;
@@ -34,9 +35,11 @@ export interface EstablishmentTypesResponse {
  * @param perPage Number of types per page (default: 100 for getting all)
  */
 export async function getEstablishmentTypes(
-  perPage: number = 100
-): Promise<ApiSuccess<EstablishmentTypesResponse>> {
-  return fetchWithErrorHandling<ApiSuccess<EstablishmentTypesResponse>>(
-    `/api/v1/establishment-types?per_page=${perPage}`
+  perPage: number = 100,
+  signal?: AbortSignal
+): Promise<EstablishmentTypesResponse> {
+  return fetchWithErrorHandling<EstablishmentTypesResponse>(
+    `/api/v1/establishment-types?per_page=${perPage}`,
+    { signal }
   );
 }

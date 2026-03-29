@@ -24,10 +24,9 @@ export function useEstablishmentTypes(): UseEstablishmentTypesReturn {
     const timer = setTimeout(async () => {
       try {
         const response = await getEstablishmentTypes(100);
-        
         // Extracción robusta con fallback
-        if (response?.data?.data && Array.isArray(response.data.data)) {
-          setTypes(response.data.data);
+        if (response?.data && Array.isArray(response.data)) {
+          setTypes(response.data);
           setError(null);
         } else {
           setError('No se pudieron cargar los tipos');
