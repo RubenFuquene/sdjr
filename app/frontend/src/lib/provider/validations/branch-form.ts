@@ -6,6 +6,8 @@ export interface BranchFormValidationInput {
   cityId: number | null;
   neighborhoodId: number | null;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   phone: string;
   email: string;
   hours: Array<{
@@ -40,6 +42,11 @@ export const validateBranchForm = (
 
   if (!formData.address.trim()) {
     newErrors["commerce_branch.address"] = "La dirección es obligatoria";
+  }
+
+  if (formData.latitude === null || formData.longitude === null) {
+    newErrors["commerce_branch.location"] =
+      "Debes seleccionar la ubicación en el mapa";
   }
 
   if (formData.phone.trim() && !/^\d{10}$/.test(formData.phone.trim())) {
