@@ -28,7 +28,7 @@ export default function AppDiscoverPage() {
 
   return (
     <section className="px-4 pb-6 pt-4">
-      <header className="rounded-2xl bg-[var(--color-app-tomatillo-soft)] px-4 py-4 shadow-[var(--app-shadow-card)]">
+      <header className="app-page-header app-page-header-accent">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Image
@@ -64,7 +64,7 @@ export default function AppDiscoverPage() {
         <LocationStatusBanner />
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--color-app-ui-divider)] bg-[var(--color-app-ui-background)] shadow-[var(--app-shadow-card)]">
+      <div className="app-surface mt-4 overflow-hidden border border-[var(--color-app-ui-divider)]">
         <div className="border-b border-[var(--color-app-ui-divider)] px-4 py-3">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Mapa de comercios cercanos</h2>
           <p className="text-sm text-[var(--color-app-text-secondary-purple)]">
@@ -79,15 +79,15 @@ export default function AppDiscoverPage() {
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Link
           href="/app/store/1"
-          className="rounded-xl bg-[var(--color-app-ui-background)] px-3 py-3 text-center text-sm text-[var(--color-app-text-primary-purple)] shadow-[var(--app-shadow-card)]"
+          className="app-card-action rounded-xl bg-[var(--color-app-ui-background)] px-3 py-3 text-center text-sm text-[var(--color-app-text-primary-purple)] shadow-[var(--app-shadow-card)]"
         >
-          Ver tienda demo
+          Ver tienda
         </Link>
         <Link
           href="/app/product/1"
-          className="rounded-xl bg-[var(--color-app-text-primary-purple)] px-3 py-3 text-center text-sm text-white shadow-[var(--app-shadow-card)]"
+          className="app-btn-primary"
         >
-          Ver producto demo
+          Ver producto
         </Link>
       </div>
     </section>

@@ -31,10 +31,8 @@ export function AppBottomNav() {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition-colors",
-                  isActive
-                    ? "bg-[var(--color-app-tomatillo-soft)] text-[var(--color-app-text-primary-purple)]"
-                    : "text-[var(--color-app-text-secondary-purple)] hover:bg-[var(--color-app-ui-background-soft)]"
+                  "app-tab-item flex flex-col items-center gap-1 px-2 py-2 text-xs",
+                  isActive && "is-active"
                 )}
                 aria-current={isActive ? "page" : undefined}
               >

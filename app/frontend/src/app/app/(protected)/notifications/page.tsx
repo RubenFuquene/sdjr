@@ -4,11 +4,11 @@ import { Bell, ChevronLeft } from "lucide-react";
 export default function AppNotificationsPage() {
   return (
     <section className="px-4 pb-6 pt-4">
-      <header className="rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-4 shadow-[var(--app-shadow-card)]">
+      <header className="app-page-header">
         <div className="flex items-center justify-between gap-3">
           <Link
             href="/app/discover"
-            className="rounded-xl bg-[var(--color-app-ui-background-soft)] p-2 text-[var(--color-app-text-primary-purple)]"
+            className="app-btn-icon app-header-back-button"
             aria-label="Volver a descubrir"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -21,7 +21,7 @@ export default function AppNotificationsPage() {
         </div>
       </header>
 
-      <div className="mt-4 rounded-2xl bg-[var(--color-app-ui-background)] p-6 text-center shadow-[var(--app-shadow-card)]">
+      <div className="app-surface mt-4 p-6 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-app-tomatillo-soft)] text-[var(--color-app-text-primary-purple)]">
           <Bell className="h-6 w-6" />
         </div>

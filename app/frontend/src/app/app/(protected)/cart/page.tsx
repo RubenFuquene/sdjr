@@ -48,11 +48,11 @@ export default function AppCartPage() {
 
   return (
     <section className="px-4 pb-6 pt-4">
-      <header className="rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-4 shadow-[var(--app-shadow-card)]">
+      <header className="app-page-header">
         <div className="flex items-center gap-3">
           <Link
             href={`/app/product/${store.id}`}
-            className="rounded-xl bg-[var(--color-app-ui-background-soft)] p-2 text-[var(--color-app-text-primary-purple)]"
+            className="app-btn-icon app-header-back-button"
             aria-label="Volver a producto"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -66,7 +66,7 @@ export default function AppCartPage() {
       </header>
 
       <div className="mt-4 space-y-4">
-        <article className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <article className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Resumen</h2>
           <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">{store.name}</p>
           <p className="text-sm text-[var(--color-app-text-secondary-purple)]">Bolsa sorpresa de {store.category.toLowerCase()}</p>
@@ -77,7 +77,7 @@ export default function AppCartPage() {
               <button
                 type="button"
                 onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                className="h-8 w-8 rounded-lg border border-[var(--color-app-ui-divider)] text-[var(--color-app-text-primary-purple)]"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-app-ui-divider)] text-[var(--color-app-text-primary-purple)] transition hover:bg-[var(--color-app-ui-background-soft)]"
                 aria-label="Disminuir cantidad"
               >
                 -
@@ -86,7 +86,7 @@ export default function AppCartPage() {
               <button
                 type="button"
                 onClick={() => setQuantity((prev) => Math.min(store.available, prev + 1))}
-                className="h-8 w-8 rounded-lg border border-[var(--color-app-ui-divider)] text-[var(--color-app-text-primary-purple)]"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-app-ui-divider)] text-[var(--color-app-text-primary-purple)] transition hover:bg-[var(--color-app-ui-background-soft)]"
                 aria-label="Aumentar cantidad"
               >
                 +
@@ -95,7 +95,7 @@ export default function AppCartPage() {
           </div>
         </article>
 
-        <article className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <article className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Metodo de entrega</h2>
 
           <div className="mt-3 space-y-2">
@@ -139,7 +139,7 @@ export default function AppCartPage() {
           </div>
         </article>
 
-        <article className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <article className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Metodo de pago</h2>
 
           <div className="mt-3 space-y-2">
@@ -183,7 +183,7 @@ export default function AppCartPage() {
           </div>
         </article>
 
-        <article className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <article className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Total</h2>
           <div className="mt-3 space-y-2 text-sm text-[var(--color-app-text-secondary-purple)]">
             <div className="flex items-center justify-between">
@@ -201,11 +201,11 @@ export default function AppCartPage() {
           </div>
         </article>
 
-        <div className="rounded-2xl border border-[var(--color-app-ui-divider)] bg-[var(--color-app-ui-background)] p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
+        <div className="app-surface-outlined p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-4 w-4 text-[var(--color-app-text-primary-purple)]" />
             <p>
-              MVP: flujo disponible hasta seleccion del metodo de pago. La confirmacion y el procesamiento de pago se
+              Flujo disponible hasta seleccion del metodo de pago. La confirmacion y el procesamiento de pago se
               habilitaran cuando se defina el proveedor.
             </p>
           </div>
@@ -214,10 +214,10 @@ export default function AppCartPage() {
         <button
           type="button"
           disabled
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-app-ui-divider)] text-sm text-[var(--color-app-text-secondary-purple)]"
+          className="app-btn-primary w-full gap-2"
         >
           <CheckCircle2 className="h-4 w-4" />
-          Confirmacion de pago no disponible en MVP
+          Confirmacion de pago no disponible aún
         </button>
       </div>
     </section>

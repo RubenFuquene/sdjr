@@ -78,7 +78,7 @@ export default function AppProfilePage() {
       </header>
 
       <div className="-mt-12 px-4">
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-5 shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-5">
           <div className="mb-4 flex items-center gap-2">
             <Leaf className="h-5 w-5 text-[var(--color-app-tomatillo-medium)]" />
             <h2 className="text-base text-[var(--color-app-text-dark)]">Tu impacto ambiental</h2>
@@ -109,7 +109,7 @@ export default function AppProfilePage() {
             key={action.id}
             type="button"
             onClick={() => handleActionClick(action.id)}
-            className="flex w-full items-center justify-between rounded-2xl bg-[var(--color-app-ui-background)] p-4 text-left shadow-[var(--app-shadow-card)]"
+            className="app-card-action app-surface flex w-full items-center justify-between p-4 text-left"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-app-tomatillo-soft)]">
@@ -127,7 +127,7 @@ export default function AppProfilePage() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center justify-between rounded-2xl bg-[var(--color-app-ui-background)] p-4 text-left shadow-[var(--app-shadow-card)]"
+          className="app-card-action app-surface flex w-full items-center justify-between p-4 text-left"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FDECEC]">

@@ -38,7 +38,7 @@ export default function AppTicketDetailPage() {
   if (!ticket) {
     return (
       <section className="px-4 pb-6 pt-4">
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 text-sm text-[var(--color-app-text-secondary-purple)] shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-4 text-sm text-[var(--color-app-text-secondary-purple)]">
           Ticket no encontrado.
         </div>
       </section>
@@ -67,11 +67,11 @@ export default function AppTicketDetailPage() {
 
   return (
     <section className="px-4 pb-6 pt-4">
-      <header className="rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-4 shadow-[var(--app-shadow-card)]">
+      <header className="app-page-header">
         <div className="flex items-center gap-3">
           <Link
             href="/app/support"
-            className="rounded-xl bg-[var(--color-app-ui-background-soft)] p-2 text-[var(--color-app-text-primary-purple)]"
+            className="app-btn-icon app-header-back-button"
             aria-label="Volver a soporte"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -110,7 +110,7 @@ export default function AppTicketDetailPage() {
       </div>
 
       {isResolved && (
-        <div className="mt-4 rounded-2xl border border-[var(--color-app-ui-divider)] bg-[var(--color-app-ui-background)] p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
+        <div className="app-surface-outlined mt-4 p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
           <div className="flex items-start gap-2">
             <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--color-app-status-success)]" />
             <p>Tu caso aparece como resuelto. Puedes responder para reabrir la conversacion.</p>
@@ -119,7 +119,7 @@ export default function AppTicketDetailPage() {
       )}
 
       {isClosed && (
-        <div className="mt-4 rounded-2xl border border-[var(--color-app-ui-divider)] bg-[var(--color-app-ui-background)] p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
+        <div className="app-surface-outlined mt-4 p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-4 w-4 text-[var(--color-app-text-primary-purple)]" />
             <p>Este ticket esta cerrado y no permite nuevos mensajes.</p>
@@ -127,7 +127,7 @@ export default function AppTicketDetailPage() {
         </div>
       )}
 
-      <div className="mt-4 rounded-2xl bg-[var(--color-app-ui-background)] p-3 shadow-[var(--app-shadow-card)]">
+      <div className="app-surface mt-4 p-3">
         <div className="flex items-end gap-2">
           <textarea
             value={newMessage}
@@ -140,7 +140,7 @@ export default function AppTicketDetailPage() {
             type="button"
             onClick={handleSendMessage}
             disabled={isClosed || newMessage.trim().length === 0}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-app-text-primary-purple)] text-white disabled:bg-[var(--color-app-ui-divider)] disabled:text-[var(--color-app-text-secondary-purple)]"
+            className="app-btn-primary app-btn-icon h-[52px] w-[52px]"
             aria-label="Enviar mensaje"
           >
             <Send className="h-4 w-4" />

@@ -7,9 +7,9 @@ type AppMobileShellProps = {
 
 export function AppMobileShell({ children }: AppMobileShellProps) {
   return (
-    <div className="min-h-screen bg-[var(--color-app-ui-background-soft)] sm:px-4 sm:py-3">
+    <div className="app-shell min-h-screen bg-[var(--color-app-ui-background-soft)] sm:px-4 sm:py-3">
       <div
-        className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col bg-[var(--color-app-ui-background)] shadow-none sm:min-h-[calc(100vh-24px)] sm:rounded-3xl sm:shadow-2xl"
+        className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col bg-[var(--color-app-ui-background)] shadow-none sm:min-h-[calc(100vh-24px)] sm:rounded-[28px] sm:shadow-[0_16px_48px_rgba(0,0,0,0.18)]"
         style={{
           paddingTop: "env(safe-area-inset-top)",
         }}

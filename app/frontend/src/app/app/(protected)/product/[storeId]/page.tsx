@@ -31,7 +31,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       <div className="relative h-56 bg-gradient-to-br from-[var(--color-app-tomatillo-soft)] via-white to-[var(--color-app-ui-background-soft)] px-4 pt-4">
         <Link
           href={`/app/store/${store.id}`}
-          className="inline-flex rounded-full bg-white/90 p-2 text-[var(--color-app-text-dark)] shadow-[var(--app-shadow-button)]"
+          className="app-btn-icon app-header-back-button bg-white/90 text-[var(--color-app-text-dark)] shadow-[var(--app-shadow-button)]"
           aria-label="Volver a tienda"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -47,12 +47,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       </div>
 
       <div className="space-y-4 px-4 pt-4">
-        <header className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <header className="app-page-header p-4">
           <h1 className="text-xl text-[var(--color-app-text-dark)]">Bolsa sorpresa de {store.category.toLowerCase()}</h1>
           <p className="text-sm text-[var(--color-app-text-secondary-purple)]">{store.name}</p>
         </header>
 
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-4">
           <div className="flex items-end gap-2">
             <p className="text-3xl text-[var(--color-app-tomatillo-medium)]">{formatPrice(store.price)}</p>
             <p className="text-sm text-[var(--color-app-text-secondary-purple)] line-through">
@@ -62,7 +62,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <p className="mt-1 text-sm text-[var(--color-app-text-secondary-purple)]">Por bolsa</p>
         </div>
 
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Metodo de entrega</h2>
 
           <div className="mt-3 space-y-2">
@@ -86,7 +86,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </div>
         </div>
 
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm text-[var(--color-app-text-secondary-purple)]">Total estimado</p>
@@ -95,7 +95,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             <Link
               href={`/app/cart?storeId=${store.id}`}
-              className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--color-app-text-primary-purple)] px-4 text-sm text-white"
+              className="app-btn-primary gap-2"
             >
               <Plus className="h-4 w-4" />
               Agregar al carrito

@@ -31,7 +31,7 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
       <div className="relative h-52 bg-gradient-to-br from-[var(--color-app-tomatillo-soft)] via-white to-[var(--color-app-ui-background-soft)] px-4 pt-4">
         <Link
           href="/app/discover"
-          className="inline-flex rounded-full bg-white/90 p-2 text-[var(--color-app-text-dark)] shadow-[var(--app-shadow-button)]"
+          className="app-btn-icon app-header-back-button bg-white/90 text-[var(--color-app-text-dark)] shadow-[var(--app-shadow-button)]"
           aria-label="Volver"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -45,12 +45,12 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
       </div>
 
       <div className="space-y-4 px-4 pt-4">
-        <header className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <header className="app-page-header p-4">
           <h1 className="text-xl text-[var(--color-app-text-dark)]">{store.name}</h1>
           <p className="text-sm text-[var(--color-app-text-secondary-purple)]">{store.category}</p>
         </header>
 
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-4">
           <div className="space-y-3 text-sm text-[var(--color-app-text-secondary-purple)]">
             <div className="flex items-start gap-2">
               <MapPin className="mt-0.5 h-4 w-4 text-[var(--color-app-text-primary-purple)]" />
@@ -72,12 +72,12 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
           </div>
         </div>
 
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Que incluye</h2>
           <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">{store.description}</p>
         </div>
 
-        <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <div className="app-surface p-4">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-sm text-[var(--color-app-text-secondary-purple)]">Precio</p>
@@ -92,7 +92,7 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
 
             <Link
               href={`/app/product/${store.id}`}
-              className="inline-flex h-11 items-center rounded-xl bg-[var(--color-app-text-primary-purple)] px-4 text-sm text-white"
+              className="app-btn-primary"
             >
               Rescatar ahora
             </Link>

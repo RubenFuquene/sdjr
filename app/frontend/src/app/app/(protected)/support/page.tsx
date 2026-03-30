@@ -41,11 +41,11 @@ export default function AppSupportPage() {
 
   return (
     <section className="px-4 pb-6 pt-4">
-      <header className="rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-4 shadow-[var(--app-shadow-card)]">
+      <header className="app-page-header">
         <div className="flex items-center gap-3">
           <Link
             href="/app/profile"
-            className="rounded-xl bg-[var(--color-app-ui-background-soft)] p-2 text-[var(--color-app-text-primary-purple)]"
+            className="app-btn-icon app-header-back-button"
             aria-label="Volver a perfil"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -59,31 +59,23 @@ export default function AppSupportPage() {
       </header>
 
       {wasCreated && (
-        <div className="mt-4 rounded-xl bg-[var(--color-app-tomatillo-soft)] px-3 py-2 text-sm text-[var(--color-app-text-primary-purple)]">
+        <div className="app-surface-soft mt-4 px-3 py-2 text-sm text-[var(--color-app-text-primary-purple)]">
           Solicitud creada correctamente. Nuestro equipo te respondera en breve.
         </div>
       )}
 
-      <div className="mt-4 rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-3 shadow-[var(--app-shadow-card)]">
+      <div className="app-surface mt-4 px-4 py-3">
         <div className="flex items-center gap-4">
           <button
             type="button"
-            className={`border-b-2 pb-2 text-sm ${
-              activeTab === "active"
-                ? "border-[var(--color-app-text-primary-purple)] text-[var(--color-app-text-primary-purple)]"
-                : "border-transparent text-[var(--color-app-text-secondary-purple)]"
-            }`}
+            className={`app-segmented-tab ${activeTab === "active" ? "is-active" : ""}`}
             onClick={() => setActiveTab("active")}
           >
             Activas ({activeTickets.length})
           </button>
           <button
             type="button"
-            className={`border-b-2 pb-2 text-sm ${
-              activeTab === "history"
-                ? "border-[var(--color-app-text-primary-purple)] text-[var(--color-app-text-primary-purple)]"
-                : "border-transparent text-[var(--color-app-text-secondary-purple)]"
-            }`}
+            className={`app-segmented-tab ${activeTab === "history" ? "is-active" : ""}`}
             onClick={() => setActiveTab("history")}
           >
             Historial ({historyTickets.length})
@@ -93,7 +85,7 @@ export default function AppSupportPage() {
 
       <div className="mt-4 space-y-3">
         {displayTickets.length === 0 && (
-          <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-6 text-center shadow-[var(--app-shadow-card)]">
+          <div className="app-surface p-6 text-center">
             <MessageCircle className="mx-auto h-8 w-8 text-[var(--color-app-text-secondary-purple)]" />
             <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">No hay solicitudes para esta seccion.</p>
           </div>
@@ -103,7 +95,7 @@ export default function AppSupportPage() {
           <Link
             key={ticket.id}
             href={`/app/support/ticket/${ticket.id}`}
-            className="block rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]"
+            className="app-card-action app-surface block p-4"
           >
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -127,7 +119,7 @@ export default function AppSupportPage() {
       <div className="mt-4">
         <Link
           href="/app/support/create-ticket"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-app-text-primary-purple)] px-4 py-3 text-sm text-white"
+          className="app-btn-primary w-full gap-2"
         >
           <Plus className="h-4 w-4" />
           Crear solicitud
