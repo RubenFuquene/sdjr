@@ -37,6 +37,28 @@
   --color-provider-text-muted: #6A6A6A;
   --color-provider-border: #E0E0E0;
   --color-provider-bg: #F7F7F7;
+
+  /* App Module Tokens (design-reference-app/src/styles/globals.css) */
+  --color-app-tomatillo-light: #C6D98F;
+  --color-app-tomatillo-medium: #B4CB7A;
+  --color-app-tomatillo-soft: #DDE8BB;
+  --color-app-text-primary-purple: #5A1E6B;
+  --color-app-text-secondary-purple: #7A2E9A;
+  --color-app-text-dark: #2E2E2E;
+  --color-app-text-light: #FFFFFF;
+  --color-app-ui-background: #FFFFFF;
+  --color-app-ui-background-soft: #F5F5F5;
+  --color-app-ui-card: #FFFFFF;
+  --color-app-ui-divider: #E6E6E6;
+  --color-app-status-success: #7C8A62;
+  --color-app-status-warning: #E3A146;
+  --color-app-status-error: #B9342D;
+  --app-radius-small: 6px;
+  --app-radius-medium: 12px;
+  --app-radius-large: 16px;
+  --app-radius-rounded: 999px;
+  --app-shadow-button: 0px 2px 4px rgba(0, 0, 0, 0.06);
+  --app-shadow-card: 0px 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 @theme inline {
@@ -61,6 +83,14 @@
   --color-provider-text-muted: var(--color-provider-text-muted);
   --color-provider-border: var(--color-provider-border);
   --color-provider-bg: var(--color-provider-bg);
+
+  /* App Module theme aliases */
+  --color-app-primary: var(--color-app-text-primary-purple);
+  --color-app-secondary: var(--color-app-text-secondary-purple);
+  --color-app-accent: var(--color-app-tomatillo-soft);
+  --color-app-surface: var(--color-app-ui-card);
+  --color-app-surface-muted: var(--color-app-ui-background-soft);
+  --color-app-divider: var(--color-app-ui-divider);
 }
 
 /* Ñapa Landing Page Colors */

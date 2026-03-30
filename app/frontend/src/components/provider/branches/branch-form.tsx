@@ -1,6 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { MapPin } from "lucide-react";
 import { useLocation } from "@/hooks";
 import { CitySelect, DepartmentSelect, NeighborhoodSelect } from "@/components/provider/ui";
 import type {
@@ -8,6 +10,11 @@ import type {
   ProviderBranchFormInput,
 } from "@/hooks/provider/use-provider-branch-form";
 import { validateBranchForm } from "@/lib/provider/validations/branch-form";
+
+const LocationPickerModal = dynamic(
+  () => import("./location-picker-modal").then((module) => module.LocationPickerModal),
+  { ssr: false }
+);
 
 export type BranchFormMode = "create" | "edit";
 
@@ -28,6 +35,8 @@ type BranchHourInitialData = {
 export interface BranchFormInitialData {
   name: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   phone?: string | null;
   email?: string | null;
   departmentName?: string | null;
@@ -93,6 +102,8 @@ function getInitialBranchFormValues(
     return {
       name: "",
       address: "",
+      latitude: null,
+      longitude: null,
       phone: "",
       email: "",
       schedule: buildDefaultSchedule(),
@@ -102,6 +113,8 @@ function getInitialBranchFormValues(
   return {
     name: initialData.name ?? "",
     address: initialData.address ?? "",
+    latitude: initialData.latitude ?? null,
+    longitude: initialData.longitude ?? null,
     phone: initialData.phone ?? "",
     email: initialData.email ?? "",
     schedule: applyInitialHours(initialData.hours),
@@ -134,9 +147,12 @@ export function BranchForm({
 
   const [name, setName] = useState(initialValues.name);
   const [address, setAddress] = useState(initialValues.address);
+  const [latitude, setLatitude] = useState<number | null>(initialValues.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(initialValues.longitude ?? null);
   const [phone, setPhone] = useState(initialValues.phone);
   const [email, setEmail] = useState(initialValues.email);
   const [schedule, setSchedule] = useState<DaySchedule[]>(initialValues.schedule);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [localErrors, setLocalErrors] = useState<ProviderBranchFormFieldErrors>({});
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -323,6 +339,8 @@ export function BranchForm({
       cityId: selectedCity,
       neighborhoodId: selectedNeighborhood,
       address,
+      latitude,
+      longitude,
       phone,
       email,
       hours: activeHours,
@@ -345,6 +363,8 @@ export function BranchForm({
       neighborhoodId: selectedNeighborhood,
       name,
       address,
+      latitude,
+      longitude,
       phone: phone || null,
       email: email || null,
       status: true,
@@ -427,6 +447,33 @@ export function BranchForm({
         />
         {getFieldError("commerce_branch.address") && (
           <p className="text-sm text-red-600">{getFieldError("commerce_branch.address")}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm text-[#1A1A1A]">Ubicación en mapa *</label>
+
+        <button
+          type="button"
+          onClick={() => setShowLocationPicker(true)}
+          disabled={submitting}
+          className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-[#F7F7F7] hover:bg-[#DDE8BB] text-[#1A1A1A] transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-60"
+        >
+          <MapPin size={16} className="text-[#4B236A]" />
+          {latitude !== null && longitude !== null
+            ? "Cambiar ubicación seleccionada"
+            : "Seleccionar ubicación en mapa"}
+        </button>
+
+        {latitude !== null && longitude !== null && (
+          <p className="text-sm text-[#1A1A1A]">
+            Coordenadas: <span className="font-medium">{latitude.toFixed(4)}</span>,{" "}
+            <span className="font-medium">{longitude.toFixed(4)}</span>
+          </p>
+        )}
+
+        {getFieldError("commerce_branch.location") && (
+          <p className="text-sm text-red-600">{getFieldError("commerce_branch.location")}</p>
         )}
       </div>
 
@@ -579,6 +626,21 @@ export function BranchForm({
               : "Guardar Sucursal"}
         </button>
       </div>
+
+      {showLocationPicker && (
+        <LocationPickerModal
+          isOpen={showLocationPicker}
+          initialLat={latitude}
+          initialLng={longitude}
+          onClose={() => setShowLocationPicker(false)}
+          onSelect={(lat, lng) => {
+            setLatitude(lat);
+            setLongitude(lng);
+            clearLocalError("commerce_branch.location");
+            setShowLocationPicker(false);
+          }}
+        />
+      )}
     </form>
   );
 }

@@ -10,6 +10,8 @@ export interface ProviderBranchCardViewModel {
   commerceId: number;
   name: string;
   fullAddress: string;
+  latitude: number | null;
+  longitude: number | null;
   phone: string;
   email: string | null;
   isActive: boolean;

@@ -45,6 +45,8 @@ export function BranchesPageClient() {
   const mapBranchToInitialData = (branch: (typeof branches)[number]): BranchFormInitialData => ({
     name: branch.name,
     address: branch.address,
+    latitude: typeof branch.latitude === "number" ? branch.latitude : null,
+    longitude: typeof branch.longitude === "number" ? branch.longitude : null,
     phone: branch.phone,
     email: branch.email,
     departmentName: branch.department,
@@ -80,6 +82,8 @@ export function BranchesPageClient() {
         await updateCommerceBranch(editingBranchId, {
           name: input.name,
           address: input.address,
+          latitude: input.latitude ?? null,
+          longitude: input.longitude ?? null,
           phone: input.phone,
           email: input.email,
           department_id: input.departmentId,

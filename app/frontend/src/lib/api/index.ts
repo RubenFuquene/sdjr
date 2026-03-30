@@ -15,8 +15,16 @@ export type { ApiSuccess, PaginatedApiResponse, PaginationMeta, PaginationLinks 
 export { API_URL, ApiError, getAuthHeaders, fetchWithErrorHandling } from "./client";
 
 // Authentication
-export { login, register, logout } from "./auth";
-export type { LoginResult, RegisterResult } from "./auth";
+export { login, logout } from "./auth";
+export type { LoginResult } from "./auth";
+
+// Provider Authentication
+export { registerProvider } from "./provider-auth";
+export type { ProviderRegisterResult } from "./provider-auth";
+
+// App Authentication (customer surface)
+export { loginAppUser, registerAppUser } from "./app-auth";
+export type { AppLoginResult, AppRegisterResult } from "./app-auth";
 
 // Roles (Perfiles)
 export { getRoles, createRole, updateRole, updateRoleStatus, deleteRole } from "./roles";
