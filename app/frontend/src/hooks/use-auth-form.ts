@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { login, register } from "@/lib/api/auth";
+import { login } from "@/lib/api/auth";
+import { registerProvider } from "@/lib/api/provider-auth";
 import { persistSession } from "@/lib/session";
 import type { SessionData } from "@/types/auth";
 
@@ -144,7 +145,7 @@ export function useAuthForm(): UseAuthFormReturn {
       }
 
       // Llamar a API
-      const result = await register({
+      const result = await registerProvider({
         name: sanitizedName,
         email: sanitizedEmail,
         password: sanitizedPassword,

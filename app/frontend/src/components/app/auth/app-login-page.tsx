@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import AppLoginForm from "@/components/app/auth/app-login-form";
+import AppAuthForm from "@/components/app/auth/app-auth-form";
 import AppLoginVisual from "@/components/app/auth/app-login-visual";
 
 export default function AppLoginPage() {
@@ -8,7 +8,7 @@ export default function AppLoginPage() {
       <div className="mx-auto flex w-full max-w-md flex-col overflow-hidden bg-white sm:rounded-3xl sm:shadow-lg">
         <AppLoginVisual />
         <Suspense fallback={null}>
-          <AppLoginForm />
+          <AppAuthForm />
         </Suspense>
       </div>
     </div>
