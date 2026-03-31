@@ -61,11 +61,11 @@ export default function AppCreateTicketPage() {
 
   return (
     <section className="px-4 pb-6 pt-4">
-      <header className="rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-4 shadow-[var(--app-shadow-card)]">
+      <header className="app-page-header">
         <div className="flex items-center gap-3">
           <Link
             href="/app/support"
-            className="rounded-xl bg-[var(--color-app-ui-background-soft)] p-2 text-[var(--color-app-text-primary-purple)]"
+            className="app-btn-icon app-header-back-button"
             aria-label="Volver a soporte"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -78,7 +78,7 @@ export default function AppCreateTicketPage() {
       </header>
 
       <div className="mt-4 space-y-4">
-        <article className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <article className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Categoria</h2>
           <div className="mt-3 space-y-2">
             {CATEGORY_OPTIONS.map((option) => {
@@ -92,7 +92,7 @@ export default function AppCreateTicketPage() {
                   className={`w-full rounded-xl border p-3 text-left ${
                     selected
                       ? "border-[var(--color-app-text-primary-purple)] bg-[var(--color-app-tomatillo-soft)]"
-                      : "border-[var(--color-app-ui-divider)]"
+                      : "border-[var(--color-app-ui-divider)] hover:bg-[var(--color-app-ui-background-soft)]"
                   }`}
                 >
                   <div className="flex items-start gap-2">
@@ -111,7 +111,7 @@ export default function AppCreateTicketPage() {
         </article>
 
         {(category === "order" || category === "payment") && (
-          <article className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+          <article className="app-surface p-4">
             <label className="text-sm text-[var(--color-app-text-dark)]" htmlFor="relatedOrder">
               Pedido relacionado (opcional)
             </label>
@@ -126,7 +126,7 @@ export default function AppCreateTicketPage() {
           </article>
         )}
 
-        <article className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 shadow-[var(--app-shadow-card)]">
+        <article className="app-surface p-4">
           <label className="text-sm text-[var(--color-app-text-dark)]" htmlFor="ticketDescription">
             Descripcion del problema
           </label>
@@ -140,7 +140,7 @@ export default function AppCreateTicketPage() {
           <p className="mt-2 text-xs text-[var(--color-app-text-secondary-purple)]">Minimo 10 caracteres ({description.length}/10)</p>
         </article>
 
-        <div className="rounded-2xl border border-[var(--color-app-ui-divider)] bg-[var(--color-app-ui-background)] p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
+        <div className="app-surface-outlined p-3 text-xs text-[var(--color-app-text-secondary-purple)]">
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-4 w-4 text-[var(--color-app-text-primary-purple)]" />
             <p>Tiempo estimado de respuesta: hasta 24 horas habiles.</p>
@@ -151,11 +151,7 @@ export default function AppCreateTicketPage() {
           type="button"
           onClick={handleSubmit}
           disabled={!canSubmit}
-          className={`h-12 w-full rounded-xl text-sm ${
-            canSubmit
-              ? "bg-[var(--color-app-text-primary-purple)] text-white"
-              : "bg-[var(--color-app-ui-divider)] text-[var(--color-app-text-secondary-purple)]"
-          }`}
+          className="app-btn-primary w-full"
         >
           Enviar solicitud
         </button>

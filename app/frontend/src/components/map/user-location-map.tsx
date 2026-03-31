@@ -7,17 +7,22 @@ import "leaflet/dist/leaflet.css";
 import "./leaflet-custom.css";
 
 import type { UserLocation } from "@/lib/geolocation/types";
+import type { DiscoverMapPin } from "@/types/app-catalog.adapters";
 import { OPENSTREETMAP_TILES } from "@/lib/maps/tile-configs";
 import {
+  calculateBounds,
   calculateZoomLevel,
+  getCommerceMarkerIcon,
   getUserMarkerIcon,
 } from "@/lib/maps/map-utils";
 import { MapControlProvider } from "@/lib/maps/map-control-context";
 import { LocationInfoPopup } from "@/components/map/location-info-popup";
+import { NearbyProductPopup } from "@/components/map/nearby-product-popup";
 import { trackEvent } from "@/lib/telemetry/track-event";
 
 interface UserLocationMapProps {
   location: UserLocation | null;
+  nearbyPins?: DiscoverMapPin[];
   isLoading?: boolean;
   onRefresh?: () => void;
 }
@@ -27,18 +32,42 @@ interface UserLocationMapProps {
  * Helper component that updates map center and zoom when location changes.
  * Necessary because MapContainer is static after initial render.
  */
-function MapUpdater({ location }: { location: UserLocation | null }) {
+function MapUpdater({
+  location,
+  nearbyPins,
+}: {
+  location: UserLocation | null;
+  nearbyPins: DiscoverMapPin[];
+}) {
   const map = useMap();
 
   useEffect(() => {
     if (!location) return;
+
+    if (nearbyPins.length > 0) {
+      const points: Array<[number, number]> = [
+        [location.lat, location.lng],
+        ...nearbyPins.map((pin) => [pin.lat, pin.lng] as [number, number]),
+      ];
+
+      const bounds = calculateBounds(points);
+
+      map.fitBounds(bounds, {
+        animate: true,
+        duration: 0.5,
+        padding: [36, 36],
+        maxZoom: 16,
+      });
+
+      return;
+    }
 
     const zoom = calculateZoomLevel(location.source);
     map.setView([location.lat, location.lng], zoom, {
       animate: true,
       duration: 0.5,
     });
-  }, [location, map]);
+  }, [location, map, nearbyPins]);
 
   return null;
 }
@@ -67,6 +96,7 @@ function MapUpdater({ location }: { location: UserLocation | null }) {
  */
 export function UserLocationMap({
   location,
+  nearbyPins = [],
   isLoading = false,
   onRefresh,
 }: UserLocationMapProps) {
@@ -129,6 +159,30 @@ export function UserLocationMap({
             maxZoom={OPENSTREETMAP_TILES.maxZoom}
           />
 
+          {nearbyPins.map((pin) => (
+            <Marker
+              key={pin.id}
+              position={[pin.lat, pin.lng]}
+              icon={getCommerceMarkerIcon(false)}
+              title={pin.title}
+              eventHandlers={{
+                click: () => {
+                  trackEvent("map_marker_clicked", {
+                    marker_type: "nearby_branch",
+                    branch_id: pin.branchId,
+                    product_count: pin.productCount,
+                    lat: pin.lat,
+                    lng: pin.lng,
+                  });
+                },
+              }}
+            >
+              <Popup maxWidth={260} className="location-popup-custom">
+                <NearbyProductPopup pin={pin} />
+              </Popup>
+            </Marker>
+          ))}
+
           {/* User location marker and popup */}
           {location && (
             <>
@@ -168,7 +222,7 @@ export function UserLocationMap({
               </Marker>
 
               {/* Map updater to re-center when location changes */}
-              <MapUpdater location={location} />
+              <MapUpdater location={location} nearbyPins={nearbyPins} />
             </>
           )}
         </MapContainer>

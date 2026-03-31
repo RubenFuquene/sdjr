@@ -78,20 +78,16 @@ export default function AppOrdersPage() {
 
   return (
     <section className="px-4 pb-6 pt-4">
-      <header className="rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-4 shadow-[var(--app-shadow-card)]">
+      <header className="app-page-header">
         <h1 className="text-2xl text-[var(--color-app-text-dark)]">Mis pedidos</h1>
         <p className="mt-1 text-sm text-[var(--color-app-text-secondary-purple)]">Tus rescates de comida</p>
       </header>
 
-      <div className="mt-4 rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-3 shadow-[var(--app-shadow-card)]">
+      <div className="app-surface mt-4 px-4 py-3">
         <div className="flex items-center gap-5">
           <button
             type="button"
-            className={`border-b-2 pb-2 text-sm ${
-              activeTab === "active"
-                ? "border-[var(--color-app-text-primary-purple)] text-[var(--color-app-text-primary-purple)]"
-                : "border-transparent text-[var(--color-app-text-secondary-purple)]"
-            }`}
+            className={`app-segmented-tab ${activeTab === "active" ? "is-active" : ""}`}
             onClick={() => setActiveTab("active")}
           >
             Pedidos en curso
@@ -99,11 +95,7 @@ export default function AppOrdersPage() {
 
           <button
             type="button"
-            className={`border-b-2 pb-2 text-sm ${
-              activeTab === "history"
-                ? "border-[var(--color-app-text-primary-purple)] text-[var(--color-app-text-primary-purple)]"
-                : "border-transparent text-[var(--color-app-text-secondary-purple)]"
-            }`}
+            className={`app-segmented-tab ${activeTab === "history" ? "is-active" : ""}`}
             onClick={() => setActiveTab("history")}
           >
             Historial
@@ -113,7 +105,7 @@ export default function AppOrdersPage() {
 
       <div className="mt-4 space-y-3">
         {currentOrders.length === 0 && (
-          <div className="rounded-2xl bg-[var(--color-app-ui-background)] p-4 text-sm text-[var(--color-app-text-secondary-purple)] shadow-[var(--app-shadow-card)]">
+          <div className="app-surface p-4 text-sm text-[var(--color-app-text-secondary-purple)]">
             No tienes pedidos en esta seccion.
           </div>
         )}
@@ -122,7 +114,7 @@ export default function AppOrdersPage() {
           currentOrders.map((order) => (
             <article
               key={order.id}
-              className="overflow-hidden rounded-2xl bg-[var(--color-app-ui-background)] shadow-[var(--app-shadow-card)]"
+              className="app-surface overflow-hidden"
             >
               <div className="flex items-center justify-between border-b border-[var(--color-app-ui-divider)] px-4 py-3">
                 <span className="text-sm text-[var(--color-app-text-secondary-purple)]">Pedido {order.code}</span>
@@ -139,7 +131,7 @@ export default function AppOrdersPage() {
                 </div>
 
                 {order.deliveryType === "pickup" && (
-                  <div className="rounded-xl bg-[var(--color-app-ui-background-soft)] p-3">
+                  <div className="app-surface-soft p-3">
                     <h3 className="text-sm text-[var(--color-app-text-dark)]">Informacion de recogida</h3>
                     <div className="mt-2 space-y-2 text-sm text-[var(--color-app-text-secondary-purple)]">
                       {order.pickupTime && (
@@ -166,7 +158,7 @@ export default function AppOrdersPage() {
             <Link
               href={`/app/store/${order.storeId}`}
               key={order.id}
-              className="flex w-full items-center gap-3 rounded-2xl bg-[var(--color-app-ui-background)] px-4 py-4 text-left shadow-[var(--app-shadow-card)]"
+              className="app-card-action app-surface flex w-full items-center gap-3 px-4 py-4 text-left"
             >
               <div className="h-14 w-14 rounded-xl bg-[var(--color-app-ui-background-soft)]" />
 

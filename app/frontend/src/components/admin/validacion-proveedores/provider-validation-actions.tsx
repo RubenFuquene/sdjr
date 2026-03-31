@@ -35,7 +35,7 @@ export function ProviderValidationActions({
   onApprovalSuccess,
   onApprovalError,
 }: ProviderValidationActionsProps) {
-  const { approveProvider, rejectProvider, isLoading, error } = useCommerceApproval();
+  const { approveProvider, rejectProvider, isLoading } = useCommerceApproval();
   
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
