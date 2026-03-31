@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock, Plus, Store, Truck } from "lucide-react";
+import { ArrowLeft, Plus, Store, Truck } from "lucide-react";
 import { getStoreById } from "@/lib/app/mock-catalog";
 
 type ProductDetailPageProps = {

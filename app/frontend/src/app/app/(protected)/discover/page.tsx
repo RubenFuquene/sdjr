@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bell, MapPin } from "lucide-react";
+import { Bell, Clock3, MapPin, Star } from "lucide-react";
 import { LocationStatusBanner } from "@/components/shared/location-status-banner";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { getNearbyProducts } from "@/lib/api/app-catalog";
@@ -117,6 +117,14 @@ export default function AppDiscoverPage() {
   };
 
   const hasMorePages = currentPage < lastPage;
+
+  const getDiscountPercentage = (price: number, originalPrice: number): number => {
+    if (originalPrice <= 0 || originalPrice <= price) {
+      return 0;
+    }
+
+    return Math.round(((originalPrice - price) / originalPrice) * 100);
+  };
 
   const handleLoadMore = async () => {
     if (!location || state !== "ready" || isLoadingMore || !hasMorePages) {
@@ -269,15 +277,23 @@ export default function AppDiscoverPage() {
 
         {!showLocationDisabledNotice && !nearbyError && isNearbyLoading && (
           <div className="space-y-3">
-            <div className="app-surface-soft animate-pulse p-3">
-              <div className="h-4 w-2/3 rounded bg-[var(--color-app-ui-divider)]" />
-              <div className="mt-2 h-3 w-5/6 rounded bg-[var(--color-app-ui-divider)]" />
-              <div className="mt-3 h-4 w-24 rounded bg-[var(--color-app-ui-divider)]" />
+            <div className="overflow-hidden rounded-[18px] border border-[var(--color-app-ui-divider)] bg-white animate-pulse">
+              <div className="h-36 bg-[var(--color-app-ui-divider)]" />
+              <div className="space-y-2 p-4">
+                <div className="h-4 w-2/3 rounded bg-[var(--color-app-ui-divider)]" />
+                <div className="h-3 w-1/3 rounded bg-[var(--color-app-ui-divider)]" />
+                <div className="h-3 w-5/6 rounded bg-[var(--color-app-ui-divider)]" />
+                <div className="mt-3 h-6 w-28 rounded bg-[var(--color-app-ui-divider)]" />
+              </div>
             </div>
-            <div className="app-surface-soft animate-pulse p-3">
-              <div className="h-4 w-1/2 rounded bg-[var(--color-app-ui-divider)]" />
-              <div className="mt-2 h-3 w-4/6 rounded bg-[var(--color-app-ui-divider)]" />
-              <div className="mt-3 h-4 w-20 rounded bg-[var(--color-app-ui-divider)]" />
+            <div className="overflow-hidden rounded-[18px] border border-[var(--color-app-ui-divider)] bg-white animate-pulse">
+              <div className="h-36 bg-[var(--color-app-ui-divider)]" />
+              <div className="space-y-2 p-4">
+                <div className="h-4 w-1/2 rounded bg-[var(--color-app-ui-divider)]" />
+                <div className="h-3 w-1/4 rounded bg-[var(--color-app-ui-divider)]" />
+                <div className="h-3 w-4/6 rounded bg-[var(--color-app-ui-divider)]" />
+                <div className="mt-3 h-6 w-24 rounded bg-[var(--color-app-ui-divider)]" />
+              </div>
             </div>
           </div>
         )}
@@ -294,18 +310,79 @@ export default function AppDiscoverPage() {
         {!showLocationDisabledNotice && !nearbyError && !isNearbyLoading && nearbyCards.length > 0 && (
           <>
             <div className="space-y-3">
-              {nearbyCards.map((card) => (
-                <article key={`${card.productId}-${card.branchId ?? "no-branch"}`} className="app-surface-soft p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="truncate text-sm text-[var(--color-app-text-dark)]">{card.name}</h3>
-                      <p className="truncate text-xs text-[var(--color-app-text-secondary-purple)]">{card.address}</p>
+              {nearbyCards.map((card) => {
+                const discountPercentage = getDiscountPercentage(card.price, card.originalPrice);
+
+                return (
+                  <article
+                    key={`${card.productId}-${card.branchId ?? "no-branch"}`}
+                    className="overflow-hidden rounded-[18px] border border-[var(--color-app-ui-divider)] bg-white shadow-[var(--app-shadow-surface)]"
+                  >
+                    <div className="relative h-36 overflow-hidden bg-gradient-to-br from-[#b9cb6f] via-[#88a255] to-[#4B236A]">
+                      {card.imageUrl ? (
+                        <Image
+                          src={card.imageUrl}
+                          alt={card.name}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.25),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.2),transparent_35%)]" />
+                      )}
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
+                      {discountPercentage > 0 && (
+                        <span className="absolute right-3 top-3 rounded-full bg-[var(--color-app-text-primary-purple)] px-2.5 py-1 text-[11px] text-white">
+                          {discountPercentage}% OFF
+                        </span>
+                      )}
+
+                      <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-lg bg-white/95 px-2 py-1 text-xs text-[var(--color-app-text-dark)] shadow-sm backdrop-blur-sm">
+                        <MapPin className="h-3.5 w-3.5 text-[var(--color-app-text-primary-purple)]" />
+                        {card.distanceKm.toFixed(1)} km
+                      </span>
                     </div>
-                    <span className="shrink-0 text-xs text-[var(--color-app-text-primary-purple)]">{card.distanceKm.toFixed(1)} km</span>
-                  </div>
-                  <p className="mt-2 text-sm text-[var(--color-app-text-dark)]">${card.price.toLocaleString("es-CO")}</p>
-                </article>
-              ))}
+
+                    <div className="p-4">
+                      <div className="mb-2 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-base text-[var(--color-app-text-dark)]">{card.name}</h3>
+                          <p className="truncate text-sm text-[var(--color-app-text-secondary-purple)]">{card.category}</p>
+                        </div>
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[var(--color-app-tomatillo-soft)] px-2 py-1 text-sm text-[var(--color-app-text-dark)]">
+                          <Star className="h-3.5 w-3.5 fill-[#95af51] text-[#95af51]" />
+                          {card.rating.toFixed(1)}
+                        </span>
+                      </div>
+
+                      <p className="truncate text-xs text-[var(--color-app-text-secondary-purple)]">{card.address}</p>
+
+                      <div className="mt-3 flex items-end justify-between gap-3">
+                        <div>
+                          <p className="text-[28px] leading-none text-[#95af51]">${card.price.toLocaleString("es-CO")}</p>
+                          {card.originalPrice > card.price && (
+                            <p className="mt-1 text-sm text-[var(--color-app-text-secondary-purple)] line-through">
+                              ${card.originalPrice.toLocaleString("es-CO")}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-sm text-[var(--color-app-text-primary-purple)]">
+                            {card.available} {card.available === 1 ? "disponible" : "disponibles"}
+                          </p>
+                          <p className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-app-text-secondary-purple)]">
+                            <Clock3 className="h-3.5 w-3.5" />
+                            Hoy 18:00 - 20:00
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
 
             {hasMorePages && (

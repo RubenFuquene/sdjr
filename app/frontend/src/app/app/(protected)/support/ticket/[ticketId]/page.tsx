@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, ChevronLeft, MessageSquare, Send } from "lucide-react";
+import { AlertCircle, CheckCircle2, ChevronLeft, Send } from "lucide-react";
 import { getMessagesByTicketId, getTicketById, type SupportMessage } from "@/lib/app/support-mock";
 
 function statusStyles(status: string): string {

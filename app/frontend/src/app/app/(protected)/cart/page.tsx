@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Store, Truck } from "lucide-react";
 import { getStoreById } from "@/lib/app/mock-catalog";
@@ -34,17 +34,21 @@ export default function AppCartPage() {
   const safeStoreId = Number.isNaN(parsedStoreId) ? 1 : parsedStoreId;
 
   const store = getStoreById(safeStoreId) ?? getStoreById(1);
-  if (!store) {
-    return null;
-  }
+  const maxAvailable = store?.available ?? 1;
+  const storePrice = store?.price ?? 0;
+  const storeDeliveryCost = store?.deliveryCost ?? 0;
 
   const [quantity, setQuantity] = useState(1);
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>("pickup");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>(SAVED_PAYMENT_METHODS[0].id);
 
-  const subtotal = useMemo(() => store.price * quantity, [store.price, quantity]);
-  const deliveryFee = deliveryOption === "delivery" ? store.deliveryCost : 0;
+  const subtotal = storePrice * quantity;
+  const deliveryFee = deliveryOption === "delivery" ? storeDeliveryCost : 0;
   const total = subtotal + deliveryFee;
+
+  if (!store) {
+    return null;
+  }
 
   return (
     <section className="px-4 pb-6 pt-4">
@@ -85,7 +89,7 @@ export default function AppCartPage() {
               <span className="min-w-6 text-center text-sm text-[var(--color-app-text-dark)]">{quantity}</span>
               <button
                 type="button"
-                onClick={() => setQuantity((prev) => Math.min(store.available, prev + 1))}
+                onClick={() => setQuantity((prev) => Math.min(maxAvailable, prev + 1))}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-app-ui-divider)] text-[var(--color-app-text-primary-purple)] transition hover:bg-[var(--color-app-ui-background-soft)]"
                 aria-label="Aumentar cantidad"
               >

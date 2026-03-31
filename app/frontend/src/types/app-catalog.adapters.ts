@@ -5,6 +5,7 @@ export interface DiscoverNearbyCard extends AppStoreCatalogItem {
   productId: number;
   branchId: number | null;
   distanceKm: number;
+  imageUrl?: string | null;
 }
 
 export interface DiscoverMapPin {
@@ -66,6 +67,49 @@ function getProductPrice(product: NearbyProduct): number {
   return toNumber(product.original_price, 0);
 }
 
+function getProductImageUrl(product: NearbyProduct): string | null {
+  const extendedProduct = product as NearbyProduct & {
+    image_url?: unknown;
+    photo_url?: unknown;
+    main_photo_url?: unknown;
+    cover_image?: unknown;
+    photos?: unknown;
+  };
+
+  const directCandidates = [
+    extendedProduct.image_url,
+    extendedProduct.photo_url,
+    extendedProduct.main_photo_url,
+    extendedProduct.cover_image,
+  ];
+
+  for (const candidate of directCandidates) {
+    if (typeof candidate === "string" && candidate.trim().length > 0) {
+      return candidate.trim();
+    }
+  }
+
+  if (Array.isArray(extendedProduct.photos)) {
+    for (const photo of extendedProduct.photos) {
+      if (typeof photo === "string" && photo.trim().length > 0) {
+        return photo.trim();
+      }
+
+      if (photo && typeof photo === "object") {
+        const urlCandidate = (photo as { url?: unknown; path?: unknown; image_url?: unknown }).url
+          ?? (photo as { url?: unknown; path?: unknown; image_url?: unknown }).path
+          ?? (photo as { url?: unknown; path?: unknown; image_url?: unknown }).image_url;
+
+        if (typeof urlCandidate === "string" && urlCandidate.trim().length > 0) {
+          return urlCandidate.trim();
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 export function mapNearbyProductToDiscoverCard(product: NearbyProduct): DiscoverNearbyCard {
   const nearestBranch = product.nearest_branch;
   const distanceKm = toNumber(product.nearest_branch_distance_km);
@@ -95,6 +139,7 @@ export function mapNearbyProductToDiscoverCard(product: NearbyProduct): Discover
     productId: product.id,
     branchId: nearestBranch?.id ?? null,
     distanceKm,
+    imageUrl: getProductImageUrl(product),
   };
 }
 
