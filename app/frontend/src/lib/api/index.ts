@@ -26,6 +26,16 @@ export type { ProviderRegisterResult } from "./provider-auth";
 export { loginAppUser, registerAppUser } from "./app-auth";
 export type { AppLoginResult, AppRegisterResult } from "./app-auth";
 
+// App Catalog (nearby products)
+export { getNearbyProducts } from "./app-catalog";
+export type { NearbyProductsParams, NearbyProductsResponse } from "@/types/app-catalog";
+export {
+  mapNearbyProductsToDiscoverCards,
+  mapNearbyProductToDiscoverCard,
+  mapNearbyProductsToMapPins,
+} from "@/types/app-catalog.adapters";
+export type { DiscoverNearbyCard, DiscoverMapPin } from "@/types/app-catalog.adapters";
+
 // Roles (Perfiles)
 export { getRoles, createRole, updateRole, updateRoleStatus, deleteRole } from "./roles";
 
