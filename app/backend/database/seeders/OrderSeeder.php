@@ -18,7 +18,7 @@ class OrderSeeder extends Seeder
         }
 
         if (env('DEMO_SEEDING') == 'true') {
-            Order::factory()->count(10)->create()->each(function (Order $order): void {
+            Order::factory()->count(2)->create()->each(function (Order $order): void {
                 $itemsCount = random_int(1, 4);
                 $total = 0.0;
 

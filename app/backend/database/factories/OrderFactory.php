@@ -29,26 +29,4 @@ class OrderFactory extends Factory
             ]),
         ];
     }
-
-    // Estados específicos
-    public function pending(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => Constant::ORDER_STATUS_PENDING,
-        ]);
-    }
-
-    public function confirmed(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => Constant::ORDER_STATUS_CONFIRMED,
-        ]);
-    }
-
-    public function delivered(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => Constant::ORDER_STATUS_DELIVERED,
-        ]);
-    }
 }
