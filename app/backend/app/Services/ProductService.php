@@ -109,7 +109,7 @@ class ProductService
                 'mime_type' => $photo['mime_type'],
                 'uploaded_at' => now(),
                 'expires_at' => now()->addHour(),
-                'uploaded_by_id' => auth()->id(),
+                'uploaded_by_id' => auth()->guard()->id(),
                 'failed_attempts' => 0,
             ];
 
@@ -166,6 +166,25 @@ class ProductService
 
         } catch (Exception $e) {
             Log::error('Error updating Product', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Update only product status by ID.
+     *
+     * @throws Exception
+     */
+    public function patchStatus(int $id, string $status): Product
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->status = $status;
+            $product->save();
+
+            return $product;
+        } catch (Exception $e) {
+            Log::error('Error patching Product status', ['error' => $e->getMessage()]);
             throw $e;
         }
     }
