@@ -8,6 +8,7 @@ use App\Models\Bank;
 use App\Models\City;
 use App\Models\Commerce;
 use App\Models\Department;
+use App\Models\EstablishmentType;
 use App\Models\Neighborhood;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,12 +35,15 @@ class CommerceBasicDataTest extends TestCase
         $department = Department::factory()->create();
         $city = City::factory()->create(['department_id' => $department->id]);
         $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id]);
+        $establishmentType = EstablishmentType::factory()->create();
+
         $payload = [
             'commerce' => [
                 'owner_user_id' => $user->id,
                 'department_id' => $department->id,
                 'city_id' => $city->id,
                 'neighborhood_id' => $neighborhood->id,
+                'establishment_type_id' => $establishmentType->id,
                 'name' => 'Comercio Test',
                 'description' => 'Comercio de prueba',
                 'tax_id' => '123456789',
