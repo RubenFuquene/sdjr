@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ProductsPageClient } from "@/components/provider/products/products-page-client";
+import { ProviderApprovedGate } from "@/components/provider/auth/provider-approved-gate";
 
 export const metadata: Metadata = {
   title: "Productos | Panel Provider - Sumass",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
 export default function ProductsPage() {
   return (
     <div className="p-6 md:p-8">
-      <ProductsPageClient />
+      <ProviderApprovedGate featureName="Productos">
+        <ProductsPageClient />
+      </ProviderApprovedGate>
     </div>
   );
 }
