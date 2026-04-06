@@ -55,6 +55,50 @@ export const useBasicInfoForm = () => {
     setFormData(mapCommerceToBasicInfoForm(commerce));
   }, [commerce, isLoadingCommerce]);
 
+  const getErrorKeysForFieldPath = (fieldPath: string): Array<keyof FormErrors> => {
+    const nestedFieldMap: Record<string, keyof FormErrors> = {
+      'legalRepresentative.firstName': 'legalRepresentativeFirstName',
+      'legalRepresentative.lastName': 'legalRepresentativeLastName',
+      'legalRepresentative.documentType': 'legalRepresentativeDocumentType',
+      'legalRepresentative.documentNumber': 'legalRepresentativeDocumentNumber',
+      'legalRepresentative.documentFile': 'legalRepresentativeDocumentFile',
+      'documents.identity': 'identity',
+      'documents.commerceChamber': 'commerceChamber',
+    };
+
+    if (nestedFieldMap[fieldPath]) {
+      return [nestedFieldMap[fieldPath]];
+    }
+
+    if (!fieldPath.includes('.')) {
+      return [fieldPath as keyof FormErrors];
+    }
+
+    return [];
+  };
+
+  const clearFieldErrors = (fieldPath: string) => {
+    const keys = getErrorKeysForFieldPath(fieldPath);
+
+    if (keys.length === 0) {
+      return;
+    }
+
+    setErrors((prev) => {
+      let changed = false;
+      const newErrors = { ...prev };
+
+      keys.forEach((key) => {
+        if (newErrors[key]) {
+          delete newErrors[key];
+          changed = true;
+        }
+      });
+
+      return changed ? newErrors : prev;
+    });
+  };
+
   const handleFieldChange = (fieldPath: string, value: string | number | null) => {
     setFormData((prev) => {
       if (fieldPath.includes('.')) {
@@ -76,13 +120,7 @@ export const useBasicInfoForm = () => {
       };
     });
 
-    if (errors[fieldPath as keyof FormErrors]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[fieldPath as keyof FormErrors];
-        return newErrors;
-      });
-    }
+    clearFieldErrors(fieldPath);
   };
 
   const validateForm = (): boolean => {
@@ -259,6 +297,16 @@ export const useBasicInfoForm = () => {
 
   const handleDocumentFileSelected = (key: DocumentFileKey, file: File | null) => {
     setDocumentFiles((prev) => ({ ...prev, [key]: file }));
+
+    setDocumentStatus((prev) => ({
+      ...prev,
+      [key]: { status: 'idle', error: null },
+    }));
+
+    const fieldPath = key === 'commerceChamber'
+      ? 'documents.commerceChamber'
+      : 'legalRepresentative.documentFile';
+    clearFieldErrors(fieldPath);
   };
 
   const handleCancel = () => {

@@ -26,10 +26,10 @@ import type { SessionData } from "@/types/auth";
 const navItems = [
   { label: "Dashboard", href: "/provider/dashboard", icon: BarChart3 },
   { label: "Datos Básicos", href: "/provider/basic-info", icon: Store },
+  { label: "Términos y condiciones", href: "/provider/legal", icon: Scale },
   { label: "Sucursales", href: "/provider/branches", icon: Building2 },
   { label: "Productos", href: "/provider/products", icon: Package },
   { label: "Mi Cuenta", href: "/provider/bank", icon: CreditCard },
-  { label: "Legal", href: "/provider/legal", icon: Scale },
   { label: "Mi Billetera", href: "/provider/wallet", icon: DollarSign },
   { label: "Revisión", href: "/provider/review", icon: CheckCircle },
   { label: "Soporte", href: "/provider/support", icon: Headphones },
@@ -67,7 +67,7 @@ export function ProviderShell({
   const userInitial = userData?.name?.charAt(0).toUpperCase() || "U";
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="fixed inset-0 flex bg-gray-50">
       {/* Overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -79,7 +79,7 @@ export function ProviderShell({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex-col bg-[#DDE8BB] transform transition-transform duration-300 ease-in-out overflow-y-auto flex-shrink-0 md:relative md:translate-x-0 md:flex ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex-col bg-[#DDE8BB] transform transition-transform duration-300 ease-in-out overflow-y-auto flex-shrink-0 md:static md:overflow-hidden md:translate-x-0 md:flex ${
           sidebarOpen ? "translate-x-0 flex" : "-translate-x-full"
         }`}
       >
