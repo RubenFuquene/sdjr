@@ -107,6 +107,10 @@ Route::prefix('v1')->group(function () {
         Route::group(['prefix' => 'commerces'], function () {
             Route::patch('{id}/status', [CommerceController::class, 'patchStatus']);
             Route::patch('{id}/verification', [CommerceController::class, 'patchVerification']);
+
+            // Endpoint: Accept commerce terms
+            Route::patch('{id}/accept-terms', [CommerceController::class, 'acceptTerms']);
+
             Route::get('{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
             Route::get('{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
             Route::post('basic', [CommerceBasicDataController::class, 'store']);

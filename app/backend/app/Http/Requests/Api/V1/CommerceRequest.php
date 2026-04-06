@@ -54,6 +54,9 @@ class CommerceRequest extends FormRequest
             'email' => ['nullable', 'string', 'max:100', 'email'],
             'is_active' => ['boolean'],
             'is_verified' => ['boolean'],
+            'terms_accepted_version' => ['nullable', 'integer', 'min:1'],
+            'terms_accepted_at' => ['nullable', 'date'],
+
         ];
 
         return $rules;
