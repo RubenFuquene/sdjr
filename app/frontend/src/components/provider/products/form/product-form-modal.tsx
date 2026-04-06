@@ -4,8 +4,11 @@ import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { ProductForm } from "./product-form";
 import type { ProductFormInitialData, ProductFormMode } from "./product-form";
-import type { ProviderProductFormFieldErrors, ProviderProductFormInput } from "@/hooks/provider/use-provider-product-form";
-import type { ProductFromAPI } from "@/lib/api";
+import type {
+  ProductFromAPI,
+  ProviderProductFormFieldErrors,
+  ProviderProductFormInput,
+} from "@/types/products";
 
 export interface ProductBranchOption {
   id: number;

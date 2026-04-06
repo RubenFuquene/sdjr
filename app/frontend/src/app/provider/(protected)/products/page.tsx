@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ProductsPageClient } from "@/components/provider/products/products-page-client";
+import { ProductsPageClient } from "@/components/provider/products";
 import { ProviderApprovedGate } from "@/components/provider/auth/provider-approved-gate";
 
 export const metadata: Metadata = {

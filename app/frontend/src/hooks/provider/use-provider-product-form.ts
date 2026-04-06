@@ -9,17 +9,15 @@ import {
   mapProductFormToCreatePayload,
   mapProductFormToUpdatePayload,
   updateProduct,
-  type ProductFormInput,
-  type ProductFromAPI,
 } from "@/lib/api";
+import type {
+  ProductFormInput,
+  ProductFromAPI,
+  ProviderProductFormFieldErrors,
+  ProviderProductFormInput,
+} from "@/types/products";
 
 type ApiValidationErrors = Record<string, string[] | string>;
-
-export type ProviderProductFormFieldErrors = Record<string, string>;
-
-export type ProviderProductFormInput = Omit<ProductFormInput, "commerceId"> & {
-  commerceId?: number;
-};
 
 interface UseProviderProductFormReturn {
   submitting: boolean;

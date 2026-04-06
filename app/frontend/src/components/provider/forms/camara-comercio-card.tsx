@@ -9,7 +9,7 @@ import {
   Label,
   FileUploadBox,
 } from '@/components/provider/ui';
-import { useFileUpload } from '@/hooks';
+import { useFileUpload } from '@/hooks/index';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { AlertCircle } from 'lucide-react';
 

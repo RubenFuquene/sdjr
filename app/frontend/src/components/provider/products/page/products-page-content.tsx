@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import type { ProductFromAPI, ProductType } from "@/lib/api";
-import { ProductsEmptyState } from "./products-empty-state";
-import { ProductsGrid } from "./products-grid";
-import { ProductsTabs } from "./products-tabs";
+import type { ProductFromAPI, ProductType } from "@/types/products";
+import { ProductsEmptyState, ProductsGrid, ProductsTabs } from "../list";
 
 interface ProductsPageContentProps {
   products: ProductFromAPI[];

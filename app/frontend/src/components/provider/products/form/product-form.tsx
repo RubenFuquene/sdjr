@@ -1,19 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  getProductCategories,
-  type ProductCategoryFromAPI,
-  type ProductFromAPI,
-  type ProductType,
-} from "@/lib/api";
 import type {
+  ProductFromAPI,
+  ProductType,
   ProviderProductFormFieldErrors,
   ProviderProductFormInput,
-} from "@/hooks/provider/use-provider-product-form";
+} from "@/types/products";
+import { useProductCategories } from "@/hooks/index";
 import type { ProductBranchOption } from "./product-form-modal";
 import { ProductTypeToggle } from "./product-type-toggle";
 import { ProductPackItemsSelector } from "./product-pack-items-selector";
+import {
+  buildProductFormSubmitInput,
+  mapInitialDataToDraft,
+  parseDecimal,
+  parseInteger,
+} from "./product-form.utils";
+import {
+  type ProductFormValidationErrors,
+  validateProductForm,
+} from "./product-form.validation";
 
 export type ProductFormMode = "create" | "edit";
 
@@ -44,42 +51,6 @@ interface ProductFormProps {
   onSubmit: (input: ProviderProductFormInput) => Promise<void>;
 }
 
-interface LocalFormErrors {
-  title?: string;
-  productCategoryId?: string;
-  originalPrice?: string;
-  discountedPrice?: string;
-  quantityAvailable?: string;
-  branchId?: string;
-  packageItems?: string;
-}
-
-function parseDecimal(value: string): number | null {
-  if (!value.trim()) {
-    return null;
-  }
-
-  const parsed = Number(value.replace(",", "."));
-  if (!Number.isFinite(parsed)) {
-    return null;
-  }
-
-  return parsed;
-}
-
-function parseInteger(value: string): number | null {
-  if (!value.trim()) {
-    return null;
-  }
-
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed)) {
-    return null;
-  }
-
-  return parsed;
-}
-
 export function ProductForm({
   mode,
   initialData,
@@ -92,92 +63,36 @@ export function ProductForm({
   onSubmit,
 }: ProductFormProps) {
   const titleRef = useRef<HTMLInputElement>(null);
+  const initialDraft = mapInitialDataToDraft(initialData);
 
-  const [categories, setCategories] = useState<ProductCategoryFromAPI[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const { categories, categoriesLoading, categoriesError } = useProductCategories();
 
-  const [title, setTitle] = useState(initialData?.title ?? "");
-  const [productType, setProductType] = useState<ProductType>(
-    initialData?.productType ?? "single"
-  );
-  const [productCategoryId, setProductCategoryId] = useState<string>(
-    initialData?.productCategoryId ? String(initialData.productCategoryId) : ""
-  );
-  const [originalPrice, setOriginalPrice] = useState(
-    initialData?.originalPrice !== undefined ? String(initialData.originalPrice) : ""
-  );
-  const [discountedPrice, setDiscountedPrice] = useState(
-    initialData?.discountedPrice !== undefined && initialData?.discountedPrice !== null
-      ? String(initialData.discountedPrice)
-      : ""
-  );
-  const [quantityAvailable, setQuantityAvailable] = useState(
-    initialData?.quantityAvailable !== undefined ? String(initialData.quantityAvailable) : ""
-  );
-  const [description, setDescription] = useState(initialData?.description ?? "");
-  const [branchId, setBranchId] = useState<string>(
-    initialData?.branchId ? String(initialData.branchId) : ""
-  );
-  const [packageItemIds, setPackageItemIds] = useState<number[]>(initialData?.packageItemIds ?? []);
-  const [localErrors, setLocalErrors] = useState<LocalFormErrors>({});
+  const [title, setTitle] = useState(initialDraft.title);
+  const [productType, setProductType] = useState<ProductType>(initialDraft.productType);
+  const [productCategoryId, setProductCategoryId] = useState<string>(initialDraft.productCategoryId);
+  const [originalPrice, setOriginalPrice] = useState(initialDraft.originalPrice);
+  const [discountedPrice, setDiscountedPrice] = useState(initialDraft.discountedPrice);
+  const [quantityAvailable, setQuantityAvailable] = useState(initialDraft.quantityAvailable);
+  const [description, setDescription] = useState(initialDraft.description);
+  const [branchId, setBranchId] = useState<string>(initialDraft.branchId);
+  const [packageItemIds, setPackageItemIds] = useState<number[]>(initialDraft.packageItemIds);
+  const [localErrors, setLocalErrors] = useState<ProductFormValidationErrors>({});
 
   useEffect(() => {
     titleRef.current?.focus();
   }, [mode, initialData]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        setCategoriesError(null);
-
-        const response = await getProductCategories({ page: 1, perPage: 100, status: "1" });
-
-        if (!isMounted) {
-          return;
-        }
-
-        setCategories(response.data ?? []);
-      } catch {
-        if (!isMounted) {
-          return;
-        }
-
-        setCategoriesError("No pudimos cargar las categorías de producto.");
-        setCategories([]);
-      } finally {
-        if (isMounted) {
-          setCategoriesLoading(false);
-        }
-      }
-    };
-
-    fetchCategories();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    setTitle(initialData?.title ?? "");
-    setProductType(initialData?.productType ?? "single");
-    setProductCategoryId(initialData?.productCategoryId ? String(initialData.productCategoryId) : "");
-    setOriginalPrice(initialData?.originalPrice !== undefined ? String(initialData.originalPrice) : "");
-    setDiscountedPrice(
-      initialData?.discountedPrice !== undefined && initialData?.discountedPrice !== null
-        ? String(initialData.discountedPrice)
-        : ""
-    );
-    setQuantityAvailable(
-      initialData?.quantityAvailable !== undefined ? String(initialData.quantityAvailable) : ""
-    );
-    setDescription(initialData?.description ?? "");
-    setBranchId(initialData?.branchId ? String(initialData.branchId) : "");
-    setPackageItemIds(initialData?.packageItemIds ?? []);
+    const nextDraft = mapInitialDataToDraft(initialData);
+    setTitle(nextDraft.title);
+    setProductType(nextDraft.productType);
+    setProductCategoryId(nextDraft.productCategoryId);
+    setOriginalPrice(nextDraft.originalPrice);
+    setDiscountedPrice(nextDraft.discountedPrice);
+    setQuantityAvailable(nextDraft.quantityAvailable);
+    setDescription(nextDraft.description);
+    setBranchId(nextDraft.branchId);
+    setPackageItemIds(nextDraft.packageItemIds);
     setLocalErrors({});
   }, [initialData, mode]);
 
@@ -210,46 +125,16 @@ export function ProductForm({
   }, [fieldErrors, localErrors]);
 
   const validate = (): boolean => {
-    const nextErrors: LocalFormErrors = {};
-
-    if (!title.trim()) {
-      nextErrors.title = "El nombre del producto es obligatorio.";
-    }
-
-    if (!productCategoryId) {
-      nextErrors.productCategoryId = "Selecciona una categoría.";
-    }
-
-    const parsedOriginalPrice = parseDecimal(originalPrice);
-    if (parsedOriginalPrice === null || parsedOriginalPrice < 0) {
-      nextErrors.originalPrice = "Ingresa un precio válido.";
-    }
-
-    const parsedDiscountPrice = parseDecimal(discountedPrice);
-    if (discountedPrice && (parsedDiscountPrice === null || parsedDiscountPrice < 0)) {
-      nextErrors.discountedPrice = "Ingresa un descuento válido.";
-    }
-
-    if (
-      parsedOriginalPrice !== null &&
-      parsedDiscountPrice !== null &&
-      parsedDiscountPrice > parsedOriginalPrice
-    ) {
-      nextErrors.discountedPrice = "El descuento no puede ser mayor al precio original.";
-    }
-
-    const parsedQuantityAvailable = parseInteger(quantityAvailable);
-    if (parsedQuantityAvailable === null || parsedQuantityAvailable < 0) {
-      nextErrors.quantityAvailable = "Ingresa una cantidad disponible válida.";
-    }
-
-    if (!branchId) {
-      nextErrors.branchId = "Selecciona una sucursal.";
-    }
-
-    if (productType === "package" && packageItemIds.length === 0) {
-      nextErrors.packageItems = "Selecciona al menos un producto para el pack.";
-    }
+    const nextErrors = validateProductForm({
+      title,
+      productCategoryId,
+      originalPrice,
+      discountedPrice,
+      quantityAvailable,
+      branchId,
+      productType,
+      packageItemIds,
+    });
 
     setLocalErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -285,20 +170,21 @@ export function ProductForm({
       return;
     }
 
-    await onSubmit({
-      commerceId: initialData?.commerceId,
-      title: title.trim(),
-      productCategoryId: Number(productCategoryId),
-      productType,
-      originalPrice: parsedOriginalPrice,
-      discountedPrice: parsedDiscountedPrice,
-      quantityAvailable: parsedQuantityAvailable,
-      quantityTotal: initialData?.quantityTotal ?? parsedQuantityAvailable,
-      description: description.trim() ? description.trim() : null,
-      branchId: Number(branchId),
-      packageItemIds: productType === "package" ? packageItemIds : [],
-      photos: [],
-    });
+    await onSubmit(
+      buildProductFormSubmitInput({
+        commerceId: initialData?.commerceId,
+        quantityTotal: initialData?.quantityTotal,
+        title,
+        productCategoryId,
+        productType,
+        originalPrice: parsedOriginalPrice,
+        discountedPrice: parsedDiscountedPrice,
+        quantityAvailable: parsedQuantityAvailable,
+        description,
+        branchId,
+        packageItemIds,
+      })
+    );
   };
 
   return (

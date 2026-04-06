@@ -3,12 +3,10 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/admin/shared/confirmation-dialog";
-import { useProviderBranches } from "@/hooks/provider/use-provider-branches";
-import { useProviderProductForm } from "@/hooks/provider/use-provider-product-form";
-import { useProviderProducts } from "@/hooks/provider/use-provider-products";
-import type { ProductFromAPI } from "@/lib/api";
-import { ProductFormModal } from "./product-form-modal";
-import type { ProductFormInitialData, ProductFormMode } from "./product-form";
+import { useProviderBranches, useProviderProductForm, useProviderProducts } from "@/hooks/index";
+import type { ProductFromAPI } from "@/types/products";
+import { ProductFormModal } from "../form";
+import type { ProductFormInitialData, ProductFormMode } from "../form";
 import { ProductsPageHeader } from "./products-page-header";
 import { ProductsPageContent } from "./products-page-content";
 

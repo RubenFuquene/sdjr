@@ -15,7 +15,7 @@ import {
   SelectValue,
   FileUploadBox,
 } from '@/components/provider/ui';
-import { useFileUpload } from '@/hooks';
+import { useFileUpload } from '@/hooks/index';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { LEGAL_REP_DOCUMENT_TYPE_OPTIONS } from '@/types/basic-info';
 import { AlertCircle } from 'lucide-react';
