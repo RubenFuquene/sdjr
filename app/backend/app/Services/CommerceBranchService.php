@@ -161,7 +161,7 @@ class CommerceBranchService
      */
     public function show(int $id): CommerceBranch
     {
-        return CommerceBranch::with(['department', 'city', 'neighborhood'])->findOrFail($id);
+        return CommerceBranch::with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos'])->findOrFail($id);
     }
 
     /**
@@ -172,7 +172,7 @@ class CommerceBranchService
         $branch = CommerceBranch::findOrFail($id);
         $branch->update($data);
 
-        return $branch->fresh(['department', 'city', 'neighborhood']);
+        return $branch->fresh(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos']);
     }
 
     /**
@@ -205,7 +205,7 @@ class CommerceBranchService
         $branches = CommerceBranch::query()
             ->whereIn('id', $ranking->pluck('commerce_branch_id')->all())
             ->whereNull('deleted_at')
-            ->with(['department', 'city', 'neighborhood'])
+            ->with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos'])
             ->get()
             ->keyBy('id');
 
