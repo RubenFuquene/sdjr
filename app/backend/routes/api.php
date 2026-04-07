@@ -102,10 +102,15 @@ Route::prefix('v1')->group(function () {
         Route::get('audit-logs/{id}', [AuditLogController::class, 'show']);
 
         // Commerce routes
+        Route::get('commerce-branches/my-favorites', [CommerceBranchController::class, 'myFavorites']);
         Route::apiResource('commerces', CommerceController::class);
         Route::group(['prefix' => 'commerces'], function () {
             Route::patch('{id}/status', [CommerceController::class, 'patchStatus']);
             Route::patch('{id}/verification', [CommerceController::class, 'patchVerification']);
+
+            // Endpoint: Accept commerce terms
+            Route::patch('{id}/accept-terms', [CommerceController::class, 'acceptTerms']);
+
             Route::get('{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
             Route::get('{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
             Route::post('basic', [CommerceBasicDataController::class, 'store']);
@@ -143,6 +148,7 @@ Route::prefix('v1')->group(function () {
 
         // Product Management routes
         Route::apiResource('products', ProductController::class);
+        Route::patch('products/{id}/status', [ProductController::class, 'patchStatus']);
 
         Route::prefix('products/commerce')->group(function () {
             Route::get('{commerce_id}', [ProductController::class, 'byCommerce']);

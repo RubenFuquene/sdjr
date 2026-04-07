@@ -143,4 +143,21 @@ class CommerceService
     {
         return Commerce::where('owner_user_id', $userId)->first();
     }
+
+    /**
+     * Registrar la aceptación de términos en el comercio
+     *
+     * @throws ModelNotFoundException
+     */
+    public function acceptTerms(int $commerceId, int $termsAcceptedVersion): Commerce
+    {
+        return DB::transaction(function () use ($commerceId, $termsAcceptedVersion) {
+            $commerce = Commerce::findOrFail($commerceId);
+            $commerce->terms_accepted_version = $termsAcceptedVersion;
+            $commerce->terms_accepted_at = now();
+            $commerce->save();
+
+            return $commerce;
+        });
+    }
 }

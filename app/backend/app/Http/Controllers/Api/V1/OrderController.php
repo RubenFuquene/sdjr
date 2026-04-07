@@ -13,6 +13,7 @@ use App\Http\Requests\Api\V1\StoreOrderRequest;
 use App\Http\Requests\Api\V1\UpdateOrderRequest;
 use App\Http\Resources\Api\V1\OrderResource;
 use App\Services\OrderService;
+use App\Services\ProductService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,9 +33,12 @@ class OrderController extends Controller
 
     protected OrderService $orderService;
 
-    public function __construct(OrderService $orderService)
+    protected ProductService $productService;
+
+    public function __construct(OrderService $orderService, ProductService $productService)
     {
         $this->orderService = $orderService;
+        $this->productService = $productService;
     }
 
     /**
@@ -88,8 +92,15 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request): JsonResponse
     {
+
         try {
             $data = $request->validated();
+
+            // Validar la disponibilidad del/ los productos antes de continuar
+            if (! $this->productService->validateProductAvailability($data['items'])) {
+                return $this->errorResponse('One or more products are not available in the requested quantity', Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
             $order = $this->orderService->store($data);
 
             return $this->createdResponse(new OrderResource($order), 'Order created successfully');

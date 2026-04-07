@@ -160,6 +160,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.commerces.show', 'guard_name' => $guardName, 'description' => 'Ver comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Actualizar comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Eliminar comercios', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.commerces.accept-terms', 'guard_name' => $guardName, 'description' => 'Aceptar términos del comercio', 'created_at' => now(), 'updated_at' => now()],
 
             // Representantes Legales
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'Listar representantes legales', 'created_at' => now(), 'updated_at' => now()],
@@ -195,6 +196,9 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.comments.index', 'guard_name' => $guardName, 'description' => 'Listar comentarios de comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.comments.show', 'guard_name' => $guardName, 'description' => 'Ver comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.comments.delete', 'guard_name' => $guardName, 'description' => 'Eliminar comentario de comercio', 'created_at' => now(), 'updated_at' => now()],
+
+            // Usuario - Customer
+            ['name' => 'customer.commerce-branches.my-favorites', 'guard_name' => $guardName, 'description' => 'Ver mis comercios favoritos', 'created_at' => now(), 'updated_at' => now()],
 
         ];
 
@@ -398,7 +402,7 @@ class RolePermissionSeeder extends Seeder
             'provider.products.delete',
             'provider.comments.delete',
 
-            // Permisos adicionales de proveedor
+            'provider.commerces.accept-terms',
             'admin.providers.upload_documents',
             'provider.photos.upload',
         ]);
@@ -410,6 +414,7 @@ class RolePermissionSeeder extends Seeder
         $userPermissions = [
 
             'customer.orders.create',
+            'customer.commerce-branches.my-favorites',
         ];
 
         $userRole = Role::where('name', 'user')->first();

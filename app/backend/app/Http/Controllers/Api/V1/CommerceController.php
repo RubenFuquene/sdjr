@@ -11,6 +11,7 @@ use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
 use App\Http\Requests\Api\V1\IndexCommerceRequest;
 use App\Http\Requests\Api\V1\MyCommerceRequest;
+use App\Http\Requests\Api\V1\PatchCommerceAcceptTermsRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
@@ -510,6 +511,63 @@ class CommerceController extends Controller
             return $this->successResponse(new CommerceResource($commerce), 'Commerce retrieved successfully');
         } catch (\Throwable $e) {
             return $this->errorResponse('Error retrieving my commerce', 500, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/commerces/{id}/accept-terms",
+     *     operationId="acceptCommerceTerms",
+     *     tags={"Commerces"},
+     *     summary="Registrar la aceptación de términos del comercio",
+     *     description="Registra la versión y fecha de aceptación de términos para un comercio.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del comercio",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"terms_accepted_version"},
+     *
+     *             @OA\Property(property="terms_accepted_version", type="integer", example=1)
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Terms accepted successfully",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/CommerceResource")
+     *     ),
+     *
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Commerce not found"),
+     *     @OA\Response(response=422, description="Validation Error"),
+     *     @OA\Response(response=500, description="Internal Server Error")
+     * )
+     */
+    public function acceptTerms(PatchCommerceAcceptTermsRequest $request, int $id): JsonResponse
+    {
+        try {
+            $validated = $request->validated();
+            $commerce = $this->commerceService->acceptTerms($id, (int) $validated['terms_accepted_version']);
+
+            return $this->successResponse(new CommerceResource($commerce), 'Terms accepted successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
+        } catch (\Throwable $e) {
+            Log::error('Error registering terms acceptance', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error registering terms acceptance', 500, ['exception' => $e->getMessage()]);
         }
     }
 }
