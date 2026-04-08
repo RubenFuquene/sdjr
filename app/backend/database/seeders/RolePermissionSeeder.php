@@ -372,8 +372,33 @@ class RolePermissionSeeder extends Seeder
         $adminRole = Role::where('name', 'admin')->first();
         $adminRole->givePermissionTo($adminPermissions);
 
+        $showProviderPermissions = [
+            'admin.params.countries.index',
+            'admin.params.departments.index',
+            'admin.params.cities.index',
+            'admin.params.neighborhoods.index',
+            'admin.legal_documents.index',
+            'provider.basic_data.show',
+            'provider.branches.show',
+            'provider.products.show',
+            'provider.my_account.show',
+            'provider.my_wallet.show',
+            'provider.dashboard.show',
+            'provider.review.show',
+            'provider.support.show',
+            'provider.commerces.mine',
+            'provider.commerces.show',
+            'provider.legal_representatives.show',
+            'provider.establishment_types.show',
+            'provider.product_categories.show',
+            'provider.products.show',
+            'provider.comments.show',
+            'provider.orders.index',
+            'provider.orders.show',
+        ];
+
         // Proveedor tiene permisos específicos
-        $providerPermissions = array_merge($indexShowPermissions, [
+        $providerPermissions = array_merge($showProviderPermissions, [
             // Create
             'provider.branches.create',
             'provider.commerces.create',

@@ -14,6 +14,7 @@ use App\Http\Requests\Api\V1\MyCommerceRequest;
 use App\Http\Requests\Api\V1\PatchCommerceAcceptTermsRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
+use App\Http\Requests\Api\V1\ShowCommerceRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
@@ -165,7 +166,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function show(Request $request, int $commerce_id): JsonResponse
+    public function show(ShowCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
             $uploadStatus = $request->query('upload_status', Constant::UPLOAD_STATUS_CONFIRMED);

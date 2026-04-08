@@ -6,8 +6,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Constants\Constant;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\IndexRoleRequest;
 use App\Http\Requests\Api\V1\PatchRoleStatusRequest;
 use App\Http\Requests\Api\V1\RoleAssignPermissionRequest;
+use App\Http\Requests\Api\V1\ShowRoleRequest;
 use App\Http\Requests\Api\V1\StoreRoleRequest;
 use App\Http\Requests\Api\V1\UpdateRoleRequest;
 use App\Http\Requests\Api\V1\UserAssignRolePermissionRequest;
@@ -67,7 +69,7 @@ class RoleController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function index(): AnonymousResourceCollection|JsonResponse
+    public function index(IndexRoleRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $filters = [
@@ -262,7 +264,7 @@ class RoleController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function show(int $id): JsonResponse
+    public function show(ShowRoleRequest $request, int $id): JsonResponse
     {
         try {
             $role = Role::with('permissions')->find($id);

@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CountryFilterRequest;
 use App\Http\Requests\Api\V1\CountryRequest;
+use App\Http\Requests\Api\V1\IndexCountryRequest;
+use App\Http\Requests\Api\V1\ShowCountryRequest;
 use App\Http\Resources\Api\V1\CountryResource;
 use App\Services\CountryService;
 use App\Traits\ApiResponseTrait;
@@ -94,7 +95,7 @@ class CountryController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function index(CountryFilterRequest $request): AnonymousResourceCollection|JsonResponse
+    public function index(IndexCountryRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $filters = $request->validatedFilters();
@@ -183,7 +184,7 @@ class CountryController extends Controller
      *      @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function show(string $id): CountryResource|JsonResponse
+    public function show(ShowCountryRequest $request, string $id): CountryResource|JsonResponse
     {
         try {
             $country = $this->countryService->find($id);

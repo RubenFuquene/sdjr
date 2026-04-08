@@ -7,10 +7,10 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * CountryFilterRequest
+ * IndexCountryRequest
  *
  * @OA\Schema(
- *     schema="CountryFilterRequest",
+ *     schema="IndexCountryRequest",
  *     type="object",
  *     required={},
  *
@@ -31,11 +31,11 @@ use Illuminate\Foundation\Http\FormRequest;
  *     )
  * )
  */
-class CountryFilterRequest extends FormRequest
+class IndexCountryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('admin.params.countries.index') ?? false;        
     }
 
     public function rules(): array
