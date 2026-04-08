@@ -15,7 +15,7 @@ class CommerceSeeder extends Seeder
             // Aquí puedes agregar datos fijos para producción si aplica
         }
         if (env('DEMO_SEEDING') == 'true') {
-            Commerce::factory()->count(10)->create();
+            Commerce::factory()->count(5)->create();
         }
     }
 }

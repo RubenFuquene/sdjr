@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Constant;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
@@ -81,6 +83,12 @@ class OrderService
         $order->status = $data['status'] ?? $order->status;
         $order->save();
 
+        // Si la orden es confirmada, se debe reducir el stock de los productos correspondientes (si se implementa stock)
+        // Extraer los productos de la orden y reducir su stock en consecuencia, asegurando que no se permita confirmar la orden si no hay suficiente stock disponible.
+        if ($order->status === Constant::ORDER_STATUS_CONFIRMED) {
+            app(ProductService::class)->dismissProductConfirmedStock($order);
+        }
+
         return $order->load('items');
     }
 
@@ -101,6 +109,12 @@ class OrderService
                 throw new \DomainException('Invalid order status transition');
             }
 
+            // Si la orden es confirmada, se debe reducir el stock de los productos correspondientes (si se implementa stock)
+            // Extraer los productos de la orden y reducir su stock en consecuencia, asegurando que no se permita confirmar la orden si no hay suficiente stock disponible.
+            if ($status === Constant::ORDER_STATUS_CONFIRMED) {
+                app(ProductService::class)->dismissProductConfirmedStock($order);
+            }
+
             $order->status = $status;
             $order->save();
 
@@ -118,9 +132,14 @@ class OrderService
     public function destroy(int $id): bool
     {
         $order = Order::find($id);
+
         if (! $order) {
             return false;
         }
+
+        // Cancelar la orden antes de eliminarla
+        $order->status = Constant::ORDER_STATUS_CANCELLED;
+        $order->save();
 
         return $order->delete();
     }
@@ -155,6 +174,9 @@ class OrderService
             'delivered' => [],
             'cancelled' => [],
         ];
+
+        Log::info("Validating order status transition from '{$from}' to '{$to}'");
+        Log::info('Is valid transition: '.(in_array($to, $validTransitions[$from] ?? [], true) ? 'true' : 'false'));
 
         return in_array($to, $validTransitions[$from] ?? [], true);
     }

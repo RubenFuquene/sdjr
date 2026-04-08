@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Constants\Constant;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -77,6 +78,19 @@ class Product extends Model
     public function setDescriptionAttribute($value): void
     {
         $this->attributes['description'] = $this->sanitizeText($value);
+    }
+
+    /**
+     * Get the available quantity, considering pending orders.
+     */
+    public function getQuantityAvailableAttribute(): int
+    {
+        // Suma la cantidad solicitada en órdenes abiertas
+        $reservedQuantity = (int) OrderItem::whereHas('order', function ($query) {
+            $query->whereIn('status', [Constant::ORDER_STATUS_PENDING, Constant::ORDER_STATUS_PREPARING, Constant::ORDER_STATUS_READY]);
+        })->where('product_id', $this->id)->sum('quantity');
+
+        return (int) $this->attributes['quantity_available'] - intval($reservedQuantity);
     }
 
     /**

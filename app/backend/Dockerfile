@@ -42,6 +42,9 @@ RUN php artisan cache:clear || true
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Install Resend Laravel package
+RUN composer require resend/resend-laravel
+
 # Copy and set entrypoint script permissions
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

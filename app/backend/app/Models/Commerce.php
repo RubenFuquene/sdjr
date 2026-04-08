@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *     @OA\Property(property="email", type="string", example="info@comercial.com"),
  *     @OA\Property(property="is_active", type="boolean", example=true),
  *     @OA\Property(property="is_verified", type="boolean", example=false),
+ *     @OA\Property(property="terms_accepted_at", type="string", format="date-time", example="2025-12-15T12:34:56Z"),
+ *     @OA\Property(property="terms_accepted_version", type="integer", example=1),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-12-15T12:34:56Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-12-15T12:34:56Z"),
  *     @OA\Property(property="deleted_at", type="string", format="date-time", example=null)
@@ -55,10 +57,14 @@ class Commerce extends Model
         'email',
         'is_active',
         'is_verified',
+        'terms_accepted_at',
+        'terms_accepted_version',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'terms_accepted_at' => 'datetime',
+        'terms_accepted_version' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',

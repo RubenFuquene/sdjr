@@ -33,6 +33,8 @@ class CommerceFactory extends Factory
             'email' => $this->faker->safeEmail(),
             'is_active' => $this->faker->boolean(90),
             'is_verified' => $this->faker->boolean(10),
+            'terms_accepted_version' => $this->faker->boolean(80) ? $this->faker->numberBetween(1, 5) : null,
+            'terms_accepted_at' => $this->faker->boolean(80) ? $this->faker->dateTime() : null,
         ];
     }
 }

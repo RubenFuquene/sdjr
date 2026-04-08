@@ -28,6 +28,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="email", type="string", example="info@comercial.com"),
  *     @OA\Property(property="is_active", type="boolean", example=true),
  *     @OA\Property(property="is_verified", type="boolean", example=false),
+ *     @OA\Property(property="terms_accepted_version", type="integer", example=1),
+ *     @OA\Property(property="terms_accepted_at", type="string", format="date-time", example="2025-12-15T12:34:56Z"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-12-15T12:34:56Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-12-15T12:34:56Z")
  * )
@@ -73,6 +75,8 @@ class CommerceResource extends JsonResource
             'email' => $this->email,
             'is_active' => $this->is_active,
             'is_verified' => $this->is_verified,
+            'terms_accepted_version' => $this->terms_accepted_version,
+            'terms_accepted_at' => $this->terms_accepted_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('email', 100)->nullable();
             $table->boolean('is_active')->default(true);
             $table->char('is_verified', 1)->default('0');
+            $table->integer('terms_accepted_version')->nullable();
+            $table->timestamp('terms_accepted_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['owner_user_id', 'department_id', 'city_id']);

@@ -7,8 +7,10 @@ namespace App\Services;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
 use App\Models\CommerceBranchPhoto;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -145,7 +147,7 @@ class CommerceBranchService
                 'mime_type' => $photo['mime_type'],
                 'uploaded_at' => now(),
                 'expires_at' => now()->addHour(),
-                'uploaded_by_id' => auth()->id(),
+                'uploaded_by_id' => auth()->guard()->id(),
                 'failed_attempts' => 0,
             ];
 
@@ -159,7 +161,7 @@ class CommerceBranchService
      */
     public function show(int $id): CommerceBranch
     {
-        return CommerceBranch::with(['department', 'city', 'neighborhood'])->findOrFail($id);
+        return CommerceBranch::with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos'])->findOrFail($id);
     }
 
     /**
@@ -170,7 +172,7 @@ class CommerceBranchService
         $branch = CommerceBranch::findOrFail($id);
         $branch->update($data);
 
-        return $branch->fresh(['department', 'city', 'neighborhood']);
+        return $branch->fresh(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos']);
     }
 
     /**
@@ -180,5 +182,46 @@ class CommerceBranchService
     {
         $branch = CommerceBranch::findOrFail($id);
         $branch->delete();
+    }
+
+    /**
+     * Get top favorite commerce branches by authenticated user order frequency.
+     */
+    public function myFavoriteCommerceBranches(int $userId, int $limit = 5): Collection
+    {
+        $ranking = Order::query()
+            ->where('orders.user_id', $userId)
+            ->whereNull('orders.deleted_at')
+            ->selectRaw('orders.commerce_branch_id as commerce_branch_id, COUNT(*) as orders_count')
+            ->groupBy('orders.commerce_branch_id')
+            ->orderByDesc('orders_count')
+            ->limit($limit)
+            ->get();
+
+        if ($ranking->isEmpty()) {
+            return collect();
+        }
+
+        $branches = CommerceBranch::query()
+            ->whereIn('id', $ranking->pluck('commerce_branch_id')->all())
+            ->whereNull('deleted_at')
+            ->with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos'])
+            ->get()
+            ->keyBy('id');
+
+        return $ranking
+            ->map(function ($row) use ($branches): ?array {
+                $branch = $branches->get((int) $row->commerce_branch_id);
+                if (! $branch) {
+                    return null;
+                }
+
+                return [
+                    'orders_count' => (int) $row->orders_count,
+                    'commerce_branch' => $branch,
+                ];
+            })
+            ->filter()
+            ->values();
     }
 }

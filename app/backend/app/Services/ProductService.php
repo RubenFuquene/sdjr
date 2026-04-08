@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Constant;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductPhoto;
 use Exception;
@@ -109,7 +110,7 @@ class ProductService
                 'mime_type' => $photo['mime_type'],
                 'uploaded_at' => now(),
                 'expires_at' => now()->addHour(),
-                'uploaded_by_id' => auth()->id(),
+                'uploaded_by_id' => auth()->guard()->id(),
                 'failed_attempts' => 0,
             ];
 
@@ -166,6 +167,25 @@ class ProductService
 
         } catch (Exception $e) {
             Log::error('Error updating Product', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Update only product status by ID.
+     *
+     * @throws Exception
+     */
+    public function patchStatus(int $id, string $status): Product
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->status = $status;
+            $product->save();
+
+            return $product;
+        } catch (Exception $e) {
+            Log::error('Error patching Product status', ['error' => $e->getMessage()]);
             throw $e;
         }
     }
@@ -288,5 +308,43 @@ class ProductService
             Log::error('Error updating ProductPackageItems', ['error' => $e->getMessage()]);
             throw $e;
         }
+    }
+
+    /**
+     * Dismiss confirmed stock for an order, reducing the total and available quantity of each product in the order.
+     * This method is called when an order is confirmed, ensuring that the stock levels are updated accordingly.
+     */
+    public function dismissProductConfirmedStock(Order $order): void
+    {
+        try {
+            foreach ($order->items as $item) {
+                $product = Product::find($item->product_id);
+                if ($product) {
+
+                    ($product->quantity_total - $item->quantity) < 0 ? $product->quantity_total = 0 : $product->quantity_total -= $item->quantity;
+                    $product->quantity_available = $product->quantity_total; // Asumiendo que quantity_available refleja el stock actual disponible
+                    $product->save();
+                }
+            }
+
+        } catch (Exception $e) {
+            Log::error('Error dismissing confirmed stock for order ID: '.$order->id, ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Validar la disponibilidad de los productos en los items de la orden
+     */
+    public function validateProductAvailability(array $items): bool
+    {
+        foreach ($items as $item) {
+            $product = Product::find($item['product_id']);
+            if (! $product || $product->quantity_available < $item['quantity']) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
