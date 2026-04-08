@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteEstablishmentTypeRequest;
 use App\Http\Requests\Api\V1\EstablishmentTypeRequest;
+use App\Http\Requests\Api\V1\IndexEstablishmentTypeRequest;
+use App\Http\Requests\Api\V1\ShowEstablishmentTypeRequest;
 use App\Http\Resources\Api\V1\EstablishmentTypeResource;
 use App\Services\EstablishmentTypeService;
 use App\Traits\ApiResponseTrait;
@@ -56,7 +59,7 @@ class EstablishmentTypeController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function index(): AnonymousResourceCollection|JsonResponse
+    public function index(IndexEstablishmentTypeRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $perPage = request('per_page', 15);
@@ -134,7 +137,7 @@ class EstablishmentTypeController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function show(int $establishmentType_id): JsonResponse
+    public function show(ShowEstablishmentTypeRequest $request, int $establishmentType_id): JsonResponse
     {
         try {
             return $this->successResponse(new EstablishmentTypeResource($this->establishmentTypeService->show($establishmentType_id)), 'Establishment type retrieved successfully');
@@ -205,7 +208,7 @@ class EstablishmentTypeController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function destroy(int $establishmentType_id): JsonResponse
+    public function destroy(DeleteEstablishmentTypeRequest $request, int $establishmentType_id): JsonResponse
     {
         try {
             $this->establishmentTypeService->delete($establishmentType_id);

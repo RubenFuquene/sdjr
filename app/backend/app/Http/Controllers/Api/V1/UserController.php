@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteUserRequest;
 use App\Http\Requests\Api\V1\ShowAdministratorRequest;
+use App\Http\Requests\Api\V1\ShowUserRequest;
+use App\Http\Requests\Api\V1\StoreUserRequest;
 use App\Http\Requests\Api\V1\UserIndexRequest;
-use App\Http\Requests\Api\V1\UserRequest;
 use App\Http\Requests\Api\V1\UserStatusRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\UserService;
@@ -89,7 +91,7 @@ class UserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(type="object", ref="#/components/schemas/UserRequest")
+     *         @OA\JsonContent(type="object", ref="#/components/schemas/StoreUserRequest")
      *     ),
      *
      *     @OA\Response(
@@ -104,7 +106,7 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(UserRequest $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
         try {
             $user = $this->userService->create($request->validated());
@@ -146,7 +148,7 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function show(int $user_id): JsonResponse
+    public function show(ShowUserRequest $request, int $user_id): JsonResponse
     {
         try {
             $user = $this->userService->find($user_id);
@@ -191,7 +193,7 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function update(UserRequest $request, int $user_id): JsonResponse
+    public function update(StoreUserRequest $request, int $user_id): JsonResponse
     {
         try {
             $updatedUser = $this->userService->update($user_id, $request->validated());
@@ -229,7 +231,7 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function destroy(int $user_id): JsonResponse
+    public function destroy(DeleteUserRequest $request, int $user_id): JsonResponse
     {
         try {
             $this->userService->delete($user_id);

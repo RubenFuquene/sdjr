@@ -8,18 +8,18 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="ShowCommerceRequest",
- *     description="Request for showing a commerce",
+ *     schema="DeleteCommerceRequest",
+ *     description="Request for deleting a commerce",
  *
  *     @OA\Property(property="id", type="integer", description="Commerce ID")
  * )
  */
-class ShowCommerceRequest extends FormRequest
+class DeleteCommerceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Permiso para ver un comercio
-        return $this->user()?->can('provider.commerces.show') ?? false;
+        // Permiso para eliminar un comercio
+        return $this->user()?->can('provider.commerces.delete') ?? false;
     }
 
     public function rules(): array

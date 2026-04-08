@@ -35,7 +35,7 @@ class IndexCountryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.params.countries.index') ?? false;        
+        return $this->user()?->can('admin.params.countries.index') ?? false;
     }
 
     public function rules(): array

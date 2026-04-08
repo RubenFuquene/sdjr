@@ -64,12 +64,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.params.support_statuses.update', 'guard_name' => $guardName, 'description' => 'Permiso para actualizar estados de soporte', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.support_statuses.delete', 'guard_name' => $guardName, 'description' => 'Permiso para eliminar estados de soporte', 'created_at' => now(), 'updated_at' => now()],
 
-            ['name' => 'admin.params.establishments.index', 'guard_name' => $guardName, 'description' => 'Listar establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.create', 'guard_name' => $guardName, 'description' => 'Crear establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.show', 'guard_name' => $guardName, 'description' => 'Ver establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.update', 'guard_name' => $guardName, 'description' => 'Permiso para actualizar establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.delete', 'guard_name' => $guardName, 'description' => 'Permiso para eliminar establecimientos', 'created_at' => now(), 'updated_at' => now()],
-
             ['name' => 'admin.params.pqrs_types.index', 'guard_name' => $guardName, 'description' => 'Listar tipos de PQRs', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.pqrs_types.create', 'guard_name' => $guardName, 'description' => 'Crear tipos de PQRs', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.pqrs_types.show', 'guard_name' => $guardName, 'description' => 'Ver tipos de PQRs', 'created_at' => now(), 'updated_at' => now()],

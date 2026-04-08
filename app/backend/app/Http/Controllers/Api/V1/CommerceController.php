@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Constants\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CommerceRequest;
+use App\Http\Requests\Api\V1\DeleteCommerceRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
 use App\Http\Requests\Api\V1\IndexCommerceRequest;
@@ -241,7 +242,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function destroy(int $commerce_id): JsonResponse
+    public function destroy(DeleteCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
             $this->commerceService->delete($commerce_id);

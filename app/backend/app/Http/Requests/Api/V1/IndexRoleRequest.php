@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *     schema="IndexRoleRequest",
  *     description="Request for listing roles",
+ *
  *     @OA\Property(property="name", type="string", description="Filter by role name"),
  *     @OA\Property(property="guard_name", type="string", description="Filter by guard name")
  * )

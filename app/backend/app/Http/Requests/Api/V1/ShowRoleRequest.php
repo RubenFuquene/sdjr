@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *     schema="ShowRoleRequest",
  *     description="Request for showing a role",
+ *
  *     @OA\Property(property="id", type="integer", description="Role ID")
  * )
  */

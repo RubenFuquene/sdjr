@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @OA\Schema(
  *     schema="IndexPermissionRequest",
  *     description="Request for listing permissions",
+ *
  *     @OA\Property(property="name", type="string", description="Filter by permission name"),
  *     @OA\Property(property="guard_name", type="string", description="Filter by guard name")
  * )

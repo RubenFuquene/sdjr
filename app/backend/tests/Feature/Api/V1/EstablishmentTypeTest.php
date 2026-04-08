@@ -97,4 +97,32 @@ class EstablishmentTypeTest extends TestCase
         $response = $this->postJson('/api/v1/establishment-types', $payload);
         $response->assertForbidden();
     }
+
+    public function test_cannot_delete_establishment_type_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $type = EstablishmentType::factory()->create();
+        $response = $this->deleteJson('/api/v1/establishment-types/'.$type->id);
+        $response->assertForbidden();
+    }
+
+    public function test_cannot_update_establishment_type_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $type = EstablishmentType::factory()->create();
+        $payload = ['name' => 'Nuevo Tipo', 'code' => 'NEWCODE'];
+        $response = $this->putJson('/api/v1/establishment-types/'.$type->id, $payload);
+        $response->assertForbidden();
+    }
+
+    public function test_cannot_show_establishment_type_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $type = EstablishmentType::factory()->create();
+        $response = $this->getJson('/api/v1/establishment-types/'.$type->id);
+        $response->assertForbidden();
+    }
 }
