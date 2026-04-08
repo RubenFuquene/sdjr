@@ -2,6 +2,7 @@ export { ProductFormModal } from "./product-form-modal";
 export { ProductForm } from "./product-form";
 export { ProductTypeToggle } from "./product-type-toggle";
 export { ProductPackItemsSelector } from "./product-pack-items-selector";
+export { useProductFormState } from "./use-product-form-state";
 export { validateProductForm } from "./product-form.validation";
 export {
   buildProductFormSubmitInput,
