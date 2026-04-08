@@ -37,6 +37,28 @@
   --color-provider-text-muted: #6A6A6A;
   --color-provider-border: #E0E0E0;
   --color-provider-bg: #F7F7F7;
+
+  /* App Module Tokens (design-reference-app/src/styles/globals.css) */
+  --color-app-tomatillo-light: #C6D98F;
+  --color-app-tomatillo-medium: #B4CB7A;
+  --color-app-tomatillo-soft: #DDE8BB;
+  --color-app-text-primary-purple: #5A1E6B;
+  --color-app-text-secondary-purple: #7A2E9A;
+  --color-app-text-dark: #2E2E2E;
+  --color-app-text-light: #FFFFFF;
+  --color-app-ui-background: #FFFFFF;
+  --color-app-ui-background-soft: #F5F5F5;
+  --color-app-ui-card: #FFFFFF;
+  --color-app-ui-divider: #E6E6E6;
+  --color-app-status-success: #7C8A62;
+  --color-app-status-warning: #E3A146;
+  --color-app-status-error: #B9342D;
+  --app-radius-small: 6px;
+  --app-radius-medium: 12px;
+  --app-radius-large: 16px;
+  --app-radius-rounded: 999px;
+  --app-shadow-button: 0px 2px 4px rgba(0, 0, 0, 0.06);
+  --app-shadow-card: 0px 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 @theme inline {
@@ -61,6 +83,14 @@
   --color-provider-text-muted: var(--color-provider-text-muted);
   --color-provider-border: var(--color-provider-border);
   --color-provider-bg: var(--color-provider-bg);
+
+  /* App Module theme aliases */
+  --color-app-primary: var(--color-app-text-primary-purple);
+  --color-app-secondary: var(--color-app-text-secondary-purple);
+  --color-app-accent: var(--color-app-tomatillo-soft);
+  --color-app-surface: var(--color-app-ui-card);
+  --color-app-surface-muted: var(--color-app-ui-background-soft);
+  --color-app-divider: var(--color-app-ui-divider);
 }
 
 /* Ñapa Landing Page Colors */
@@ -84,7 +114,185 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* App module typography and visual rhythm (Figma parity baseline) */
+.app-shell {
+  font-family: var(--font-geist-sans), "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--color-app-text-dark);
+}
+
+.app-shell h1,
+.app-shell h2,
+.app-shell h3,
+.app-shell h4 {
+  font-family: var(--font-outfit), "Poppins", var(--font-geist-sans), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.app-shell p,
+.app-shell span,
+.app-shell button,
+.app-shell a,
+.app-shell input,
+.app-shell textarea {
+  line-height: 1.35;
+}
+
+/* App interactive system: tabs, cards and buttons */
+.app-tab-item {
+  border-radius: 12px;
+  color: var(--color-app-text-secondary-purple);
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.app-tab-item:hover {
+  background: var(--color-app-ui-background-soft);
+  color: var(--color-app-text-primary-purple);
+}
+
+.app-tab-item:focus-visible {
+  outline: 2px solid var(--color-app-text-primary-purple);
+  outline-offset: 2px;
+}
+
+.app-tab-item.is-active {
+  background: var(--color-app-tomatillo-soft);
+  color: var(--color-app-text-primary-purple);
+}
+
+.app-segmented-tab {
+  border-bottom: 2px solid transparent;
+  color: var(--color-app-text-secondary-purple);
+  font-size: 0.875rem;
+  padding-bottom: 0.5rem;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.app-segmented-tab:hover {
+  color: var(--color-app-text-primary-purple);
+}
+
+.app-segmented-tab:focus-visible {
+  outline: 2px solid var(--color-app-text-primary-purple);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.app-segmented-tab.is-active {
+  border-color: var(--color-app-text-primary-purple);
+  color: var(--color-app-text-primary-purple);
+}
+
+.app-card-action {
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 120ms ease;
+}
+
+.app-card-action:hover {
+  background: color-mix(in srgb, var(--color-app-ui-background) 82%, var(--color-app-tomatillo-soft) 18%);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.app-card-action:active {
+  transform: translateY(1px);
+}
+
+.app-card-action:focus-visible {
+  outline: 2px solid var(--color-app-text-primary-purple);
+  outline-offset: 2px;
+}
+
+.app-btn-primary {
+  align-items: center;
+  background: var(--color-app-text-primary-purple);
+  border-radius: 12px;
+  color: var(--color-app-text-light);
+  display: inline-flex;
+  font-size: 0.875rem;
+  font-weight: 600;
+  height: 52px;
+  justify-content: center;
+  padding: 0 1rem;
+  transition: filter 180ms ease, box-shadow 180ms ease, transform 120ms ease;
+  box-shadow: var(--app-shadow-button);
+}
+
+.app-btn-primary:hover {
+  filter: brightness(0.96);
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.app-btn-primary:active {
+  transform: translateY(1px);
+}
+
+.app-btn-primary:focus-visible {
+  outline: 2px solid var(--color-app-text-primary-purple);
+  outline-offset: 2px;
+}
+
+.app-btn-primary:disabled,
+.app-btn-primary[aria-disabled="true"] {
+  background: var(--color-app-ui-divider);
+  box-shadow: none;
+  color: var(--color-app-text-secondary-purple);
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+.app-btn-icon {
+  align-items: center;
+  border-radius: 12px;
+  display: inline-flex;
+  justify-content: center;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.app-btn-icon:focus-visible {
+  outline: 2px solid var(--color-app-text-primary-purple);
+  outline-offset: 2px;
+}
+
+.app-page-header {
+  background: var(--color-app-ui-background);
+  border-radius: 16px;
+  box-shadow: var(--app-shadow-card);
+  padding: 1rem;
+}
+
+.app-page-header-accent {
+  background: var(--color-app-tomatillo-soft);
+}
+
+.app-header-back-button {
+  align-items: center;
+  background: var(--color-app-ui-background-soft);
+  border-radius: 12px;
+  color: var(--color-app-text-primary-purple);
+  display: inline-flex;
+  height: 2.25rem;
+  justify-content: center;
+  width: 2.25rem;
+}
+
+.app-surface {
+  background: var(--color-app-ui-background);
+  border-radius: 16px;
+  box-shadow: var(--app-shadow-card);
+}
+
+.app-surface-soft {
+  background: var(--color-app-ui-background-soft);
+  border-radius: 12px;
+}
+
+.app-surface-outlined {
+  background: var(--color-app-ui-background);
+  border: 1px solid var(--color-app-ui-divider);
+  border-radius: 16px;
 }
 
 /* Degradado del login - Figma spec */

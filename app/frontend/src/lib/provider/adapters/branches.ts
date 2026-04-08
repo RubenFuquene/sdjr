@@ -62,6 +62,15 @@ function isAbsoluteUrl(value: string): boolean {
   return /^https?:\/\//i.test(value);
 }
 
+function normalizeCoordinate(value: number | string | null): number | null {
+  if (value === null || value === "") {
+    return null;
+  }
+
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function resolvePhotoUrl(photo?: CommerceBranchPhotoFromAPI): string | null {
   if (!photo) {
     return null;
@@ -102,6 +111,8 @@ export function commerceBranchToCardViewModel(
     commerceId: branch.commerce_id,
     name: branch.name,
     fullAddress: fullAddress || branch.address,
+    latitude: normalizeCoordinate(branch.latitude),
+    longitude: normalizeCoordinate(branch.longitude),
     phone,
     email: branch.email,
     isActive: branch.is_active,

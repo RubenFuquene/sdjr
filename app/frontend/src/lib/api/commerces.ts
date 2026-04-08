@@ -4,8 +4,15 @@
  */
 
 import { ApiResponse } from "@/types/admin";
-import type { CommerceFromAPI, ProveedorPayload, CommerceBasicPayload, CommerceBasicDataResponse } from "@/types/commerces";
+import type {
+  CommerceBasicDataResponse,
+  CommerceFromAPI,
+  CommerceVerificationStatus,
+  ProveedorPayload,
+  CommerceBasicPayload,
+} from "@/types/commerces";
 import { fetchWithErrorHandling } from "./client";
+import type { ApiSuccess } from "./types";
 
 export interface GetCommercesParams {
   page?: number;
@@ -41,16 +48,6 @@ export async function getCommerces({
 // ============================================
 // Detail & Update endpoints
 // ============================================
-
-/**
- * Estructura genérica de respuesta simple del backend (no paginada)
- * successResponse: { status: true, message?: string, data: T }
- */
-export interface ApiSuccess<T> {
-  status: boolean;
-  message?: string;
-  data: T;
-}
 
 /**
  * POST /api/v1/commerces
@@ -154,16 +151,17 @@ export async function getMyCommerce(): Promise<ApiSuccess<CommerceFromAPI | null
  * PATCH /api/v1/commerces/{id}/verification
  * Actualiza el estado de verificación de un comercio
  * 
+ * Pendiente: is_verified = 0
  * Aprobación: is_verified = 1
- * Rechazo: is_verified = 0
+ * Rechazo: is_verified = 2
  * 
  * @param id - ID del comercio
- * @param isVerified - 1 para aprobar, 0 para rechazar
+ * @param isVerified - 0 pendiente, 1 aprobar, 2 rechazar
  * @returns Comercio actualizado
  */
 export async function updateCommerceVerification(
   id: number,
-  isVerified: 0 | 1
+  isVerified: CommerceVerificationStatus
 ): Promise<ApiSuccess<CommerceFromAPI>> {
   return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
     `/api/v1/commerces/${id}/verification`,
@@ -211,11 +209,11 @@ export async function approveCommerce(id: number): Promise<ApiSuccess<CommerceFr
 
 /**
  * Convenience function: Rechazar un comercio/proveedor
- * Equivalente a: updateCommerceVerification(id, 0)
+ * Equivalente a: updateCommerceVerification(id, 2)
  * 
  * @param id - ID del comercio
  * @returns Comercio actualizado
  */
 export async function rejectCommerce(id: number): Promise<ApiSuccess<CommerceFromAPI>> {
-  return updateCommerceVerification(id, 0);
+  return updateCommerceVerification(id, 2);
 }

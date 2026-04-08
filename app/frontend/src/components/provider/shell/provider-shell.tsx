@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/provider/ui/button";
+import { useProviderCommerce } from "@/components/provider/context/provider-commerce-context";
 import { clearSession } from "@/lib/session";
 import type { SessionData } from "@/types/auth";
 
@@ -47,6 +48,7 @@ export function ProviderShell({
 }: ProviderShellProps) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { registrationStatus, isLoadingCommerce } = useProviderCommerce();
 
   const handleLogout = () => {
     clearSession();
@@ -54,10 +56,8 @@ export function ProviderShell({
     router.push("/provider/login");
   };
 
-  // Determinar estado del registro (por ahora hardcoded, futuro: desde backend)
-  const registrationStatus = "Pendiente" as "Activo" | "Pendiente" | "Rechazado";
   const statusColor =
-    registrationStatus === "Activo"
+    registrationStatus === "Aprobado"
       ? "bg-green-500"
       : registrationStatus === "Pendiente"
         ? "bg-yellow-500"
@@ -145,7 +145,9 @@ export function ProviderShell({
             <p className="text-sm text-[#4B236A]/70 mb-2">Estado del Registro</p>
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${statusColor}`} />
-              <span className="text-sm text-[#4B236A]">{registrationStatus}</span>
+              <span className="text-sm text-[#4B236A]">
+                {isLoadingCommerce ? "Cargando..." : registrationStatus}
+              </span>
             </div>
           </div>
 

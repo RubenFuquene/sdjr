@@ -6,16 +6,17 @@
 
 import type {
   CommerceFromAPI,
+  CommerceVerificationStatus,
   Proveedor,
   ProveedorListItem,
   DocumentoProveedor,
   Sucursal,
   InformacionBancaria,
   Legal,
-  ProveedorPayload,
   CommerceBasicPayload,
   CommerceBasicDataResponse,
 } from './commerces';
+import { normalizeCommerceVerificationStatus } from './commerces';
 import type { BasicInfoFormData, DocumentType } from './basic-info';
 
 // ============================================
@@ -31,6 +32,8 @@ import type { BasicInfoFormData, DocumentType } from './basic-info';
  */
 export const commerceToProveedorListItem = (commerce: CommerceFromAPI): ProveedorListItem => {
   const representanteLegal = commerce.legal_representatives?.[0]?.name || 'N/A';
+  const normalizedVerificationStatus: CommerceVerificationStatus =
+    normalizeCommerceVerificationStatus(commerce.is_verified);
 
   return {
     id: commerce.id,
@@ -40,7 +43,8 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
     email: commerce.email || '',
     perfil: 'Proveedor',
     estado: commerce.is_active,
-    verificado: commerce.is_verified,
+    estadoVerificacion: normalizedVerificationStatus,
+    verificado: normalizedVerificationStatus === 1,
     tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible (actualmente no proporcionado)
     createdAt: commerce.created_at,
   };
@@ -56,13 +60,18 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
 export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
   const representanteLegal = (commerce.legal_representatives?.[0]?.name || '') + ' ' + (commerce.legal_representatives?.[0]?.last_name || '');
   const barrio = commerce.neighborhood?.name || '';
+  const normalizedVerificationStatus: CommerceVerificationStatus =
+    normalizeCommerceVerificationStatus(commerce.is_verified);
 
   return {
     // Datos básicos
     id: commerce.id,
     nombreComercial: commerce.name,
+    tipoDocumento: commerce.tax_id_type === 'NIT' ? 'NIT' : (commerce.tax_id_type === 'CC' ? 'Cédula de ciudadanía' : (commerce.tax_id_type === 'PS' ? 'Pasaporte' : 'Cédula de extranjería')),
     nit: commerce.tax_id,
     representanteLegal: representanteLegal.trim(),
+    tipoDocumentoRepresentante: commerce.legal_representatives?.[0]?.document_type === 'CC' ? 'Cédula de ciudadanía' : (commerce.legal_representatives?.[0]?.document_type === 'CE' ? 'Cédula de extranjería' : (commerce.legal_representatives?.[0]?.document_type === 'PAS' ? 'Pasaporte' : 'Cédula de ciudadanía')),
+    documentoRepresentante: commerce.legal_representatives?.[0]?.document || '',
     tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible
     telefono: commerce.phone || '',
     email: commerce.email || '',
@@ -74,7 +83,7 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     estado: commerce.is_active,
 
     // Datos secundarios
-    verificado: commerce.is_verified,
+    verificado: normalizedVerificationStatus === 1 || normalizedVerificationStatus === 0,
     descripcion: commerce.description,
 
     // Relaciones
@@ -445,12 +454,13 @@ export const basicInfoToCommerceBasicPayload = (
       neighborhood_id: neighborhoodId,
       name: formData.commercialName.trim(),
       description: formData.observations?.trim() || undefined,
+      establishment_type: formData.establishmentType || undefined,
       tax_id: formData.documentNumber.trim(),
       tax_id_type: mapDocumentTypeToBackendTaxIdType(formData.documentType),
       address: formData.mainAddress.trim(),
       phone: formData.phone?.trim() || undefined,
       email: formData.email?.trim() || undefined,
-      is_verified: false,
+      is_verified: 0,
       is_active: true,
     },
     legal_representative: {

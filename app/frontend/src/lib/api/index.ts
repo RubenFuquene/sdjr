@@ -6,12 +6,35 @@
  * import { login, getRoles, ApiError } from '@/lib/api/index';
  */
 
+// ============================================
+// Shared Types & Utilities
+// ============================================
+export type { ApiSuccess, PaginatedApiResponse, PaginationMeta, PaginationLinks } from "./types";
+
 // Core utilities
 export { API_URL, ApiError, getAuthHeaders, fetchWithErrorHandling } from "./client";
 
 // Authentication
-export { login, register, logout } from "./auth";
-export type { LoginResult, RegisterResult } from "./auth";
+export { login, logout } from "./auth";
+export type { LoginResult } from "./auth";
+
+// Provider Authentication
+export { registerProvider } from "./provider-auth";
+export type { ProviderRegisterResult } from "./provider-auth";
+
+// App Authentication (customer surface)
+export { loginAppUser, registerAppUser } from "./app-auth";
+export type { AppLoginResult, AppRegisterResult } from "./app-auth";
+
+// App Catalog (nearby products)
+export { getNearbyProducts } from "./app-catalog";
+export type { NearbyProductsParams, NearbyProductsResponse } from "@/types/app-catalog";
+export {
+  mapNearbyProductsToDiscoverCards,
+  mapNearbyProductToDiscoverCard,
+  mapNearbyProductsToMapPins,
+} from "@/types/app-catalog.adapters";
+export type { DiscoverNearbyCard, DiscoverMapPin } from "@/types/app-catalog.adapters";
 
 // Roles (Perfiles)
 export { getRoles, createRole, updateRole, updateRoleStatus, deleteRole } from "./roles";
@@ -30,7 +53,6 @@ export {
 // Branches (Sucursales)
 export { getCommerceBranches, createCommerceBranch, updateCommerceBranch } from "./branches";
 export type {
-  ApiSuccess as BranchApiSuccess,
   CommerceBranchFromAPI,
   CommerceBranchHourFromAPI,
   CommerceBranchPhotoFromAPI,
@@ -52,7 +74,6 @@ export {
   mapProductFormToUpdatePayload,
 } from "./products";
 export type {
-  ApiSuccess as ProductApiSuccess,
   CreateProductPayload,
   CreateProductPhotoInput,
   GetProductCategoriesParams,
@@ -87,11 +108,9 @@ export {
   updateUserStatus,
   deleteUser,
 } from "./users";
-export type { ApiSuccess } from "./users";
 
-// Administrators (Administradores)
+// Administrators (Administradores)  
 export { getAdministrators } from "./administrators";
-export type { ApiSuccess as AdminApiSuccess } from "./administrators";
 
 // Location (Geolocalización)
 export {
@@ -104,3 +123,7 @@ export {
   getNeighborhoods,
   getNeighborhood
 } from "./location";
+
+// Establishment Types (Tipos de Establecimiento)
+export { getEstablishmentTypes } from "./establishment-types";
+export type { EstablishmentType, EstablishmentTypesResponse } from "./establishment-types";

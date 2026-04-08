@@ -78,7 +78,7 @@ export function useCommerceApproval(): UseCommerceApprovalReturn {
   };
 
   /**
-   * Rechaza un proveedor (is_verified = 0)
+    * Rechaza un proveedor (is_verified = 2)
    * 
    * ⚠️ Nota: El backend no almacena las observaciones de rechazo en este endpoint.
    * Las observaciones deben manejarse en un endpoint separado de PQRS/Comments.

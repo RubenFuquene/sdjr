@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { getSessionOrRedirect } from "@/lib/auth";
+import { AppMobileShell } from "@/components/app/shell/app-mobile-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -10,5 +11,5 @@ type AppProtectedLayoutProps = {
 export default async function AppProtectedLayout({ children }: AppProtectedLayoutProps) {
   await getSessionOrRedirect("user");
 
-  return <div className="min-h-screen bg-[#F5F5F5]">{children}</div>;
+  return <AppMobileShell>{children}</AppMobileShell>;
 }

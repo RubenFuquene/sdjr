@@ -1,12 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { MapPin } from "lucide-react";
 import { useLocation } from "@/hooks";
+import { CitySelect, DepartmentSelect, NeighborhoodSelect } from "@/components/provider/ui";
 import type {
   ProviderBranchFormFieldErrors,
   ProviderBranchFormInput,
 } from "@/hooks/provider/use-provider-branch-form";
 import { validateBranchForm } from "@/lib/provider/validations/branch-form";
+
+const LocationPickerModal = dynamic(
+  () => import("./location-picker-modal").then((module) => module.LocationPickerModal),
+  { ssr: false }
+);
 
 export type BranchFormMode = "create" | "edit";
 
@@ -27,6 +35,8 @@ type BranchHourInitialData = {
 export interface BranchFormInitialData {
   name: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   phone?: string | null;
   email?: string | null;
   departmentName?: string | null;
@@ -92,6 +102,8 @@ function getInitialBranchFormValues(
     return {
       name: "",
       address: "",
+      latitude: null,
+      longitude: null,
       phone: "",
       email: "",
       schedule: buildDefaultSchedule(),
@@ -101,6 +113,8 @@ function getInitialBranchFormValues(
   return {
     name: initialData.name ?? "",
     address: initialData.address ?? "",
+    latitude: initialData.latitude ?? null,
+    longitude: initialData.longitude ?? null,
     phone: initialData.phone ?? "",
     email: initialData.email ?? "",
     schedule: applyInitialHours(initialData.hours),
@@ -133,9 +147,12 @@ export function BranchForm({
 
   const [name, setName] = useState(initialValues.name);
   const [address, setAddress] = useState(initialValues.address);
+  const [latitude, setLatitude] = useState<number | null>(initialValues.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(initialValues.longitude ?? null);
   const [phone, setPhone] = useState(initialValues.phone);
   const [email, setEmail] = useState(initialValues.email);
   const [schedule, setSchedule] = useState<DaySchedule[]>(initialValues.schedule);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [localErrors, setLocalErrors] = useState<ProviderBranchFormFieldErrors>({});
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -322,6 +339,8 @@ export function BranchForm({
       cityId: selectedCity,
       neighborhoodId: selectedNeighborhood,
       address,
+      latitude,
+      longitude,
       phone,
       email,
       hours: activeHours,
@@ -344,6 +363,8 @@ export function BranchForm({
       neighborhoodId: selectedNeighborhood,
       name,
       address,
+      latitude,
+      longitude,
       phone: phone || null,
       email: email || null,
       status: true,
@@ -375,74 +396,38 @@ export function BranchForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <label htmlFor="branch-department" className="text-sm text-[#1A1A1A]">
-            Departamento *
-          </label>
-          <select
-            id="branch-department"
-            value={selectedDept ?? ""}
-            onChange={(event) => handleDepartmentChange(event.target.value)}
-            className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-white outline-none focus:ring-2 focus:ring-[#4B236A]/20"
-            disabled={loading.departments || submitting}
-          >
-            <option value="">Selecciona departamento</option>
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>
-                {department.name}
-              </option>
-            ))}
-          </select>
-          {getFieldError("commerce_branch.department_id") && (
-            <p className="text-sm text-red-600">{getFieldError("commerce_branch.department_id")}</p>
-          )}
-        </div>
+        <DepartmentSelect
+          departments={departments}
+          value={selectedDept}
+          onChange={(id) => handleDepartmentChange(id?.toString() ?? "")}
+          disabled={submitting}
+          loading={loading.departments}
+          required
+          error={getFieldError("commerce_branch.department_id")}
+        />
 
-        <div className="space-y-2">
-          <label htmlFor="branch-city" className="text-sm text-[#1A1A1A]">
-            Ciudad *
-          </label>
-          <select
-            id="branch-city"
-            value={selectedCity ?? ""}
-            onChange={(event) => handleCityChange(event.target.value)}
-            className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-white outline-none focus:ring-2 focus:ring-[#4B236A]/20"
-            disabled={!selectedDept || loading.cities || submitting}
-          >
-            <option value="">Selecciona ciudad</option>
-            {filteredCities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-          {getFieldError("commerce_branch.city_id") && (
-            <p className="text-sm text-red-600">{getFieldError("commerce_branch.city_id")}</p>
-          )}
-        </div>
+        <CitySelect
+          cities={filteredCities}
+          departmentId={selectedDept}
+          value={selectedCity}
+          onChange={(id) => handleCityChange(id?.toString() ?? "")}
+          disabled={submitting}
+          loading={loading.cities}
+          required
+          error={getFieldError("commerce_branch.city_id")}
+        />
 
-        <div className="space-y-2">
-          <label htmlFor="branch-neighborhood" className="text-sm text-[#1A1A1A]">
-            Barrio *
-          </label>
-          <select
-            id="branch-neighborhood"
-            value={selectedNeighborhood ?? ""}
-            onChange={(event) => handleNeighborhoodChange(event.target.value)}
-            className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-white outline-none focus:ring-2 focus:ring-[#4B236A]/20"
-            disabled={!selectedCity || loading.neighborhoods || submitting}
-          >
-            <option value="">Selecciona barrio</option>
-            {filteredNeighborhoods.map((neighborhood) => (
-              <option key={neighborhood.id} value={neighborhood.id}>
-                {neighborhood.name}
-              </option>
-            ))}
-          </select>
-          {getFieldError("commerce_branch.neighborhood_id") && (
-            <p className="text-sm text-red-600">{getFieldError("commerce_branch.neighborhood_id")}</p>
-          )}
-        </div>
+        <NeighborhoodSelect
+          neighborhoods={filteredNeighborhoods}
+          cityId={selectedCity}
+          value={selectedNeighborhood?.toString() ?? ""}
+          onChange={handleNeighborhoodChange}
+          disabled={submitting}
+          loading={loading.neighborhoods}
+          required
+          error={getFieldError("commerce_branch.neighborhood_id")}
+          allowManualEntry={false}
+        />
       </div>
 
       <div className="space-y-2">
@@ -462,6 +447,33 @@ export function BranchForm({
         />
         {getFieldError("commerce_branch.address") && (
           <p className="text-sm text-red-600">{getFieldError("commerce_branch.address")}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm text-[#1A1A1A]">Ubicación en mapa *</label>
+
+        <button
+          type="button"
+          onClick={() => setShowLocationPicker(true)}
+          disabled={submitting}
+          className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-[#F7F7F7] hover:bg-[#DDE8BB] text-[#1A1A1A] transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-60"
+        >
+          <MapPin size={16} className="text-[#4B236A]" />
+          {latitude !== null && longitude !== null
+            ? "Cambiar ubicación seleccionada"
+            : "Seleccionar ubicación en mapa"}
+        </button>
+
+        {latitude !== null && longitude !== null && (
+          <p className="text-sm text-[#1A1A1A]">
+            Coordenadas: <span className="font-medium">{latitude.toFixed(4)}</span>,{" "}
+            <span className="font-medium">{longitude.toFixed(4)}</span>
+          </p>
+        )}
+
+        {getFieldError("commerce_branch.location") && (
+          <p className="text-sm text-red-600">{getFieldError("commerce_branch.location")}</p>
         )}
       </div>
 
@@ -614,6 +626,21 @@ export function BranchForm({
               : "Guardar Sucursal"}
         </button>
       </div>
+
+      {showLocationPicker && (
+        <LocationPickerModal
+          isOpen={showLocationPicker}
+          initialLat={latitude}
+          initialLng={longitude}
+          onClose={() => setShowLocationPicker(false)}
+          onSelect={(lat, lng) => {
+            setLatitude(lat);
+            setLongitude(lng);
+            clearLocalError("commerce_branch.location");
+            setShowLocationPicker(false);
+          }}
+        />
+      )}
     </form>
   );
 }

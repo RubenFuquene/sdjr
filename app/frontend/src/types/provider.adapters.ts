@@ -6,7 +6,6 @@
  * Responsabilidad única: Transformación de datos de usuario/proveedor
  */
 
-import type { DescargaDocumento, BancoOption } from './provider';
 import type { ProveedorPayload } from './commerces';
 import type { BasicInfoFormData, DocumentType } from './basic-info';
 

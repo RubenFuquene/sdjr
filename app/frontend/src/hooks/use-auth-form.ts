@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { login, register } from "@/lib/api/auth";
+import { login } from "@/lib/api/auth";
+import { registerProvider } from "@/lib/api/provider-auth";
 import { persistSession } from "@/lib/session";
 import type { SessionData } from "@/types/auth";
 
@@ -18,7 +19,7 @@ import type { SessionData } from "@/types/auth";
 
 interface UseAuthFormReturn {
   handleLogin: (email: string, password: string) => Promise<{ redirectTo: string; user: SessionData }>;
-  handleRegister: (name: string, last_name: string, email: string, password: string, password_confirmation: string) => Promise<{ redirectTo: string; user: SessionData }>;
+  handleRegister: (name: string, email: string, password: string, password_confirmation: string) => Promise<{ redirectTo: string; user: SessionData }>;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -108,7 +109,6 @@ export function useAuthForm(): UseAuthFormReturn {
    */
   const handleRegister = async (
     name: string,
-    last_name: string,
     email: string,
     password: string,
     password_confirmation: string
@@ -119,22 +119,17 @@ export function useAuthForm(): UseAuthFormReturn {
     try {
       // Sanitizar inputs
       const sanitizedName = sanitizeName(name);
-      const sanitizedLastName = sanitizeName(last_name);
       const sanitizedEmail = sanitizeEmail(email);
       const sanitizedPassword = sanitizePassword(password);
       const sanitizedPasswordConfirmation = sanitizePassword(password_confirmation);
 
       // Validación básica frontend
-      if (!sanitizedName || !sanitizedLastName || !sanitizedEmail || !sanitizedPassword || !sanitizedPasswordConfirmation) {
+      if (!sanitizedName || !sanitizedEmail || !sanitizedPassword || !sanitizedPasswordConfirmation) {
         throw new Error("Por favor completa todos los campos");
       }
 
       if (sanitizedName.length < 2) {
         throw new Error("El nombre debe tener al menos 2 caracteres");
-      }
-
-      if (sanitizedLastName.length < 2) {
-        throw new Error("El apellido debe tener al menos 2 caracteres");
       }
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
@@ -150,9 +145,8 @@ export function useAuthForm(): UseAuthFormReturn {
       }
 
       // Llamar a API
-      const result = await register({
+      const result = await registerProvider({
         name: sanitizedName,
-        last_name: sanitizedLastName,
         email: sanitizedEmail,
         password: sanitizedPassword,
         password_confirmation: sanitizedPasswordConfirmation,
