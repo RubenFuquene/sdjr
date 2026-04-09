@@ -9,6 +9,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuditMiddleware
@@ -35,6 +36,10 @@ class AuditMiddleware
     protected function logAudit(Request $request, $response, float $start): void
     {
         try {
+            if (! Schema::hasTable('audit_logs')) {
+                return;
+            }
+
             $user = Auth::user();
             $payload = $this->sanitizePayload($request->all());
             AuditLog::create([
