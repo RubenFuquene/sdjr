@@ -8,16 +8,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteUserRequest;
 use App\Http\Requests\Api\V1\ShowAdministratorRequest;
 use App\Http\Requests\Api\V1\ShowUserRequest;
+use App\Http\Requests\Api\V1\StoreUserRegisterRequest;
 use App\Http\Requests\Api\V1\StoreUserRequest;
 use App\Http\Requests\Api\V1\UserIndexRequest;
 use App\Http\Requests\Api\V1\UserStatusRequest;
 use App\Http\Resources\Api\V1\UserResource;
+use App\Services\AuthService;
 use App\Services\UserService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * @OA\Tag(
@@ -31,9 +34,13 @@ class UserController extends Controller
 
     private UserService $userService;
 
-    public function __construct(UserService $userService)
+    private AuthService $authService;
+
+    public function __construct(UserService $userService, AuthService $authService)
     {
         $this->userService = $userService;
+        $this->authService = $authService;
+
     }
 
     /**
@@ -333,6 +340,124 @@ class UserController extends Controller
             Log::error('Error listing administrators', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error listing administrators', Response::HTTP_INTERNAL_SERVER_ERROR, ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/provider/register",
+     *     operationId="providerRegister",
+     *     tags={"Users"},
+     *     summary="Register a provider user",
+     *     description="Registers a provider user and returns auth token.",
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"name","last_name","email","password","password_confirmation"},
+     *
+     *             @OA\Property(property="name", type="string", example="Proveedor"),
+     *             @OA\Property(property="last_name", type="string", example="Demo"),
+     *             @OA\Property(property="email", type="string", format="email", example="proveedor@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Provider registered successfully",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Login successful"),
+     *             @OA\Property(property="data", ref="#/components/schemas/UserResource"),
+     *             @OA\Property(property="token", type="string", example="1|abcdef123456")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=422, description="Validation Error"),
+     *     @OA\Response(response=500, description="Server Error")
+     * )
+     */
+    public function providerRegister(StoreUserRegisterRequest $request): JsonResponse
+    {
+        try {
+            $user = $this->userService->registerUserAndNotification($request->validated(), 'provider');
+
+            // Iniciar sesión automáticamente
+            $tokenData = $this->authService->login([
+                'email' => $user->email,
+                'password' => $request->input('password'),
+            ]);
+
+            return $this->loginResponse(new UserResource($user), $tokenData['token']);
+
+        } catch (Throwable $e) {
+            Log::error('Error registering provider', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error registering provider', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/customer/register",
+     *     operationId="customerRegister",
+     *     tags={"Users"},
+     *     summary="Register a customer user",
+     *     description="Registers a customer user and returns auth token.",
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"name","last_name","email","password","password_confirmation"},
+     *
+     *             @OA\Property(property="name", type="string", example="Cliente"),
+     *             @OA\Property(property="last_name", type="string", example="Demo"),
+     *             @OA\Property(property="email", type="string", format="email", example="cliente@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Customer registered successfully",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Login successful"),
+     *             @OA\Property(property="data", ref="#/components/schemas/UserResource"),
+     *             @OA\Property(property="token", type="string", example="1|abcdef123456")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=422, description="Validation Error"),
+     *     @OA\Response(response=500, description="Server Error")
+     * )
+     */
+    public function customerRegister(StoreUserRegisterRequest $request): JsonResponse
+    {
+        try {
+            $user = $this->userService->registerUserAndNotification($request->validated(), 'user');
+
+            // Iniciar sesión automáticamente
+            $tokenData = $this->authService->login([
+                'email' => $user->email,
+                'password' => $request->input('password'),
+            ]);
+
+            return $this->loginResponse(new UserResource($user), $tokenData['token']);
+
+        } catch (Throwable $e) {
+            Log::error('Error registering customer', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error registering customer', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -14,12 +14,12 @@ use Illuminate\Notifications\Notification;
  * Welcome notification for new provider users.
  *
  * @OA\Schema(
- *     schema="WelcomeProviderNotification",
- *     title="WelcomeProviderNotification",
+ *     schema="WelcomeUserNotification",
+ *     title="WelcomeUserNotification",
  *     description="Notification sent to new provider users upon registration."
  * )
  */
-class WelcomeProviderNotification extends Notification implements ShouldQueue
+class WelcomeUserNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -66,9 +66,8 @@ class WelcomeProviderNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('¡Bienvenido a Ñapa App!')
             ->greeting('Hola '.$this->user->name.',')
-            ->line('Tu registro como proveedor ha sido exitoso.')
-            ->line('Ya puedes acceder a tu cuenta y comenzar a utilizar nuestros servicios.')
-            ->action('Ir al panel', url('/provider/dashboard'))
+            ->line('Tu registro ha sido exitoso.')
+            ->line('Ya puedes acceder a tu cuenta y comenzar a utilizar nuestros servicios.')            
             ->line('¡Gracias por confiar en nosotros!');
     }
 

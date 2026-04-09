@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Notifications\CommerceRejectedNotification;
 use App\Notifications\CommerceVerifiedNotification;
 use App\Notifications\ResetPasswordNotification;
-use App\Notifications\WelcomeProviderNotification;
+use App\Notifications\WelcomeUserNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Tests\TestCase;
@@ -23,7 +23,7 @@ class NotificationQueueTest extends TestCase
             'email' => 'provider@test.com',
         ]);
 
-        $notification = new WelcomeProviderNotification($user);
+        $notification = new WelcomeUserNotification($user);
 
         $this->assertInstanceOf(ShouldQueue::class, $notification);
         $this->assertSame(['mail'], $notification->via($user));
