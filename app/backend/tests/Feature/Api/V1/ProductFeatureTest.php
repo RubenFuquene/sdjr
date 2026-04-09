@@ -54,10 +54,9 @@ class ProductFeatureTest extends TestCase
 
     public function test_store_creates_product()
     {
-        $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $category = ProductCategory::factory()->create();
-
         $commerce_branch = CommerceBranch::factory()->create([
             'commerce_id' => $commerce->id,
         ]);
@@ -103,14 +102,19 @@ class ProductFeatureTest extends TestCase
 
     public function test_update_modifies_product()
     {
-        $this->actingAsAdmin();
-        $product = Product::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+        ]);
         $commerce_branch = CommerceBranch::factory()->create([
-            'commerce_id' => $product->commerce_id,
+            'commerce_id' => $commerce->id,
         ]);
         $payload = [
             'product' => [
-                'commerce_id' => $product->commerce_id,
+                'commerce_id' => $commerce->id,
                 'title' => 'Té Verde',
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,
             ],
