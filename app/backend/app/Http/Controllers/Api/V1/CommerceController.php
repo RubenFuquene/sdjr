@@ -369,11 +369,27 @@ class CommerceController extends Controller
             switch ($commerce->is_verified) {
                 case Constant::COMMERCE_VERIFIED:
                     $message = 'Commerce verified successfully';
-                    $user->notify(new CommerceVerifiedNotification($commerce));
+                    try {
+                        $user->notify(new CommerceVerifiedNotification($commerce));
+                    } catch (\Throwable $e) {
+                        Log::warning('Commerce verified notification dispatch failed', [
+                            'commerce_id' => $commerce->id,
+                            'user_id' => $user?->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                     break;
                 case Constant::COMMERCE_REJECTED:
                     $message = 'Commerce rejected successfully';
-                    $user->notify(new CommerceRejectedNotification($commerce));
+                    try {
+                        $user->notify(new CommerceRejectedNotification($commerce));
+                    } catch (\Throwable $e) {
+                        Log::warning('Commerce rejected notification dispatch failed', [
+                            'commerce_id' => $commerce->id,
+                            'user_id' => $user?->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                     break;
                 default:
                     $message = 'Commerce verification updated successfully';

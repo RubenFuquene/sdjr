@@ -6,13 +6,14 @@ namespace App\Notifications;
 
 use App\Models\Commerce;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
  * Notification sent when a commerce is verified and activated.
  */
-class CommerceVerifiedNotification extends Notification
+class CommerceVerifiedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -34,6 +35,18 @@ class CommerceVerifiedNotification extends Notification
     public function via($notifiable): array
     {
         return ['mail'];
+    }
+
+    /**
+     * Define queue names per channel.
+     *
+     * @return array<string, string>
+     */
+    public function viaQueues(): array
+    {
+        return [
+            'mail' => 'emails',
+        ];
     }
 
     /**

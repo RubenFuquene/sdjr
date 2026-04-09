@@ -64,7 +64,16 @@ class PasswordResetService
         try {
             $user = User::where('email', $email)->firstOrFail();
             $token = Password::broker()->createToken($user);
-            $user->notify(new ResetPasswordNotification($token, $user->email));
+
+            try {
+                $user->notify(new ResetPasswordNotification($token, $user->email));
+            } catch (\Throwable $e) {
+                Log::warning('Reset password notification dispatch failed', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'message' => $e->getMessage(),
+                ]);
+            }
         } catch (Exception $e) {
             Log::error('Password reset error', [
                 'email' => $email,

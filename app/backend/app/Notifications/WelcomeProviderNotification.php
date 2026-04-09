@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -18,7 +19,7 @@ use Illuminate\Notifications\Notification;
  *     description="Notification sent to new provider users upon registration."
  * )
  */
-class WelcomeProviderNotification extends Notification
+class WelcomeProviderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -41,6 +42,18 @@ class WelcomeProviderNotification extends Notification
     public function via($notifiable): array
     {
         return ['mail'];
+    }
+
+    /**
+     * Define queue names per channel.
+     *
+     * @return array<string, string>
+     */
+    public function viaQueues(): array
+    {
+        return [
+            'mail' => 'emails',
+        ];
     }
 
     /**

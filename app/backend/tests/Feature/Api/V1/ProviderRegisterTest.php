@@ -6,6 +6,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -92,5 +93,41 @@ class ProviderRegisterTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
+    }
+
+    /**
+     * Test registration succeeds even if notification dispatch fails.
+     */
+    public function test_register_provider_succeeds_when_welcome_email_dispatch_fails(): void
+    {
+        Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'sanctum']);
+
+        Notification::shouldReceive('send')
+            ->once()
+            ->andThrow(new \RuntimeException('SMTP unavailable'));
+
+        $payload = [
+            'name' => 'Proveedor',
+            'last_name' => 'SinCorreo',
+            'email' => 'nocorreo'.Str::random(5).'@test.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->postJson('/api/v1/provider/register', $payload);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data',
+                'token',
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => trim(Str::lower($payload['email'])),
+            'name' => 'Proveedor',
+            'last_name' => 'Sincorreo',
+        ]);
     }
 }

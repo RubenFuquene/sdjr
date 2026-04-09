@@ -14,6 +14,7 @@ use App\Services\UserService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -78,8 +79,16 @@ class ProviderRegisterController extends Controller
                 'password' => $request->input('password'),
             ]);
 
-            // Enviar notificación de bienvenida
-            $user->notify(new WelcomeProviderNotification($user));
+            // Enviar notificación de bienvenida sin bloquear el flujo de registro
+            try {
+                Notification::send($user, new WelcomeProviderNotification($user));
+            } catch (Throwable $e) {
+                Log::warning('Welcome provider email dispatch failed', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return $this->loginResponse(new UserResource($user), $tokenData['token']);
 
