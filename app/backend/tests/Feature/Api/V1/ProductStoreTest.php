@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Api\V1;
 
 use App\Models\Commerce;
+use App\Models\CommerceBranch;
 use App\Models\ProductCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,8 +30,15 @@ class ProductStoreTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo('provider.products.create');
         $this->actingAs($user, 'sanctum');
-        $commerce = Commerce::factory()->create();
+
+        // El usuario debe ser owner del commerce
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $category = ProductCategory::factory()->create();
+
+        // Crear branch asociado al commerce y al usuario owner
+        $branch = CommerceBranch::factory()->create([
+            'commerce_id' => $commerce->id,
+        ]);
 
         $payload = [
             'product' => [
@@ -55,7 +63,7 @@ class ProductStoreTest extends TestCase
                     'metadata' => ['description' => 'Foto de prueba'],
                 ],
             ],
-            'commerce_branch_ids' => [],
+            'commerce_branch_ids' => [$branch->id],
         ];
 
         $response = $this->postJson('/api/v1/products', $payload);
@@ -69,10 +77,17 @@ class ProductStoreTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo('provider.products.create');
         $this->actingAs($user, 'sanctum');
+        // El usuario debe ser owner del commerce
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $branch = CommerceBranch::factory()->create([
+            'commerce_id' => $commerce->id,
+        ]);
         $payload = [
             'product' => [
+                'commerce_id' => $commerce->id,
                 'title' => '',
             ],
+            'commerce_branch_ids' => [$branch->id],
         ];
         $response = $this->postJson('/api/v1/products', $payload);
         $response->assertStatus(422);

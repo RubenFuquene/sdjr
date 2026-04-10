@@ -5,16 +5,27 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
+use App\Notifications\WelcomeUserNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Service class for handling user-related business logic for users.
  */
 class UserService
 {
+    private RoleService $roleService;
+
+    public function __construct(RoleService $roleService)
+    {
+        $this->roleService = $roleService;
+    }
+
     /**
      * Get all users with roles and permissions loaded.
      *
@@ -158,5 +169,41 @@ class UserService
         }
 
         return $query->paginate($perPage);
+    }
+
+    /**
+     * Register a new user with the specified role and send a welcome notification.
+     */
+    public function registerUserAndNotification(array $data, string $role): User
+    {
+        try {
+            // Crear el usuario con el rol asignado
+            $user = $this->create($data);
+
+            // Asignar rol al usuario
+            $this->roleService->assignToUser($user, [$role]);
+
+            // Enviar notificación de bienvenida sin bloquear el flujo de registro
+            try {
+                Notification::send($user, new WelcomeUserNotification($user));
+            } catch (Throwable $e) {
+                Log::warning('Welcome user email dispatch failed', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return $user;
+
+        } catch (Throwable $e) {
+
+            Log::error('Error registering user', [
+                'email' => $data['email'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e; // Re-throw the exception after logging
+        }
     }
 }

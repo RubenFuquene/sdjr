@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="UserRequest",
+ *     schema="StoreUserRequest",
  *     required={"name", "last_name", "email", "password"},
  *
  *     @OA\Property(property="name", type="string", maxLength=255, example="Juan", description="User first name"),
@@ -21,7 +21,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="status", type="integer", enum={0,1}, example=1, description="User status: 1=active, 0=inactive")
  * )
  */
-class UserRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

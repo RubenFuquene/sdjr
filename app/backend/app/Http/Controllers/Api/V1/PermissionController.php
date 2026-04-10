@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\IndexPermissionRequest;
 use App\Http\Requests\Api\V1\StorePermissionRequest;
 use App\Http\Resources\Api\V1\PermissionResource;
 use App\Services\RoleService;
@@ -49,7 +50,7 @@ class PermissionController extends Controller
      *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function index(): JsonResponse
+    public function index(IndexPermissionRequest $request): JsonResponse
     {
         try {
             $permissions = Permission::all();

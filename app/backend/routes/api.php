@@ -26,7 +26,6 @@ use App\Http\Controllers\Api\V1\PqrsTypeController;
 use App\Http\Controllers\Api\V1\PriorityTypeController;
 use App\Http\Controllers\Api\V1\ProductCategoryController;
 use App\Http\Controllers\Api\V1\ProductController;
-use App\Http\Controllers\Api\V1\ProviderRegisterController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SupportStatusController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -35,7 +34,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
 
     // Registro público de proveedores
-    Route::post('provider/register', [ProviderRegisterController::class, '__invoke']);
+    Route::post('provider/register', [UserController::class, 'providerRegister']);
+    Route::post('customer/register', [UserController::class, 'customerRegister']);
 
     // Authentication routes
     Route::post('login', [AuthController::class, 'login']);

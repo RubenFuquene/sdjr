@@ -64,12 +64,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.params.support_statuses.update', 'guard_name' => $guardName, 'description' => 'Permiso para actualizar estados de soporte', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.support_statuses.delete', 'guard_name' => $guardName, 'description' => 'Permiso para eliminar estados de soporte', 'created_at' => now(), 'updated_at' => now()],
 
-            ['name' => 'admin.params.establishments.index', 'guard_name' => $guardName, 'description' => 'Listar establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.create', 'guard_name' => $guardName, 'description' => 'Crear establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.show', 'guard_name' => $guardName, 'description' => 'Ver establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.update', 'guard_name' => $guardName, 'description' => 'Permiso para actualizar establecimientos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.establishments.delete', 'guard_name' => $guardName, 'description' => 'Permiso para eliminar establecimientos', 'created_at' => now(), 'updated_at' => now()],
-
             ['name' => 'admin.params.pqrs_types.index', 'guard_name' => $guardName, 'description' => 'Listar tipos de PQRs', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.pqrs_types.create', 'guard_name' => $guardName, 'description' => 'Crear tipos de PQRs', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.pqrs_types.show', 'guard_name' => $guardName, 'description' => 'Ver tipos de PQRs', 'created_at' => now(), 'updated_at' => now()],
@@ -372,8 +366,33 @@ class RolePermissionSeeder extends Seeder
         $adminRole = Role::where('name', 'admin')->first();
         $adminRole->givePermissionTo($adminPermissions);
 
+        $showProviderPermissions = [
+            'admin.params.countries.index',
+            'admin.params.departments.index',
+            'admin.params.cities.index',
+            'admin.params.neighborhoods.index',
+            'admin.legal_documents.index',
+            'provider.basic_data.show',
+            'provider.branches.show',
+            'provider.products.show',
+            'provider.my_account.show',
+            'provider.my_wallet.show',
+            'provider.dashboard.show',
+            'provider.review.show',
+            'provider.support.show',
+            'provider.commerces.mine',
+            'provider.commerces.show',
+            'provider.legal_representatives.show',
+            'provider.establishment_types.show',
+            'provider.product_categories.show',
+            'provider.products.show',
+            'provider.comments.show',
+            'provider.orders.index',
+            'provider.orders.show',
+        ];
+
         // Proveedor tiene permisos específicos
-        $providerPermissions = array_merge($indexShowPermissions, [
+        $providerPermissions = array_merge($showProviderPermissions, [
             // Create
             'provider.branches.create',
             'provider.commerces.create',

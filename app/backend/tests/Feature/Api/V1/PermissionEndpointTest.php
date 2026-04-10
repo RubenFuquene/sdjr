@@ -21,7 +21,8 @@ class PermissionEndpointTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        Permission::create(['name' => 'admin.profiles.users.index']);
+        Permission::create(['name' => 'admin.profiles.permissions.index', 'description' => 'View permissions']);
+        $user->givePermissionTo('admin.profiles.permissions.index');
 
         $response = $this->getJson('/api/v1/permissions');
 
@@ -34,7 +35,7 @@ class PermissionEndpointTest extends TestCase
                 'status',
             ])
             ->assertJsonFragment([
-                'name' => 'admin.profiles.users.index',
+                'name' => 'admin.profiles.permissions.index', 'description' => 'View permissions',
             ])
             ->assertJsonFragment([
                 'message' => 'Permissions retrieved successfully',
