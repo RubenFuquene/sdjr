@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Notifications\WelcomeUserNotification;
-use App\Services\RoleService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +19,6 @@ use Throwable;
  */
 class UserService
 {
-
     private RoleService $roleService;
 
     public function __construct(RoleService $roleService)
@@ -181,10 +179,10 @@ class UserService
         try {
             // Crear el usuario con el rol asignado
             $user = $this->create($data);
-                
+
             // Asignar rol al usuario
             $this->roleService->assignToUser($user, [$role]);
-    
+
             // Enviar notificación de bienvenida sin bloquear el flujo de registro
             try {
                 Notification::send($user, new WelcomeUserNotification($user));
@@ -195,7 +193,7 @@ class UserService
                     'error' => $e->getMessage(),
                 ]);
             }
-    
+
             return $user;
 
         } catch (Throwable $e) {

@@ -67,7 +67,7 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
             ->subject('¡Bienvenido a Ñapa App!')
             ->greeting('Hola '.$this->user->name.',')
             ->line('Tu registro ha sido exitoso.')
-            ->line('Ya puedes acceder a tu cuenta y comenzar a utilizar nuestros servicios.')            
+            ->line('Ya puedes acceder a tu cuenta y comenzar a utilizar nuestros servicios.')
             ->line('¡Gracias por confiar en nosotros!');
     }
 

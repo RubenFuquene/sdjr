@@ -19,7 +19,7 @@ class StoreUserRegisterRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        if ($this->is('provider/register')){
+        if ($this->is('provider/register')) {
             $this->merge([
                 'role' => 'provider', // El rol se asignará automáticamente en el controlador
             ]);
@@ -27,7 +27,7 @@ class StoreUserRegisterRequest extends FormRequest
             $this->merge([
                 'role' => 'user', // El rol se asignará automáticamente en el controlador
             ]);
-        }         
+        }
     }
 
     /**
