@@ -172,6 +172,8 @@ run_seeders() {
     
     # Only run seeders if explicitly enabled
     if [ "$enable_seeding" = "true" ]; then
+        echo "Restoring database from seeders..."
+        php artisan migrate:refresh --force --no-interaction
         echo "Running database seeders..."
         php artisan db:seed --force --no-interaction
     else
