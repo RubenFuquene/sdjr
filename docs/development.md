@@ -44,7 +44,7 @@ The frontend will be available at http://localhost:3000
 ```bash
 cd app/backend
 composer install
-cp .env.example .env
+cp .env.example.prd .env
 php artisan key:generate
 php artisan migrate
 php artisan serve

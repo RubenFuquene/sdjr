@@ -18,7 +18,7 @@ update_env_var() {
 bootstrap_env_file() {
     if [ ! -f "$ENV_FILE" ]; then
         echo "Creating .env file from .env.example..."
-        cp .env.example "$ENV_FILE"
+        cp .env.example.prd "$ENV_FILE"
     fi
 }
 
