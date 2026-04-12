@@ -47,7 +47,43 @@ class CommerceBasicDataController extends Controller
      *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/CommerceBasicDataResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=422, description="Validation Error")
+     *     @OA\Response(response=422, description="Validation Error"),
+     *     @OA\Response(
+     *         response=429,
+     *         description="Too Many Requests",
+     *
+     *         @OA\JsonContent(
+     *             example={"status":false,"message":"Too many requests. Please try again later.","code":429}
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="Retry-After",
+     *             description="Segundos hasta que se puede volver a intentar",
+     *
+     *             @OA\Schema(type="integer")
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="X-RateLimit-Limit",
+     *             description="Límite de peticiones por ventana",
+     *
+     *             @OA\Schema(type="integer")
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="X-RateLimit-Remaining",
+     *             description="Peticiones restantes en la ventana actual",
+     *
+     *             @OA\Schema(type="integer")
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="X-RateLimit-Reset",
+     *             description="Timestamp de reseteo de ventana",
+     *
+     *             @OA\Schema(type="integer")
+     *         )
+     *     )
      * )
      */
     public function store(CommerceBasicDataRequest $request): JsonResponse

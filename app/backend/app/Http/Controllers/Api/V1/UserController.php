@@ -67,7 +67,8 @@ class UserController extends Controller
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function index(UserIndexRequest $request): AnonymousResourceCollection|JsonResponse
@@ -110,7 +111,8 @@ class UserController extends Controller
      *
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function store(StoreUserRequest $request): JsonResponse
@@ -152,7 +154,8 @@ class UserController extends Controller
      *
      *     @OA\Response(response=404, description="Not Found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function show(ShowUserRequest $request, int $user_id): JsonResponse
@@ -197,7 +200,8 @@ class UserController extends Controller
      *
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function update(StoreUserRequest $request, int $user_id): JsonResponse
@@ -235,7 +239,8 @@ class UserController extends Controller
      *         description="User deleted successfully"
      *     ),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function destroy(DeleteUserRequest $request, int $user_id): JsonResponse
@@ -285,7 +290,8 @@ class UserController extends Controller
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=404, description="Not Found")
+     *     @OA\Response(response=404, description="Not Found"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function updateStatus(UserStatusRequest $request, int $user_id): JsonResponse
@@ -324,7 +330,8 @@ class UserController extends Controller
      *     ),
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function administrators(ShowAdministratorRequest $request): AnonymousResourceCollection|JsonResponse
@@ -379,6 +386,7 @@ class UserController extends Controller
      *     ),
      *
      *     @OA\Response(response=422, description="Validation Error"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer"))),
      *     @OA\Response(response=500, description="Server Error")
      * )
      */
@@ -438,6 +446,7 @@ class UserController extends Controller
      *     ),
      *
      *     @OA\Response(response=422, description="Validation Error"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer"))),
      *     @OA\Response(response=500, description="Server Error")
      * )
      */

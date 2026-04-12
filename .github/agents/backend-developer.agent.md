@@ -294,7 +294,6 @@ Cuando se solicite:
 - Agregarla si no existe
 - Explicar brevemente qué campos se normalizan
 
-
 ### 5.6 Autorización obligatoria por permisos en todos los endpoints
 - Regla global e innegociable
 - Todo endpoint del backend debe ser accesible únicamente por usuarios autenticados y autorizados mediante permisos explícitos.
@@ -691,5 +690,67 @@ tests/
 ```
 
 ---
+
+# 13. Rate Limiting y Protección Anti-Abuso (Obligatorio)
+
+### 13.1 Middleware y perfiles de límite
+- Todo endpoint público o autenticado debe estar protegido por un middleware de rate limiting adecuado.
+- Los perfiles de límite deben ser diferenciados según el riesgo: auth/register/password (estricto), públicos de lectura (medio), autenticados (medio), operaciones pesadas (estricto).
+- El agente debe definir y registrar los RateLimiters en AppServiceProvider y aplicar el middleware throttle en las rutas correspondientes.
+- La respuesta 429 debe ser JSON consistente, con mensaje claro y headers estándar (`Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`).
+
+### 13.2 Pruebas automáticas
+- Es obligatorio crear pruebas automáticas de throttling para los endpoints críticos de cada perfil (login, registro, password, lectura pública, autenticados, operaciones pesadas).
+- Los tests deben validar el código 429, el payload y los headers de rate limit.
+
+### 13.3 Documentación Swagger (OpenAPI)
+- Todo endpoint protegido por rate limiting debe documentar explícitamente:
+  - El código de respuesta 429 en la sección `@OA\Response`.
+  - El significado de los headers de rate limit relevantes.
+  - Un ejemplo de payload de error 429.
+- Ejemplo de bloque Swagger:
+
+```php
+/**
+ * @OA\Post(
+ *   path="/api/v1/login",
+ *   summary="Login de usuario",
+ *   ...
+ *   @OA\Response(
+ *     response=429,
+ *     description="Too Many Requests",
+ *     @OA\JsonContent(
+ *       example={"status":false,"message":"Too many requests. Please try again later.","code":429}
+ *     ),
+ *     @OA\Header(
+ *       header="Retry-After",
+ *       description="Segundos hasta que se puede volver a intentar",
+ *       @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Header(
+ *       header="X-RateLimit-Limit",
+ *       description="Límite de peticiones por ventana",
+ *       @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Header(
+ *       header="X-RateLimit-Remaining",
+ *       description="Peticiones restantes en la ventana actual",
+ *       @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Header(
+ *       header="X-RateLimit-Reset",
+ *       description="Timestamp de reseteo de ventana",
+ *       @OA\Schema(type="integer")
+ *     )
+ *   ),
+ *   ...
+ * )
+ */
+```
+
+### 13.4 Expectativa del agente
+- Nunca omitir la protección de rate limiting en endpoints nuevos o modificados.
+- Validar que la documentación Swagger incluya el código 429 y headers.
+- Incluir siempre pruebas automáticas de throttling en los tests de feature.
 
 > 📌 **Recuerda:** Este agente prioriza la **seguridad**, la **calidad del código** y la **documentación** como pilares fundamentales del desarrollo backend con Laravel 12.

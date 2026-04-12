@@ -64,15 +64,20 @@ class CommerceBranchController extends Controller
      *     @OA\Parameter(name="phone", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
      *
-     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
-     *
-     *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommerceBranchResource")),
-     *         @OA\Property(property="meta", type="object"),
-     *         @OA\Property(property="links", type="object")
-     *     )),
-     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommerceBranchResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(
+     *         response=429,
+     *         description="Too Many Requests",
+     *
+     *         @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}),
+     *
+     *         @OA\Header(header="Retry-After", description="Seconds to retry", @OA\Schema(type="integer")),
+     *         @OA\Header(header="X-RateLimit-Limit", description="Rate limit per window", @OA\Schema(type="integer")),
+     *         @OA\Header(header="X-RateLimit-Remaining", description="Requests left in window", @OA\Schema(type="integer")),
+     *         @OA\Header(header="X-RateLimit-Reset", description="Window reset timestamp", @OA\Schema(type="integer"))
+     *     )
      * )
      */
     public function index(IndexCommerceBranchRequest $request): JsonResponse
@@ -94,7 +99,7 @@ class CommerceBranchController extends Controller
      *     description="Creates a new commerce branch.",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/StoreCommerceBranchRequest")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(example={"name":"Branch Plaza","latitude":19.4326,"longitude":-99.1332,"address":"123 Main St","phone":"+52 55 1234 5678"})),
      *
      *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/CommerceBranchResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -158,7 +163,7 @@ class CommerceBranchController extends Controller
      *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UpdateCommerceBranchRequest")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(example={"name":"New Branch Name","latitude":20.0000,"longitude":-100.0000,"address":"456 Update St","phone":"+52 55 9999 8888"})),
      *
      *     @OA\Response(response=200, description="Updated", @OA\JsonContent(ref="#/components/schemas/CommerceBranchResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -222,22 +227,12 @@ class CommerceBranchController extends Controller
      *   operationId="confirmCommerceBranchPhotoUpload",
      *   tags={"Commerce Branches"},
      *   summary="Confirm commerce branch photo upload",
-     *   description="Confirma que la foto de la sucursal del comercio fue subida exitosamente y actualiza el registro.",
+     *   description="Confirms the commerce branch photo was successfully uploaded and updates the record.",
      *   security={{"sanctum":{}}},
      *
-     *   @OA\RequestBody(
-     *     required=true,
+     *   @OA\RequestBody(required=true, @OA\JsonContent(example={"upload_token":"abcdef123456","photo_url":"https://example.com/photo.jpg"})),
      *
-     *     @OA\JsonContent(ref="#/components/schemas/PatchProductPhotoUploadRequest")
-     *   ),
-     *
-     *   @OA\Response(
-     *     response=200,
-     *     description="Product photo confirmed successfully",
-     *
-     *     @OA\JsonContent(ref="#/components/schemas/DocumentUploadResource")
-     *   ),
-     *
+     *   @OA\Response(response=200, description="Product photo confirmed successfully", @OA\JsonContent(ref="#/components/schemas/DocumentUploadResource")),
      *   @OA\Response(response=404, description="Photo not exist or not in pending status"),
      *   @OA\Response(response=410, description="Presigned URL expired"),
      *   @OA\Response(response=401, description="Unauthenticated"),
@@ -280,7 +275,7 @@ class CommerceBranchController extends Controller
      *   operationId="removeCommerceBranchPhoto",
      *   tags={"Commerce Branches"},
      *   summary="Remove commerce branch photo",
-     *   description="Elimina una foto de la sucursal del comercio por su ID.",
+     *   description="Deletes a commerce branch photo by its ID.",
      *   security={{"sanctum":{}}},
      *
      *   @OA\Parameter(name="photo", in="path", required=true, @OA\Schema(type="integer")),

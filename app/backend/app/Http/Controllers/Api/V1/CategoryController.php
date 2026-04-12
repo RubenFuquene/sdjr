@@ -48,7 +48,18 @@ class CategoryController extends Controller
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(
+     *         response=429,
+     *         description="Too Many Requests",
+     *
+     *         @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}),
+     *
+     *         @OA\Header(header="Retry-After", description="Seconds to retry", @OA\Schema(type="integer")),
+     *         @OA\Header(header="X-RateLimit-Limit", description="Rate limit per window", @OA\Schema(type="integer")),
+     *         @OA\Header(header="X-RateLimit-Remaining", description="Requests left in window", @OA\Schema(type="integer")),
+     *         @OA\Header(header="X-RateLimit-Reset", description="Window reset timestamp", @OA\Schema(type="integer"))
+     *     )
      * )
      */
     public function index(IndexCategoryRequest $request): AnonymousResourceCollection|JsonResponse
@@ -76,14 +87,19 @@ class CategoryController extends Controller
      *      description="Returns created category data",
      *      security={{"sanctum":{}}},
      *
-     *      @OA\RequestBody(
-     *          required=true,
+     *     @OA\RequestBody(
+     *         required=true,
      *
-     *          @OA\JsonContent(type="object")
-     *      ),
+     *         @OA\JsonContent(
+     *             example={
+     *                 "name": "Beverages",
+     *                 "status": 1
+     *             }
+     *         )
+     *     ),
      *
-     *      @OA\Response(
-     *          response=201,
+     *     @OA\Response(
+     *         response=201,
      *          description="Successful operation",
      *
      *          @OA\JsonContent(ref="#/components/schemas/CategoryResource")
@@ -177,7 +193,12 @@ class CategoryController extends Controller
      *      @OA\RequestBody(
      *          required=true,
      *
-     *          @OA\JsonContent(type="object")
+     *          @OA\JsonContent(
+     *              example={
+     *                  "name": "Updated Beverages",
+     *                  "status": 1
+     *              }
+     *          )
      *      ),
      *
      *      @OA\Response(
