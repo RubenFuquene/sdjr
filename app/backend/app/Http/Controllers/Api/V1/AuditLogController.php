@@ -40,12 +40,12 @@ class AuditLogController extends Controller
      *         response=200,
      *         description="Successful operation",
      *
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/AuditLogResource"))
-     *     ),
+     *         @OA\JsonContent(
      *
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=500, description="Internal Server Error")
+     *     @OA\Response(response=429, description="Too many requests, please try again later."),
+     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
     public function index(): JsonResponse
@@ -74,9 +74,9 @@ class AuditLogController extends Controller
      *         response=200,
      *         description="Successful operation",
      *
-     *         @OA\JsonContent(ref="#/components/schemas/AuditLogResource")
-     *     ),
+     *         @OA\JsonContent(
      *
+     *     @OA\Response(response=429, description="Too many requests, please try again later."),
      *     @OA\Response(response=404, description="Not Found"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")

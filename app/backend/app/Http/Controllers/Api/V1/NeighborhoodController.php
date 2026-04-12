@@ -49,7 +49,43 @@ class NeighborhoodController extends Controller
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(
+     *         response=429,
+     *         description="Too Many Requests",
+     *
+     *         @OA\JsonContent(
+     *             example={"status":false,"message":"Too many requests. Please try again later.","code":429}
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="Retry-After",
+     *             description="Segundos hasta que se puede volver a intentar",
+     *
+     *             @OA\Schema(type="integer")
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="X-RateLimit-Limit",
+     *             description="Límite de peticiones por ventana",
+     *
+     *             @OA\Schema(type="integer")
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="X-RateLimit-Remaining",
+     *             description="Peticiones restantes en la ventana actual",
+     *
+     *             @OA\Schema(type="integer")
+     *         ),
+     *
+     *         @OA\Header(
+     *             header="X-RateLimit-Reset",
+     *             description="Timestamp de reseteo de ventana",
+     *
+     *             @OA\Schema(type="integer")
+     *         )
+     *     )
      * )
      */
     public function index(IndexNeighborhoodRequest $request): JsonResponse

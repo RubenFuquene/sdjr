@@ -30,12 +30,15 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/api/v1/login",
      *     summary="Authenticate user and get token",
-     *     tags={"Auth"},
+     *     tags={"Authentication"},
      *
      *     @OA\RequestBody(
      *         required=true,
      *
-     *         @OA\JsonContent(type="object")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             example={"email": "user@example.com", "password": "password123"}
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -43,10 +46,21 @@ class AuthController extends Controller
      *         description="Login successful",
      *
      *         @OA\JsonContent(
-     *
-     *             @OA\Property(property="message", type="string", example="Login successful"),
-     *             @OA\Property(property="data", ref="#/components/schemas/UserResource"),
-     *             @OA\Property(property="token", type="string", example="1|laravel_sanctum_token_string")
+     *             example={
+     *                 "message": "Login successful",
+     *                 "data": {
+     *                     "id": 1,
+     *                     "name": "John",
+     *                     "last_name": "Doe",
+     *                     "email": "john.doe@example.com",
+     *                     "phone": "3001234567",
+     *                     "roles": {"admin", "user"},
+     *                     "status": "A",
+     *                     "created_at": "2023-01-01T12:00:00Z",
+     *                     "updated_at": "2023-01-01T12:00:00Z"
+     *                 },
+     *                 "token": "1|laravel_sanctum_token_string"
+     *             }
      *         )
      *     ),
      *
@@ -59,7 +73,9 @@ class AuthController extends Controller
      *             @OA\Property(property="message", type="string", example="The given data was invalid."),
      *             @OA\Property(property="errors", type="object")
      *         )
-     *     )
+     *     ),
+     *
+     *     @OA\Response(response=429, description="Too many requests, please try again later.")
      * )
      */
     public function login(LoginRequest $request): JsonResponse

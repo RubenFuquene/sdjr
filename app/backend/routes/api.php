@@ -33,25 +33,25 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
-    // Registro público de proveedores
-    Route::post('provider/register', [UserController::class, 'providerRegister']);
-    Route::post('customer/register', [UserController::class, 'customerRegister']);
+    // Registro público de proveedores (throttle:public-write)
+    Route::post('provider/register', [UserController::class, 'providerRegister'])->middleware('throttle:public-write');
+    Route::post('customer/register', [UserController::class, 'customerRegister'])->middleware('throttle:public-write');
 
-    // Authentication routes
-    Route::post('login', [AuthController::class, 'login']);
+    // Authentication routes (throttle:auth)
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth');
 
-    // Password forgot endpoint
-    Route::post('password/forgot', [ForgotPasswordController::class, 'forgot']);
-    Route::post('password/reset', [ForgotPasswordController::class, 'reset']);
+    // Password forgot/reset (throttle:auth)
+    Route::post('password/forgot', [ForgotPasswordController::class, 'forgot'])->middleware('throttle:auth');
+    Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->middleware('throttle:auth');
 
-    // Nearby search (público)
-    Route::prefix('nearby')->name('nearby.')->group(function () {
+    // Nearby search (público, throttle:public-read)
+    Route::prefix('nearby')->name('nearby.')->middleware('throttle:public-read')->group(function () {
         Route::get('branches', [NearbyController::class, 'branches']);
         Route::get('products', [NearbyController::class, 'products']);
     });
 
-    // Protected routes
-    Route::middleware('auth:sanctum')->group(function () {
+    // Protected routes (throttle:authenticated)
+    Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function () {
 
         // Support Status Management routes
         Route::apiResource('support-statuses', SupportStatusController::class);

@@ -12,8 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Global middleware - CORS debe estar primero
+        // Mitigación DDOS: Habilita confianza en proxy inverso Docker/Nginx.
+        // Registra el middleware TrustProxies personalizado
         $middleware->use([
+            \App\Http\Middleware\TrustProxies::class,
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
 
@@ -24,5 +26,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Personalización de respuesta 429 Too Many Requests
+        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, \Illuminate\Http\Request $request) {
+            $retryAfter = $e->getHeaders()['Retry-After'] ?? 60;
+            $maxAttempts = $e->getHeaders()['X-RateLimit-Limit'] ?? null;
+            $remaining = $e->getHeaders()['X-RateLimit-Remaining'] ?? null;
+            $reset = $e->getHeaders()['X-RateLimit-Reset'] ?? null;
+
+            $response = [
+                'status' => false,
+                'message' => 'Too many requests. Please try again later.',
+                'code' => 429,
+            ];
+
+            return response()->json($response, 429)
+                ->header('Retry-After', $retryAfter)
+                ->header('X-RateLimit-Limit', $maxAttempts)
+                ->header('X-RateLimit-Remaining', $remaining)
+                ->header('X-RateLimit-Reset', $reset);
+        });
     })->create();
