@@ -22,17 +22,6 @@ bootstrap_env_file() {
     fi
 }
 
-get_app_environment() {
-    # Try environment variable first, then .env file
-    if [ ! -z "$APP_ENV" ]; then
-        echo "$APP_ENV"
-    elif [ -f "$ENV_FILE" ]; then
-        grep "^APP_ENV=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '"'\''' || echo "local"
-    else
-        echo "local"
-    fi
-}
-
 configure_database_from_url() {
     local url="$1"
     [ -z "$url" ] && return 1
@@ -101,7 +90,6 @@ determine_wait_requirement() {
         DB_WAIT_REQUIRED=1
     fi
 }
-
 
 get_app_environment() {
     # Get APP_ENV from environment variable or .env file
@@ -238,7 +226,6 @@ main() {
     determine_wait_requirement
     generate_app_key_if_needed
     ensure_sqlite_file_if_needed
-    # ensure_queue_configuration removido: las variables ya están en .env.example.prd
     wait_for_database
 
     if ! is_cron_mode && { [ "$#" -eq 0 ] || is_default_serve_command "$@"; }; then
@@ -250,3 +237,4 @@ main() {
     start_application "$@"
 }
 
+main "$@"
