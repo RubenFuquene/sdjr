@@ -210,7 +210,9 @@ start_application() {
     fi
 
     if is_cron_mode; then
-        echo "Cron mode detected, running scheduler daemon..."
+        echo "Cron mode detected, clearing scheduler cache..."
+        php artisan schedule:clear-cache
+        echo "Starting scheduler daemon..."
         exec php artisan schedule:work
     fi
 
