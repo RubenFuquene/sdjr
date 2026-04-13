@@ -22,16 +22,6 @@ bootstrap_env_file() {
     fi
 }
 
-get_app_environment() {
-    # Try environment variable first, then .env file
-    if [ ! -z "$APP_ENV" ]; then
-        echo "$APP_ENV"
-    elif [ -f "$ENV_FILE" ]; then
-        grep "^APP_ENV=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '"'\''' || echo "local"
-    else
-        echo "local"
-    fi
-}
 
 configure_database_from_url() {
     local url="$1"
