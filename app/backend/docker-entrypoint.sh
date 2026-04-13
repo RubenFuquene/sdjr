@@ -22,16 +22,6 @@ bootstrap_env_file() {
     fi
 }
 
-get_app_environment() {
-    # Try environment variable first, then .env file
-    if [ ! -z "$APP_ENV" ]; then
-        echo "$APP_ENV"
-    elif [ -f "$ENV_FILE" ]; then
-        grep "^APP_ENV=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '"'\''' || echo "local"
-    else
-        echo "local"
-    fi
-}
 
 configure_database_from_url() {
     local url="$1"
@@ -101,6 +91,7 @@ determine_wait_requirement() {
         DB_WAIT_REQUIRED=1
     fi
 }
+
 
 get_app_environment() {
     # Get APP_ENV from environment variable or .env file
@@ -186,7 +177,35 @@ generate_documentation() {
     php artisan l5-swagger:generate
 }
 
-start_server() {
+is_default_serve_command() {
+    [ "$#" -eq 5 ] && \
+    [ "$1" = "php" ] && \
+    [ "$2" = "artisan" ] && \
+    [ "$3" = "serve" ] && \
+    [ "$4" = "--host=0.0.0.0" ] && \
+    [ "$5" = "--port=8000" ]
+}
+
+is_cron_mode() {
+    local run_mode="${APP_RUN_MODE:-${CONTAINER_ROLE:-${RAILWAY_CRON_JOB:-}}}"
+    run_mode=$(echo "$run_mode" | tr '[:upper:]' '[:lower:]')
+
+    [ "$run_mode" = "cron" ] || [ "$run_mode" = "true" ] || [ "$run_mode" = "1" ]
+}
+
+start_application() {
+    if [ "$#" -gt 0 ]; then
+        echo "Starting custom command: $*"
+        exec "$@"
+    fi
+
+    if is_cron_mode; then
+        echo "Cron mode detected, clearing scheduler cache..."
+        php artisan schedule:clear-cache
+        echo "Starting scheduler daemon..."
+        exec php artisan schedule:work
+    fi
+
     local port=${PORT:-8000}
     echo "Starting Laravel server on 0.0.0.0:$port..."
     exec php artisan serve --host=0.0.0.0 --port=$port
@@ -209,11 +228,18 @@ main() {
     determine_wait_requirement
     generate_app_key_if_needed
     ensure_sqlite_file_if_needed
+    # ensure_queue_configuration removido: las variables ya están en .env.example.prd
     wait_for_database
-    run_migrations
-    run_seeders
-    generate_documentation
-    start_server
+
+    if ! is_cron_mode && { [ "$#" -eq 0 ] || is_default_serve_command "$@"; }; then
+        run_migrations
+        run_seeders
+        generate_documentation
+    fi
+
+    start_application "$@"
 }
 
+# Ejecuta el flujo principal al arrancar el contenedor
 main "$@"
+
