@@ -62,7 +62,18 @@ class ProductController extends Controller
      *
      *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *   @OA\Response(response=401, description="Unauthenticated"),
-     *   @OA\Response(response=403, description="Forbidden")
+     *   @OA\Response(response=403, description="Forbidden"),
+     *   @OA\Response(
+     *     response=429,
+     *     description="Too Many Requests",
+     *
+     *     @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}),
+     *
+     *     @OA\Header(header="Retry-After", description="Seconds to retry", @OA\Schema(type="integer")),
+     *     @OA\Header(header="X-RateLimit-Limit", description="Rate limit per window", @OA\Schema(type="integer")),
+     *     @OA\Header(header="X-RateLimit-Remaining", description="Requests left in window", @OA\Schema(type="integer")),
+     *     @OA\Header(header="X-RateLimit-Reset", description="Window reset timestamp", @OA\Schema(type="integer"))
+     *   )
      * )
      */
     public function index(ProductIndexRequest $request): JsonResponse
@@ -85,7 +96,19 @@ class ProductController extends Controller
      *   description="Creates a new product",
      *   security={{"sanctum":{}}},
      *
-     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/StoreProductRequest")),
+     *   @OA\RequestBody(
+     *     required=true,
+     *
+     *     @OA\JsonContent(
+     *         example={
+     *             "title": "Product name",
+     *             "description": "Description of product",
+     *             "commerce_id": 1,
+     *             "price": 100.50,
+     *             "product_category_id": 1
+     *         }
+     *     )
+     *   ),
      *
      *   @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/ProductResource")),
      *   @OA\Response(response=401, description="Unauthenticated"),
@@ -143,7 +166,17 @@ class ProductController extends Controller
      *
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UpdateProductRequest")),
+     *   @OA\RequestBody(
+     *     required=true,
+     *
+     *     @OA\JsonContent(
+     *         example={
+     *             "title": "Updated product",
+     *             "description": "New description",
+     *             "price": 150.00
+     *         }
+     *     )
+     *   ),
      *
      *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/ProductResource")),
      *   @OA\Response(response=401, description="Unauthenticated"),
@@ -174,7 +207,15 @@ class ProductController extends Controller
      *
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/PatchProductStatusRequest")),
+     *   @OA\RequestBody(
+     *     required=true,
+     *
+     *     @OA\JsonContent(
+     *         example={
+     *             "status": "inactive"
+     *         }
+     *     )
+     *   ),
      *
      *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/ProductResource")),
      *   @OA\Response(response=401, description="Unauthenticated"),
@@ -444,13 +485,18 @@ class ProductController extends Controller
      *   operationId="confirmProductPhotoUpload",
      *   tags={"Products"},
      *   summary="Confirm product photo upload",
-     *   description="Confirma que la foto del producto fue subida exitosamente y actualiza el registro.",
+     *   description="Confirms that the product photo was uploaded successfully and updates the record.",
      *   security={{"sanctum":{}}},
      *
      *   @OA\RequestBody(
      *     required=true,
      *
-     *     @OA\JsonContent(ref="#/components/schemas/PatchProductPhotoUploadRequest")
+     *     @OA\JsonContent(
+     *         example={
+     *             "upload_token": "xyz789",
+     *             "photo_url": "https://example.com/product.jpg"
+     *         }
+     *     )
      *   ),
      *
      *   @OA\Response(
@@ -500,7 +546,7 @@ class ProductController extends Controller
      *   operationId="removeProductPhoto",
      *   tags={"Products"},
      *   summary="Remove product photo",
-     *   description="Elimina una foto de producto por su ID.",
+     *   description="Deletes a product photo by its ID.",
      *   security={{"sanctum":{}}},
      *
      *   @OA\Parameter(name="photo", in="path", required=true, @OA\Schema(type="integer")),

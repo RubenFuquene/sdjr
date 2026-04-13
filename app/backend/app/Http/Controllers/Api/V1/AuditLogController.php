@@ -36,15 +36,10 @@ class AuditLogController extends Controller
      *     description="Returns a list of audit logs",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/AuditLogResource"))
-     *     ),
-     *
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/AuditLogResource"))),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer"))),
      *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
@@ -70,16 +65,13 @@ class AuditLogController extends Controller
      *     description="Returns a single audit log entry",
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *         @OA\JsonContent(ref="#/components/schemas/AuditLogResource")
-     *     ),
-     *
-     *     @OA\Response(response=404, description="Not Found"),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/AuditLogResource")),
      *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not Found"),
+     *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
     public function show(int $id): JsonResponse

@@ -197,3 +197,53 @@ sequenceDiagram
 ---
 
 *Maintain this file as a living document. For technical issues or to propose changes, open a PR referencing this doc and your discussion.*
+
+---
+
+## DDOS Mitigation, Rate Limiting & Operational Runbook
+
+### Estrategia de Protección
+- Todos los endpoints están protegidos por middleware de rate limiting (Laravel RateLimiter + throttle).
+- Perfiles diferenciados: login/register/password (estricto), públicos de lectura (medio), autenticados (medio), operaciones pesadas (estricto).
+- Respuesta 429 personalizada con headers estándar: `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`.
+- TrustProxies y reverse proxy (Nginx) configurados para preservar IP real del cliente.
+- Pruebas automáticas de throttling en tests/Feature/.
+
+### Procedimiento de Pruebas de Carga y Tuning
+1. Usar herramientas como k6, ab, Locust o Artillery para simular tráfico legítimo y ataques.
+2. Validar que los límites se cumplen y la API responde con 429 bajo abuso.
+3. Verificar headers de rate limiting en las respuestas.
+4. Ajustar límites en AppServiceProvider y Nginx según resultados.
+5. Documentar resultados y recomendaciones.
+6. Automatizar pruebas de carga en cada release crítico.
+
+#### Ejemplo de script k6 (login)
+```js
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export let options = {
+    vus: 50,
+    duration: '30s',
+};
+
+export default function () {
+    const url = 'https://api.tuapp.com/api/v1/login';
+    const payload = JSON.stringify({ email: 'test@example.com', password: 'password' });
+    const params = { headers: { 'Content-Type': 'application/json' } };
+    let res = http.post(url, payload, params);
+    check(res, { 'status is 200 or 429': (r) => r.status === 200 || r.status === 429 });
+    sleep(1);
+}
+```
+
+### Runbook Operativo ante DDOS
+- Monitorear logs de errores y métricas de respuestas 429.
+- Si se detecta abuso:
+    1. Elevar límites temporalmente solo si afecta usuarios legítimos.
+    2. Bloquear IPs abusivas en Nginx o firewall.
+    3. Revisar y ajustar perfiles de rate limiting.
+    4. Notificar a infraestructura y documentar el incidente.
+- Mantener actualizado este runbook y los scripts de prueba.
+
+---
