@@ -246,4 +246,5 @@ main() {
     fi
 
     start_application "$@"
+}
 
