@@ -101,4 +101,24 @@ class CommerceTest extends TestCase
         $response = $this->postJson('/api/v1/commerces', $payload);
         $response->assertForbidden();
     }
+
+    public function test_cannot_update_commerce_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $commerce = Commerce::factory()->create();
+        $payload = $commerce->toArray();
+        $payload['name'] = 'Nuevo Nombre';
+        $response = $this->putJson('/api/v1/commerces/'.$commerce->id, $payload);
+        $response->assertForbidden();
+    }
+
+    public function test_cannot_show_commerce_without_permission()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $commerce = Commerce::factory()->create();
+        $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
+        $response->assertForbidden();
+    }
 }

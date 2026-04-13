@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Models\Commerce;
+use App\Models\Product;
+use App\Services\ProductService;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -43,9 +46,16 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class UpdateProductRequest extends FormRequest
 {
+    protected $productService;
+
+    public function __construct(ProductService $productService)
+    {
+        $this->productService = $productService;
+    }
+
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.products.update') ?? false;
+        return $this->productService->validateStoreRequest($this->user(), $this->all());
     }
 
     public function rules(): array

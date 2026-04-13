@@ -18,7 +18,7 @@ update_env_var() {
 bootstrap_env_file() {
     if [ ! -f "$ENV_FILE" ]; then
         echo "Creating .env file from .env.example..."
-        cp .env.example "$ENV_FILE"
+        cp .env.example.prd "$ENV_FILE"
     fi
 }
 
@@ -172,6 +172,8 @@ run_seeders() {
     
     # Only run seeders if explicitly enabled
     if [ "$enable_seeding" = "true" ]; then
+        echo "Restoring database from seeders..."
+        php artisan migrate:refresh --force --no-interaction
         echo "Running database seeders..."
         php artisan db:seed --force --no-interaction
     else

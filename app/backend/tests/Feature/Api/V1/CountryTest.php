@@ -175,4 +175,29 @@ class CountryTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    public function test_unauthenticated_user_cannot_update()
+    {
+        $response = $this->putJson('/api/v1/countries/1', [
+            'name' => 'Updated Country',
+            'code' => 'UC0001',
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    public function test_unauthenticated_user_cannot_delete()
+    {
+        $response = $this->deleteJson('/api/v1/countries/1');
+
+        $response->assertStatus(401);
+    }
+
+    public function test_unauthenticated_user_cannot_show()
+    {
+        $response = $this->getJson('/api/v1/countries/1');
+
+        $response->assertStatus(401);
+    }
 }

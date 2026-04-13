@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Constant;
+use App\Models\Commerce;
+use App\Models\CommerceBranch;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductPhoto;
@@ -346,5 +348,48 @@ class ProductService
         }
 
         return true;
+    }
+
+    /**
+     * Validate store/update request for Product, checking user permissions and ownership of related commerce branches and commerce.
+     * This method is used in both store and update requests to ensure that the user has the necessary permissions and ownership to create or update a product associated with specific commerce branches and commerce.
+     */
+    public function validateStoreRequest($user, $data): bool
+    {
+        try {
+            if (! $user) {
+                return false;
+            }
+
+            // Permitir si tiene al menos uno de los permisos
+            if (! ($user->can('provider.products.update') || $user->can('provider.products.create'))) {
+                return false;
+            }
+
+            if ($user->hasAnyRole(['superadmin', 'admin'])) {
+                return true;
+            }
+
+            $commerceBranch = CommerceBranch::query()
+                ->whereIn('id', $data['commerce_branch_ids'] ?? [])
+                ->whereHas('commerce', function ($query) use ($user) {
+                    $query->where('owner_user_id', $user->id);
+                })
+                ->exists();
+
+            if (! $commerceBranch) {
+                return false;
+            }
+
+            return Commerce::query()
+                ->where('id', $data['product']['commerce_id'] ?? null)
+                ->where('owner_user_id', $user->id)
+                ->exists();
+
+        } catch (\Throwable $th) {
+            Log::error('Error validating store request for Product', ['error' => $th->getMessage()]);
+
+            return false;
+        }
     }
 }

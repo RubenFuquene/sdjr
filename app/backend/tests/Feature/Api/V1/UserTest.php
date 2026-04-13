@@ -128,4 +128,53 @@ class UserTest extends TestCase
         $response->assertNoContent();
         $this->assertSoftDeleted('users', ['id' => $user->id]);
     }
+
+    public function test_unauthenticated_user_cannot_create_user(): void
+    {
+        $unauthenticated_user = User::factory()->create();
+        Sanctum::actingAs($unauthenticated_user);
+
+        $data = [
+            'name' => 'New',
+            'last_name' => 'User',
+            'email' => 'new@example.com',
+            'phone' => '3001234567',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'roles' => ['admin'],
+        ];
+
+        $response = $this->postJson('/api/v1/users', $data);
+        $response->assertForbidden();
+    }
+
+    public function test_unauthenticated_user_cannot_update_user(): void
+    {
+        $unauthenticated_user = User::factory()->create();
+        Sanctum::actingAs($unauthenticated_user);
+
+        $user = User::factory()->create();
+
+        $data = ['name' => 'Updated Name', 'last_name' => 'Updated LastName', 'roles' => ['admin', 'superadmin']];
+        $response = $this->putJson('/api/v1/users/'.$user->id, $data);
+        $response->assertForbidden();
+    }
+
+    public function test_unauthenticated_user_cannot_show_user(): void
+    {
+        $unauthenticated_user = User::factory()->create();
+        Sanctum::actingAs($unauthenticated_user);
+        $user = User::factory()->create();
+        $response = $this->getJson('/api/v1/users/'.$user->id);
+        $response->assertForbidden();
+    }
+
+    public function test_unauthenticated_user_cannot_delete_user(): void
+    {
+        $unauthenticated_user = User::factory()->create();
+        Sanctum::actingAs($unauthenticated_user);
+        $user = User::factory()->create();
+        $response = $this->deleteJson('/api/v1/users/'.$user->id);
+        $response->assertForbidden();
+    }
 }

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Constants\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CommerceRequest;
+use App\Http\Requests\Api\V1\DeleteCommerceRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
 use App\Http\Requests\Api\V1\IndexCommerceRequest;
@@ -14,6 +15,7 @@ use App\Http\Requests\Api\V1\MyCommerceRequest;
 use App\Http\Requests\Api\V1\PatchCommerceAcceptTermsRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
+use App\Http\Requests\Api\V1\ShowCommerceRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
@@ -165,7 +167,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function show(Request $request, int $commerce_id): JsonResponse
+    public function show(ShowCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
             $uploadStatus = $request->query('upload_status', Constant::UPLOAD_STATUS_CONFIRMED);
@@ -240,7 +242,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function destroy(int $commerce_id): JsonResponse
+    public function destroy(DeleteCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
             $this->commerceService->delete($commerce_id);
@@ -367,11 +369,27 @@ class CommerceController extends Controller
             switch ($commerce->is_verified) {
                 case Constant::COMMERCE_VERIFIED:
                     $message = 'Commerce verified successfully';
-                    $user->notify(new CommerceVerifiedNotification($commerce));
+                    try {
+                        $user->notify(new CommerceVerifiedNotification($commerce));
+                    } catch (\Throwable $e) {
+                        Log::warning('Commerce verified notification dispatch failed', [
+                            'commerce_id' => $commerce->id,
+                            'user_id' => $user?->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                     break;
                 case Constant::COMMERCE_REJECTED:
                     $message = 'Commerce rejected successfully';
-                    $user->notify(new CommerceRejectedNotification($commerce));
+                    try {
+                        $user->notify(new CommerceRejectedNotification($commerce));
+                    } catch (\Throwable $e) {
+                        Log::warning('Commerce rejected notification dispatch failed', [
+                            'commerce_id' => $commerce->id,
+                            'user_id' => $user?->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                     break;
                 default:
                     $message = 'Commerce verification updated successfully';

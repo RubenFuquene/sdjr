@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteLegalRepresentativeRequest;
+use App\Http\Requests\Api\V1\IndexLegalRepresentativeRequest;
 use App\Http\Requests\Api\V1\LegalRepresentativeRequest;
+use App\Http\Requests\Api\V1\ShowLegalRepresentativeRequest;
 use App\Http\Resources\Api\V1\LegalRepresentativeResource;
 use App\Services\LegalRepresentativeService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -46,7 +48,7 @@ class LegalRepresentativeController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexLegalRepresentativeRequest $request): JsonResponse
     {
         try {
             $perPage = (int) $request->query('per_page', 15);
@@ -103,7 +105,7 @@ class LegalRepresentativeController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function show(int $id): JsonResponse
+    public function show(ShowLegalRepresentativeRequest $request, int $id): JsonResponse
     {
         try {
             $legalRepresentative = $this->legalRepresentativeService->show($id);
@@ -162,7 +164,7 @@ class LegalRepresentativeController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(DeleteLegalRepresentativeRequest $request, int $id): JsonResponse
     {
         try {
             $this->legalRepresentativeService->destroy($id);

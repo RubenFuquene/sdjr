@@ -22,6 +22,7 @@ class LegalRepresentativeFeatureTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->create();
         $permissions = [
+            'provider.legal_representatives.index',
             'provider.legal_representatives.create',
             'provider.legal_representatives.show',
             'provider.legal_representatives.update',
@@ -135,6 +136,42 @@ class LegalRepresentativeFeatureTest extends TestCase
             'document_type' => 'CC',
         ];
         $response = $this->postJson('/api/v1/legal-representatives', $payload);
+        $response->assertForbidden();
+    }
+
+    public function test_cannot_update_without_permission(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $commerce = Commerce::factory()->create();
+
+        $payload = [
+            'commerce_id' => $commerce->id,
+            'name' => 'Carlos',
+            'last_name' => 'Ramírez',
+            'document' => '9876543210',
+            'document_type' => 'CE',
+        ];
+        $legal = LegalRepresentative::factory()->create();
+        $response = $this->putJson('/api/v1/legal-representatives/'.$legal->id, $payload);
+        $response->assertForbidden();
+    }
+
+    public function test_cannot_delete_without_permission(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $legal = LegalRepresentative::factory()->create();
+        $response = $this->deleteJson('/api/v1/legal-representatives/'.$legal->id);
+        $response->assertForbidden();
+    }
+
+    public function test_cannot_show_without_permission(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $legal = LegalRepresentative::factory()->create();
+        $response = $this->getJson('/api/v1/legal-representatives/'.$legal->id);
         $response->assertForbidden();
     }
 }
