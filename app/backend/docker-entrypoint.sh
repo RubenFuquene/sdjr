@@ -240,3 +240,6 @@ main() {
     start_application "$@"
 }
 
+# Ejecuta el flujo principal al arrancar el contenedor
+main "$@"
+
