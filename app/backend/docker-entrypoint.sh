@@ -102,6 +102,22 @@ determine_wait_requirement() {
     fi
 }
 
+ensure_queue_configuration() {
+    # Ensure queue processing is configured if QUEUE_CONNECTION is database
+    local queue_connection=$(grep '^QUEUE_CONNECTION=' "$ENV_FILE" 2>/dev/null | cut -d '=' -f2 | xargs)
+    
+    if [ "$queue_connection" = "database" ]; then
+        # Set default queue processing variables if not already defined
+        grep -q '^QUEUE_PROCESS_ENABLED=' "$ENV_FILE" || update_env_var QUEUE_PROCESS_ENABLED "true"
+        grep -q '^QUEUE_PROCESS_QUEUES=' "$ENV_FILE" || update_env_var QUEUE_PROCESS_QUEUES "emails,default"
+        grep -q '^QUEUE_PROCESS_TRIES=' "$ENV_FILE" || update_env_var QUEUE_PROCESS_TRIES "3"
+        grep -q '^QUEUE_PROCESS_TIMEOUT=' "$ENV_FILE" || update_env_var QUEUE_PROCESS_TIMEOUT "120"
+        grep -q '^QUEUE_PROCESS_SLEEP=' "$ENV_FILE" || update_env_var QUEUE_PROCESS_SLEEP "1"
+        
+        echo "Queue processing configuration ensured."
+    fi
+}
+
 get_app_environment() {
     # Get APP_ENV from environment variable or .env file
     # Handles quoted values and whitespace
@@ -235,6 +251,7 @@ main() {
     determine_wait_requirement
     generate_app_key_if_needed
     ensure_sqlite_file_if_needed
+    ensure_queue_configuration
     wait_for_database
 
     if ! is_cron_mode && { [ "$#" -eq 0 ] || is_default_serve_command "$@"; }; then
