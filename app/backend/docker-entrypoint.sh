@@ -245,21 +245,5 @@ main() {
         generate_documentation
     fi
 
-    start_application() {
-        if [ "$#" -gt 0 ]; then
-            echo "Starting custom command: $*"
-            exec "$@"
-        fi
-
-        if is_cron_mode; then
-            echo "Clearing schedule cache..."
-            php artisan schedule:clear-cache || true
-            echo "Cron mode detected, running scheduler daemon..."
-            exec php artisan schedule:work
-        fi
-
-        local port=${PORT:-8000}
-        echo "Starting Laravel server on 0.0.0.0:$port..."
-        exec php artisan serve --host=0.0.0.0 --port=$port
-    }
+    start_application "$@"
 
