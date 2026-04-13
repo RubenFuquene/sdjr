@@ -20,29 +20,51 @@ Artisan::command('scheduler:heartbeat', function () {
 })->purpose('Emit a log entry every minute to confirm the scheduler is running');
 
 Artisan::command('queues:process', function () {
-    $queueList = env('QUEUE_PROCESS_QUEUES', 'emails,default');
-    $tries = (int) env('QUEUE_PROCESS_TRIES', 3);
-    $timeout = (int) env('QUEUE_PROCESS_TIMEOUT', 120);
-    $sleep = (int) env('QUEUE_PROCESS_SLEEP', 1);
+    // ── Diagnostic log 1: confirm the closure was actually entered. ──────────
+    Log::info('[queues:process] Command closure entered — execution has started.');
+    $this->info('[queues:process] Command closure entered.');
 
-    Log::info('[queues:process] Starting queue worker run.', [
-        'queues' => $queueList,
-        'tries' => $tries,
-        'timeout' => $timeout,
-        'sleep' => $sleep,
-    ]);
+    try {
+        $queueList = env('QUEUE_PROCESS_QUEUES', 'emails,default');
+        $tries = (int) env('QUEUE_PROCESS_TRIES', 3);
+        $timeout = (int) env('QUEUE_PROCESS_TIMEOUT', 120);
+        $sleep = (int) env('QUEUE_PROCESS_SLEEP', 1);
 
-    $this->info("[queues:process] Processing queues: {$queueList}");
+        // ── Diagnostic log 2: confirm env vars resolved correctly. ───────────
+        Log::info('[queues:process] Configuration resolved — starting queue:work.', [
+            'queues' => $queueList,
+            'tries' => $tries,
+            'timeout' => $timeout,
+            'sleep' => $sleep,
+        ]);
 
-    $this->call('queue:work', [
-        '--queue' => $queueList,
-        '--stop-when-empty' => true,
-        '--tries' => $tries,
-        '--timeout' => $timeout,
-        '--sleep' => $sleep,
-    ]);
+        $this->info("[queues:process] Processing queues: {$queueList}");
 
-    Log::info('[queues:process] Queue worker run finished.');
+        $this->call('queue:work', [
+            '--queue' => $queueList,
+            '--stop-when-empty' => true,
+            '--tries' => $tries,
+            '--timeout' => $timeout,
+            '--sleep' => $sleep,
+        ]);
+
+        // ── Diagnostic log 3: confirm queue:work returned cleanly. ───────────
+        Log::info('[queues:process] queue:work returned — run finished successfully.');
+        $this->info('[queues:process] queue:work finished.');
+
+    } catch (\Throwable $e) {
+        // ── Diagnostic log 4: surface any exception that was swallowed. ──────
+        Log::error('[queues:process] Exception thrown during execution.', [
+            'exception' => get_class($e),
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        $this->error('[queues:process] Exception: '.$e->getMessage());
+
+        throw $e; // re-throw so the scheduler marks the run as failed
+    }
 })->purpose('Process queued jobs once and stop when queue is empty');
 
 // Register schedules — both are unconditional so the scheduler always sees them.
@@ -52,9 +74,15 @@ Schedule::command('scheduler:heartbeat')
     ->everyMinute()
     ->withoutOverlapping();
 
+// NOTE: runInBackground() has been intentionally removed.
+// When a closure-based command runs in the background, Laravel spawns a
+// detached child process.  Any Log::info / Log::error calls inside the
+// closure execute in that child, but the child's output is not captured by
+// the parent scheduler process, making failures completely invisible in logs.
+// Running in the foreground keeps all logging in the same process and lets
+// withoutOverlapping() work reliably via its mutex.
 Schedule::command('queues:process')
     ->everyMinute()
-    ->withoutOverlapping()
-    ->runInBackground();
+    ->withoutOverlapping();
 
 Log::info('[console.php] Schedule registration complete.');
