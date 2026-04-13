@@ -81,8 +81,19 @@ Schedule::command('scheduler:heartbeat')
 // the parent scheduler process, making failures completely invisible in logs.
 // Running in the foreground keeps all logging in the same process and lets
 // withoutOverlapping() work reliably via its mutex.
+
+// ── Diagnostic: log immediately before registering queues:process so we can
+// confirm this code path is reached on every scheduler tick. ─────────────────
+Log::info('[console.php] About to register Schedule::command(queues:process).');
+
+// withoutOverlapping() has been intentionally removed from this command.
+// Hypothesis: a stuck mutex was silently preventing every run.  Without the
+// mutex guard the command will execute unconditionally each minute, which lets
+// us confirm whether the mutex was the culprit.
 Schedule::command('queues:process')
-    ->everyMinute()
-    ->withoutOverlapping();
+    ->everyMinute();
+
+// ── Diagnostic: log immediately after registration to confirm it succeeded. ──
+Log::info('[console.php] Schedule::command(queues:process) registered successfully.');
 
 Log::info('[console.php] Schedule registration complete.');
