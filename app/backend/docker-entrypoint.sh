@@ -195,10 +195,22 @@ is_default_serve_command() {
     [ "$5" = "--port=8000" ]
 }
 
+is_cron_mode() {
+    local run_mode="${APP_RUN_MODE:-${CONTAINER_ROLE:-${RAILWAY_CRON_JOB:-}}}"
+    run_mode=$(echo "$run_mode" | tr '[:upper:]' '[:lower:]')
+
+    [ "$run_mode" = "cron" ] || [ "$run_mode" = "true" ] || [ "$run_mode" = "1" ]
+}
+
 start_application() {
     if [ "$#" -gt 0 ]; then
         echo "Starting custom command: $*"
         exec "$@"
+    fi
+
+    if is_cron_mode; then
+        echo "Cron mode detected, running scheduler once..."
+        exec php artisan schedule:run
     fi
 
     local port=${PORT:-8000}
@@ -225,7 +237,7 @@ main() {
     ensure_sqlite_file_if_needed
     wait_for_database
 
-    if [ "$#" -eq 0 ] || is_default_serve_command "$@"; then
+    if ! is_cron_mode && { [ "$#" -eq 0 ] || is_default_serve_command "$@"; }; then
         run_migrations
         run_seeders
         generate_documentation
