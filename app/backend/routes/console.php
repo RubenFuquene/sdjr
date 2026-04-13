@@ -26,26 +26,26 @@ Artisan::command('queues:process', function () {
 
     try {
         $queueList = env('QUEUE_PROCESS_QUEUES', 'emails,default');
-        $tries     = (int) env('QUEUE_PROCESS_TRIES', 3);
-        $timeout   = (int) env('QUEUE_PROCESS_TIMEOUT', 120);
-        $sleep     = (int) env('QUEUE_PROCESS_SLEEP', 1);
+        $tries = (int) env('QUEUE_PROCESS_TRIES', 3);
+        $timeout = (int) env('QUEUE_PROCESS_TIMEOUT', 120);
+        $sleep = (int) env('QUEUE_PROCESS_SLEEP', 1);
 
         // ── Diagnostic log 2: confirm env vars resolved correctly. ───────────
         Log::info('[queues:process] Configuration resolved — starting queue:work.', [
-            'queues'  => $queueList,
-            'tries'   => $tries,
+            'queues' => $queueList,
+            'tries' => $tries,
             'timeout' => $timeout,
-            'sleep'   => $sleep,
+            'sleep' => $sleep,
         ]);
 
         $this->info("[queues:process] Processing queues: {$queueList}");
 
         $this->call('queue:work', [
-            '--queue'           => $queueList,
+            '--queue' => $queueList,
             '--stop-when-empty' => true,
-            '--tries'           => $tries,
-            '--timeout'         => $timeout,
-            '--sleep'           => $sleep,
+            '--tries' => $tries,
+            '--timeout' => $timeout,
+            '--sleep' => $sleep,
         ]);
 
         // ── Diagnostic log 3: confirm queue:work returned cleanly. ───────────
@@ -56,12 +56,12 @@ Artisan::command('queues:process', function () {
         // ── Diagnostic log 4: surface any exception that was swallowed. ──────
         Log::error('[queues:process] Exception thrown during execution.', [
             'exception' => get_class($e),
-            'message'   => $e->getMessage(),
-            'file'      => $e->getFile(),
-            'line'      => $e->getLine(),
-            'trace'     => $e->getTraceAsString(),
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
         ]);
-        $this->error('[queues:process] Exception: ' . $e->getMessage());
+        $this->error('[queues:process] Exception: '.$e->getMessage());
 
         throw $e; // re-throw so the scheduler marks the run as failed
     }
