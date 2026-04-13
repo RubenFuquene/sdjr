@@ -186,7 +186,21 @@ generate_documentation() {
     php artisan l5-swagger:generate
 }
 
-start_server() {
+is_default_serve_command() {
+    [ "$#" -eq 5 ] && \
+    [ "$1" = "php" ] && \
+    [ "$2" = "artisan" ] && \
+    [ "$3" = "serve" ] && \
+    [ "$4" = "--host=0.0.0.0" ] && \
+    [ "$5" = "--port=8000" ]
+}
+
+start_application() {
+    if [ "$#" -gt 0 ]; then
+        echo "Starting custom command: $*"
+        exec "$@"
+    fi
+
     local port=${PORT:-8000}
     echo "Starting Laravel server on 0.0.0.0:$port..."
     exec php artisan serve --host=0.0.0.0 --port=$port
@@ -210,10 +224,14 @@ main() {
     generate_app_key_if_needed
     ensure_sqlite_file_if_needed
     wait_for_database
-    run_migrations
-    run_seeders
-    generate_documentation
-    start_server
+
+    if [ "$#" -eq 0 ] || is_default_serve_command "$@"; then
+        run_migrations
+        run_seeders
+        generate_documentation
+    fi
+
+    start_application "$@"
 }
 
 main "$@"
