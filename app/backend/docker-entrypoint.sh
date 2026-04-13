@@ -209,8 +209,8 @@ start_application() {
     fi
 
     if is_cron_mode; then
-        echo "Cron mode detected, running scheduler once..."
-        exec php artisan schedule:run
+        echo "Cron mode detected, running scheduler daemon..."
+        exec php artisan schedule:work
     fi
 
     local port=${PORT:-8000}
