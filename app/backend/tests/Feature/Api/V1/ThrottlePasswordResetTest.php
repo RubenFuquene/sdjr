@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+namespace Tests\Feature\Api\V1;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
-class ThrottleAuthTest extends TestCase
+class ThrottlePasswordResetTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * Test login endpoint throttling (should return 429 after 10 requests/min).
+     * Test password forgot endpoint throttling (should return 429 after 10 requests/min).
      */
-    public function test_login_throttle_returns_429_after_limit(): void
+    public function test_password_forgot_throttle_returns_429_after_limit(): void
     {
         $payload = [
-            'email' => 'test@example.com',
-            'password' => 'wrongpassword',
+            'email' => Str::random(10).'@example.com',
         ];
         for ($i = 0; $i < 10; $i++) {
-            $this->postJson('/api/v1/login', $payload);
+            $this->postJson('/api/v1/password/forgot', $payload);
         }
-        $response = $this->postJson('/api/v1/login', $payload);
+        $response = $this->postJson('/api/v1/password/forgot', $payload);
         $response->assertStatus(429)
             ->assertJson([
                 'status' => false,
@@ -36,14 +36,20 @@ class ThrottleAuthTest extends TestCase
     }
 
     /**
-     * Test nearby branches endpoint throttling (should return 429 after 60 requests/min).
+     * Test password reset endpoint throttling (should return 429 after 10 requests/min).
      */
-    public function test_nearby_branches_throttle_returns_429_after_limit(): void
+    public function test_password_reset_throttle_returns_429_after_limit(): void
     {
-        for ($i = 0; $i < 60; $i++) {
-            $this->getJson('/api/v1/nearby/branches?lat=4.7&lng=-74.0');
+        $payload = [
+            'email' => Str::random(10).'@example.com',
+            'token' => Str::random(32),
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ];
+        for ($i = 0; $i < 10; $i++) {
+            $this->postJson('/api/v1/password/reset', $payload);
         }
-        $response = $this->getJson('/api/v1/nearby/branches?lat=4.7&lng=-74.0');
+        $response = $this->postJson('/api/v1/password/reset', $payload);
         $response->assertStatus(429)
             ->assertJson([
                 'status' => false,
