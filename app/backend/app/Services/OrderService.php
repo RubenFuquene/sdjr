@@ -8,9 +8,12 @@ use App\Constants\Constant;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Notifications\OrderCreatedNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 class OrderService
 {
@@ -59,7 +62,21 @@ class OrderService
             $order->total_price = round($total, 2);
             $order->save();
 
-            return $order->load('items');
+            // Cargar relaciones necesarias para la notificación
+            $order->load(['items.product', 'user', 'commerceBranch.commerce']);
+
+            // Enviar notificación de orden creada sin bloquear el flujo
+            try {
+                Notification::send($order->user, new OrderCreatedNotification($order));
+            } catch (Throwable $e) {
+                Log::warning('Order created email dispatch failed', [
+                    'order_id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return $order;
         });
     }
 
