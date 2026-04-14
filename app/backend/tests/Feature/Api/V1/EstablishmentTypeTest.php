@@ -19,10 +19,26 @@ class EstablishmentTypeTest extends TestCase
     {
         parent::setUp();
         // Crear permisos necesarios con guard sanctum
+        Permission::findOrCreate('provider.establishment_types.index', 'sanctum');
         Permission::findOrCreate('provider.establishment_types.create', 'sanctum');
         Permission::findOrCreate('provider.establishment_types.update', 'sanctum');
         Permission::findOrCreate('provider.establishment_types.show', 'sanctum');
         Permission::findOrCreate('provider.establishment_types.delete', 'sanctum');
+    }
+
+    /**
+     * Prueba que un usuario con permiso puede listar los tipos de establecimiento.
+     */
+    public function test_user_can_list_establishment_types()
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.establishment_types.index');
+        $this->actingAs($user, 'sanctum');
+
+        EstablishmentType::factory()->count(3)->create();
+        $response = $this->getJson('/api/v1/establishment-types');
+        $response->assertOk();
+        $response->assertJsonCount(3, 'data');
     }
 
     /**

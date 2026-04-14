@@ -78,12 +78,12 @@ class OrderController extends Controller
      *     operationId="storeOrder",
      *     tags={"Orders"},
      *     summary="Create a new order",
-     *     description="Creates a new order for the authenticated user.",
+     *     description="Creates a new order for the authenticated user. An email notification with order details and products will be sent to the user asynchronously.",
      *     security={{"sanctum":{}}},
      *
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/StoreOrderRequest")),
      *
-     *     @OA\Response(response=201, description="Order created successfully", @OA\JsonContent(type="object", @OA\Property(property="status", type="boolean", example=true), @OA\Property(property="message", type="string", example="Order created successfully"), @OA\Property(property="data", ref="#/components/schemas/OrderResource"))),
+     *     @OA\Response(response=201, description="Order created successfully. An email notification will be sent to the user.", @OA\JsonContent(type="object", @OA\Property(property="status", type="boolean", example=true), @OA\Property(property="message", type="string", example="Order created successfully"), @OA\Property(property="data", ref="#/components/schemas/OrderResource"))),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=422, description="Unprocessable Entity"),

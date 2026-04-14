@@ -19,7 +19,7 @@ class IndexEstablishmentTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.establishments.index') ?? false;
+        return $this->user()?->can('provider.establishment_types.index') ?? false;
     }
 
     public function rules(): array

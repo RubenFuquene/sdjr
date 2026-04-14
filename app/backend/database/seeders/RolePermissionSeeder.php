@@ -367,6 +367,7 @@ class RolePermissionSeeder extends Seeder
             'admin.params.cities.index',
             'admin.params.neighborhoods.index',
             'admin.legal_documents.index',
+            'provider.establishment_types.index',
             'provider.basic_data.show',
             'provider.branches.show',
             'provider.products.show',
