@@ -48,7 +48,9 @@ export {
   createCommerceBasic,
   updateCommerce,
   deleteCommerce,
+  acceptCommerceTerms,
 } from "./commerces";
+export type { AcceptCommerceTermsPayload } from "./commerces";
 
 // Branches (Sucursales)
 export { getCommerceBranches, createCommerceBranch, updateCommerceBranch } from "./branches";

@@ -237,7 +237,7 @@ export function EstablecimientoCard({
               </SelectTrigger>
               <SelectContent>
                 {Array.isArray(establishmentTypes) && establishmentTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.code}>
+                  <SelectItem key={type.id} value={String(type.id)}>
                     {type.name}
                   </SelectItem>
                 ))}

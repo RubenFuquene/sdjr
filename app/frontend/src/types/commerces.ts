@@ -92,7 +92,15 @@ export interface CommerceFromAPI {
   documents: CommerceDocumentFromAPI[];
   name: string;
   description?: string;
-  establishment_type?: string | null;
+  establishment_type_id?: number | null;
+  establishment_type?: {
+    id: number;
+    name: string;
+    code: string;
+    status?: string;
+    created_at?: string;
+    updated_at?: string;
+  } | null;
   tax_id: string;
   tax_id_type: string;
   address: string;
@@ -100,6 +108,8 @@ export interface CommerceFromAPI {
   email?: string;
   is_active: boolean;
   is_verified: CommerceVerificationStatusRaw;
+  terms_accepted_version?: number | null;
+  terms_accepted_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -171,6 +181,7 @@ export interface InformacionBancaria {
 export interface Legal {
   aceptoTerminos: boolean;
   fechaAceptacion: string; // ISO date
+  termsAcceptedVersion?: number | null;
 }
 
 /**
@@ -248,7 +259,7 @@ export interface CommerceBasicPayload {
     neighborhood_id: number;
     name: string;
     description?: string;
-    establishment_type?: string;
+    establishment_type_id: number;
     tax_id: string;
     tax_id_type: 'NIT' | 'CC' | 'PS' | 'CE';
     address: string;

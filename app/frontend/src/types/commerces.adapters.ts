@@ -90,7 +90,11 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     documentos: mapearCommerceDocumentsADocumentos(commerce.documents),
     sucursales: [],
     informacionBancaria: undefined,
-    legal: undefined,
+    legal: {
+      aceptoTerminos: Boolean(commerce.terms_accepted_at),
+      fechaAceptacion: commerce.terms_accepted_at || '',
+      termsAcceptedVersion: commerce.terms_accepted_version ?? null,
+    },
 
     // Metadata
     fechaCreacion: commerce.created_at,
@@ -445,6 +449,7 @@ export const basicInfoToCommerceBasicPayload = (
   const departmentId = requireNumber(formData.departmentId, 'department_id');
   const cityId = requireNumber(formData.cityId, 'city_id');
   const neighborhoodId = parseNeighborhoodId(formData.neighborhood);
+  const establishmentTypeId = parseEstablishmentTypeId(formData.establishmentType);
 
   return {
     commerce: {
@@ -454,7 +459,7 @@ export const basicInfoToCommerceBasicPayload = (
       neighborhood_id: neighborhoodId,
       name: formData.commercialName.trim(),
       description: formData.observations?.trim() || undefined,
-      establishment_type: formData.establishmentType || undefined,
+      establishment_type_id: establishmentTypeId,
       tax_id: formData.documentNumber.trim(),
       tax_id_type: mapDocumentTypeToBackendTaxIdType(formData.documentType),
       address: formData.mainAddress.trim(),
@@ -573,6 +578,15 @@ const parseNeighborhoodId = (value: string): number => {
   const parsed = Number.parseInt(value, 10);
   if (Number.isNaN(parsed)) {
     throw new Error('neighborhood_id_invalid');
+  }
+
+  return parsed;
+};
+
+const parseEstablishmentTypeId = (value: string): number => {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) {
+    throw new Error('establishment_type_id_invalid');
   }
 
   return parsed;

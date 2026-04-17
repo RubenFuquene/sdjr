@@ -1,206 +1,109 @@
 /**
- * Tab: Información Legal del Proveedor
- * 
+ * Tab: Informacion Legal del Proveedor
+ *
  * Responsabilidades:
- * - Mostrar aceptación de términos y condiciones
- * - Fecha de aceptación (read-only en MVP)
- * 
- * Nota: En MVP este tab es solo lectura. La aceptación de términos
- * se realiza durante el registro del proveedor.
+ * - Mostrar estado de aceptacion de terminos
+ * - Mostrar fecha y version aceptada (read-only)
  */
 
 'use client';
 
-import { CheckCircle2, FileText, Calendar } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle2, FileCheck } from 'lucide-react';
 import type { Proveedor } from '@/types/admin';
-
-// ============================================
-// Props Interface
-// ============================================
 
 interface ProviderLegalTabProps {
   formData: Proveedor;
 }
 
-// ============================================
-// Component
-// ============================================
-
-export function ProviderLegalTab({
-  formData,
-}: ProviderLegalTabProps) {
+export function ProviderLegalTab({ formData }: ProviderLegalTabProps) {
   const legal = formData.legal || {
     aceptoTerminos: false,
     fechaAceptacion: '',
+    termsAcceptedVersion: null,
   };
 
-  /**
-   * Formatea fecha ISO a formato legible
-   */
   const formatFecha = (isoDate: string): string => {
     if (!isoDate) return 'No disponible';
-    
+
     try {
       const date = new Date(isoDate);
-      return date.toLocaleDateString('es-CO', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      if (Number.isNaN(date.getTime())) {
+        return 'No disponible';
+      }
+
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      const hour = String(date.getHours()).padStart(2, '0');
+      const minute = String(date.getMinutes()).padStart(2, '0');
+
+      return `${day}/${month}/${year} ${hour}:${minute}`;
     } catch {
-      return 'Fecha inválida';
+      return 'No disponible';
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Descripción informativa */}
-      <div className="p-4 bg-[#DDE8BB]/30 border border-[#C8D86D] rounded-xl">
-        <p className="text-sm text-[#1A1A1A]">
-          ⚖️ <strong>Información legal:</strong> Esta sección muestra el estado de aceptación de los términos y condiciones del proveedor.
-          La aceptación se realiza durante el proceso de registro.
-        </p>
+    <div className="bg-white rounded-[18px] shadow-sm p-6 border border-[#E0E0E0]">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-[#DDE8BB] rounded-lg flex items-center justify-center">
+          <FileCheck className="w-5 h-5 text-[#4B236A]" />
+        </div>
+        <h3 className="text-[#1A1A1A] font-semibold">Términos y Condiciones</h3>
       </div>
 
-      {/* Card principal con estado de términos */}
-      <div className="p-6 border-2 border-[#E0E0E0] rounded-xl bg-white">
-        {/* Estado de aceptación */}
-        <div className="flex items-start gap-4 mb-6">
-          <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
-            legal.aceptoTerminos 
-              ? 'bg-green-100' 
-              : 'bg-red-100'
-          }`}>
+      <div className="space-y-4">
+        <div
+          className={`flex items-center justify-between p-4 rounded-xl border ${
+            legal.aceptoTerminos
+              ? 'bg-emerald-50 border-emerald-200'
+              : 'bg-amber-50 border-amber-200'
+          }`}
+        >
+          <div className="flex items-center gap-3">
             {legal.aceptoTerminos ? (
-              <CheckCircle2 className="w-6 h-6 text-green-600" />
+              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
             ) : (
-              <FileText className="w-6 h-6 text-red-600" />
+              <AlertCircle className="w-6 h-6 text-amber-600" />
             )}
-          </div>
-          
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">
-              Términos y Condiciones
-            </h3>
-            
-            <div className="flex items-center gap-2 mb-3">
-              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                legal.aceptoTerminos
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
-              }`}>
-                {legal.aceptoTerminos ? '✓ Aceptados' : '✗ No aceptados'}
-              </div>
-            </div>
 
-            <p className="text-sm text-[#6A6A6A]">
-              {legal.aceptoTerminos 
-                ? 'El proveedor ha aceptado los términos y condiciones de uso de la plataforma.'
-                : 'El proveedor aún no ha aceptado los términos y condiciones.'}
-            </p>
+            <div>
+              <p className="text-[#1A1A1A] font-medium">
+                {legal.aceptoTerminos
+                  ? 'Términos y Condiciones Aceptados'
+                  : 'Términos y Condiciones Pendientes'}
+              </p>
+              <p className="text-[#6A6A6A] text-sm">
+                Fecha de aceptación: {formatFecha(legal.fechaAceptacion)}
+              </p>
+            </div>
+          </div>
+
+          <span
+            className={`px-4 py-2 rounded-xl text-white text-sm ${
+              legal.aceptoTerminos ? 'bg-[#10B981]' : 'bg-[#D97706]'
+            }`}
+          >
+            {legal.aceptoTerminos ? 'Aceptado' : 'Pendiente'}
+          </span>
+        </div>
+
+        <div className="p-4 bg-[#F7F7F7] rounded-xl border border-[#E0E0E0]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#4B236A]/10 rounded-lg flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-[#4B236A]" />
+            </div>
+            <div>
+              <p className="text-[#6A6A6A] text-sm">Versión aceptada</p>
+              <p className="text-[#1A1A1A] font-medium">
+                {legal.termsAcceptedVersion ?? 'No disponible'}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Fecha de aceptación */}
-        {legal.aceptoTerminos && legal.fechaAceptacion && (
-          <div className="pt-6 border-t border-[#E0E0E0]">
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-10 h-10 bg-[#4B236A]/10 rounded-lg flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-[#4B236A]" />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-[#6A6A6A] mb-1">
-                  Fecha de Aceptación
-                </p>
-                <p className="text-sm font-medium text-[#1A1A1A]">
-                  {formatFecha(legal.fechaAceptacion)}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sección de documentos legales */}
-      <div>
-        <h4 className="text-sm font-semibold text-[#1A1A1A] mb-3">
-          Documentos Disponibles
-        </h4>
-        
-        <div className="space-y-2">
-          <DocumentoLegalItem
-            titulo="Términos y Condiciones"
-            descripcion="Condiciones generales de uso de la plataforma"
-            url="/legal/terminos-y-condiciones"
-          />
-          <DocumentoLegalItem
-            titulo="Política de Privacidad"
-            descripcion="Tratamiento de datos personales"
-            url="/legal/politica-privacidad"
-          />
-          <DocumentoLegalItem
-            titulo="Contrato de Prestación de Servicios"
-            descripcion="Acuerdo comercial entre el proveedor y la plataforma"
-            url="/legal/contrato-servicios"
-          />
-        </div>
-      </div>
-
-      {/* Nota informativa */}
-      <div className="p-4 bg-[#F7F7F7] border border-[#E0E0E0] rounded-xl">
-        <p className="text-xs text-[#6A6A6A]">
-          📄 <strong>Nota:</strong> Los documentos legales están disponibles para consulta en cualquier momento.
-          Si necesitas realizar cambios en el estado de aceptación, contacta al administrador del sistema.
-        </p>
+        {/* TODO: Implementar seccion de documentos legales cuando negocio confirme contenidos y rutas finales. */}
       </div>
     </div>
-  );
-}
-
-// ============================================
-// Helper Components
-// ============================================
-
-/**
- * Item de documento legal con link
- */
-interface DocumentoLegalItemProps {
-  titulo: string;
-  descripcion: string;
-  url: string;
-}
-
-function DocumentoLegalItem({ titulo, descripcion, url }: DocumentoLegalItemProps) {
-  const handleClick = () => {
-    // TODO: Implementar apertura de documento
-    console.log('Abrir documento:', url);
-    // Por ahora, abrir en nueva pestaña (placeholder)
-    window.open(url, '_blank');
-  };
-
-  return (
-    <button
-      onClick={handleClick}
-      className="w-full flex items-center justify-between p-3 border border-[#E0E0E0] rounded-xl hover:bg-[#F7F7F7] hover:border-[#4B236A] transition-all group"
-    >
-      <div className="flex items-center gap-3 text-left">
-        <div className="flex-shrink-0 w-10 h-10 bg-[#4B236A]/10 rounded-lg flex items-center justify-center group-hover:bg-[#4B236A] transition-colors">
-          <FileText className="w-5 h-5 text-[#4B236A] group-hover:text-white transition-colors" />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-[#1A1A1A] group-hover:text-[#4B236A] transition-colors">
-            {titulo}
-          </p>
-          <p className="text-xs text-[#6A6A6A]">
-            {descripcion}
-          </p>
-        </div>
-      </div>
-      <span className="text-sm text-[#4B236A] font-medium group-hover:translate-x-1 transition-transform">
-        Ver →
-      </span>
-    </button>
   );
 }

@@ -132,9 +132,7 @@ export async function deleteCommerce(id: number): Promise<void> {
 /**
  * GET /api/v1/me/commerce
  * Obtiene el comercio del usuario autenticado (por owner_user_id)
- * 
- * ⚠️ PENDIENTE IMPLEMENTACIÓN BACKEND
- * Ver: docs/backend-endpoints-v3.md sección D
+ * Backend implementado ✓
  * 
  * @returns Commerce del usuario o null si no tiene comercio registrado
  */
@@ -143,6 +141,36 @@ export async function getMyCommerce(): Promise<ApiSuccess<CommerceFromAPI | null
     `/api/v1/me/commerce`
   );
 }
+
+// ============================================
+// Terms & Conditions Endpoints
+// ============================================
+
+export interface AcceptCommerceTermsPayload {
+  terms_accepted_version: number;
+}
+
+/**
+ * PATCH /api/v1/commerces/{id}/accept-terms
+ * Marca los términos y condiciones como aceptados por el proveedor
+ * 
+ * @param id - ID del comercio
+ * @param payload - { terms_accepted_version: number >= 1 }
+ * @returns Comercio actualizado con terms_accepted_at y terms_accepted_version
+ */
+export async function acceptCommerceTerms(
+  id: number,
+  payload: AcceptCommerceTermsPayload
+): Promise<ApiSuccess<CommerceFromAPI>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
+    `/api/v1/commerces/${id}/accept-terms`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
 // ============================================
 // Verification & Status Endpoints
 // ============================================
