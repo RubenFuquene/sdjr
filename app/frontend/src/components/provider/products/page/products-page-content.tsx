@@ -13,6 +13,7 @@ interface ProductsPageContentProps {
   hasProducts: boolean;
   onAddProduct?: () => void;
   onEditProduct?: (product: ProductFromAPI) => void;
+  onDuplicateProduct?: (product: ProductFromAPI) => void;
   onDeleteProduct?: (product: ProductFromAPI) => void;
 }
 
@@ -24,6 +25,7 @@ export function ProductsPageContent({
   hasProducts,
   onAddProduct,
   onEditProduct,
+  onDuplicateProduct,
   onDeleteProduct,
 }: ProductsPageContentProps) {
   const [activeTab, setActiveTab] = useState<ProductType>("single");
@@ -59,6 +61,11 @@ export function ProductsPageContent({
   };
 
   const handleDuplicateProduct = (product: ProductFromAPI) => {
+    if (onDuplicateProduct) {
+      onDuplicateProduct(product);
+      return;
+    }
+
     toast.info(`Duplicar producto \"${product.title}\" estará disponible pronto.`);
   };
 

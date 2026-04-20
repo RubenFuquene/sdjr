@@ -93,6 +93,22 @@ export function ProductsPageClient() {
     setIsModalOpen(true);
   };
 
+  const handleDuplicateProduct = (product: ProductFromAPI) => {
+    setModalMode("create");
+    setEditingProductId(null);
+    setEditingInitialData({
+      ...mapProductToInitialData(product),
+      id: undefined,
+      title: `${product.title} (copia)`,
+    });
+    resetErrors();
+    setIsModalOpen(true);
+
+    if (product.product_type === "package") {
+      toast.info("Verifica los items del pack antes de guardar la copia.");
+    }
+  };
+
   const handleSubmitProductForm = async (input: Parameters<typeof createProduct>[0]) => {
     if (modalMode === "edit" && editingProductId) {
       const updated = await updateProduct(editingProductId, input);
@@ -154,6 +170,7 @@ export function ProductsPageClient() {
         hasProducts={hasProducts}
         onAddProduct={openCreateSingleModal}
         onEditProduct={handleEditProduct}
+        onDuplicateProduct={handleDuplicateProduct}
         onDeleteProduct={handleDeleteProduct}
       />
 
