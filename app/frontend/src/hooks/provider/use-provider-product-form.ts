@@ -11,7 +11,6 @@ import {
   updateProduct,
 } from "@/lib/api";
 import type {
-  ProductFormInput,
   ProductFromAPI,
   ProviderProductFormFieldErrors,
   ProviderProductFormInput,
