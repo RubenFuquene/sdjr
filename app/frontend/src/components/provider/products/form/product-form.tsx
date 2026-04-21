@@ -90,7 +90,6 @@ export function ProductForm({
     handleTogglePackItem,
     handleSubmit,
   } = useProductFormState({
-    mode,
     initialData,
     fieldErrors,
     packItemOptions,

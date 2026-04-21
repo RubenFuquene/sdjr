@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   ProductType,
   ProviderProductFormFieldErrors,
@@ -17,8 +17,6 @@ import {
   validateProductForm,
 } from "./product-form.validation";
 
-type ProductFormMode = "create" | "edit";
-
 type ProductFormInitialData = {
   commerceId?: number;
   quantityTotal?: number;
@@ -34,7 +32,6 @@ type ProductFormInitialData = {
 };
 
 type UseProductFormStateParams = {
-  mode: ProductFormMode;
   initialData?: ProductFormInitialData | null;
   fieldErrors: ProviderProductFormFieldErrors;
   packItemOptions: Array<{ id: number; originalPrice: number }>;
@@ -42,13 +39,12 @@ type UseProductFormStateParams = {
 };
 
 export function useProductFormState({
-  mode,
   initialData,
   fieldErrors,
   packItemOptions,
   onSubmit,
 }: UseProductFormStateParams) {
-  const initialDraft = useMemo(() => mapInitialDataToDraft(initialData), [initialData]);
+  const initialDraft = mapInitialDataToDraft(initialData);
 
   const [title, setTitle] = useState(initialDraft.title);
   const [productType, setProductType] = useState<ProductType>(initialDraft.productType);
@@ -60,20 +56,6 @@ export function useProductFormState({
   const [branchId, setBranchId] = useState(initialDraft.branchId);
   const [packageItemIds, setPackageItemIds] = useState<number[]>(initialDraft.packageItemIds);
   const [localErrors, setLocalErrors] = useState<ProductFormValidationErrors>({});
-
-  useEffect(() => {
-    const nextDraft = mapInitialDataToDraft(initialData);
-    setTitle(nextDraft.title);
-    setProductType(nextDraft.productType);
-    setProductCategoryId(nextDraft.productCategoryId);
-    setOriginalPrice(nextDraft.originalPrice);
-    setDiscountedPrice(nextDraft.discountedPrice);
-    setQuantityAvailable(nextDraft.quantityAvailable);
-    setDescription(nextDraft.description);
-    setBranchId(nextDraft.branchId);
-    setPackageItemIds(nextDraft.packageItemIds);
-    setLocalErrors({});
-  }, [initialData, mode]);
 
   const mergedErrors = useMemo(() => {
     return {
@@ -98,20 +80,18 @@ export function useProductFormState({
     return Number(total.toFixed(2));
   }, [packItemOptions, packageItemIds]);
 
-  useEffect(() => {
-    if (productType !== "package") {
-      return;
-    }
-
-    const nextValue = packageItemIds.length > 0 ? String(packOriginalPrice) : "";
-    setOriginalPrice(nextValue);
-  }, [packOriginalPrice, packageItemIds.length, productType]);
+  const effectiveOriginalPrice =
+    productType === "package"
+      ? packageItemIds.length > 0
+        ? String(packOriginalPrice)
+        : ""
+      : originalPrice;
 
   const validate = (): boolean => {
     const nextErrors = validateProductForm({
       title,
       productCategoryId,
-      originalPrice,
+      originalPrice: effectiveOriginalPrice,
       discountedPrice,
       quantityAvailable,
       branchId,
@@ -153,7 +133,7 @@ export function useProductFormState({
       return;
     }
 
-    const parsedOriginalPrice = parseDecimal(originalPrice);
+    const parsedOriginalPrice = parseDecimal(effectiveOriginalPrice);
     const parsedDiscountedPrice = parseDecimal(discountedPrice);
     const parsedQuantityAvailable = parseInteger(quantityAvailable);
 
@@ -185,7 +165,7 @@ export function useProductFormState({
     handleProductTypeChange,
     productCategoryId,
     setProductCategoryId,
-    originalPrice,
+    originalPrice: effectiveOriginalPrice,
     setOriginalPrice,
     discountedPrice,
     setDiscountedPrice,
