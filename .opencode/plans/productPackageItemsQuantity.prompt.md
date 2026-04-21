@@ -13,7 +13,8 @@ Se agregará el campo `quantity` (unsignedInteger) a la tabla intermedia `produc
    1. Actualizar validaciones en StoreProductRequest cambiando de `package_items.*` (integer) a estructura de objetos con `package_items.*.product_id` y `package_items.*.quantity` (required, integer, min:1).
    2. Actualizar validaciones en UpdateProductRequest con misma estructura.
    3. Agregar regla `distinct` en `product_id` para prevenir productos duplicados en el mismo paquete.
-   4. Actualizar documentación Swagger en ambos Request con esquema de objeto que incluya `product_id` y `quantity`, incluyendo ejemplos.
+   4. Agregar validación personalizada con `withValidator` para verificar que `quantity` no exceda `quantity_available` del producto.
+   5. Actualizar documentación Swagger en ambos Request con esquema de objeto que incluya `product_id` y `quantity`, incluyendo ejemplos.
 
 3. Fase de lógica de negocio
    1. Modificar ProductService::storePackageItems transformando array de items antes de `attach()` para incluir quantity en pivot.
@@ -31,6 +32,8 @@ Se agregará el campo `quantity` (unsignedInteger) a la tabla intermedia `produc
       - `test_store_package_items_rejects_negative_quantity()`
       - `test_update_package_items_updates_quantity()`
       - `test_store_package_items_prevents_duplicate_products()`
+      - `test_store_package_items_rejects_quantity_exceeding_available()`
+      - `test_update_package_items_rejects_quantity_exceeding_available()`
 
 5. Fase de verificación
    1. Ejecutar suite completa de tests: `php artisan test`
@@ -42,19 +45,20 @@ Se agregará el campo `quantity` (unsignedInteger) a la tabla intermedia `produc
 - [app/backend/database/migrations/YYYY_MM_DD_add_quantity_to_product_package_items_table.php](app/backend/database/migrations/) - nueva migración para agregar columna quantity (CREAR).
 - [app/backend/app/Models/Product.php](app/backend/app/Models/Product.php) - agregar `withPivot('quantity')` en líneas 131-134 y 141-144.
 - [app/backend/app/Services/ProductService.php](app/backend/app/Services/ProductService.php) - transformar datos en `storePackageItems` (~línea 285) y `updatePackageItems` (~línea 309).
-- [app/backend/app/Http/Requests/Api/V1/StoreProductRequest.php](app/backend/app/Http/Requests/Api/V1/StoreProductRequest.php) - actualizar validaciones (línea ~91) y documentación Swagger (líneas 42-47).
-- [app/backend/app/Http/Requests/Api/V1/UpdateProductRequest.php](app/backend/app/Http/Requests/Api/V1/UpdateProductRequest.php) - actualizar validaciones (línea ~82).
+- [app/backend/app/Http/Requests/Api/V1/StoreProductRequest.php](app/backend/app/Http/Requests/Api/V1/StoreProductRequest.php) - actualizar validaciones (línea ~91), agregar método `withValidator` para validar quantity vs quantity_available, y documentación Swagger (líneas 42-47).
+- [app/backend/app/Http/Requests/Api/V1/UpdateProductRequest.php](app/backend/app/Http/Requests/Api/V1/UpdateProductRequest.php) - actualizar validaciones (línea ~82) y agregar método `withValidator` para validar quantity vs quantity_available.
 - [app/backend/app/Http/Resources/Api/V1/ProductResource.php](app/backend/app/Http/Resources/Api/V1/ProductResource.php) - incluir `pivot->quantity` en packageItems.
-- [app/backend/tests/Feature/Api/V1/ProductFeatureTest.php](app/backend/tests/Feature/Api/V1/ProductFeatureTest.php) - actualizar tests existentes (líneas 178-290) y crear 5 nuevos tests.
+- [app/backend/tests/Feature/Api/V1/ProductFeatureTest.php](app/backend/tests/Feature/Api/V1/ProductFeatureTest.php) - actualizar tests existentes (líneas 178-290) y crear 7 nuevos tests.
 
 **Verification**
 1. Confirmar columna `quantity` existe en tabla `product_package_items` tras migración.
 2. Probar crear paquete con nuevo formato y validar persistencia en DB con quantity correcto.
 3. Probar actualizar paquete y validar que quantity se actualiza correctamente.
 4. Probar validaciones: quantity requerido (422), quantity = 0 (422), quantity negativo (422).
-5. Probar productos duplicados en mismo request y esperar 422.
-6. Validar respuestas GET incluyan campo quantity en cada item del paquete.
-7. Ejecutar suite completa de tests y confirmar 100% pasan.
+5. Probar que quantity no puede exceder quantity_available del producto (422).
+6. Probar productos duplicados en mismo request y esperar 422.
+7. Validar respuestas GET incluyan campo quantity en cada item del paquete.
+8. Ejecutar suite completa de tests y confirmar 100% pasan.
 
 **Decisions**
 - Tipo de dato: `unsignedInteger` (solo enteros, no decimales) - confirmado por usuario.
@@ -63,6 +67,7 @@ Se agregará el campo `quantity` (unsignedInteger) a la tabla intermedia `produc
 - Breaking change: Implementar cambio directo sin compatibilidad temporal - confirmado por usuario.
 - Valor default: `default(1)` en migración como fallback.
 - Validación adicional: `distinct` para prevenir duplicados en mismo request.
+- Validación de negocio: `quantity` no puede exceder `quantity_available` del producto - implementado con `withValidator`.
 - Estructura request: De `package_items: [1, 2, 3]` a `package_items: [{product_id: 1, quantity: 2}, ...]`
 - Estructura response: Incluir `quantity` en cada item de packageItems.
 

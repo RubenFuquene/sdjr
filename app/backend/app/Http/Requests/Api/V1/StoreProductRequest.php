@@ -6,7 +6,9 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
 use App\Models\Commerce;
+use App\Models\Product;
 use App\Services\ProductService;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -110,5 +112,29 @@ class StoreProductRequest extends FormRequest
             'package_items.*.product_id' => ['required', 'integer', 'exists:products,id', 'distinct'],
             'package_items.*.quantity' => ['required', 'integer', 'min:1'],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($this->has('package_items')) {
+                foreach ($this->input('package_items', []) as $index => $item) {
+                    if (isset($item['product_id']) && isset($item['quantity'])) {
+                        $product = Product::find($item['product_id']);
+                        if ($product) {
+                            if ($item['quantity'] > $product->quantity_available) {
+                                $validator->errors()->add(
+                                    "package_items.{$index}.quantity",
+                                    "The quantity cannot exceed the available quantity ({$product->quantity_available}) of product '{$product->title}'."
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }
