@@ -181,7 +181,10 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
         $item1 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
         $item2 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
-        $package->packageItems()->attach([$item1->id, $item2->id]);
+        $package->packageItems()->attach([
+            $item1->id => ['quantity' => 1],
+            $item2->id => ['quantity' => 1],
+        ]);
         $payload = ['id' => $package->id];
         $response = $this->deleteJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
         $response->assertNoContent();
@@ -260,7 +263,10 @@ class ProductFeatureTest extends TestCase
         // Simular items de paquete
         $item1 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
         $item2 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
-        $package->packageItems()->attach([$item1->id, $item2->id]);
+        $package->packageItems()->attach([
+            $item1->id => ['quantity' => 2],
+            $item2->id => ['quantity' => 1],
+        ]);
 
         $response = $this->getJson('/api/v1/products/commerce/package-items/'.$package->id);
         $response->assertOk()
@@ -287,5 +293,222 @@ class ProductFeatureTest extends TestCase
                 'status' => false,
                 'message' => 'Product not found with the specified ID.',
             ]);
+    }
+
+    public function test_store_package_items_requires_quantity()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 10,
+                'quantity_available' => 10,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id], // Missing quantity
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['package_items.0.quantity']);
+    }
+
+    public function test_store_package_items_rejects_zero_quantity()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 10,
+                'quantity_available' => 10,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 0],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['package_items.0.quantity']);
+    }
+
+    public function test_store_package_items_rejects_negative_quantity()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 10,
+                'quantity_available' => 10,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => -5],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['package_items.0.quantity']);
+    }
+
+    public function test_update_package_items_updates_quantity()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+        ]);
+        $product = Product::factory()->create([
+            'commerce_id' => $package->commerce_id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        $package->packageItems()->attach($product->id, ['quantity' => 2]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $package->commerce_id,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 5],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+        $response->assertOk();
+
+        $this->assertEquals(5, $package->fresh()->packageItems()->first()->pivot->quantity);
+    }
+
+    public function test_store_package_items_prevents_duplicate_products()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 10,
+                'quantity_available' => 10,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 2],
+                ['product_id' => $product->id, 'quantity' => 3], // Duplicate
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['package_items.1.product_id']);
+    }
+
+    public function test_store_package_items_rejects_quantity_exceeding_available()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        // Producto con solo 5 unidades disponibles
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 5,
+        ]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 10,
+                'quantity_available' => 10,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 10], // Excede las 5 disponibles
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['package_items.0.quantity']);
+    }
+
+    public function test_update_package_items_rejects_quantity_exceeding_available()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+        ]);
+        // Producto con solo 3 unidades disponibles
+        $product = Product::factory()->create([
+            'commerce_id' => $package->commerce_id,
+            'quantity_total' => 10,
+            'quantity_available' => 3,
+        ]);
+
+        $package->packageItems()->attach($product->id, ['quantity' => 2]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $package->commerce_id,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 7], // Excede las 3 disponibles
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['package_items.0.quantity']);
     }
 }
