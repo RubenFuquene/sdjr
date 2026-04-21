@@ -42,8 +42,26 @@ use Illuminate\Foundation\Http\FormRequest;
  *   @OA\Property(
  *     property="package_items",
  *     type="array",
+ *     description="Array of products included in this package",
  *
- *     @OA\Items(type="integer", example=10, description="ID of a product included in the package")
+ *     @OA\Items(
+ *       type="object",
+ *       required={"product_id", "quantity"},
+ *
+ *       @OA\Property(
+ *         property="product_id",
+ *         type="integer",
+ *         example=10,
+ *         description="ID of the product to include"
+ *       ),
+ *       @OA\Property(
+ *         property="quantity",
+ *         type="integer",
+ *         minimum=1,
+ *         example=2,
+ *         description="Quantity of this product in the package"
+ *       )
+ *     )
  *   )
  * )
  */
@@ -88,7 +106,9 @@ class StoreProductRequest extends FormRequest
             'photos.*.metadata' => ['nullable', 'array'],
 
             // Package
-            'package_items.*' => ['sometimes', 'integer', 'exists:products,id'],
+            'package_items' => ['sometimes', 'array'],
+            'package_items.*.product_id' => ['required', 'integer', 'exists:products,id', 'distinct'],
+            'package_items.*.quantity' => ['required', 'integer', 'min:1'],
         ];
     }
 }
