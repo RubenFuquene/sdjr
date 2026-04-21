@@ -23,8 +23,39 @@ const SAVED_PAYMENT_METHODS = [
 
 type DeliveryOption = "pickup" | "delivery";
 
+type CartItemView = {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  originalPrice: number;
+  available: number;
+  pickupTime: string;
+  deliveryTime: string;
+  deliveryCost: number;
+  source: "query" | "mock";
+};
+
 function formatPrice(value: number): string {
   return `$${value.toLocaleString("es-CO")}`;
+}
+
+function toNumber(value: string | null, fallback: number): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toText(value: string | null, fallback: string): string {
+  if (!value) {
+    return fallback;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : fallback;
 }
 
 export default function AppCartPage() {
@@ -32,11 +63,44 @@ export default function AppCartPage() {
   const storeIdRaw = searchParams.get("storeId");
   const parsedStoreId = storeIdRaw ? Number.parseInt(storeIdRaw, 10) : 1;
   const safeStoreId = Number.isNaN(parsedStoreId) ? 1 : parsedStoreId;
+  const source = searchParams.get("source");
 
-  const store = getStoreById(safeStoreId) ?? getStoreById(1);
-  const maxAvailable = store?.available ?? 1;
-  const storePrice = store?.price ?? 0;
-  const storeDeliveryCost = store?.deliveryCost ?? 0;
+  const fallbackStore = getStoreById(safeStoreId) ?? getStoreById(1);
+
+  const queryProduct: CartItemView | null = source === "product-detail"
+    ? {
+        id: toNumber(searchParams.get("productId"), safeStoreId),
+        name: toText(searchParams.get("name"), "Producto"),
+        category: toText(searchParams.get("category"), "Sin categoria"),
+        price: toNumber(searchParams.get("price"), 0),
+        originalPrice: toNumber(searchParams.get("originalPrice"), toNumber(searchParams.get("price"), 0)),
+        available: Math.max(1, toNumber(searchParams.get("available"), 1)),
+        pickupTime: toText(searchParams.get("pickupTime"), "Consultar con el comercio"),
+        deliveryTime: toText(searchParams.get("deliveryTime"), "Consultar disponibilidad"),
+        deliveryCost: toNumber(searchParams.get("deliveryCost"), 0),
+        source: "query",
+      }
+    : null;
+
+  const cartItem: CartItemView | null = queryProduct
+    ?? (fallbackStore
+      ? {
+          id: fallbackStore.id,
+          name: fallbackStore.name,
+          category: fallbackStore.category,
+          price: fallbackStore.price,
+          originalPrice: fallbackStore.originalPrice,
+          available: fallbackStore.available,
+          pickupTime: fallbackStore.pickupTime,
+          deliveryTime: fallbackStore.deliveryTime,
+          deliveryCost: fallbackStore.deliveryCost,
+          source: "mock",
+        }
+      : null);
+
+  const maxAvailable = cartItem?.available ?? 1;
+  const storePrice = cartItem?.price ?? 0;
+  const storeDeliveryCost = cartItem?.deliveryCost ?? 0;
 
   const [quantity, setQuantity] = useState(1);
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>("pickup");
@@ -46,7 +110,7 @@ export default function AppCartPage() {
   const deliveryFee = deliveryOption === "delivery" ? storeDeliveryCost : 0;
   const total = subtotal + deliveryFee;
 
-  if (!store) {
+  if (!cartItem) {
     return null;
   }
 
@@ -55,7 +119,7 @@ export default function AppCartPage() {
       <header className="app-page-header">
         <div className="flex items-center gap-3">
           <Link
-            href={`/app/product/${store.id}`}
+            href={`/app/product/${cartItem.id}`}
             className="app-btn-icon app-header-back-button"
             aria-label="Volver a producto"
           >
@@ -72,8 +136,8 @@ export default function AppCartPage() {
       <div className="mt-4 space-y-4">
         <article className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Resumen</h2>
-          <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">{store.name}</p>
-          <p className="text-sm text-[var(--color-app-text-secondary-purple)]">Bolsa sorpresa de {store.category.toLowerCase()}</p>
+          <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">{cartItem.name}</p>
+          <p className="text-sm text-[var(--color-app-text-secondary-purple)]">Bolsa sorpresa de {cartItem.category.toLowerCase()}</p>
 
           <div className="mt-3 flex items-center justify-between">
             <span className="text-sm text-[var(--color-app-text-secondary-purple)]">Cantidad</span>
@@ -116,7 +180,7 @@ export default function AppCartPage() {
                 <Store className="mt-0.5 h-4 w-4 text-[var(--color-app-text-primary-purple)]" />
                 <div>
                   <p className="text-sm text-[var(--color-app-text-dark)]">Recoger en tienda</p>
-                  <p className="text-xs text-[var(--color-app-text-secondary-purple)]">{store.pickupTime}</p>
+                  <p className="text-xs text-[var(--color-app-text-secondary-purple)]">{cartItem.pickupTime}</p>
                 </div>
               </div>
             </button>
@@ -135,7 +199,7 @@ export default function AppCartPage() {
                 <div>
                   <p className="text-sm text-[var(--color-app-text-dark)]">Envio a domicilio</p>
                   <p className="text-xs text-[var(--color-app-text-secondary-purple)]">
-                    {store.deliveryTime} · {formatPrice(store.deliveryCost)}
+                    {cartItem.deliveryTime} · {formatPrice(cartItem.deliveryCost)}
                   </p>
                 </div>
               </div>

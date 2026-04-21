@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import type { ProductFromAPI, ProductType } from "@/lib/api";
-import { ProductsEmptyState } from "./products-empty-state";
-import { ProductsGrid } from "./products-grid";
-import { ProductsTabs } from "./products-tabs";
+import type { ProductFromAPI, ProductType } from "@/types/products";
+import { ProductsEmptyState, ProductsGrid, ProductsTabs } from "../list";
 
 interface ProductsPageContentProps {
   products: ProductFromAPI[];
@@ -15,6 +13,7 @@ interface ProductsPageContentProps {
   hasProducts: boolean;
   onAddProduct?: () => void;
   onEditProduct?: (product: ProductFromAPI) => void;
+  onDuplicateProduct?: (product: ProductFromAPI) => void;
   onDeleteProduct?: (product: ProductFromAPI) => void;
 }
 
@@ -26,6 +25,7 @@ export function ProductsPageContent({
   hasProducts,
   onAddProduct,
   onEditProduct,
+  onDuplicateProduct,
   onDeleteProduct,
 }: ProductsPageContentProps) {
   const [activeTab, setActiveTab] = useState<ProductType>("single");
@@ -61,6 +61,11 @@ export function ProductsPageContent({
   };
 
   const handleDuplicateProduct = (product: ProductFromAPI) => {
+    if (onDuplicateProduct) {
+      onDuplicateProduct(product);
+      return;
+    }
+
     toast.info(`Duplicar producto \"${product.title}\" estará disponible pronto.`);
   };
 

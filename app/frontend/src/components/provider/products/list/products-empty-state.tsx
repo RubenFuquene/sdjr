@@ -1,5 +1,5 @@
 import { Package } from "lucide-react";
-import { AddProductButton } from "./add-product-button";
+import { AddProductButton } from "../shared";
 
 interface ProductsEmptyStateProps {
   onAddProduct: () => void;

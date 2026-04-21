@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { AddProductButton } from "./add-product-button";
+import { AddProductButton } from "../shared";
 
 interface ProductsPageHeaderProps {
   onAddProduct?: () => void;

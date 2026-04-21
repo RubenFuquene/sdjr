@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, User, Check } from "lucide-react";
 import { useAuthForm } from "@/hooks/use-auth-form";
+import { PASSWORD_MIN_LENGTH, validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { Button } from "@/components/provider/ui/button";
 import { Input } from "@/components/provider/ui/input";
 import { Label } from "@/components/provider/ui/label";
@@ -27,11 +28,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   // Validaciones
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   const validateName = (name: string) => name.trim().length >= 2;
   const validateEmail = (email: string) => emailRegex.test(email);
-  const validatePassword = (password: string) => password.length >= 8;
+  const validatePassword = (password: string) => validatePasswordPolicy(password).isStrong;
   const validatePasswordMatch = (pwd: string, confirm: string) => pwd === confirm && pwd.length > 0;
+
+  const passwordPolicy = validatePasswordPolicy(formData.password);
 
   // Obtener estado de validación para cada campo
   const isNameValid = formData.name === "" || validateName(formData.name);
@@ -173,9 +176,33 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         </div>
         {touched.password && !isPasswordValid && (
           <p className="text-xs text-red-600">
-            La contraseña debe tener al menos 8 caracteres.
+            Debe cumplir todos los criterios de seguridad.
           </p>
         )}
+
+        <div className="rounded-[12px] border border-[#E0E0E0] bg-[#F7F7F7] p-3">
+          <p className="mb-2 text-xs font-medium text-[#1A1A1A]">La contraseña debe cumplir:</p>
+          <ul className="space-y-1 text-xs">
+            <li className={cn(passwordPolicy.minLength ? "text-emerald-700" : "text-[#6A6A6A]") }>
+              {passwordPolicy.minLength ? "✓" : "•"} Mínimo {PASSWORD_MIN_LENGTH} caracteres
+            </li>
+            <li className={cn(passwordPolicy.hasUppercase ? "text-emerald-700" : "text-[#6A6A6A]") }>
+              {passwordPolicy.hasUppercase ? "✓" : "•"} Al menos una mayúscula (A-Z)
+            </li>
+            <li className={cn(passwordPolicy.hasLowercase ? "text-emerald-700" : "text-[#6A6A6A]") }>
+              {passwordPolicy.hasLowercase ? "✓" : "•"} Al menos una minúscula (a-z)
+            </li>
+            <li className={cn(passwordPolicy.hasNumber ? "text-emerald-700" : "text-[#6A6A6A]") }>
+              {passwordPolicy.hasNumber ? "✓" : "•"} Al menos un número (0-9)
+            </li>
+            <li className={cn(passwordPolicy.hasSymbol ? "text-emerald-700" : "text-[#6A6A6A]") }>
+              {passwordPolicy.hasSymbol ? "✓" : "•"} Al menos un carácter especial (ej. !@#$%)
+            </li>
+            <li className={cn(passwordPolicy.noSpaces ? "text-emerald-700" : "text-[#6A6A6A]") }>
+              {passwordPolicy.noSpaces ? "✓" : "•"} Sin espacios
+            </li>
+          </ul>
+        </div>
       </div>
 
       {/* Campo Confirmar Contraseña */}

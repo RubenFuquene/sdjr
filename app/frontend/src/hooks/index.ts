@@ -12,6 +12,7 @@ export { useBasicInfoForm } from './provider/use-basic-info-form';
 export { useCreateProviderBranch } from './provider/use-create-provider-branch';
 export { useProviderBranchForm } from './provider/use-provider-branch-form';
 export { useProviderBranches } from './provider/use-provider-branches';
+export { useProductCategories } from './provider/use-product-categories';
 export { useProviderProductForm } from './provider/use-provider-product-form';
 export { useProviderProducts } from './provider/use-provider-products';
 export { useEstablishmentTypes } from './use-establishment-types';

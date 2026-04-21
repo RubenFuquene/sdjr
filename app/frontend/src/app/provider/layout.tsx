@@ -5,5 +5,5 @@ export const metadata = {
 };
 
 export default function ProviderLayout({ children }: { children: ReactNode }) {
-  return <div className="min-h-screen">{children}</div>;
+  return <>{children}</>;
 }

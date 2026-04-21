@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { login } from "@/lib/api/auth";
 import { registerProvider } from "@/lib/api/provider-auth";
+import {
+  getPasswordPolicyMessage,
+  validatePasswordPolicy,
+} from "@/lib/auth/password-policy";
 import { persistSession } from "@/lib/session";
 import type { SessionData } from "@/types/auth";
 
@@ -136,8 +140,9 @@ export function useAuthForm(): UseAuthFormReturn {
         throw new Error("Por favor ingresa un correo válido");
       }
 
-      if (sanitizedPassword.length < 8) {
-        throw new Error("La contraseña debe tener al menos 8 caracteres");
+      const passwordPolicy = validatePasswordPolicy(sanitizedPassword);
+      if (!passwordPolicy.isStrong) {
+        throw new Error(getPasswordPolicyMessage(passwordPolicy));
       }
 
       if (sanitizedPassword !== sanitizedPasswordConfirmation) {

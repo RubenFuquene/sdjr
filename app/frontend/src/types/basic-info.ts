@@ -11,7 +11,7 @@ export type DocumentType = 'nit' | 'cc' | 'ce' | 'passport';
 /**
  * Tipo de establecimiento
  */
-export type EstablishmentType = 'restaurant' | 'cafeteria' | 'bakery' | 'fast_food' | 'desserts' | 'drinks' | 'other';
+export type EstablishmentType = string;
 
 /**
  * Información del Representante Legal

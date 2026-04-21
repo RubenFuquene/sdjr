@@ -117,6 +117,7 @@ export default function AppDiscoverPage() {
   };
 
   const hasMorePages = currentPage < lastPage;
+  const DUMMY_SCHEDULE_LABEL = "Horario referencial (dummy): Hoy 18:00 - 20:00";
 
   const getDiscountPercentage = (price: number, originalPrice: number): number => {
     if (originalPrice <= 0 || originalPrice <= price) {
@@ -124,6 +125,28 @@ export default function AppDiscoverPage() {
     }
 
     return Math.round(((originalPrice - price) / originalPrice) * 100);
+  };
+  
+  const buildProductHref = (card: DiscoverNearbyCard): string => {
+    const params = new URLSearchParams({
+      source: "discover",
+      name: card.name,
+      category: card.category,
+      address: card.address,
+      price: String(card.price),
+      originalPrice: String(card.originalPrice),
+      available: String(card.available),
+      pickupTime: DUMMY_SCHEDULE_LABEL,
+      deliveryTime: DUMMY_SCHEDULE_LABEL,
+      deliveryCost: String(card.deliveryCost),
+      description: card.description,
+    });
+
+    if (card.imageUrl) {
+      params.set("imageUrl", card.imageUrl);
+    }
+
+    return `/app/product/${card.productId}?${params.toString()}`;
   };
 
   const handleLoadMore = async () => {
@@ -314,9 +337,11 @@ export default function AppDiscoverPage() {
                 const discountPercentage = getDiscountPercentage(card.price, card.originalPrice);
 
                 return (
-                  <article
+                  <Link
                     key={`${card.productId}-${card.branchId ?? "no-branch"}`}
-                    className="overflow-hidden rounded-[18px] border border-[var(--color-app-ui-divider)] bg-white shadow-[var(--app-shadow-surface)]"
+                    href={buildProductHref(card)}
+                    className="group block overflow-hidden rounded-[18px] border border-[var(--color-app-ui-divider)] bg-white shadow-[var(--app-shadow-surface)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-app-text-primary-purple)]"
+                    aria-label={`Ver producto ${card.name}`}
                   >
                     <div className="relative h-36 overflow-hidden bg-gradient-to-br from-[#b9cb6f] via-[#88a255] to-[#4B236A]">
                       {card.imageUrl ? (
@@ -376,11 +401,12 @@ export default function AppDiscoverPage() {
                           <p className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-app-text-secondary-purple)]">
                             <Clock3 className="h-3.5 w-3.5" />
                             Hoy 18:00 - 20:00
+                            Horario referencial (dummy)
                           </p>
                         </div>
                       </div>
                     </div>
-                  </article>
+                  </Link>
                 );
               })}
             </div>
