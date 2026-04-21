@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { INITIAL_BASIC_INFO_FORM } from '@/types/basic-info';
@@ -32,6 +33,7 @@ type DocumentFiles = {
 type DocumentFileKey = keyof DocumentFiles;
 
 export const useBasicInfoForm = () => {
+  const router = useRouter();
   const { commerce, isLoadingCommerce, refreshCommerce } = useProviderCommerce();
   const [formData, setFormData] = useState<BasicInfoFormData>(INITIAL_BASIC_INFO_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -55,6 +57,50 @@ export const useBasicInfoForm = () => {
     setFormData(mapCommerceToBasicInfoForm(commerce));
   }, [commerce, isLoadingCommerce]);
 
+  const getErrorKeysForFieldPath = (fieldPath: string): Array<keyof FormErrors> => {
+    const nestedFieldMap: Record<string, keyof FormErrors> = {
+      'legalRepresentative.firstName': 'legalRepresentativeFirstName',
+      'legalRepresentative.lastName': 'legalRepresentativeLastName',
+      'legalRepresentative.documentType': 'legalRepresentativeDocumentType',
+      'legalRepresentative.documentNumber': 'legalRepresentativeDocumentNumber',
+      'legalRepresentative.documentFile': 'legalRepresentativeDocumentFile',
+      'documents.identity': 'identity',
+      'documents.commerceChamber': 'commerceChamber',
+    };
+
+    if (nestedFieldMap[fieldPath]) {
+      return [nestedFieldMap[fieldPath]];
+    }
+
+    if (!fieldPath.includes('.')) {
+      return [fieldPath as keyof FormErrors];
+    }
+
+    return [];
+  };
+
+  const clearFieldErrors = (fieldPath: string) => {
+    const keys = getErrorKeysForFieldPath(fieldPath);
+
+    if (keys.length === 0) {
+      return;
+    }
+
+    setErrors((prev) => {
+      let changed = false;
+      const newErrors = { ...prev };
+
+      keys.forEach((key) => {
+        if (newErrors[key]) {
+          delete newErrors[key];
+          changed = true;
+        }
+      });
+
+      return changed ? newErrors : prev;
+    });
+  };
+
   const handleFieldChange = (fieldPath: string, value: string | number | null) => {
     setFormData((prev) => {
       if (fieldPath.includes('.')) {
@@ -76,13 +122,7 @@ export const useBasicInfoForm = () => {
       };
     });
 
-    if (errors[fieldPath as keyof FormErrors]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[fieldPath as keyof FormErrors];
-        return newErrors;
-      });
-    }
+    clearFieldErrors(fieldPath);
   };
 
   const validateForm = (): boolean => {
@@ -119,11 +159,15 @@ export const useBasicInfoForm = () => {
       let commerceId = existingCommerceId;
 
       if (commerceId) {
+        const establishmentTypeId = Number.parseInt(formData.establishmentType, 10);
+
         await updateCommerce(commerceId, {
           owner_user_id: ownerUserId,
           name: payload.commerce.name,
           description: payload.commerce.description,
-          establishment_type: payload.commerce.establishment_type,
+          establishment_type_id: Number.isNaN(establishmentTypeId)
+            ? undefined
+            : establishmentTypeId,
           tax_id: payload.commerce.tax_id,
           tax_id_type: payload.commerce.tax_id_type,
           address: payload.commerce.address,
@@ -149,6 +193,15 @@ export const useBasicInfoForm = () => {
           ? 'Tus cambios fueron aplicados.'
           : 'Procederemos con la siguiente sección de tu registro',
       });
+
+      // Fase 3: Encadenar flujo según aceptación de términos
+      // Si terms_accepted_at es null, redirigir a pantalla legal para primera aceptación
+      // Si ya fue aceptado, mantener comportamiento normal
+      setTimeout(() => {
+        if (!commerce?.terms_accepted_at) {
+          router.push('/provider/legal');
+        }
+      }, 500);
     } catch (err) {
       console.error('Error al guardar:', err);
       const errorMessage = err instanceof Error ? err.message : '';
@@ -161,6 +214,12 @@ export const useBasicInfoForm = () => {
       if (errorMessage === 'neighborhood_id_invalid') {
         toast.error('Barrio inválido', {
           description: 'Selecciona un barrio válido desde la lista.',
+        });
+        return;
+      }
+      if (errorMessage === 'establishment_type_id_invalid') {
+        toast.error('Tipo de establecimiento inválido', {
+          description: 'Selecciona un tipo de establecimiento válido desde la lista.',
         });
         return;
       }
@@ -259,6 +318,16 @@ export const useBasicInfoForm = () => {
 
   const handleDocumentFileSelected = (key: DocumentFileKey, file: File | null) => {
     setDocumentFiles((prev) => ({ ...prev, [key]: file }));
+
+    setDocumentStatus((prev) => ({
+      ...prev,
+      [key]: { status: 'idle', error: null },
+    }));
+
+    const fieldPath = key === 'commerceChamber'
+      ? 'documents.commerceChamber'
+      : 'legalRepresentative.documentFile';
+    clearFieldErrors(fieldPath);
   };
 
   const handleCancel = () => {
@@ -303,7 +372,9 @@ const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormDat
     commercialName: commerce.name || '',
     documentType: mapBackendDocumentTypeToFrontend(commerce.tax_id_type),
     documentNumber: commerce.tax_id || '',
-    establishmentType: mapBackendEstablishmentTypeToFrontend(commerce.establishment_type),
+    establishmentType: commerce.establishment_type_id
+      ? String(commerce.establishment_type_id)
+      : '',
     phone: commerce.phone || '',
     email: commerce.email || '',
     departmentId: commerce.department?.id ?? null,
@@ -352,21 +423,3 @@ const mapBackendDocumentTypeToFrontend = (documentType?: string): BasicInfoFormD
   }
 };
 
-const mapBackendEstablishmentTypeToFrontend = (
-  establishmentType?: string | null
-): BasicInfoFormData['establishmentType'] => {
-  const normalizedEstablishmentType = (establishmentType || '').trim().toLowerCase();
-
-  switch (normalizedEstablishmentType) {
-    case 'restaurant':
-    case 'cafeteria':
-    case 'bakery':
-    case 'fast_food':
-    case 'desserts':
-    case 'drinks':
-    case 'other':
-      return normalizedEstablishmentType;
-    default:
-      return '';
-  }
-};

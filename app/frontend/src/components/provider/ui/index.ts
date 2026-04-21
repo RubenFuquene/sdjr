@@ -19,6 +19,13 @@ export { Input } from "./input";
 
 export { Label } from "./label";
 
+export { FormField } from "./form-field";
+
+export { InputField } from "./input-field";
+
+export { SelectField } from "./select-field";
+export type { SelectFieldOption } from "./select-field";
+
 export { Textarea } from "./textarea";
 
 export {

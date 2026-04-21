@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProductFromAPI } from "@/lib/api";
+import type { ProductFromAPI } from "@/types/products";
 import { ProductCard } from "./product-card";
 
 interface ProductsGridProps {

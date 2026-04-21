@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Copy, Edit, Image as ImageIcon, Package, Trash2 } from "lucide-react";
-import type { ProductFromAPI } from "@/lib/api";
+import type { ProductFromAPI } from "@/types/products";
 
 interface ProductCardProps {
   product: ProductFromAPI;

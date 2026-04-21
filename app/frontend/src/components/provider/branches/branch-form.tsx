@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
-import { useLocation } from "@/hooks";
+import { useLocation } from "@/hooks/index";
 import { CitySelect, DepartmentSelect, NeighborhoodSelect } from "@/components/provider/ui";
 import type {
   ProviderBranchFormFieldErrors,

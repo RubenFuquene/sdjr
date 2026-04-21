@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { loginAppUser, registerAppUser } from "@/lib/api/app-auth";
 import { ApiError } from "@/lib/api/client";
+import {
+  getPasswordPolicyMessage,
+  validatePasswordPolicy,
+} from "@/lib/auth/password-policy";
 import { persistSession } from "@/lib/session";
 import type { SessionData } from "@/types/auth";
 
@@ -192,8 +196,9 @@ export function useAppAuthForm(): UseAppAuthFormReturn {
         throw new Error("Por favor ingresa un correo valido");
       }
 
-      if (sanitizedPassword.length < 8) {
-        throw new Error("La contrasena debe tener al menos 8 caracteres");
+      const passwordPolicy = validatePasswordPolicy(sanitizedPassword);
+      if (!passwordPolicy.isStrong) {
+        throw new Error(getPasswordPolicyMessage(passwordPolicy));
       }
 
       if (sanitizedPassword !== sanitizedConfirmation) {

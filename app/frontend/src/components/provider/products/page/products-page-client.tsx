@@ -3,12 +3,10 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/admin/shared/confirmation-dialog";
-import { useProviderBranches } from "@/hooks/provider/use-provider-branches";
-import { useProviderProductForm } from "@/hooks/provider/use-provider-product-form";
-import { useProviderProducts } from "@/hooks/provider/use-provider-products";
-import type { ProductFromAPI } from "@/lib/api";
-import { ProductFormModal } from "./product-form-modal";
-import type { ProductFormInitialData, ProductFormMode } from "./product-form";
+import { useProviderBranches, useProviderProductForm, useProviderProducts } from "@/hooks/index";
+import type { ProductFromAPI } from "@/types/products";
+import { ProductFormModal } from "../form";
+import type { ProductFormInitialData, ProductFormMode } from "../form";
 import { ProductsPageHeader } from "./products-page-header";
 import { ProductsPageContent } from "./products-page-content";
 
@@ -95,6 +93,22 @@ export function ProductsPageClient() {
     setIsModalOpen(true);
   };
 
+  const handleDuplicateProduct = (product: ProductFromAPI) => {
+    setModalMode("create");
+    setEditingProductId(null);
+    setEditingInitialData({
+      ...mapProductToInitialData(product),
+      id: undefined,
+      title: `${product.title} (copia)`,
+    });
+    resetErrors();
+    setIsModalOpen(true);
+
+    if (product.product_type === "package") {
+      toast.info("Verifica los items del pack antes de guardar la copia.");
+    }
+  };
+
   const handleSubmitProductForm = async (input: Parameters<typeof createProduct>[0]) => {
     if (modalMode === "edit" && editingProductId) {
       const updated = await updateProduct(editingProductId, input);
@@ -156,6 +170,7 @@ export function ProductsPageClient() {
         hasProducts={hasProducts}
         onAddProduct={openCreateSingleModal}
         onEditProduct={handleEditProduct}
+        onDuplicateProduct={handleDuplicateProduct}
         onDeleteProduct={handleDeleteProduct}
       />
 

@@ -4,41 +4,22 @@
  */
 
 import { fetchWithErrorHandling } from "./client";
-import type { DocumentUploadResource } from "./documents";
 import type { ApiSuccess } from "./types";
+import type {
+  ProductCategoryFromAPI,
+  ProductFormInput,
+  ProductFromAPI,
+  ProductType,
+} from "@/types/products";
 
-export type ProductType = "single" | "package";
-
-export interface ProductPhotoFromAPI extends DocumentUploadResource {
-  product_id?: number;
-}
-
-export interface ProductFromAPI {
-  id: number;
-  commerce_id: number;
-  product_category_id: number;
-  title: string;
-  description: string | null;
-  product_type: ProductType;
-  original_price: number;
-  discounted_price: number | null;
-  quantity_total: number;
-  quantity_available: number;
-  expires_at: string | null;
-  photos?: ProductPhotoFromAPI[];
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ProductCategoryFromAPI {
-  id: number;
-  name: string;
-  description: string | null;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
+// Backward compatibility: maintain temporary type exports from API layer.
+export type {
+  ProductCategoryFromAPI,
+  ProductFormInput,
+  ProductFromAPI,
+  ProductPhotoFromAPI,
+  ProductType,
+} from "@/types/products";
 
 export interface GetProductCategoriesParams {
   page?: number;
@@ -53,23 +34,6 @@ export interface CreateProductPhotoInput {
   file_size_bytes: number;
   versioning_enabled?: string;
   metadata?: Record<string, unknown>;
-}
-
-export interface ProductFormInput {
-  commerceId: number;
-  productCategoryId: number;
-  title: string;
-  description?: string | null;
-  productType: ProductType;
-  originalPrice: number;
-  discountedPrice?: number | null;
-  quantityTotal?: number;
-  quantityAvailable: number;
-  expiresAt?: string | null;
-  status?: string;
-  branchId?: number | null;
-  packageItemIds?: number[];
-  photos?: CreateProductPhotoInput[];
 }
 
 export interface CreateProductPayload {

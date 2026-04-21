@@ -20,7 +20,7 @@ import {
 } from '@/components/provider/ui';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
 import { DOCUMENT_TYPE_OPTIONS } from '@/types/basic-info';
-import { useLocation, useEstablishmentTypes } from '@/hooks';
+import { useLocation, useEstablishmentTypes } from '@/hooks/index';
 
 interface EstablecimientoCardProps {
   formData: BasicInfoFormData;
@@ -237,7 +237,7 @@ export function EstablecimientoCard({
               </SelectTrigger>
               <SelectContent>
                 {Array.isArray(establishmentTypes) && establishmentTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.code}>
+                  <SelectItem key={type.id} value={String(type.id)}>
                     {type.name}
                   </SelectItem>
                 ))}

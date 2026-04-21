@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError, getMyCommerce, getProductsByCommerce } from '@/lib/api';
-import type { ProductFromAPI } from '@/lib/api';
+import type { ProductFromAPI } from '@/types/products';
 
 interface UseProviderProductsReturn {
   products: ProductFromAPI[];

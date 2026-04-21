@@ -1,4 +1,4 @@
-import type { ProductType } from "@/lib/api";
+import type { ProductType } from "@/types/products";
 
 interface ProductsTabsProps {
   activeTab: ProductType;
