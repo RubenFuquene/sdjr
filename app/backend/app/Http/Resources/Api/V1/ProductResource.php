@@ -23,6 +23,22 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="quantity_available", type="integer"),
  *   @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
  *   @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
+ *   @OA\Property(
+ *     property="package_items",
+ *     type="array",
+ *     description="Products included in this package (only when loaded)",
+ *
+ *     @OA\Items(
+ *       type="object",
+ *
+ *       @OA\Property(property="id", type="integer"),
+ *       @OA\Property(property="title", type="string"),
+ *       @OA\Property(property="product_type", type="string"),
+ *       @OA\Property(property="original_price", type="number", format="float"),
+ *       @OA\Property(property="discounted_price", type="number", format="float", nullable=true),
+ *       @OA\Property(property="quantity", type="integer", description="Quantity of this product in the package")
+ *     )
+ *   ),
  *   @OA\Property(property="status", type="string"),
  *   @OA\Property(property="created_at", type="string", format="date-time"),
  *   @OA\Property(property="updated_at", type="string", format="date-time")
@@ -53,6 +69,18 @@ class ProductResource extends JsonResource
             'photos' => $this->whenLoaded('photos', function () {
                 return $this->photos->map(function ($photo) {
                     return new DocumentUploadResource($photo, ['product_id' => $this->id]);
+                });
+            }),
+            'package_items' => $this->whenLoaded('packageItems', function () {
+                return $this->packageItems->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'title' => $item->title,
+                        'product_type' => $item->product_type,
+                        'original_price' => $item->original_price,
+                        'discounted_price' => $item->discounted_price,
+                        'quantity' => $item->pivot->quantity,
+                    ];
                 });
             }),
             'status' => $this->status,

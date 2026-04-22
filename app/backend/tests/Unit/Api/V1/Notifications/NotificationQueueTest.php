@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Notifications;
+namespace Tests\Unit\Api\V1\Notifications;
 
 use App\Models\Commerce;
 use App\Models\User;

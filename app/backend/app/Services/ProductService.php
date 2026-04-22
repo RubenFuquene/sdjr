@@ -253,7 +253,7 @@ class ProductService
         try {
             $product = Product::where(['id' => $product_package_id, 'product_type' => Constant::PRODUCT_TYPE_PACKAGE])->firstOrFail();
 
-            return $product;
+            return $product->load(['packageItems', 'packageItems.photos']);
         } catch (ModelNotFoundException $e) {
             Log::error('Error fetching package items for product ID: '.$product_package_id, ['error' => $e->getMessage()]);
             throw new ModelNotFoundException('Product Package not found with the specified ID.');
@@ -277,10 +277,13 @@ class ProductService
                 $productPackage->packageItems()->detach();
 
                 if (isset($data['package_items']) && is_array($data['package_items'])) {
-                    $productPackage->packageItems()->attach($data['package_items']);
+                    $itemsWithQuantity = collect($data['package_items'])->mapWithKeys(function ($item) {
+                        return [$item['product_id'] => ['quantity' => $item['quantity']]];
+                    })->toArray();
+                    $productPackage->packageItems()->attach($itemsWithQuantity);
                 }
 
-                return $productPackage;
+                return $productPackage->load(['packageItems', 'packageItems.photos']);
             });
 
         } catch (Exception $e) {
@@ -301,10 +304,13 @@ class ProductService
             $productPackage = $this->update($product_package_id, $items);
             $productPackage->packageItems()->detach();
             if (! empty($items['package_items'])) {
-                $productPackage->packageItems()->attach($items['package_items']);
+                $itemsWithQuantity = collect($items['package_items'])->mapWithKeys(function ($item) {
+                    return [$item['product_id'] => ['quantity' => $item['quantity']]];
+                })->toArray();
+                $productPackage->packageItems()->attach($itemsWithQuantity);
             }
 
-            return $productPackage;
+            return $productPackage->load(['packageItems', 'packageItems.photos']);
 
         } catch (Exception $e) {
             Log::error('Error updating ProductPackageItems', ['error' => $e->getMessage()]);

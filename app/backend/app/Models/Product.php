@@ -130,7 +130,8 @@ class Product extends Model
      */
     public function packageItems()
     {
-        return $this->belongsToMany(Product::class, 'product_package_items', 'product_package_id', 'product_id');
+        return $this->belongsToMany(Product::class, 'product_package_items', 'product_package_id', 'product_id')
+            ->withPivot('quantity');
     }
 
     /**
@@ -140,7 +141,8 @@ class Product extends Model
      */
     public function package()
     {
-        return $this->belongsToMany(Product::class, 'product_package_items', 'product_id', 'product_package_id');
+        return $this->belongsToMany(Product::class, 'product_package_items', 'product_id', 'product_package_id')
+            ->withPivot('quantity');
     }
 
     /**

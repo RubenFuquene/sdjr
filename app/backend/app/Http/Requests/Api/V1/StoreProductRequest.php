@@ -6,7 +6,9 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
 use App\Models\Commerce;
+use App\Models\Product;
 use App\Services\ProductService;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -42,8 +44,26 @@ use Illuminate\Foundation\Http\FormRequest;
  *   @OA\Property(
  *     property="package_items",
  *     type="array",
+ *     description="Array of products included in this package",
  *
- *     @OA\Items(type="integer", example=10, description="ID of a product included in the package")
+ *     @OA\Items(
+ *       type="object",
+ *       required={"product_id", "quantity"},
+ *
+ *       @OA\Property(
+ *         property="product_id",
+ *         type="integer",
+ *         example=10,
+ *         description="ID of the product to include"
+ *       ),
+ *       @OA\Property(
+ *         property="quantity",
+ *         type="integer",
+ *         minimum=1,
+ *         example=2,
+ *         description="Quantity of this product in the package"
+ *       )
+ *     )
  *   )
  * )
  */
@@ -88,7 +108,33 @@ class StoreProductRequest extends FormRequest
             'photos.*.metadata' => ['nullable', 'array'],
 
             // Package
-            'package_items.*' => ['sometimes', 'integer', 'exists:products,id'],
+            'package_items' => ['sometimes', 'array'],
+            'package_items.*.product_id' => ['required', 'integer', 'exists:products,id', 'distinct'],
+            'package_items.*.quantity' => ['required', 'integer', 'min:1'],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($this->has('package_items')) {
+                foreach ($this->input('package_items', []) as $index => $item) {
+                    if (isset($item['product_id']) && isset($item['quantity'])) {
+                        $product = Product::find($item['product_id']);
+                        if ($product) {
+                            if ($item['quantity'] > $product->quantity_available) {
+                                $validator->errors()->add(
+                                    "package_items.{$index}.quantity",
+                                    "The quantity cannot exceed the available quantity ({$product->quantity_available}) of product '{$product->title}'."
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }

@@ -2,32 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+namespace Tests\Feature\Api\V1;
 
-use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class ThrottleOrderCreateTest extends TestCase
+class ThrottleAuthenticatedTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * Test order creation endpoint throttling (should return 429 after 100 requests/min).
+     * Test authenticated user throttle (should return 429 after 100 requests/min).
      */
-    public function test_order_create_throttle_returns_429_after_limit(): void
+    public function test_authenticated_throttle_returns_429_after_limit(): void
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        $payload = [
-            // Completa con los campos mínimos requeridos por Order
-        ];
         for ($i = 0; $i < 100; $i++) {
-            $this->postJson('/api/v1/orders', $payload);
+            $this->getJson('/api/v1/me');
         }
-        $response = $this->postJson('/api/v1/orders', $payload);
+        $response = $this->getJson('/api/v1/me');
         $response->assertStatus(429)
             ->assertJson([
                 'status' => false,
