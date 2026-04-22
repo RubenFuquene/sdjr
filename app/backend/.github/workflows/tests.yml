@@ -37,8 +37,10 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Copy environment file
-        run: cp .env.example .env
+      - name: Copy CI environment file and set bootstrap flag
+        run: |
+          cp .env.example.ci .env
+          echo "BOOTSTRAP_ENV_FILE=true" >> $GITHUB_ENV
 
       - name: Generate app key
         run: php artisan key:generate

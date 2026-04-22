@@ -5,6 +5,20 @@ ENV_FILE=".env"
 DB_WAIT_TIMEOUT=${DB_WAIT_TIMEOUT:-60}
 DB_WAIT_REQUIRED=0
 
+is_env_bootstrap_enabled() {
+    local flag="${BOOTSTRAP_ENV_FILE:-false}"
+    flag=$(echo "$flag" | tr '[:upper:]' '[:lower:]' | xargs)
+
+    [ "$flag" = "true" ] || [ "$flag" = "1" ] || [ "$flag" = "yes" ]
+}
+
+is_runtime_config_cache_enabled() {
+    local flag="${ENABLE_RUNTIME_CONFIG_CACHE:-false}"
+    flag=$(echo "$flag" | tr '[:upper:]' '[:lower:]' | xargs)
+
+    [ "$flag" = "true" ] || [ "$flag" = "1" ] || [ "$flag" = "yes" ]
+}
+
 update_env_var() {
     local key="$1"
     local value="$2"
@@ -16,10 +30,62 @@ update_env_var() {
 }
 
 bootstrap_env_file() {
-    if [ ! -f "$ENV_FILE" ]; then
-        echo "Creating .env file from .env.example..."
-        cp .env.example.prd "$ENV_FILE"
+    if [ -f "$ENV_FILE" ]; then
+        return
     fi
+
+    if ! is_env_bootstrap_enabled; then
+        echo "BOOTSTRAP_ENV_FILE disabled. Skipping .env bootstrap."
+        return
+    fi
+
+    if [ ! -f ".env.example.ci" ]; then
+        echo "Error: .env.example.ci not found and BOOTSTRAP_ENV_FILE is enabled."
+        exit 1
+    fi
+
+    echo "Creating .env file from .env.example.ci..."
+    cp .env.example.ci "$ENV_FILE"
+}
+
+validate_required_runtime_env() {
+    local app_env=$(get_app_environment)
+
+    if [[ "$app_env" != "production" && "$app_env" != "prod" ]]; then
+        return
+    fi
+
+    local required_vars=(
+        "AWS_ACCESS_KEY_ID"
+        "AWS_SECRET_ACCESS_KEY"
+        "AWS_BUCKET"
+        "AWS_URL"
+        "AWS_ENDPOINT"
+    )
+
+    local missing_vars=()
+    for var_name in "${required_vars[@]}"; do
+        local value="${!var_name}"
+        if [ -z "$value" ]; then
+            missing_vars+=("$var_name")
+        fi
+    done
+
+    if [ ${#missing_vars[@]} -gt 0 ]; then
+        echo "Error: Missing required runtime env vars in production: ${missing_vars[*]}"
+        exit 1
+    fi
+}
+
+refresh_laravel_config_cache_if_enabled() {
+    if ! is_runtime_config_cache_enabled; then
+        echo "ENABLE_RUNTIME_CONFIG_CACHE disabled. Skipping config cache regeneration."
+        return
+    fi
+
+    echo "Regenerating Laravel config cache from current runtime environment..."
+    php artisan config:clear --no-interaction || true
+    php artisan config:cache --no-interaction
 }
 
 
@@ -213,6 +279,7 @@ start_application() {
 
 main() {
     bootstrap_env_file
+    validate_required_runtime_env
 
     # Normalize URLs provided by hosting platforms
     if [ -z "$DATABASE_URL" ] && [ ! -z "$MYSQL_URL" ]; then
@@ -226,6 +293,7 @@ main() {
     fi
 
     determine_wait_requirement
+    refresh_laravel_config_cache_if_enabled
     generate_app_key_if_needed
     ensure_sqlite_file_if_needed
     # ensure_queue_configuration removido: las variables ya están en .env.example.prd
