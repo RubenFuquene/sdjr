@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Models\Commerce;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -32,9 +33,32 @@ class CommerceRequest extends FormRequest
     public function authorize(): bool
     {
         $action = $this->route()->getActionMethod();
-        $permission = 'provider.commerces.'.($action === 'store' ? 'create' : 'update');
+        $permission = 'provider.commerces.'.($action === 'store' ? 'create' : 'update');        
 
-        return $this->user()?->can($permission) ?? false;
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        $canUpdateAsProvider = $this->user()?->can($permission);
+        if (! $canUpdateAsProvider) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(['superadmin', 'admin'])) {
+            return true;
+        }
+
+        $commerceId = (int) ($this->route('id') ?? $this->route('commerce') ?? 0);
+        if ($commerceId <= 0) {
+            return false;
+        }
+
+        return Commerce::query()
+            ->whereKey($commerceId)
+            ->where('owner_user_id', $user->id)            
+            ->exists();
+
     }
 
     public function rules(): array

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Models\CommerceBranch;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 /**
  * @OA\Schema(
@@ -26,8 +28,37 @@ use Illuminate\Foundation\Http\FormRequest;
 class UpdateCommerceBranchRequest extends FormRequest
 {
     public function authorize(): bool
-    {
-        return $this->user()?->can('provider.branches.update') ?? false;
+    {        
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        $canUpdateAsProvider = $user->can('provider.branches.update');
+        if (! $canUpdateAsProvider) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(['superadmin', 'admin'])) {
+            return true;
+        }
+
+        $branchId = (int) ($this->route('id') ?? $this->route('branch') ?? 0);
+        if ($branchId <= 0) {
+            return false;
+        }
+
+        return CommerceBranch::query()
+            ->whereKey($branchId)
+            ->where(function (Builder $query) use ($user): void {
+                $query
+                    ->where('user_id', $user->id)
+                    ->orWhereHas('commerce.commerceBranch', function (Builder $commerceQuery) use ($user): void {
+                        $commerceQuery->where('owner_user_id', $user->id);
+                    });
+            })
+            ->exists();
+
     }
 
     public function rules(): array
