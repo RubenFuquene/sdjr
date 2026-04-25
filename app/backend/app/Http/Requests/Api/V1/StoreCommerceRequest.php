@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
-use App\Models\Commerce;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="CommerceRequest",
+ *     schema="StoreCommerceRequest",
  *     required={"owner_user_id","department_id","city_id","neighborhood_id","name","tax_id","tax_id_type","address"},
  *
  *     @OA\Property(property="owner_user_id", type="integer", example=1),
@@ -18,7 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="neighborhood_id", type="integer", example=1),
  *     @OA\Property(property="establishment_type_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", maxLength=255, example="Comercial S.A.S"),
- *     @OA\Property(property="description", type="string", maxLength=500, example="Comercio de tecnología"),
+ *     @OA\Property(property="description", type="string", maxLength=500, example="Comercio de tecnologia"),
  *     @OA\Property(property="tax_id", type="string", maxLength=30, example="900123456"),
  *     @OA\Property(property="tax_id_type", type="string", maxLength=10, example="NIT"),
  *     @OA\Property(property="address", type="string", maxLength=255, example="Calle 123 #45-67"),
@@ -28,20 +27,17 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="is_verified", type="boolean", example=false)
  * )
  */
-class CommerceRequest extends FormRequest
+class StoreCommerceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $action = $this->route()->getActionMethod();
-        $permission = 'provider.commerces.'.($action === 'store' ? 'create' : 'update');        
-
         $user = $this->user();
         if (! $user) {
             return false;
         }
 
-        $canUpdateAsProvider = $this->user()?->can($permission);
-        if (! $canUpdateAsProvider) {
+        $canCreateAsProvider = $user->can('provider.commerces.create');
+        if (! $canCreateAsProvider) {
             return false;
         }
 
@@ -49,21 +45,14 @@ class CommerceRequest extends FormRequest
             return true;
         }
 
-        $commerceId = (int) ($this->route('id') ?? $this->route('commerce') ?? 0);
-        if ($commerceId <= 0) {
-            return false;
-        }
+        $ownerUserId = (int) $this->input('owner_user_id', 0);
 
-        return Commerce::query()
-            ->whereKey($commerceId)
-            ->where('owner_user_id', $user->id)            
-            ->exists();
-
+        return $ownerUserId > 0 && $ownerUserId === (int) $user->id;
     }
 
     public function rules(): array
     {
-        $rules = [
+        return [
             'owner_user_id' => ['required', 'integer', 'exists:users,id'],
             'department_id' => ['required', 'integer', 'exists:departments,id'],
             'city_id' => ['required', 'integer', 'exists:cities,id'],
@@ -80,9 +69,6 @@ class CommerceRequest extends FormRequest
             'is_verified' => ['boolean'],
             'terms_accepted_version' => ['nullable', 'integer', 'min:1'],
             'terms_accepted_at' => ['nullable', 'date'],
-
         ];
-
-        return $rules;
     }
 }

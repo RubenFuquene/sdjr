@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Constants\Constant;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CommerceRequest;
 use App\Http\Requests\Api\V1\DeleteCommerceRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
@@ -16,6 +15,8 @@ use App\Http\Requests\Api\V1\PatchCommerceAcceptTermsRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
 use App\Http\Requests\Api\V1\ShowCommerceRequest;
+use App\Http\Requests\Api\V1\StoreCommerceRequest;
+use App\Http\Requests\Api\V1\UpdateCommerceRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
@@ -124,7 +125,7 @@ class CommerceController extends Controller
      *         required=true,
      *         description="Commerce",
      *
-     *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
+    *         @OA\JsonContent(ref="#/components/schemas/StoreCommerceRequest")
      *     ),
      *
      *     @OA\Response(
@@ -139,7 +140,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(CommerceRequest $request): JsonResponse
+    public function store(StoreCommerceRequest $request): JsonResponse
     {
         try {
             $commerce = $this->commerceService->store($request->validated());
@@ -205,7 +206,7 @@ class CommerceController extends Controller
      *         required=true,
      *         description="Commerce",
      *
-     *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
+    *         @OA\JsonContent(ref="#/components/schemas/UpdateCommerceRequest")
      *     ),
      *
      *     @OA\Response(
@@ -221,7 +222,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function update(CommerceRequest $request, int $commerce_id): JsonResponse
+    public function update(UpdateCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
             $commerce = $this->commerceService->update($commerce_id, $request->validated());

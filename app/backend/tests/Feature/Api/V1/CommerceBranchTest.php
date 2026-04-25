@@ -107,9 +107,35 @@ class CommerceBranchTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.update');
-        $branch = CommerceBranch::factory()->create();
+
+        $commerce = Commerce::factory()->create([
+            'owner_user_id' => $user->id,
+        ]);
+
+        $branch = CommerceBranch::factory()->create([
+            'commerce_id' => $commerce->id,
+        ]);
+
+        $payload = [
+            'commerce_branch' => [
+                'commerce_id' => $commerce->id,
+                'name' => 'Sucursal Editada',
+                'address' => 'Calle 456 #78-90',
+                'phone' => '3009876543',
+                'status' => true,
+            ],
+            'commerce_branch_hours' => [
+                [
+                    'day_of_week' => 1,
+                    'open_time' => '08:00',
+                    'close_time' => '18:00',
+                    'note' => 'Horario actualizado',
+                ],
+            ]
+        ];
+
         $this->actingAs($user, 'sanctum')
-            ->putJson("/api/v1/commerce-branches/{$branch->id}", ['name' => 'Sucursal Editada'])
+            ->putJson("/api/v1/commerce-branches/{$branch->id}", $payload)
             ->assertOk()
             ->assertJsonFragment(['name' => 'Sucursal editada']);
     }
