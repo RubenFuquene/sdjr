@@ -22,6 +22,8 @@ class ProductIndexRequest extends FormRequest
             'description' => ['sometimes', 'string', 'max:255'],
             'commerce_id' => ['sometimes', 'integer', 'exists:commerces,id'],
             'product_category_id' => ['sometimes', 'integer', 'exists:product_categories,id'],
+            'sort_by' => ['sometimes', 'string', 'in:title,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
         ];
     }
 

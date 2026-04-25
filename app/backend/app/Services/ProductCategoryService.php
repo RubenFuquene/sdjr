@@ -18,7 +18,7 @@ class ProductCategoryService
     /**
      * Get paginated list of product categories with optional filters.
      */
-    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15, string $sortBy = 'name', string $sortDir = 'asc'): LengthAwarePaginator
     {
         $query = ProductCategory::query();
 
@@ -35,7 +35,10 @@ class ProductCategoryService
             $query->where('description', 'like', '%'.$filters['description'].'%');
         }
 
-        return $query->with(['establishmentType'])->paginate($perPage);
+        return $query
+            ->orderBy($sortBy, $sortDir)
+            ->with(['establishmentType'])
+            ->paginate($perPage);
     }
 
     /**

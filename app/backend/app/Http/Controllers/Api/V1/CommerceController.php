@@ -27,7 +27,6 @@ use App\Services\CommerceService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -71,6 +70,8 @@ class CommerceController extends Controller
      *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", default=15)),
      *     @OA\Parameter(name="page", in="query", required=false, description="Número de página", @OA\Schema(type="integer", default=1)),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, description="Campo de orden", @OA\Schema(type="string", enum={"name","email","phone","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, description="Dirección de orden", @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
      *
@@ -91,7 +92,15 @@ class CommerceController extends Controller
             $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $page = $request->validatedPage();
-            $commerces = $this->commerceService->paginateWithFilters($perPage, $page, $filters['search'] ?? null, $filters['status'] ?? null, $filters['verified'] ?? null);
+            $commerces = $this->commerceService->paginateWithFilters(
+                $perPage,
+                $page,
+                $filters['search'] ?? null,
+                $filters['status'] ?? null,
+                $filters['verified'] ?? null,
+                $filters['sort_by'] ?? 'name',
+                $filters['sort_dir'] ?? 'asc'
+            );
             $resource = CommerceResource::collection($commerces);
 
             return $this->paginatedResponse($commerces, $resource, 'Commerces retrieved successfully');

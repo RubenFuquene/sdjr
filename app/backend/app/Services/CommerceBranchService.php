@@ -94,7 +94,12 @@ class CommerceBranchService
             $query->where('status', $filters['status']);
         }
 
-        return $query->paginate($perPage);
+        $allowedSorts = ['name', 'address', 'status', 'created_at', 'updated_at'];
+        $sortByCandidate = $filters['sort_by'] ?? 'name';
+        $sortBy = in_array($sortByCandidate, $allowedSorts, true) ? $sortByCandidate : 'name';
+        $sortDir = ($filters['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        return $query->orderBy($sortBy, $sortDir)->paginate($perPage);
     }
 
     /**

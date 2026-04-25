@@ -44,6 +44,8 @@ class CountryController extends Controller
      *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del país (ISO)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos, all=todos", @OA\Schema(type="string", enum={"1","0","all"}, default="all")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Cantidad de registros por página (1-100)", @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, description="Campo de orden", @OA\Schema(type="string", enum={"name","code","status","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, description="Dirección de orden", @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CountryResource")))),
      *     @OA\Response(response=401, description="Unauthenticated"),

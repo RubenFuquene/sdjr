@@ -59,6 +59,8 @@ class ProductController extends Controller
      *   @OA\Parameter(name="description", in="query", required=false, @OA\Schema(type="string")),
      *   @OA\Parameter(name="commerce_id", in="query", required=false, @OA\Schema(type="integer")),
      *   @OA\Parameter(name="product_category_id", in="query", required=false, @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", enum={"title","status","created_at","updated_at"}, default="title")),
+     *   @OA\Parameter(name="sort_dir", in="query", required=false, @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *   @OA\Response(response=401, description="Unauthenticated"),

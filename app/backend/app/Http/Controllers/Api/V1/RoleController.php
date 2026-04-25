@@ -63,6 +63,8 @@ class RoleController extends Controller
      *     @OA\Parameter(name="permission", in="query", required=false, description="Filter by permission", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status", @OA\Schema(type="string")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page", @OA\Schema(type="integer", example=15)),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, description="Campo de orden", @OA\Schema(type="string", enum={"name","description","status","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, description="Dirección de orden", @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -108,13 +110,8 @@ class RoleController extends Controller
     public function index(IndexRoleRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $filters = [
-                'name' => request('name'),
-                'description' => request('description'),
-                'permission' => request('permission'),
-                'per_page' => request('per_page', Constant::DEFAULT_PER_PAGE),
-                'q' => request('q'),
-            ];
+            $filters = $request->validatedFilters();
+            $filters['per_page'] = $filters['per_page'] ?? Constant::DEFAULT_PER_PAGE;
             $roles = $this->roleService->getPaginatedWithPermissionsAndUserCount($filters);
             $resource = RoleResource::collection($roles);
 

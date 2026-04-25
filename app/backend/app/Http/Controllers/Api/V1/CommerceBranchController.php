@@ -63,6 +63,8 @@ class CommerceBranchController extends Controller
      *     @OA\Parameter(name="address", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="phone", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", enum={"name","address","status","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CommerceBranchResource")), @OA\Property(property="meta", type="object"), @OA\Property(property="links", type="object"))),
      *     @OA\Response(response=401, description="Unauthenticated"),

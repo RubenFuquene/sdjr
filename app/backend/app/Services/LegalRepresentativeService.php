@@ -18,9 +18,23 @@ class LegalRepresentativeService
     /**
      * Get paginated list of legal representatives.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return LegalRepresentative::with('commerce')->paginate($perPage);
+        $query = LegalRepresentative::with('commerce');
+
+        if (! empty($filters['name'])) {
+            $query->where('name', 'like', "%{$filters['name']}%");
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        $allowedSorts = ['name', 'status', 'created_at', 'updated_at'];
+        $sortByCandidate = $filters['sort_by'] ?? 'name';
+        $sortBy = in_array($sortByCandidate, $allowedSorts, true) ? $sortByCandidate : 'name';
+        $sortDir = ($filters['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        return $query->orderBy($sortBy, $sortDir)->paginate($perPage);
     }
 
     /**
