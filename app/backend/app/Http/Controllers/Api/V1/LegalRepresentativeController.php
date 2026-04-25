@@ -42,6 +42,10 @@ class LegalRepresentativeController extends Controller
      *     security={{"sanctum":{}}},
      *
      *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", enum={"name","status","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeResource")))),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -87,8 +91,9 @@ class LegalRepresentativeController extends Controller
     public function index(IndexLegalRepresentativeRequest $request): JsonResponse
     {
         try {
-            $perPage = (int) $request->query('per_page', 15);
-            $legalRepresentatives = $this->legalRepresentativeService->paginate($perPage);
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
+            $legalRepresentatives = $this->legalRepresentativeService->paginate($filters, $perPage);
 
             return $this->paginatedResponse($legalRepresentatives, LegalRepresentativeResource::collection($legalRepresentatives), 'Legal representatives retrieved successfully');
         } catch (Throwable $e) {

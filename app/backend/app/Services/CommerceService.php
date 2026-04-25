@@ -75,7 +75,7 @@ class CommerceService
     /**
      * Get paginated commerces with filters: page, per_page, search, status, verified
      */
-    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null, $verified = null): LengthAwarePaginator
+    public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null, $verified = null, string $sortBy = 'name', string $sortDir = 'asc'): LengthAwarePaginator
     {
         $query = Commerce::query();
 
@@ -96,6 +96,12 @@ class CommerceService
         if (! is_null($verified)) {
             $query->where('is_verified', $verified);
         }
+
+        $allowedSorts = ['name', 'email', 'phone', 'created_at', 'updated_at'];
+        $resolvedSortBy = in_array($sortBy, $allowedSorts, true) ? $sortBy : 'name';
+        $resolvedSortDir = $sortDir === 'desc' ? 'desc' : 'asc';
+
+        $query->orderBy($resolvedSortBy, $resolvedSortDir);
 
         return $query->paginate($perPage, ['*'], 'page', $page);
     }

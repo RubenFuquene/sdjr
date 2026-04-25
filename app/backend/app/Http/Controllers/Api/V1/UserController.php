@@ -58,6 +58,8 @@ class UserController extends Controller
      *     @OA\Parameter(name="email", in="query", required=false, description="Filtrar por email de usuario", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activo, 0=inactivo", @OA\Schema(type="string", enum={"1","0"}, default="1")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Cantidad de resultados por página (1-100)", @OA\Schema(type="integer", minimum=1, maximum=100, example=15)),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, description="Campo de orden", @OA\Schema(type="string", enum={"name","last_name","email","phone","status","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, description="Dirección de orden", @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(
      *         response=200,

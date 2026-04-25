@@ -43,6 +43,12 @@ class EstablishmentTypeController extends Controller
      *     description="Returns paginated list of establishment types.",
      *     security={{"sanctum":{}}},
      *
+     *     @OA\Parameter(name="name", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", enum={"name","status","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -62,8 +68,9 @@ class EstablishmentTypeController extends Controller
     public function index(IndexEstablishmentTypeRequest $request): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $perPage = request('per_page', 15);
-            $types = $this->establishmentTypeService->paginate((int) $perPage);
+            $filters = $request->validatedFilters();
+            $perPage = $request->validatedPerPage();
+            $types = $this->establishmentTypeService->paginate($filters, $perPage);
             $resource = EstablishmentTypeResource::collection($types);
 
             return $this->paginatedResponse($types, $resource, 'Establishment types retrieved successfully');

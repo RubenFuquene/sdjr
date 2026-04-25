@@ -57,7 +57,12 @@ class ProductService
             $query->where('product_category_id', $filters['product_category_id']);
         }
 
-        return $query->paginate($perPage);
+        $allowedSorts = ['title', 'status', 'created_at', 'updated_at'];
+        $sortByCandidate = $filters['sort_by'] ?? 'title';
+        $sortBy = in_array($sortByCandidate, $allowedSorts, true) ? $sortByCandidate : 'title';
+        $sortDir = ($filters['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        return $query->orderBy($sortBy, $sortDir)->paginate($perPage);
     }
 
     /**

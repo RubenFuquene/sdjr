@@ -28,6 +28,13 @@ class IndexRoleRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string'],
             'guard_name' => ['sometimes', 'string'],
+            'description' => ['sometimes', 'string'],
+            'permission' => ['sometimes', 'string'],
+            'status' => ['sometimes', 'string', 'max:1'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'q' => ['sometimes', 'string'],
+            'sort_by' => ['sometimes', 'string', 'in:name,description,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
         ];
     }
 
@@ -36,6 +43,6 @@ class IndexRoleRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'guard_name']);
+        return $this->only(['name', 'guard_name', 'description', 'permission', 'status', 'per_page', 'q', 'sort_by', 'sort_dir']);
     }
 }

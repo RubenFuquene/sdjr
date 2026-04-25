@@ -19,6 +19,8 @@ class ProductFactory extends Factory
 
     public function definition(): array
     {
+        $quantityTotal = $this->faker->numberBetween(10, 100);
+
         return [
             'commerce_id' => Commerce::factory(),
             'product_category_id' => ProductCategory::factory(),
@@ -26,8 +28,8 @@ class ProductFactory extends Factory
             'description' => $this->faker->sentence(8),
             'original_price' => $this->faker->randomFloat(2, 10, 1000),
             'discounted_price' => $this->faker->optional()->randomFloat(2, 5, 900),
-            'quantity_total' => $this->faker->numberBetween(1, 100),
-            'quantity_available' => $this->faker->numberBetween(0, 100),
+            'quantity_total' => $quantityTotal,
+            'quantity_available' => $this->faker->numberBetween(5, $quantityTotal),
             'expires_at' => $this->faker->optional()->dateTimeBetween('now', '+1 year'),
             'status' => Constant::STATUS_ACTIVE,
         ];

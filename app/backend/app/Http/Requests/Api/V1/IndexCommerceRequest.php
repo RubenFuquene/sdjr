@@ -28,6 +28,8 @@ class IndexCommerceRequest extends FormRequest
             'verified' => ['nullable', Rule::in(['1', '0', 'all'])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
+            'sort_by' => ['nullable', 'string', Rule::in(['name', 'email', 'phone', 'created_at', 'updated_at'])],
+            'sort_dir' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
         ];
     }
 
@@ -52,6 +54,6 @@ class IndexCommerceRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['search', 'status', 'verified']);
+        return $this->only(['search', 'status', 'verified', 'sort_by', 'sort_dir']);
     }
 }

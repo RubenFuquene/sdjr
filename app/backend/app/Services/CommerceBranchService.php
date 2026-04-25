@@ -94,7 +94,12 @@ class CommerceBranchService
             $query->where('status', $filters['status']);
         }
 
-        return $query->paginate($perPage);
+        $allowedSorts = ['name', 'address', 'status', 'created_at', 'updated_at'];
+        $sortByCandidate = $filters['sort_by'] ?? 'name';
+        $sortBy = in_array($sortByCandidate, $allowedSorts, true) ? $sortByCandidate : 'name';
+        $sortDir = ($filters['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        return $query->orderBy($sortBy, $sortDir)->paginate($perPage);
     }
 
     /**
@@ -169,10 +174,27 @@ class CommerceBranchService
      */
     public function update(int $id, array $data): CommerceBranch
     {
-        $branch = CommerceBranch::findOrFail($id);
-        $branch->update($data);
+        return DB::transaction(function () use ($data, $id) {
+            $commerceBranch = CommerceBranch::findOrFail($id);
+            $commerceBranch->update($data['commerce_branch']);
 
-        return $branch->fresh(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos']);
+            if (! empty($data['commerce_branch_hours'])) {
+                foreach ($data['commerce_branch_hours'] as $commerceBranchHoursData) {
+                    $commerceBranchHoursData['commerce_branch_id'] = $commerceBranch->id;
+                    $this->commerceBranchHoursService->store($commerceBranchHoursData);
+                }
+            }
+
+            if (! empty($data['commerce_branch_photos'])) {
+                $this->storeCommerceBranchPhotos(
+                    $commerceBranch->id,
+                    $data['commerce_branch_photos']
+                );
+            }
+
+            return $commerceBranch->load(['commerce', 'commerceBranchPhotos', 'commerceBranchHours']);
+        });
+
     }
 
     /**

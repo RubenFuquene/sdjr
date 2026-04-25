@@ -50,6 +50,13 @@ class RoleService
             });
         }
 
+        $allowedSorts = ['name', 'description', 'status', 'created_at', 'updated_at'];
+        $sortByCandidate = $filters['sort_by'] ?? 'name';
+        $sortBy = in_array($sortByCandidate, $allowedSorts, true) ? $sortByCandidate : 'name';
+        $sortDir = ($filters['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        $query->orderBy($sortBy, $sortDir);
+
         $roles = $query->paginate($perPage);
 
         // Agregar el conteo de usuarios a cada rol

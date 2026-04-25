@@ -57,6 +57,8 @@ class IndexBankRequest extends FormRequest
             'code' => ['sometimes', 'string', 'max:20'],
             'status' => ['sometimes', 'string', 'size:1'],
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'sort_by' => ['sometimes', 'string', 'in:name,code,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
         ];
     }
 
@@ -70,6 +72,6 @@ class IndexBankRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'code', 'status']);
+        return $this->only(['name', 'code', 'status', 'sort_by', 'sort_dir']);
     }
 }

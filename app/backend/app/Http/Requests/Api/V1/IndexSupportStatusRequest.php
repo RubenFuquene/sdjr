@@ -28,6 +28,8 @@ class IndexSupportStatusRequest extends FormRequest
             'color' => ['nullable', 'string', 'max:20'],
             'status' => ['nullable', Rule::in(['1', '0', 'all'])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'sort_by' => ['nullable', 'string', Rule::in(['name', 'code', 'color', 'status', 'created_at', 'updated_at'])],
+            'sort_dir' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
         ];
     }
 
@@ -44,6 +46,6 @@ class IndexSupportStatusRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'code', 'color', 'status']);
+        return $this->only(['name', 'code', 'color', 'status', 'sort_by', 'sort_dir']);
     }
 }

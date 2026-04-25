@@ -42,6 +42,8 @@ class IndexPriorityTypeRequest extends FormRequest
         return [
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'status' => ['sometimes', 'string', 'max:1'],
+            'sort_by' => ['sometimes', 'string', 'in:name,code,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
         ];
     }
 
@@ -55,6 +57,6 @@ class IndexPriorityTypeRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'code', 'status']);
+        return $this->only(['name', 'code', 'status', 'sort_by', 'sort_dir']);
     }
 }

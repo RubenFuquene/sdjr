@@ -27,7 +27,15 @@ class IndexEstablishmentTypeRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string'],
             'status' => ['sometimes', 'string'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'sort_by' => ['sometimes', 'string', 'in:name,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
         ];
+    }
+
+    public function validatedPerPage(): int
+    {
+        return (int) ($this->input('per_page', 15));
     }
 
     /**
@@ -35,6 +43,6 @@ class IndexEstablishmentTypeRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'status']);
+        return $this->only(['name', 'status', 'sort_by', 'sort_dir']);
     }
 }
