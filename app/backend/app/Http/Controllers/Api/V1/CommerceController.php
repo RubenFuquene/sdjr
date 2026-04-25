@@ -125,7 +125,7 @@ class CommerceController extends Controller
      *         required=true,
      *         description="Commerce",
      *
-    *         @OA\JsonContent(ref="#/components/schemas/StoreCommerceRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/StoreCommerceRequest")
      *     ),
      *
      *     @OA\Response(
@@ -206,7 +206,7 @@ class CommerceController extends Controller
      *         required=true,
      *         description="Commerce",
      *
-    *         @OA\JsonContent(ref="#/components/schemas/UpdateCommerceRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/UpdateCommerceRequest")
      *     ),
      *
      *     @OA\Response(

@@ -131,7 +131,7 @@ class CommerceBranchTest extends TestCase
                     'close_time' => '18:00',
                     'note' => 'Horario actualizado',
                 ],
-            ]
+            ],
         ];
 
         $this->actingAs($user, 'sanctum')

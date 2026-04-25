@@ -29,7 +29,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class UpdateCommerceBranchRequest extends FormRequest
 {
     public function authorize(): bool
-    {        
+    {
         $user = $this->user();
         if (! $user) {
             return false;
@@ -54,7 +54,7 @@ class UpdateCommerceBranchRequest extends FormRequest
             ->where(function (Builder $query) use ($user): void {
                 $query->whereHas('commerce', function (Builder $commerceQuery) use ($user): void {
                     $commerceQuery->where('owner_user_id', $user->id);
-                });                    
+                });
             })
             ->exists();
 

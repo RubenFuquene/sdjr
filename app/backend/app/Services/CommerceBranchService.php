@@ -174,7 +174,7 @@ class CommerceBranchService
      */
     public function update(int $id, array $data): CommerceBranch
     {
-       return DB::transaction(function () use ($data, $id) {
+        return DB::transaction(function () use ($data, $id) {
             $commerceBranch = CommerceBranch::findOrFail($id);
             $commerceBranch->update($data['commerce_branch']);
 
