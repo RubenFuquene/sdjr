@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend URLs
+    |--------------------------------------------------------------------------
+    |
+    | These URLs are used to build links in notifications sent to end users.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
+    'frontend_prod_url' => env('FRONTEND_PROD_URL', env('FRONTEND_URL', 'http://localhost:3000')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
