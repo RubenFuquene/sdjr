@@ -39,12 +39,6 @@ export function ProviderApprovedGate({ children, featureName }: ProviderApproved
 
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
-          href="/provider/dashboard"
-          className="px-5 h-[48px] inline-flex items-center rounded-[14px] border border-[#E0E0E0] text-[#4B236A] hover:bg-[#F7F7F7] transition-colors"
-        >
-          Ir al dashboard
-        </Link>
-        <Link
           href="/provider/basic-info"
           className="px-5 h-[48px] inline-flex items-center rounded-[14px] bg-[#4B236A] text-white hover:bg-[#5D2B7D] transition-colors"
         >
