@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, User } from "lucide-react";
 
 import { useAppAuthForm } from "@/hooks/app/use-app-auth-form";
+import { PASSWORD_MIN_LENGTH, validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { Button } from "@/components/app/ui/button";
 import { Input } from "@/components/app/ui/input";
 
 const PASSWORD_MISMATCH_ERROR = "Las contrasenas no coinciden. Verifica ambos campos.";
+const PASSWORD_POLICY_ERROR = "La contraseña aun no cumple todos los criterios de seguridad.";
 
 export default function AppRegisterForm() {
   const [name, setName] = useState("");
@@ -18,17 +20,21 @@ export default function AppRegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { handleRegister, loading, error, clearError } = useAppAuthForm();
   const router = useRouter();
+  const passwordPolicy = validatePasswordPolicy(password);
+  const hasWeakPassword = password.length > 0 && !passwordPolicy.isStrong;
   const hasPasswordMismatch =
     confirmPassword.length > 0 && password !== confirmPassword;
   const resolvedErrorMessage = hasPasswordMismatch
     ? PASSWORD_MISMATCH_ERROR
-    : error;
+    : hasWeakPassword
+      ? PASSWORD_POLICY_ERROR
+      : error;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearError();
 
-    if (hasPasswordMismatch) {
+    if (hasPasswordMismatch || hasWeakPassword) {
       return;
     }
 
@@ -86,11 +92,40 @@ export default function AppRegisterForm() {
             placeholder="Contraseña"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="h-12 rounded-xl border-[#E6E6E6] bg-white pl-10 focus:border-[#5A1E6B] focus:ring-[#5A1E6B]"
+            className={`h-12 rounded-xl bg-white pl-10 focus:ring-[#5A1E6B] ${
+              hasWeakPassword
+                ? "border-[#B9342D] focus:border-[#B9342D]"
+                : "border-[#E6E6E6] focus:border-[#5A1E6B]"
+            }`}
             aria-label="Contraseña"
+            aria-invalid={hasWeakPassword}
             autoComplete="new-password"
             required
           />
+        </div>
+
+        <div className="rounded-xl border border-[#EADCF1] bg-[#FCF8FE] px-4 py-3">
+          <p className="mb-2 text-xs font-semibold text-[#5A1E6B]">Criterios de seguridad</p>
+          <div className="grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
+            <p className={passwordPolicy.minLength ? "text-[#2F6F3E]" : "text-[#7A2E9A]"}>
+              {passwordPolicy.minLength ? "OK" : "-"} Minimo {PASSWORD_MIN_LENGTH} caracteres
+            </p>
+            <p className={passwordPolicy.hasUppercase ? "text-[#2F6F3E]" : "text-[#7A2E9A]"}>
+              {passwordPolicy.hasUppercase ? "OK" : "-"} Una mayuscula
+            </p>
+            <p className={passwordPolicy.hasLowercase ? "text-[#2F6F3E]" : "text-[#7A2E9A]"}>
+              {passwordPolicy.hasLowercase ? "OK" : "-"} Una minuscula
+            </p>
+            <p className={passwordPolicy.hasNumber ? "text-[#2F6F3E]" : "text-[#7A2E9A]"}>
+              {passwordPolicy.hasNumber ? "OK" : "-"} Un numero
+            </p>
+            <p className={passwordPolicy.hasSymbol ? "text-[#2F6F3E]" : "text-[#7A2E9A]"}>
+              {passwordPolicy.hasSymbol ? "OK" : "-"} Un simbolo
+            </p>
+            <p className={passwordPolicy.noSpaces ? "text-[#2F6F3E]" : "text-[#7A2E9A]"}>
+              {passwordPolicy.noSpaces ? "OK" : "-"} Sin espacios
+            </p>
+          </div>
         </div>
 
         <div className="relative">
@@ -129,7 +164,7 @@ export default function AppRegisterForm() {
         <Button
           type="submit"
           className="h-12 w-full rounded-xl bg-[#5A1E6B] text-white hover:bg-[#7A2E9A]"
-          disabled={loading}
+          disabled={loading || hasWeakPassword || hasPasswordMismatch}
           aria-busy={loading}
         >
           {loading ? "Creando cuenta..." : "Crear cuenta"}
