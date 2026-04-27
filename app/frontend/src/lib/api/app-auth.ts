@@ -42,6 +42,31 @@ function ensureRequiredFields(fields: Array<string>, message: string): void {
   }
 }
 
+function splitNameParts(fullName: string, explicitLastName?: string): { name: string; last_name: string } {
+  const normalizedName = fullName.trim().replace(/\s+/g, " ");
+  const normalizedLastName = (explicitLastName ?? "").trim().replace(/\s+/g, " ");
+
+  if (normalizedLastName.length > 0) {
+    return {
+      name: normalizedName,
+      last_name: normalizedLastName,
+    };
+  }
+
+  const parts = normalizedName.split(" ");
+  if (parts.length >= 2) {
+    return {
+      name: parts[0],
+      last_name: parts.slice(1).join(" "),
+    };
+  }
+
+  return {
+    name: normalizedName,
+    last_name: "Usuario",
+  };
+}
+
 function mapResponseToSession(data: LoginResponse): { user: SessionData; redirectTo: string } {
   const apiUser = data.data;
   const userRole = apiUser.roles && apiUser.roles.length > 0 ? apiUser.roles[0] : "user";
@@ -109,7 +134,7 @@ export async function loginAppUser({ email, password }: AppLoginPayload): Promis
 
 /**
  * Dedicated register for app/customer surface.
- * Expected backend endpoint: POST /api/v1/app/register (or customer/register).
+ * Backend endpoint: POST /api/v1/customer/register.
  */
 export async function registerAppUser({
   name,
@@ -123,15 +148,17 @@ export async function registerAppUser({
     "Por favor completa todos los campos."
   );
 
-  const response = await fetch(`${API_URL}/api/v1/app/register`, {
+  const normalizedNameParts = splitNameParts(name, last_name);
+
+  const response = await fetch(`${API_URL}/api/v1/customer/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
     body: JSON.stringify({
-      name,
-      last_name: (last_name || "").trim() || "app",
+      name: normalizedNameParts.name,
+      last_name: normalizedNameParts.last_name,
       email,
       password,
       password_confirmation,
