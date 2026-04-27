@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
+import { CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Revisión | Panel Provider - Sumass",
   description: "Estado de revisión del proveedor",
 };
 
-export default function ReviewPage() {
+type ReviewPageProps = {
+  searchParams?: Promise<{
+    onboarding?: string;
+  }>;
+};
+
+const ONBOARDING_MESSAGE =
+  "Tu solicitud fue enviada. El proceso de validación toma 24 horas. Te notificaremos por correo si se requiere información adicional.";
+
+export default async function ReviewPage({ searchParams }: ReviewPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const isOnboardingSubmitted = resolvedSearchParams?.onboarding === "submitted";
+
   return (
     <div className="p-6 md:p-8">
       <div className="mb-6">
@@ -17,10 +30,30 @@ export default function ReviewPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-[18px] shadow-sm p-6 md:p-8">
-        <p className="text-gray-600">
-          Aquí podrás ver el estado de revisión de tu perfil y cualquier observación del equipo de Sumass.
-        </p>
+      <div className="space-y-4">
+        <div
+          className={`rounded-[18px] border p-6 md:p-8 ${
+            isOnboardingSubmitted
+              ? "border-[#C8D86D] bg-[#DDE8BB]/40"
+              : "border-[#E0E0E0] bg-white"
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 rounded-full bg-[#4B236A]/10 p-2">
+              <CheckCircle2 className="h-5 w-5 text-[#4B236A]" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Solicitud enviada</h2>
+              <p className="mt-1 text-sm text-[#4A4A4A]">{ONBOARDING_MESSAGE}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-[18px] shadow-sm p-6 md:p-8">
+          <p className="text-gray-600">
+            Aquí podrás ver el estado de revisión de tu perfil y cualquier observación del equipo de Ñapa.
+          </p>
+        </div>
       </div>
     </div>
   );
