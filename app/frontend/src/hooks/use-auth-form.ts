@@ -165,7 +165,7 @@ export function useAuthForm(): UseAuthFormReturn {
       persistSession(result.user);
 
       return {
-        redirectTo: result.redirectTo || "/provider/dashboard",
+        redirectTo: result.redirectTo || "/provider/basic-info",
         user: result.user,
       };
     } catch (err) {

@@ -4,7 +4,6 @@
  */
 
 import type { LoginResponse, SessionData } from "@/types/auth";
-import { getDashboardPath } from "@/lib/roles";
 import { API_URL } from "./client";
 
 type ProviderRegisterPayload = {
@@ -71,7 +70,7 @@ export async function registerProvider({
     if (data?.message && data?.data) {
       const user = data.data;
       const role = "provider";
-      const redirectTo = getDashboardPath(role);
+      const redirectTo = "/provider/basic-info";
 
       const sessionData: SessionData = {
         userId: user.id?.toString() || "unknown",
