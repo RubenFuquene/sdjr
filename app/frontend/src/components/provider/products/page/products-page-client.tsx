@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/admin/shared/confirmation-dialog";
+import { ApiError, getPackageItemsByProductId, getProductById } from "@/lib/api";
 import { useProviderBranches, useProviderProductForm, useProviderProducts } from "@/hooks/index";
 import type { ProductFromAPI } from "@/types/products";
 import { ProductFormModal } from "../form";
@@ -82,30 +83,74 @@ export function ProductsPageClient() {
     quantityAvailable: product.quantity_available,
     quantityTotal: product.quantity_total,
     branchId: null,
-    packageItemIds: [],
+    packageItems: [],
   });
 
-  const handleEditProduct = (product: ProductFromAPI) => {
-    setModalMode("edit");
-    setEditingProductId(product.id);
-    setEditingInitialData(mapProductToInitialData(product));
-    resetErrors();
-    setIsModalOpen(true);
-  };
+  const hydrateProductInitialData = async (productId: number): Promise<ProductFormInitialData> => {
+    const productResponse = await getProductById(productId);
+    const product = productResponse.data;
 
-  const handleDuplicateProduct = (product: ProductFromAPI) => {
-    setModalMode("create");
-    setEditingProductId(null);
-    setEditingInitialData({
-      ...mapProductToInitialData(product),
-      id: undefined,
-      title: `${product.title} (copia)`,
-    });
-    resetErrors();
-    setIsModalOpen(true);
+    let packageItems: Array<{ productId: number; quantity: number }> = [];
 
     if (product.product_type === "package") {
-      toast.info("Verifica los items del pack antes de guardar la copia.");
+      const packageItemsResponse = await getPackageItemsByProductId(productId);
+
+      packageItems = packageItemsResponse.data.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity ?? item.pivot?.quantity ?? 1,
+      }));
+    }
+
+    return {
+      ...mapProductToInitialData(product),
+      packageItems,
+    };
+  };
+
+  const handleEditProduct = async (product: ProductFromAPI) => {
+    try {
+      setModalMode("edit");
+      setEditingProductId(product.id);
+      resetErrors();
+
+      const hydratedInitialData = await hydrateProductInitialData(product.id);
+      setEditingInitialData(hydratedInitialData);
+      setIsModalOpen(true);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.message || "No pudimos cargar el detalle del producto.");
+        return;
+      }
+
+      toast.error("Error inesperado al cargar el detalle del producto.");
+    }
+  };
+
+  const handleDuplicateProduct = async (product: ProductFromAPI) => {
+    try {
+      setModalMode("create");
+      setEditingProductId(null);
+      resetErrors();
+
+      const hydratedInitialData = await hydrateProductInitialData(product.id);
+
+      setEditingInitialData({
+        ...hydratedInitialData,
+        id: undefined,
+        title: `${hydratedInitialData.title ?? product.title} (copia)`,
+      });
+      setIsModalOpen(true);
+
+      if (product.product_type === "package") {
+        toast.info("Verifica los items del pack antes de guardar la copia.");
+      }
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.message || "No pudimos cargar el detalle para duplicar el producto.");
+        return;
+      }
+
+      toast.error("Error inesperado al preparar la copia del producto.");
     }
   };
 

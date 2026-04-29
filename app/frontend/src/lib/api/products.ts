@@ -51,7 +51,10 @@ export interface CreateProductPayload {
     status: string;
   };
   commerce_branch_ids?: number[];
-  package_items?: number[];
+  package_items?: Array<{
+    product_id: number;
+    quantity: number;
+  }>;
   photos?: CreateProductPhotoInput[];
 }
 
@@ -70,8 +73,18 @@ export interface UpdateProductPayload {
     status?: string;
   };
   commerce_branches?: number[];
-  package_items?: number[];
+  package_items?: Array<{
+    product_id: number;
+    quantity: number;
+  }>;
   photos?: CreateProductPhotoInput[];
+}
+
+export interface PackageItemFromAPI extends ProductFromAPI {
+  quantity?: number;
+  pivot?: {
+    quantity?: number;
+  };
 }
 
 function toNumber(value: number | string | null | undefined, fallback = 0): number {
@@ -156,14 +169,39 @@ function normalizeCategory(category: ProductCategoryFromAPI): ProductCategoryFro
   };
 }
 
-function normalizePackageItems(input: ProductFormInput): number[] | undefined {
+function normalizePackageItem(item: PackageItemFromAPI): PackageItemFromAPI {
+  const normalizedBase = normalizeProduct(item);
+
+  return {
+    ...normalizedBase,
+    quantity:
+      item.quantity !== undefined
+        ? toInteger(item.quantity)
+        : item.pivot?.quantity !== undefined
+          ? toInteger(item.pivot.quantity)
+          : undefined,
+    pivot:
+      item.pivot?.quantity !== undefined
+        ? {
+            quantity: toInteger(item.pivot.quantity),
+          }
+        : item.pivot,
+  };
+}
+
+function normalizePackageItems(
+  input: ProductFormInput
+): Array<{ product_id: number; quantity: number }> | undefined {
   if (input.productType !== "package") {
     return undefined;
   }
 
-  const packageItems = (input.packageItemIds ?? [])
-    .map((id) => toInteger(id))
-    .filter((id) => id > 0);
+  const packageItems = (input.packageItems ?? [])
+    .map((item) => ({
+      product_id: toInteger(item.productId),
+      quantity: toInteger(item.quantity),
+    }))
+    .filter((item) => item.product_id > 0 && item.quantity > 0);
 
   return packageItems.length > 0 ? packageItems : undefined;
 }
@@ -265,6 +303,42 @@ export async function getProductsByCommerce(
 }
 
 /**
+ * GET /api/v1/products/{id}
+ * Obtiene detalle de producto por ID
+ */
+export async function getProductById(
+  productId: number
+): Promise<ApiSuccess<ProductFromAPI>> {
+  const response = await fetchWithErrorHandling<ApiSuccess<ProductFromAPI>>(
+    `/api/v1/products/${productId}`
+  );
+
+  return {
+    ...response,
+    data: normalizeProduct(response.data),
+  };
+}
+
+/**
+ * GET /api/v1/products/commerce/package-items/{product_package_id}
+ * Obtiene items de un pack por ID
+ */
+export async function getPackageItemsByProductId(
+  productPackageId: number
+): Promise<ApiSuccess<PackageItemFromAPI[]>> {
+  const response = await fetchWithErrorHandling<ApiSuccess<unknown>>(
+    `/api/v1/products/commerce/package-items/${productPackageId}`
+  );
+
+  const packageItems = extractCollectionData<PackageItemFromAPI>(response.data);
+
+  return {
+    ...response,
+    data: packageItems.map(normalizePackageItem),
+  };
+}
+
+/**
  * GET /api/v1/product-categories
  * Obtiene categorías para el formulario de productos
  */
@@ -306,6 +380,27 @@ export async function createProduct(
 }
 
 /**
+ * POST /api/v1/products/commerce/package-items
+ * Crea pack usando endpoint especializado de backend
+ */
+export async function createPackageProduct(
+  payload: CreateProductPayload
+): Promise<ApiSuccess<ProductFromAPI>> {
+  const response = await fetchWithErrorHandling<ApiSuccess<ProductFromAPI>>(
+    `/api/v1/products/commerce/package-items`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+
+  return {
+    ...response,
+    data: normalizeProduct(response.data),
+  };
+}
+
+/**
  * PUT /api/v1/products/{id}
  * Actualiza producto o pack
  */
@@ -315,6 +410,28 @@ export async function updateProduct(
 ): Promise<ApiSuccess<ProductFromAPI>> {
   const response = await fetchWithErrorHandling<ApiSuccess<ProductFromAPI>>(
     `/api/v1/products/${productId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+
+  return {
+    ...response,
+    data: normalizeProduct(response.data),
+  };
+}
+
+/**
+ * PUT /api/v1/products/commerce/package-items/{id}
+ * Actualiza pack usando endpoint especializado de backend
+ */
+export async function updatePackageProduct(
+  productId: number,
+  payload: UpdateProductPayload
+): Promise<ApiSuccess<ProductFromAPI>> {
+  const response = await fetchWithErrorHandling<ApiSuccess<ProductFromAPI>>(
+    `/api/v1/products/commerce/package-items/${productId}`,
     {
       method: "PUT",
       body: JSON.stringify(payload),

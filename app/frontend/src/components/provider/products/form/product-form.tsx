@@ -27,7 +27,7 @@ export interface ProductFormInitialData {
   quantityAvailable?: number;
   quantityTotal?: number;
   branchId?: number | null;
-  packageItemIds?: number[];
+  packageItems?: Array<{ productId: number; quantity: number }>;
 }
 
 interface ProductFormProps {
@@ -85,9 +85,10 @@ export function ProductForm({
     setDescription,
     branchId,
     setBranchId,
-    packageItemIds,
+    packageItems,
     mergedErrors,
     handleTogglePackItem,
+    handlePackItemQuantityChange,
     handleSubmit,
   } = useProductFormState({
     initialData,
@@ -243,10 +244,11 @@ export function ProductForm({
       {productType === "package" ? (
         <ProductPackItemsSelector
           options={packItemOptions}
-          selectedIds={packageItemIds}
+          selectedItems={packageItems}
           disabled={submitting}
           error={mergedErrors.packageItems}
           onToggle={handleTogglePackItem}
+          onQuantityChange={handlePackItemQuantityChange}
         />
       ) : null}
 

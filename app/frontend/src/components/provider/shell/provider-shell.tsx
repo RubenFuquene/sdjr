@@ -27,11 +27,11 @@ const navItems = [
   { label: "Dashboard", href: "/provider/dashboard", icon: BarChart3 },
   { label: "Datos Básicos", href: "/provider/basic-info", icon: Store },
   { label: "Términos y condiciones", href: "/provider/legal", icon: Scale },
+  { label: "Revisión", href: "/provider/review", icon: CheckCircle },
   { label: "Sucursales", href: "/provider/branches", icon: Building2 },
   { label: "Productos", href: "/provider/products", icon: Package },
   { label: "Mi Cuenta", href: "/provider/bank", icon: CreditCard },
   { label: "Mi Billetera", href: "/provider/wallet", icon: DollarSign },
-  { label: "Revisión", href: "/provider/review", icon: CheckCircle },
   { label: "Soporte", href: "/provider/support", icon: Headphones },
 ];
 
