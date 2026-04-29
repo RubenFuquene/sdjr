@@ -1,5 +1,10 @@
 export type ProductType = "single" | "package";
 
+export interface ProductPackageItemInput {
+  productId: number;
+  quantity: number;
+}
+
 export interface ProductPhotoFromAPI {
   id?: number;
   product_id?: number;
@@ -63,7 +68,7 @@ export interface ProductFormInput {
   expiresAt?: string | null;
   status?: string;
   branchId?: number | null;
-  packageItemIds?: number[];
+  packageItems?: ProductPackageItemInput[];
   photos?: Array<{
     file_name: string;
     mime_type: string;

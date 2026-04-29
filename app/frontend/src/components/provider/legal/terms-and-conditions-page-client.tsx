@@ -42,12 +42,12 @@ export function TermsAndConditionsPageClient() {
       await refreshCommerce();
 
       toast.success("Términos aceptados", {
-        description: "¡Bienvenido al panel de proveedores!",
+        description: "Tu solicitud fue enviada correctamente.",
       });
 
-      // Navegar al dashboard después de un breve delay para que el usuario vea el toast
+      // Navegar a revisión después de un breve delay para que el usuario vea el toast
       setTimeout(() => {
-        router.push("/provider/dashboard");
+        router.push("/provider/review?onboarding=submitted");
       }, 500);
     } catch (error) {
       const errorMessage =
@@ -125,7 +125,7 @@ export function TermsAndConditionsPageClient() {
                 Términos y condiciones aceptados
               </h2>
               <p className="mt-1 text-sm text-green-800">
-                Ya has aceptado los términos y condiciones de Sumass. Puedes continuar al panel de control.
+                Ya has aceptado los términos y condiciones de Sumass. Revisa el estado de tu proceso de validación.
               </p>
             </div>
           </div>
@@ -140,10 +140,10 @@ export function TermsAndConditionsPageClient() {
             </Button>
             <Button
               type="button"
-              onClick={() => router.push("/provider/dashboard")}
+              onClick={() => router.push("/provider/review")}
               className="h-[52px] rounded-xl bg-[#4B236A] px-6 text-white shadow-lg transition-colors hover:bg-[#5D2B7D]"
             >
-              Ir al dashboard
+              Ver estado de revisión
             </Button>
           </div>
         </section>

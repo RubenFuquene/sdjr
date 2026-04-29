@@ -9,10 +9,11 @@ interface PackItemOption {
 
 interface ProductPackItemsSelectorProps {
   options: PackItemOption[];
-  selectedIds: number[];
+  selectedItems: Array<{ productId: number; quantity: number }>;
   disabled?: boolean;
   error?: string;
   onToggle: (productId: number) => void;
+  onQuantityChange: (productId: number, quantity: number) => void;
 }
 
 function formatCurrency(value: number): string {
@@ -21,11 +22,14 @@ function formatCurrency(value: number): string {
 
 export function ProductPackItemsSelector({
   options,
-  selectedIds,
+  selectedItems,
   disabled = false,
   error,
   onToggle,
+  onQuantityChange,
 }: ProductPackItemsSelectorProps) {
+  const selectedById = new Map(selectedItems.map((item) => [item.productId, item.quantity]));
+
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-[#1A1A1A]">Productos del Pack *</p>
@@ -39,12 +43,13 @@ export function ProductPackItemsSelector({
       ) : (
         <div className="max-h-56 overflow-y-auto rounded-[14px] border border-[#E0E0E0] p-2 space-y-2">
           {options.map((option) => {
-            const checked = selectedIds.includes(option.id);
+            const selectedQuantity = selectedById.get(option.id) ?? 1;
+            const checked = selectedById.has(option.id);
 
             return (
-              <label
+              <div
                 key={option.id}
-                className="flex items-start gap-3 rounded-[12px] px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer"
+                className="flex items-start gap-3 rounded-[12px] px-3 py-2 hover:bg-[#F7F7F7]"
               >
                 <input
                   type="checkbox"
@@ -59,7 +64,33 @@ export function ProductPackItemsSelector({
                     {formatCurrency(option.originalPrice)} · Disponible: {option.quantityAvailable}
                   </span>
                 </span>
-              </label>
+
+                {checked ? (
+                  <div className="flex flex-col gap-1 min-w-[92px]">
+                    <label htmlFor={`pack-item-qty-${option.id}`} className="text-xs text-[#6A6A6A]">
+                      Cantidad
+                    </label>
+                    <input
+                      id={`pack-item-qty-${option.id}`}
+                      type="number"
+                      min={1}
+                      max={option.quantityAvailable}
+                      value={selectedQuantity}
+                      disabled={disabled}
+                      onChange={(event) => {
+                        const parsed = Number(event.target.value);
+
+                        if (!Number.isFinite(parsed)) {
+                          return;
+                        }
+
+                        onQuantityChange(option.id, Math.trunc(parsed));
+                      }}
+                      className="h-9 w-[92px] rounded-[10px] border border-[#E0E0E0] px-2 text-sm text-[#1A1A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4B236A]/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                ) : null}
+              </div>
             );
           })}
         </div>

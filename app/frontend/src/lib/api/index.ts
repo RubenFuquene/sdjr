@@ -68,9 +68,13 @@ export type {
 // Products (Productos)
 export {
   getProductsByCommerce,
+  getProductById,
+  getPackageItemsByProductId,
   getProductCategories,
   createProduct,
+  createPackageProduct,
   updateProduct,
+  updatePackageProduct,
   deleteProduct,
   mapProductFormToCreatePayload,
   mapProductFormToUpdatePayload,
@@ -79,6 +83,7 @@ export type {
   CreateProductPayload,
   CreateProductPhotoInput,
   GetProductCategoriesParams,
+  PackageItemFromAPI,
   ProductCategoryFromAPI,
   ProductFormInput,
   ProductFromAPI,

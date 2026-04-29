@@ -19,7 +19,7 @@ type ProductFormValidationInput = {
   quantityAvailable: string;
   branchId: string;
   productType: ProductType;
-  packageItemIds: number[];
+  packageItems: Array<{ productId: number; quantity: number }>;
 };
 
 export function validateProductForm(
@@ -62,8 +62,15 @@ export function validateProductForm(
     nextErrors.branchId = "Selecciona una sucursal.";
   }
 
-  if (input.productType === "package" && input.packageItemIds.length === 0) {
+  if (input.productType === "package" && input.packageItems.length === 0) {
     nextErrors.packageItems = "Selecciona al menos un producto para el pack.";
+  }
+
+  if (
+    input.productType === "package" &&
+    input.packageItems.some((item) => !Number.isInteger(item.quantity) || item.quantity < 1)
+  ) {
+    nextErrors.packageItems = "Cada item del pack debe tener una cantidad valida mayor o igual a 1.";
   }
 
   return nextErrors;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, User, Check } from "lucide-react";
+import { Check, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useAuthForm } from "@/hooks/use-auth-form";
 import { PASSWORD_MIN_LENGTH, validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { Button } from "@/components/provider/ui/button";
@@ -17,6 +17,7 @@ interface RegisterFormProps {
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const router = useRouter();
   const { handleRegister, loading, error, clearError } = useAuthForm();
+  const [showPassword, setShowPassword] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -159,19 +160,29 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[#4B236A] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <Input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••"
             value={formData.password}
             onChange={handleChange}
             onBlur={() => handleBlur("password")}
             disabled={loading}
             className={cn(
-              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
+              "pl-10 pr-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
               touched.password && !isPasswordValid && "border-red-300 bg-red-50"
             )}
+            aria-label="Contraseña"
           />
         </div>
         {touched.password && !isPasswordValid && (
@@ -212,19 +223,29 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         </Label>
         <div className="relative">
           <Check className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[#4B236A] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <Input
             id="confirmPassword"
             name="confirmPassword"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••"
             value={formData.confirmPassword}
             onChange={handleChange}
             onBlur={() => handleBlur("confirmPassword")}
             disabled={loading}
             className={cn(
-              "pl-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
+              "pl-10 pr-10 rounded-[14px] border-[#E0E0E0] focus-visible:ring-[#4B236A] placeholder-gray-400",
               touched.confirmPassword && !isConfirmPasswordValid && "border-red-300 bg-red-50"
             )}
+            aria-label="Confirmar contraseña"
           />
         </div>
         {touched.confirmPassword && !isConfirmPasswordValid && (

@@ -12,7 +12,7 @@ type ProductFormInitialLike = {
   quantityAvailable?: number;
   quantityTotal?: number;
   branchId?: number | null;
-  packageItemIds?: number[];
+  packageItems?: Array<{ productId: number; quantity: number }>;
 };
 
 export type ProductFormDraft = {
@@ -24,7 +24,7 @@ export type ProductFormDraft = {
   quantityAvailable: string;
   description: string;
   branchId: string;
-  packageItemIds: number[];
+  packageItems: Array<{ productId: number; quantity: number }>;
 };
 
 export function parseDecimal(value: string): number | null {
@@ -68,7 +68,7 @@ export function mapInitialDataToDraft(initialData?: ProductFormInitialLike | nul
       initialData?.quantityAvailable !== undefined ? String(initialData.quantityAvailable) : "",
     description: initialData?.description ?? "",
     branchId: initialData?.branchId ? String(initialData.branchId) : "",
-    packageItemIds: initialData?.packageItemIds ?? [],
+    packageItems: initialData?.packageItems ?? [],
   };
 }
 
@@ -83,7 +83,7 @@ type BuildSubmitInputParams = {
   quantityAvailable: number;
   description: string;
   branchId: string;
-  packageItemIds: number[];
+  packageItems: Array<{ productId: number; quantity: number }>;
 };
 
 export function buildProductFormSubmitInput(
@@ -100,7 +100,7 @@ export function buildProductFormSubmitInput(
     quantityAvailable,
     description,
     branchId,
-    packageItemIds,
+    packageItems,
   } = params;
 
   return {
@@ -114,7 +114,7 @@ export function buildProductFormSubmitInput(
     quantityTotal: quantityTotal ?? quantityAvailable,
     description: description.trim() ? description.trim() : null,
     branchId: Number(branchId),
-    packageItemIds: productType === "package" ? packageItemIds : [],
+    packageItems: productType === "package" ? packageItems : [],
     photos: [],
   };
 }

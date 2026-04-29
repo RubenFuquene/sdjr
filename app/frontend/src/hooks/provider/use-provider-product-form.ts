@@ -4,11 +4,13 @@ import { useCallback, useState } from "react";
 import {
   ApiError,
   createProduct,
+  createPackageProduct,
   deleteProduct,
   getMyCommerce,
   mapProductFormToCreatePayload,
   mapProductFormToUpdatePayload,
   updateProduct,
+  updatePackageProduct,
 } from "@/lib/api";
 import type {
   ProductFromAPI,
@@ -107,7 +109,10 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
           commerceId,
         });
 
-        const response = await createProduct(payload);
+        const response =
+          input.productType === "package"
+            ? await createPackageProduct(payload)
+            : await createProduct(payload);
         return response.data;
       } catch (err) {
         if (err instanceof ApiError) {
@@ -145,7 +150,10 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
           commerceId,
         });
 
-        const response = await updateProduct(productId, payload);
+        const response =
+          input.productType === "package"
+            ? await updatePackageProduct(productId, payload)
+            : await updateProduct(productId, payload);
         return response.data;
       } catch (err) {
         if (err instanceof ApiError) {

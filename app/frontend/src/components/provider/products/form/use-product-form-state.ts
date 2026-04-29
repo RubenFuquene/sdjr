@@ -28,13 +28,13 @@ type ProductFormInitialData = {
   discountedPrice?: number | null;
   quantityAvailable?: number;
   branchId?: number | null;
-  packageItemIds?: number[];
+  packageItems?: Array<{ productId: number; quantity: number }>;
 };
 
 type UseProductFormStateParams = {
   initialData?: ProductFormInitialData | null;
   fieldErrors: ProviderProductFormFieldErrors;
-  packItemOptions: Array<{ id: number; originalPrice: number }>;
+  packItemOptions: Array<{ id: number; originalPrice: number, quantityAvailable: number }>;
   onSubmit: (input: ProviderProductFormInput) => Promise<void>;
 };
 
@@ -54,10 +54,17 @@ export function useProductFormState({
   const [quantityAvailable, setQuantityAvailable] = useState(initialDraft.quantityAvailable);
   const [description, setDescription] = useState(initialDraft.description);
   const [branchId, setBranchId] = useState(initialDraft.branchId);
-  const [packageItemIds, setPackageItemIds] = useState<number[]>(initialDraft.packageItemIds);
+  const [packageItems, setPackageItems] = useState<Array<{ productId: number; quantity: number }>>(
+    initialDraft.packageItems
+  );
   const [localErrors, setLocalErrors] = useState<ProductFormValidationErrors>({});
 
   const mergedErrors = useMemo(() => {
+    const packageItemsFieldError =
+      Object.entries(fieldErrors).find(
+        ([key]) => key === "package_items" || key.startsWith("package_items.")
+      )?.[1] ?? undefined;
+
     return {
       title: localErrors.title ?? fieldErrors["product.title"],
       productCategoryId:
@@ -69,20 +76,27 @@ export function useProductFormState({
         localErrors.quantityAvailable ?? fieldErrors["product.quantity_available"],
       branchId:
         localErrors.branchId ?? fieldErrors["commerce_branch_ids.0"] ?? fieldErrors["commerce_branches.0"],
-      packageItems:
-        localErrors.packageItems ?? fieldErrors["package_items.0"] ?? fieldErrors["package_items"],
+      packageItems: localErrors.packageItems ?? packageItemsFieldError,
     };
   }, [fieldErrors, localErrors]);
 
   const packOriginalPrice = useMemo(() => {
-    const selectedProducts = packItemOptions.filter((option) => packageItemIds.includes(option.id));
-    const total = selectedProducts.reduce((accumulator, option) => accumulator + option.originalPrice, 0);
+    const optionsById = new Map(packItemOptions.map((option) => [option.id, option]));
+    const total = packageItems.reduce((accumulator, selected) => {
+      const option = optionsById.get(selected.productId);
+
+      if (!option) {
+        return accumulator;
+      }
+
+      return accumulator + option.originalPrice * selected.quantity;
+    }, 0);
     return Number(total.toFixed(2));
-  }, [packItemOptions, packageItemIds]);
+  }, [packItemOptions, packageItems]);
 
   const effectiveOriginalPrice =
     productType === "package"
-      ? packageItemIds.length > 0
+      ? packageItems.length > 0
         ? String(packOriginalPrice)
         : ""
       : originalPrice;
@@ -96,7 +110,7 @@ export function useProductFormState({
       quantityAvailable,
       branchId,
       productType,
-      packageItemIds,
+      packageItems,
     });
 
     setLocalErrors(nextErrors);
@@ -107,17 +121,43 @@ export function useProductFormState({
     setProductType(nextType);
 
     if (nextType === "single") {
-      setPackageItemIds([]);
+      setPackageItems([]);
     }
   };
 
   const handleTogglePackItem = (productId: number) => {
-    setPackageItemIds((previous) => {
-      if (previous.includes(productId)) {
-        return previous.filter((id) => id !== productId);
+    setPackageItems((previous) => {
+      const existing = previous.find((item) => item.productId === productId);
+
+      if (existing) {
+        return previous.filter((item) => item.productId !== productId);
       }
 
-      return [...previous, productId];
+      return [...previous, { productId, quantity: 1 }];
+    });
+
+    setLocalErrors((previous) => ({
+      ...previous,
+      packageItems: undefined,
+    }));
+  };
+
+  const handlePackItemQuantityChange = (productId: number, quantity: number) => {
+    const option = packItemOptions.find((item) => item.id === productId);
+    const maxQuantity = option?.quantityAvailable ?? Number.MAX_SAFE_INTEGER;
+    const normalizedQuantity = Math.max(1, Math.min(quantity, maxQuantity));
+
+    setPackageItems((previous) => {
+      return previous.map((item) => {
+        if (item.productId !== productId) {
+          return item;
+        }
+
+        return {
+          ...item,
+          quantity: normalizedQuantity,
+        };
+      });
     });
 
     setLocalErrors((previous) => ({
@@ -153,7 +193,7 @@ export function useProductFormState({
         quantityAvailable: parsedQuantityAvailable,
         description,
         branchId,
-        packageItemIds,
+        packageItems,
       })
     );
   };
@@ -175,9 +215,10 @@ export function useProductFormState({
     setDescription,
     branchId,
     setBranchId,
-    packageItemIds,
+    packageItems,
     mergedErrors,
     handleTogglePackItem,
+    handlePackItemQuantityChange,
     handleSubmit,
   };
 }

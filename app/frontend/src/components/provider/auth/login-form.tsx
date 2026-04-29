@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useAuthForm } from "@/hooks/use-auth-form";
 import { Button } from "@/components/provider/ui/button";
 import { Input } from "@/components/provider/ui/input";
@@ -15,6 +15,7 @@ export function LoginForm() {
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,17 +70,27 @@ export function LoginForm() {
         </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[#4B236A] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <Input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={cn(
-              "pl-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
+              "pl-10 pr-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
               "focus:border-[#4B236A] focus:ring-2 focus:ring-[#4B236A]/20"
             )}
             disabled={loading}
+            aria-label="Contraseña"
           />
         </div>
       </div>
