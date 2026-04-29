@@ -34,6 +34,8 @@ class UserIndexRequest extends FormRequest
     {
         return [
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'sort_by' => ['nullable', 'string', 'in:name,last_name,email,phone,status,created_at,updated_at'],
+            'sort_dir' => ['nullable', 'string', 'in:asc,desc'],
         ];
     }
 
@@ -47,6 +49,6 @@ class UserIndexRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'last_name', 'phone', 'email', 'status']);
+        return $this->only(['name', 'last_name', 'phone', 'email', 'status', 'sort_by', 'sort_dir']);
     }
 }

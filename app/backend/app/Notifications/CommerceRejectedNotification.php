@@ -68,7 +68,6 @@ class CommerceRejectedNotification extends Notification implements ShouldQueue
             ->greeting('Hola '.($notifiable->name ?? 'Usuario').',')
             ->line('Lamentamos informarte que tu comercio "'.$this->commerce->name.'" ha sido rechazado tras el proceso de verificación.')
             ->line('Por favor revisa la información registrada y vuelve a intentarlo o contacta soporte para más detalles.')
-            ->action('Ver detalles', url('/provider/dashboard'))
             ->line('Gracias por tu interés en nuestra plataforma.');
     }
 

@@ -42,6 +42,8 @@ class IndexCategoryRequest extends FormRequest
         return [
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'status' => ['nullable', 'in:1,0,all'],
+            'sort_by' => ['nullable', 'string', 'in:name,code,status,created_at,updated_at'],
+            'sort_dir' => ['nullable', 'string', 'in:asc,desc'],
         ];
     }
 
@@ -55,6 +57,6 @@ class IndexCategoryRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'status']);
+        return $this->only(['name', 'status', 'sort_by', 'sort_dir']);
     }
 }

@@ -15,7 +15,18 @@ class IndexCommerceBranchRequest extends FormRequest
 
     public function rules(): array
     {
-        return [];
+        return [
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'name' => ['sometimes', 'string', 'max:100'],
+            'address' => ['sometimes', 'string', 'max:255'],
+            'longitude' => ['sometimes', 'numeric'],
+            'latitude' => ['sometimes', 'numeric'],
+            'phone' => ['sometimes', 'string', 'max:20'],
+            'email' => ['sometimes', 'email', 'max:255'],
+            'status' => ['sometimes', 'string', 'max:1'],
+            'sort_by' => ['sometimes', 'string', 'in:name,address,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
+        ];
     }
 
     public function validatedPerPage(): int
@@ -28,6 +39,6 @@ class IndexCommerceBranchRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'address', 'longitude', 'latitude', 'phone', 'email', 'status']);
+        return $this->only(['name', 'address', 'longitude', 'latitude', 'phone', 'email', 'status', 'sort_by', 'sort_dir']);
     }
 }

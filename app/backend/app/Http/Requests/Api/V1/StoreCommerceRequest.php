@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @OA\Schema(
- *     schema="CommerceRequest",
+ *     schema="StoreCommerceRequest",
  *     required={"owner_user_id","department_id","city_id","neighborhood_id","name","tax_id","tax_id_type","address"},
  *
  *     @OA\Property(property="owner_user_id", type="integer", example=1),
@@ -17,7 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="neighborhood_id", type="integer", example=1),
  *     @OA\Property(property="establishment_type_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", maxLength=255, example="Comercial S.A.S"),
- *     @OA\Property(property="description", type="string", maxLength=500, example="Comercio de tecnología"),
+ *     @OA\Property(property="description", type="string", maxLength=500, example="Comercio de tecnologia"),
  *     @OA\Property(property="tax_id", type="string", maxLength=30, example="900123456"),
  *     @OA\Property(property="tax_id_type", type="string", maxLength=10, example="NIT"),
  *     @OA\Property(property="address", type="string", maxLength=255, example="Calle 123 #45-67"),
@@ -27,19 +27,32 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="is_verified", type="boolean", example=false)
  * )
  */
-class CommerceRequest extends FormRequest
+class StoreCommerceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $action = $this->route()->getActionMethod();
-        $permission = 'provider.commerces.'.($action === 'store' ? 'create' : 'update');
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
 
-        return $this->user()?->can($permission) ?? false;
+        $canCreateAsProvider = $user->can('provider.commerces.create');
+        if (! $canCreateAsProvider) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(['superadmin', 'admin'])) {
+            return true;
+        }
+
+        $ownerUserId = (int) $this->input('owner_user_id', 0);
+
+        return $ownerUserId > 0 && $ownerUserId === (int) $user->id;
     }
 
     public function rules(): array
     {
-        $rules = [
+        return [
             'owner_user_id' => ['required', 'integer', 'exists:users,id'],
             'department_id' => ['required', 'integer', 'exists:departments,id'],
             'city_id' => ['required', 'integer', 'exists:cities,id'],
@@ -56,9 +69,6 @@ class CommerceRequest extends FormRequest
             'is_verified' => ['boolean'],
             'terms_accepted_version' => ['nullable', 'integer', 'min:1'],
             'terms_accepted_at' => ['nullable', 'date'],
-
         ];
-
-        return $rules;
     }
 }

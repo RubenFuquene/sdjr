@@ -36,7 +36,7 @@ class CommerceTest extends TestCase
         $user->givePermissionTo('provider.commerces.create');
         $this->actingAs($user, 'sanctum');
 
-        $payload = Commerce::factory()->make()->toArray();
+        $payload = Commerce::factory(['owner_user_id' => $user->id])->make()->toArray();
         $response = $this->postJson('/api/v1/commerces', $payload);
         $response->assertCreated();
         $response->assertJsonPath('status', true);
@@ -72,7 +72,9 @@ class CommerceTest extends TestCase
         $user->givePermissionTo('provider.commerces.update');
         $this->actingAs($user, 'sanctum');
 
-        $commerce = Commerce::factory()->create();
+        $commerce = Commerce::factory()->create([
+            'owner_user_id' => $user->id,
+        ]);
         $payload = $commerce->toArray();
         $payload['name'] = 'Nuevo Nombre';
         $response = $this->putJson('/api/v1/commerces/'.$commerce->id, $payload);

@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Constants\Constant;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\CommerceRequest;
 use App\Http\Requests\Api\V1\DeleteCommerceRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
@@ -16,6 +15,8 @@ use App\Http\Requests\Api\V1\PatchCommerceAcceptTermsRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
 use App\Http\Requests\Api\V1\ShowCommerceRequest;
+use App\Http\Requests\Api\V1\StoreCommerceRequest;
+use App\Http\Requests\Api\V1\UpdateCommerceRequest;
 use App\Http\Resources\Api\V1\CommerceBranchResource;
 use App\Http\Resources\Api\V1\CommercePayoutMethodResource;
 use App\Http\Resources\Api\V1\CommerceResource;
@@ -27,7 +28,6 @@ use App\Services\CommerceService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -71,6 +71,8 @@ class CommerceController extends Controller
      *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", default=15)),
      *     @OA\Parameter(name="page", in="query", required=false, description="Número de página", @OA\Schema(type="integer", default=1)),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, description="Campo de orden", @OA\Schema(type="string", enum={"name","email","phone","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, description="Dirección de orden", @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
      *
@@ -91,7 +93,15 @@ class CommerceController extends Controller
             $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
             $page = $request->validatedPage();
-            $commerces = $this->commerceService->paginateWithFilters($perPage, $page, $filters['search'] ?? null, $filters['status'] ?? null, $filters['verified'] ?? null);
+            $commerces = $this->commerceService->paginateWithFilters(
+                $perPage,
+                $page,
+                $filters['search'] ?? null,
+                $filters['status'] ?? null,
+                $filters['verified'] ?? null,
+                $filters['sort_by'] ?? 'name',
+                $filters['sort_dir'] ?? 'asc'
+            );
             $resource = CommerceResource::collection($commerces);
 
             return $this->paginatedResponse($commerces, $resource, 'Commerces retrieved successfully');
@@ -115,7 +125,7 @@ class CommerceController extends Controller
      *         required=true,
      *         description="Commerce",
      *
-     *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/StoreCommerceRequest")
      *     ),
      *
      *     @OA\Response(
@@ -130,7 +140,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(CommerceRequest $request): JsonResponse
+    public function store(StoreCommerceRequest $request): JsonResponse
     {
         try {
             $commerce = $this->commerceService->store($request->validated());
@@ -196,7 +206,7 @@ class CommerceController extends Controller
      *         required=true,
      *         description="Commerce",
      *
-     *         @OA\JsonContent(ref="#/components/schemas/CommerceRequest")
+     *         @OA\JsonContent(ref="#/components/schemas/UpdateCommerceRequest")
      *     ),
      *
      *     @OA\Response(
@@ -212,7 +222,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function update(CommerceRequest $request, int $commerce_id): JsonResponse
+    public function update(UpdateCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
             $commerce = $this->commerceService->update($commerce_id, $request->validated());

@@ -57,6 +57,8 @@ class IndexPqrsTypeRequest extends FormRequest
             'status' => ['sometimes', 'string', 'size:1'],
             'name' => ['sometimes', 'string', 'max:100'],
             'code' => ['sometimes', 'string', 'max:20'],
+            'sort_by' => ['sometimes', 'string', 'in:name,code,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
         ];
     }
 
@@ -70,6 +72,6 @@ class IndexPqrsTypeRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'code', 'status']);
+        return $this->only(['name', 'code', 'status', 'sort_by', 'sort_dir']);
     }
 }

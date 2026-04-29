@@ -47,6 +47,8 @@ class BankController extends Controller
      *     @OA\Parameter(name="code", in="query", required=false, description="Bank code (ISO)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Bank status: 1=active, 0=inactive", @OA\Schema(type="string", enum={"1","0"}, default="1")),
      *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, description="Sort field", @OA\Schema(type="string", enum={"name","code","status","created_at","updated_at"}, default="name")),
+     *     @OA\Parameter(name="sort_dir", in="query", required=false, description="Sort direction", @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *
      *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", example={"data":{{"id":1,"name":"Bank of America","code":"BOA","status":"1"},{"id":2,"name":"Citibank","code":"CITI","status":"1"}},"meta":{"current_page":1,"total":2,"per_page":15},"links":{"first":"/?page=1","last":"/?page=1","prev":null,"next":null}})),
      *     @OA\Response(response=401, description="Unauthenticated"),

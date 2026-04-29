@@ -43,6 +43,8 @@ class IndexCountryRequest extends FormRequest
         return [
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'status' => ['sometimes', 'in:0,1,all'],
+            'sort_by' => ['sometimes', 'string', 'in:name,code,status,created_at,updated_at'],
+            'sort_dir' => ['sometimes', 'string', 'in:asc,desc'],
         ];
     }
 
@@ -66,6 +68,6 @@ class IndexCountryRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'code', 'status']);
+        return $this->only(['name', 'code', 'status', 'sort_by', 'sort_dir']);
     }
 }

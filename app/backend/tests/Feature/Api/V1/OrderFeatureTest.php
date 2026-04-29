@@ -9,7 +9,9 @@ use App\Models\CommerceBranch;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Notifications\OrderCreatedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -276,5 +278,50 @@ class OrderFeatureTest extends TestCase
         ]);
 
         $response->assertUnauthorized();
+    }
+
+    public function test_customer_creates_order_and_receives_notification(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $user->assignRole('user');
+        $user->givePermissionTo('customer.orders.create');
+        Sanctum::actingAs($user);
+
+        $branch = CommerceBranch::factory()->create();
+        $products = Product::factory()->count(2)->create(['commerce_id' => $branch->commerce_id]);
+
+        $body = [
+            'commerce_branch_id' => $branch->id,
+            'items' => [
+                [
+                    'product_id' => $products[0]->id,
+                    'quantity' => 2,
+                ],
+                [
+                    'product_id' => $products[1]->id,
+                    'quantity' => 1,
+                ],
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/orders', $body);
+
+        $response->assertCreated();
+        $response->assertJsonPath('status', true);
+        $response->assertJsonPath('message', 'Order created successfully');
+
+        // Verificar que se envió la notificación
+        Notification::assertSentTo(
+            $user,
+            OrderCreatedNotification::class,
+            function ($notification, $channels) {
+                $order = Order::latest('id')->first();
+
+                return $notification->order->id === $order->id
+                    && in_array('mail', $channels);
+            }
+        );
     }
 }
