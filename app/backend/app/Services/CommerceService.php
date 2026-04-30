@@ -89,11 +89,11 @@ class CommerceService
             });
         }
 
-        if (! is_null($status)) {
+        if (! is_null($status) && $status !== 'all') {
             $query->where('is_active', $status);
         }
 
-        if (! is_null($verified)) {
+        if (! is_null($verified) && $verified !== 'all') {
             $query->where('is_verified', $verified);
         }
 

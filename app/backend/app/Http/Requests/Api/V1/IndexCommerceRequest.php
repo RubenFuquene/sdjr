@@ -25,7 +25,7 @@ class IndexCommerceRequest extends FormRequest
         return [
             'search' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', Rule::in(['1', '0', 'all'])],
-            'verified' => ['nullable', Rule::in(['1', '0', 'all'])],
+            'verified' => ['nullable', Rule::in(['0', '1', '2', '3', 'all'])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
             'sort_by' => ['nullable', 'string', Rule::in(['name', 'email', 'phone', 'created_at', 'updated_at'])],

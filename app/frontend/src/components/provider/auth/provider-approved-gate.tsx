@@ -27,6 +27,8 @@ export function ProviderApprovedGate({ children, featureName }: ProviderApproved
   const blockedMessage =
     registrationStatus === "Rechazado"
       ? "Tu registro fue rechazado. Actualiza la informacion requerida y vuelve a enviarla para revision."
+      : registrationStatus === "Por aprobar nuevamente"
+        ? "Tus cambios fueron enviados y tu registro esta en nueva revision. Cuando sea validado nuevamente podras gestionar sucursales y productos."
       : "Tu registro aun no ha sido aprobado. Cuando sea validado podras gestionar sucursales y productos.";
 
   return (

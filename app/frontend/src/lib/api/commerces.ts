@@ -189,13 +189,14 @@ export async function acceptCommerceTerms(
  */
 export async function updateCommerceVerification(
   id: number,
-  isVerified: CommerceVerificationStatus
+  isVerified: CommerceVerificationStatus,
+  message: string
 ): Promise<ApiSuccess<CommerceFromAPI>> {
   return fetchWithErrorHandling<ApiSuccess<CommerceFromAPI>>(
     `/api/v1/commerces/${id}/verification`,
     {
       method: "PATCH",
-      body: JSON.stringify({ is_verified: isVerified }),
+      body: JSON.stringify({ is_verified: isVerified, message }),
     }
   );
 }
@@ -226,22 +227,30 @@ export async function updateCommerceStatus(
 
 /**
  * Convenience function: Aprobar un comercio/proveedor
- * Equivalente a: updateCommerceVerification(id, 1)
+ * Equivalente a: updateCommerceVerification(id, 1, message)
  * 
  * @param id - ID del comercio
+ * @param message - Mensaje de aprobación (mín. 10 caracteres)
  * @returns Comercio actualizado
  */
-export async function approveCommerce(id: number): Promise<ApiSuccess<CommerceFromAPI>> {
-  return updateCommerceVerification(id, 1);
+export async function approveCommerce(
+  id: number,
+  message: string = 'Su registro como proveedor ha sido aprobado satisfactoriamente.'
+): Promise<ApiSuccess<CommerceFromAPI>> {
+  return updateCommerceVerification(id, 1, message);
 }
 
 /**
  * Convenience function: Rechazar un comercio/proveedor
- * Equivalente a: updateCommerceVerification(id, 2)
+ * Equivalente a: updateCommerceVerification(id, 2, message)
  * 
  * @param id - ID del comercio
+ * @param message - Motivo del rechazo (mín. 10 caracteres, máx. 500)
  * @returns Comercio actualizado
  */
-export async function rejectCommerce(id: number): Promise<ApiSuccess<CommerceFromAPI>> {
-  return updateCommerceVerification(id, 2);
+export async function rejectCommerce(
+  id: number,
+  message: string
+): Promise<ApiSuccess<CommerceFromAPI>> {
+  return updateCommerceVerification(id, 2, message);
 }

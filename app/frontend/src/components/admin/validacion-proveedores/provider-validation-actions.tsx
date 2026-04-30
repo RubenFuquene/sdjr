@@ -74,9 +74,14 @@ export function ProviderValidationActions({
       return;
     }
 
+    if (rejectReason.trim().length < 10) {
+      setApprovalError('La razón de rechazo debe tener al menos 10 caracteres');
+      return;
+    }
+
     try {
       setApprovalError(null);
-      await rejectProvider(providerId);
+      await rejectProvider(providerId, rejectReason.trim());
       
       // Limpiar y cerrar dialog
       setRejectReason('');

@@ -39,11 +39,11 @@ export function ProviderValidationSidebar({
   onSelectProvider,
   refreshTrigger = 0,
 }: ProviderValidationSidebarProps) {
-  // Inicializar hook con filtro para mostrar solo proveedores pendientes (no verificados)
-  const commerceManagement = useCommerceManagement({ verified: '0' });
+  // Inicializar hook con filtro para mostrar pendientes y por aprobar nuevamente
+  const commerceManagement = useCommerceManagement({ verified: '0,3' });
   const { refresh } = commerceManagement;
 
-  // Mostrar solo proveedores con estado "pendiente" (no verificados)
+  // Mostrar proveedores con estado pendiente (0) y por aprobar nuevamente (3)
   const pendingProviders = commerceManagement.commerces;
 
   useEffect(() => {
@@ -135,6 +135,21 @@ interface ProviderPendingCardProps {
 }
 
 function ProviderPendingCard({ provider, isSelected, onClick }: ProviderPendingCardProps) {
+  const statusMeta =
+    provider.estadoVerificacion === 3
+      ? {
+          iconClass: 'text-[#4B236A]',
+          badgeClass: 'bg-[#4B236A]/10 text-[#4B236A]',
+          dotClass: 'bg-[#4B236A]',
+          label: 'Por aprobar nuevamente',
+        }
+      : {
+          iconClass: 'text-orange-500',
+          badgeClass: 'bg-orange-100 text-orange-700',
+          dotClass: 'bg-orange-500',
+          label: 'Pendiente',
+        };
+
   return (
     <button
       onClick={onClick}
@@ -149,13 +164,20 @@ function ProviderPendingCard({ provider, isSelected, onClick }: ProviderPendingC
           {provider.nombreComercial}
         </h3>
         <div className="flex-shrink-0 ml-2">
-          <Clock className="w-4 h-4 text-orange-500" />
+          <Clock className={`w-4 h-4 ${statusMeta.iconClass}`} />
         </div>
       </div>
 
       <p className="text-xs text-[#6A6A6A] mb-2">
         {provider.tipoEstablecimiento || 'Establecimiento'}
       </p>
+
+      <div className="mb-3">
+        <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-medium ${statusMeta.badgeClass}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dotClass}`}></span>
+          {statusMeta.label}
+        </span>
+      </div>
 
       <div className="flex items-center justify-between text-xs text-[#6A6A6A]">
         <span>Solicitud:</span>

@@ -83,7 +83,7 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     estado: commerce.is_active,
 
     // Datos secundarios
-    verificado: normalizedVerificationStatus === 1 || normalizedVerificationStatus === 0,
+    verificado: normalizedVerificationStatus,
     descripcion: commerce.description,
 
     // Relaciones

@@ -8,7 +8,7 @@ import {
   type CommerceVerificationStatus,
 } from "@/types/commerces";
 
-export type RegistrationStatus = "Aprobado" | "Pendiente" | "Rechazado";
+export type RegistrationStatus = "Aprobado" | "Pendiente" | "Rechazado" | "Por aprobar nuevamente";
 
 type ProviderCommerceContextValue = {
   commerce: CommerceFromAPI | null;
@@ -27,6 +27,10 @@ function resolveRegistrationStatus(isVerifiedValue: CommerceVerificationStatus):
 
   if (isVerifiedValue === 2) {
     return "Rechazado";
+  }
+
+  if (isVerifiedValue === 3) {
+    return "Por aprobar nuevamente";
   }
 
   return "Pendiente";
