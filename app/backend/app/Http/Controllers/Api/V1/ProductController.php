@@ -15,7 +15,6 @@ use App\Http\Requests\Api\V1\StoreProductRequest;
 use App\Http\Requests\Api\V1\UpdateProductRequest;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
 use App\Http\Resources\Api\V1\ProductResource;
-use App\Http\Resources\Api\V1\ProductResourceCollection;
 use App\Models\ProductPhoto;
 use App\Services\CommerceService;
 use App\Services\DocumentUploadService;
@@ -399,9 +398,8 @@ class ProductController extends Controller
     {
         try {
             $product = $this->productService->getProductPackage($product_package_id);
-            $items = $product->packageItems;
 
-            return $this->successResponse(new ProductResourceCollection($items), 'Package items fetched successfully', 200);
+            return $this->successResponse(new ProductResource($product), 'Package items fetched successfully', 200);
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse('Product not found with the specified ID.', 404);
         } catch (Exception $e) {
