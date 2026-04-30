@@ -332,7 +332,7 @@ class CommerceController extends Controller
      *     operationId="patchCommerceVerification",
      *     tags={"Commerces"},
      *     summary="Update commerce verification status",
-     *     description="Updates the is_verified status of a commerce (verified/unverified).",
+     *     description="Updates the is_verified status of a commerce (verified/unverified) and sends a notification email with a custom message.",
      *     security={{"sanctum":{}}},
      *
      *     @OA\Parameter(
@@ -348,9 +348,10 @@ class CommerceController extends Controller
      *         required=true,
      *
      *         @OA\JsonContent(
-     *             required={"is_verified"},
+     *             required={"is_verified", "message"},
      *
-     *             @OA\Property(property="is_verified", type="integer", enum={0,1,2}, example=1)
+     *             @OA\Property(property="is_verified", type="integer", enum={0,1,2}, example=1, description="Verification status: 0=pending, 1=verified, 2=rejected"),
+     *             @OA\Property(property="message", type="string", minLength=10, maxLength=500, example="Tu comercio ha cumplido con todos los requisitos necesarios.", description="Custom message to include in the notification email (10-500 characters)")
      *         )
      *     ),
      *
@@ -372,6 +373,7 @@ class CommerceController extends Controller
         try {
 
             $commerce = $this->commerceService->updateVerification($id, (int) $request->validated('is_verified'));
+            $customMessage = (string) $request->validated('message');
 
             // Si el comercio fue verificado o rechazado enviar notificación
             $user = $commerce->ownerUser;
@@ -380,7 +382,7 @@ class CommerceController extends Controller
                 case Constant::COMMERCE_VERIFIED:
                     $message = 'Commerce verified successfully';
                     try {
-                        $user->notify(new CommerceVerifiedNotification($commerce));
+                        $user->notify(new CommerceVerifiedNotification($commerce, $customMessage));
                     } catch (\Throwable $e) {
                         Log::warning('Commerce verified notification dispatch failed', [
                             'commerce_id' => $commerce->id,
@@ -392,7 +394,7 @@ class CommerceController extends Controller
                 case Constant::COMMERCE_REJECTED:
                     $message = 'Commerce rejected successfully';
                     try {
-                        $user->notify(new CommerceRejectedNotification($commerce));
+                        $user->notify(new CommerceRejectedNotification($commerce, $customMessage));
                     } catch (\Throwable $e) {
                         Log::warning('Commerce rejected notification dispatch failed', [
                             'commerce_id' => $commerce->id,

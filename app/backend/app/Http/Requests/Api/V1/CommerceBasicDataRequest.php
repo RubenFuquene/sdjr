@@ -14,11 +14,57 @@ use Illuminate\Validation\Rule;
  * @OA\Schema(
  *     schema="CommerceBasicDataRequest",
  *     type="object",
- *     description="Request schema for basic commerce data, including commerce, legal representatives, and documents.",
+ *     description="Request schema for basic commerce onboarding data, including commerce, legal representative, and documents.",
+ *     required={"commerce","legal_representative"},
  *
- *     @OA\Property(property="commerce", type="array", @OA\Items(ref="#/components/schemas/CommerceRequest")),
- *     @OA\Property(property="legal_representatives", type="array", @OA\Items(ref="#/components/schemas/LegalRepresentativeRequest")),
- *     @OA\Property(property="commerce_documents", type="array", @OA\Items(ref="#/components/schemas/CommerceDocument"))
+ *     @OA\Property(
+ *         property="commerce",
+ *         type="object",
+ *         required={"owner_user_id","department_id","city_id","neighborhood_id","establishment_type_id","name","tax_id","tax_id_type","address"},
+ *         @OA\Property(property="owner_user_id", type="integer", example=1),
+ *         @OA\Property(property="department_id", type="integer", example=1),
+ *         @OA\Property(property="city_id", type="integer", example=1),
+ *         @OA\Property(property="neighborhood_id", type="integer", example=1),
+ *         @OA\Property(property="establishment_type_id", type="integer", example=1),
+ *         @OA\Property(property="name", type="string", maxLength=255, example="Acme Market"),
+ *         @OA\Property(property="description", type="string", maxLength=500, example="Retail commerce"),
+ *         @OA\Property(property="tax_id", type="string", maxLength=50, example="900123456"),
+ *         @OA\Property(property="tax_id_type", type="string", enum={"NIT","CC","PS","CE"}, example="NIT"),
+ *         @OA\Property(property="address", type="string", maxLength=255, example="123 Main St"),
+ *         @OA\Property(property="phone", type="string", maxLength=20, example="3001234567"),
+ *         @OA\Property(property="email", type="string", format="email", maxLength=100, example="info@acme.com"),
+ *         @OA\Property(property="is_verified", type="boolean", example=false),
+ *         @OA\Property(property="is_active", type="boolean", example=true)
+ *     ),
+ *     @OA\Property(
+ *         property="legal_representative",
+ *         type="object",
+ *         required={"name","last_name","document","document_type"},
+ *         @OA\Property(property="name", type="string", maxLength=255, example="John"),
+ *         @OA\Property(property="last_name", type="string", maxLength=255, example="Doe"),
+ *         @OA\Property(property="document", type="string", maxLength=30, example="123456789"),
+ *         @OA\Property(property="document_type", type="string", enum={"CC","CE","NIT","PAS"}, example="CC"),
+ *         @OA\Property(property="email", type="string", format="email", maxLength=100, example="john.doe@example.com"),
+ *         @OA\Property(property="phone", type="string", maxLength=20, example="3007654321"),
+ *         @OA\Property(property="is_primary", type="boolean", example=true)
+ *     ),
+ *     @OA\Property(
+ *         property="commerce_documents",
+ *         type="array",
+ *
+ *         @OA\Items(
+ *             type="object",
+ *
+ *             @OA\Property(property="verified_by_id", type="integer", nullable=true, example=2),
+ *             @OA\Property(property="uploaded_by_id", type="integer", nullable=true, example=1),
+ *             @OA\Property(property="document_type", type="string", maxLength=100, nullable=true, example="RUT"),
+ *             @OA\Property(property="file_path", type="string", maxLength=255, nullable=true, example="documents/commerce/rut.pdf"),
+ *             @OA\Property(property="mime_type", type="string", maxLength=100, nullable=true, example="application/pdf"),
+ *             @OA\Property(property="verified", type="boolean", example=false),
+ *             @OA\Property(property="uploaded_at", type="string", format="date-time", nullable=true),
+ *             @OA\Property(property="verified_at", type="string", format="date-time", nullable=true)
+ *         )
+ *     )
  * )
  */
 class CommerceBasicDataRequest extends FormRequest

@@ -24,6 +24,20 @@ class PatchCommerceVerificationRequest extends FormRequest
     {
         return [
             'is_verified' => ['required', 'integer', 'in:'.Constant::COMMERCE_PENDING.','.Constant::COMMERCE_VERIFIED.','.Constant::COMMERCE_REJECTED],
+            'message' => ['required', 'string', 'min:10', 'max:500'],
+        ];
+    }
+
+    /**
+     * Mensajes de error personalizados.
+     */
+    public function messages(): array
+    {
+        return [
+            'message.required' => 'The custom message field is required.',
+            'message.string' => 'The message must be a string.',
+            'message.min' => 'The message must be at least 10 characters.',
+            'message.max' => 'The message may not be greater than 500 characters.',
         ];
     }
 }

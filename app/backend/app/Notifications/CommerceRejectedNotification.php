@@ -25,12 +25,15 @@ class CommerceRejectedNotification extends Notification implements ShouldQueue
 
     protected Commerce $commerce;
 
+    protected string $customMessage;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct(Commerce $commerce)
+    public function __construct(Commerce $commerce, string $customMessage)
     {
         $this->commerce = $commerce;
+        $this->customMessage = $customMessage;
     }
 
     /**
@@ -68,6 +71,7 @@ class CommerceRejectedNotification extends Notification implements ShouldQueue
             ->greeting('Hola '.($notifiable->name ?? 'Usuario').',')
             ->line('Lamentamos informarte que tu comercio "'.$this->commerce->name.'" ha sido rechazado tras el proceso de verificación.')
             ->line('Por favor revisa la información registrada y vuelve a intentarlo o contacta soporte para más detalles.')
+            ->line($this->customMessage)
             ->line('Gracias por tu interés en nuestra plataforma.');
     }
 

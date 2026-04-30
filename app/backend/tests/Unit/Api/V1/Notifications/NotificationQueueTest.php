@@ -45,7 +45,7 @@ class NotificationQueueTest extends TestCase
         ]);
         $commerce->id = 10;
 
-        $notification = new CommerceVerifiedNotification($commerce);
+        $notification = new CommerceVerifiedNotification($commerce, $commerceMessage = '¡Tu comercio ha sido verificado exitosamente!');
 
         $this->assertInstanceOf(ShouldQueue::class, $notification);
         $this->assertSame(['mail'], $notification->via($user));
@@ -67,7 +67,7 @@ class NotificationQueueTest extends TestCase
         ]);
         $commerce->id = 22;
 
-        $notification = new CommerceRejectedNotification($commerce);
+        $notification = new CommerceRejectedNotification($commerce, $commerceMessage = '¡Tu comercio ha sido rechazado!');
 
         $this->assertInstanceOf(ShouldQueue::class, $notification);
         $this->assertSame(['mail'], $notification->via($user));
