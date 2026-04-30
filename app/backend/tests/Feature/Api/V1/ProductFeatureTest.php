@@ -233,6 +233,51 @@ class ProductFeatureTest extends TestCase
             ]);
     }
 
+    public function test_get_products_by_commerce_includes_package_items_when_loaded()
+    {
+        $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create();
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+        ]);
+        $item = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+        ]);
+        $package->packageItems()->attach([
+            $item->id => ['quantity' => 2],
+        ]);
+
+        $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
+        $response->assertOk()
+            ->assertJsonPath('data.0.package_items.0.id', $item->id)
+            ->assertJsonPath('data.0.package_items.0.quantity', 2);
+    }
+
+    public function test_get_products_by_commerce_branch_includes_package_items_when_loaded()
+    {
+        $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create();
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+        ]);
+        $item = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+        ]);
+        $package->packageItems()->attach([
+            $item->id => ['quantity' => 1],
+        ]);
+
+        $response = $this->getJson('/api/v1/products/commerce/branch/'.$branch->id);
+        $response->assertOk()
+            ->assertJsonPath('data.0.package_items.0.id', $item->id)
+            ->assertJsonPath('data.0.package_items.0.quantity', 1);
+    }
+
     public function test_get_products_by_commerce_branch_returns_404_when_none_found()
     {
         $this->actingAsAdmin();
@@ -270,8 +315,8 @@ class ProductFeatureTest extends TestCase
 
         $response = $this->getJson('/api/v1/products/commerce/package-items/'.$package->id);
         $response->assertOk()
-            ->assertJsonStructure(['data'])
-            ->assertJsonCount(2, 'data');
+            ->assertJsonStructure(['data' => ['package_items']])
+            ->assertJsonCount(2, 'data.package_items');
     }
 
     public function test_get_package_items_returns_empty_when_none()
@@ -280,7 +325,7 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
         $response = $this->getJson('/api/v1/products/commerce/package-items/'.$package->id);
         $response->assertOk()
-            ->assertJson(['data' => []]);
+            ->assertJson(['data' => ['package_items' => []]]);
     }
 
     public function test_get_package_items_returns_404_for_invalid_product()
