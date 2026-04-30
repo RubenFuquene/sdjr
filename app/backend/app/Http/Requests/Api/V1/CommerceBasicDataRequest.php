@@ -51,8 +51,10 @@ use Illuminate\Validation\Rule;
  *     @OA\Property(
  *         property="commerce_documents",
  *         type="array",
+ *
  *         @OA\Items(
  *             type="object",
+ *
  *             @OA\Property(property="verified_by_id", type="integer", nullable=true, example=2),
  *             @OA\Property(property="uploaded_by_id", type="integer", nullable=true, example=1),
  *             @OA\Property(property="document_type", type="string", maxLength=100, nullable=true, example="RUT"),
