@@ -63,6 +63,7 @@ class Commerce extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_verified' => 'integer',
         'terms_accepted_at' => 'datetime',
         'terms_accepted_version' => 'integer',
         'created_at' => 'datetime',
