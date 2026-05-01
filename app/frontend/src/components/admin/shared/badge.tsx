@@ -33,16 +33,18 @@ export function StatusBadge({ activo }: { activo: boolean }) {
 }
 
 export function VerificationStatusBadge({ estado }: { estado: CommerceVerificationStatus }) {
-  const variantMap: Record<0 | 1 | 2, "inactive" | "success" | "warning"> = {
+  const variantMap: Record<CommerceVerificationStatus, "inactive" | "success" | "warning" | "perfil"> = {
     0: "inactive",
     1: "success",
     2: "warning",
+    3: "perfil",
   };
 
-  const labelMap: Record<0 | 1 | 2, string> = {
+  const labelMap: Record<CommerceVerificationStatus, string> = {
     0: "Pendiente",
     1: "Activo",
     2: "Rechazado",
+    3: "Por aprobar nuevamente",
   };
 
   return (

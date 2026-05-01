@@ -59,6 +59,8 @@ export function ProviderShell({
   const statusColor =
     registrationStatus === "Aprobado"
       ? "bg-green-500"
+      : registrationStatus === "Por aprobar nuevamente"
+        ? "bg-[#4B236A]"
       : registrationStatus === "Pendiente"
         ? "bg-yellow-500"
         : "bg-red-500";

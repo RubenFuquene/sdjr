@@ -39,7 +39,7 @@ export interface CommerceFilters {
   perPage?: number;
   search?: string;
   status?: string;
-  verified?: string; // opcional: 1 (verified) | 0 (not verified) | all
+  verified?: string; // opcional: "1" | "0" | "2" | "3" | "0,3"
 }
 
 /**
@@ -72,6 +72,35 @@ export function useCommerceManagement(initialFilters?: Partial<CommerceFilters>)
     try {
       setLoading(true);
       setError(null);
+
+      const verifiedFilters = (filtersToUse.verified || '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0);
+
+      if (verifiedFilters.length > 1) {
+        const responses = await Promise.all(
+          verifiedFilters.map((verifiedValue) =>
+            getCommerces({
+              page: filtersToUse.page,
+              perPage: filtersToUse.perPage,
+              search: filtersToUse.search,
+              status: filtersToUse.status,
+              verified: verifiedValue,
+            })
+          )
+        );
+
+        const mergedData = responses.flatMap((response) => response.data);
+        const uniqueById = Array.from(new Map(mergedData.map((item) => [item.id, item])).values());
+        const mappedCommerces = uniqueById.map(commerceToProveedorListItem);
+
+        setCommerces(mappedCommerces);
+        setCurrentPage(1);
+        setLastPage(1);
+        setTotalCommerces(mappedCommerces.length);
+        return;
+      }
 
       const response = await getCommerces({
         page: filtersToUse.page,
@@ -131,21 +160,7 @@ export function useCommerceManagement(initialFilters?: Partial<CommerceFilters>)
 
       const newFilters = { ...filters, ...searchFilters, page: 1 };
       setFilters(newFilters);
-
-      const response = await getCommerces({
-        page: newFilters.page,
-        perPage: newFilters.perPage,
-        search: newFilters.search,
-        status: newFilters.status,
-        verified: newFilters.verified,
-      });
-
-      const mappedCommerces = response.data.map(commerceToProveedorListItem);
-      setCommerces(mappedCommerces);
-
-      setCurrentPage(response.meta.current_page);
-      setLastPage(response.meta.last_page);
-      setTotalCommerces(response.meta.total);
+      await performFetch(newFilters);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -168,21 +183,7 @@ export function useCommerceManagement(initialFilters?: Partial<CommerceFilters>)
 
       const newFilters = { ...filters, page };
       setFilters(newFilters);
-
-      const response = await getCommerces({
-        page: newFilters.page,
-        perPage: newFilters.perPage,
-        search: newFilters.search,
-        status: newFilters.status,
-        verified: newFilters.verified,
-      });
-
-      const mappedCommerces = response.data.map(commerceToProveedorListItem);
-      setCommerces(mappedCommerces);
-
-      setCurrentPage(response.meta.current_page);
-      setLastPage(response.meta.last_page);
-      setTotalCommerces(response.meta.total);
+      await performFetch(newFilters);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -193,7 +194,7 @@ export function useCommerceManagement(initialFilters?: Partial<CommerceFilters>)
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, performFetch]);
 
   /**
    * Crea un nuevo comercio

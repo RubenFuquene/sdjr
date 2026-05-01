@@ -25,7 +25,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="phone", type="string", maxLength=20, example="3001234567"),
  *     @OA\Property(property="email", type="string", maxLength=100, example="info@comercial.com"),
  *     @OA\Property(property="is_active", type="boolean", example=true),
- *     @OA\Property(property="is_verified", type="boolean", example=false)
+ *     @OA\Property(property="is_verified", type="integer", enum={0,1,2,3}, example=0)
  * )
  */
 class UpdateCommerceRequest extends FormRequest
@@ -73,7 +73,7 @@ class UpdateCommerceRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'string', 'max:100', 'email'],
             'is_active' => ['boolean'],
-            'is_verified' => ['boolean'],
+            'is_verified' => ['integer', 'in:0,1,2,3'],
             'terms_accepted_version' => ['nullable', 'integer', 'min:1'],
             'terms_accepted_at' => ['nullable', 'date'],
         ];

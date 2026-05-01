@@ -16,8 +16,8 @@ interface UseCommerceApprovalState {
 }
 
 interface UseCommerceApprovalReturn extends UseCommerceApprovalState {
-  approveProvider: (commerceId: number) => Promise<CommerceFromAPI>;
-  rejectProvider: (commerceId: number) => Promise<CommerceFromAPI>;
+  approveProvider: (commerceId: number, message?: string) => Promise<CommerceFromAPI>;
+  rejectProvider: (commerceId: number, message: string) => Promise<CommerceFromAPI>;
   reset: () => void;
 }
 
@@ -54,13 +54,16 @@ export function useCommerceApproval(): UseCommerceApprovalReturn {
    * @returns Datos actualizados del comercio
    * @throws Error si falla la aprobación
    */
-  const approveProvider = async (commerceId: number): Promise<CommerceFromAPI> => {
+  const approveProvider = async (
+    commerceId: number,
+    message?: string
+  ): Promise<CommerceFromAPI> => {
     setIsLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
-      const response = await approveCommerce(commerceId);
+      const response = await approveCommerce(commerceId, message);
       
       if (!response.data) {
         throw new Error('No se recibieron datos del comercio actualizado');
@@ -87,13 +90,16 @@ export function useCommerceApproval(): UseCommerceApprovalReturn {
    * @returns Datos actualizados del comercio
    * @throws Error si falla el rechazo
    */
-  const rejectProvider = async (commerceId: number): Promise<CommerceFromAPI> => {
+  const rejectProvider = async (
+    commerceId: number,
+    message: string
+  ): Promise<CommerceFromAPI> => {
     setIsLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
-      const response = await rejectCommerce(commerceId);
+      const response = await rejectCommerce(commerceId, message);
       
       if (!response.data) {
         throw new Error('No se recibieron datos del comercio actualizado');

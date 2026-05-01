@@ -15,7 +15,7 @@ import { getSessionFromCookie } from '@/lib/session';
 import { basicInfoToCommerceBasicPayload } from '@/types/commerces.adapters';
 import { uploadFileToPresignedUrl, getBackendMimeType } from '@/lib/utils/document-upload';
 import { validateBasicInfoForm } from '@/lib/provider/validations/basic-info';
-import type { CommerceFromAPI } from '@/types/commerces';
+import { normalizeCommerceVerificationStatus, type CommerceFromAPI } from '@/types/commerces';
 import { useProviderCommerce } from '@/components/provider/context/provider-commerce-context';
 
 type DocumentStatus = { status: 'idle' | 'uploading' | 'success' | 'error'; error: string | null };
@@ -160,11 +160,16 @@ export const useBasicInfoForm = () => {
 
       if (commerceId) {
         const establishmentTypeId = Number.parseInt(formData.establishmentType, 10);
+        const currentVerificationStatus = commerce
+          ? normalizeCommerceVerificationStatus(commerce.is_verified)
+          : 0;
+        const verificationStatusForUpdate = currentVerificationStatus === 0 ? 0 : 3;
 
         await updateCommerce(commerceId, {
           owner_user_id: ownerUserId,
           name: payload.commerce.name,
           description: payload.commerce.description,
+          is_verified: verificationStatusForUpdate,
           establishment_type_id: Number.isNaN(establishmentTypeId)
             ? undefined
             : establishmentTypeId,

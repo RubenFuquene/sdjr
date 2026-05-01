@@ -68,6 +68,19 @@ export function ProviderValidationDetail({
 }: ProviderValidationDetailProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('basicos');
 
+  const verificationBadge =
+    provider.verificado === 3
+      ? {
+          containerClass: 'bg-[#4B236A]/10 text-[#4B236A]',
+          dotClass: 'bg-[#4B236A]',
+          label: 'Por aprobar nuevamente',
+        }
+      : {
+          containerClass: 'bg-orange-100 text-orange-700',
+          dotClass: 'bg-orange-500',
+          label: 'Pendiente',
+        };
+
   // Mock de perfiles (TODO: obtener desde API o props)
   const perfiles: Perfil[] = [];
 
@@ -86,9 +99,9 @@ export function ProviderValidationDetail({
           </div>
           
           {/* Badge de estado */}
-          <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-            Pendiente
+          <div className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${verificationBadge.containerClass}`}>
+            <span className={`w-2 h-2 rounded-full ${verificationBadge.dotClass}`}></span>
+            {verificationBadge.label}
           </div>
         </div>
       </div>

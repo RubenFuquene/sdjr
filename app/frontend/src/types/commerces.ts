@@ -13,17 +13,17 @@
 
 /**
  * Estado de verificacion del comercio en backend:
- * 0 = Pendiente, 1 = Activo, 2 = Rechazado
+ * 0 = Pendiente, 1 = Activo, 2 = Rechazado, 3 = Por aprobar nuevamente
  */
-export type CommerceVerificationStatus = 0 | 1 | 2;
-export type CommerceVerificationStatusRaw = CommerceVerificationStatus | '0' | '1' | '2';
+export type CommerceVerificationStatus = 0 | 1 | 2 | 3;
+export type CommerceVerificationStatusRaw = CommerceVerificationStatus | '0' | '1' | '2' | '3';
 
 export function normalizeCommerceVerificationStatus(
   value: CommerceVerificationStatusRaw | null | undefined
 ): CommerceVerificationStatus {
   const normalizedValue = Number(value);
 
-  if (normalizedValue === 1 || normalizedValue === 2) {
+  if (normalizedValue === 1 || normalizedValue === 2 || normalizedValue === 3) {
     return normalizedValue;
   }
 
@@ -130,7 +130,7 @@ export interface ProveedorListItem {
   email: string;
   perfil: string;
   estado: boolean; // is_active (operativo)
-  estadoVerificacion: CommerceVerificationStatus; // is_verified (0=Pendiente, 1=Activo, 2=Rechazado)
+  estadoVerificacion: CommerceVerificationStatus; // is_verified (0=Pendiente, 1=Activo, 2=Rechazado, 3=Por aprobar nuevamente)
   verificado: boolean; // Deprecated: usar estadoVerificacion
   tipoEstablecimiento?: string; // Tipo de establecimiento (Ej: Restaurante, Tienda, etc)
   createdAt?: string; // Fecha de creación/solicitud (ISO 8601)
@@ -210,7 +210,7 @@ export interface Proveedor {
   estado: boolean; // is_active
 
   // Datos secundarios
-  verificado: boolean; // is_verified
+  verificado: CommerceVerificationStatus; // is_verified
   descripcion?: string;
 
   // Relaciones
