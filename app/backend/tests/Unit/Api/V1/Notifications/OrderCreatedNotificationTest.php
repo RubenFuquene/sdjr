@@ -104,6 +104,7 @@ class OrderCreatedNotificationTest extends TestCase
         $this->assertStringContainsString('150.50', $html);
         $this->assertStringContainsString('Sucursal centro', $html);
         $this->assertStringContainsString('pending', $html);
+        $this->assertStringContainsString('isotipo-512-napa.png', $html);
     }
 
     public function test_order_created_notification_to_array(): void
