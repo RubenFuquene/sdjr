@@ -16,6 +16,15 @@ use Tests\TestCase;
 
 class NotificationQueueTest extends TestCase
 {
+    public function test_notifications_mail_header_uses_company_isotipo_logo(): void
+    {
+        $html = view('vendor.mail.html.header', [
+            'url' => 'https://example.com',
+        ])->render();
+
+        $this->assertStringContainsString('/brand/isotipo-512-napa.png', $html);
+    }
+
     public function test_welcome_provider_notification_uses_queue_and_mail_channel(): void
     {
         $user = new User([
