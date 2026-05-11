@@ -60,7 +60,7 @@ export function ProviderDatosBasicosTab({
           )}
         </div>
 
-        {/* NIT */}
+        {/* Documento del Proveedor */}
         <div>
           <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
             {formData.tipoDocumento} <span className="text-red-500">*</span>
@@ -98,20 +98,20 @@ export function ProviderDatosBasicosTab({
         {/*Tipo de documento y documento del representante legal*/}
         <div>
           <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-            {formData.tipoDocumento} del Representante Legal
+            {formData.tipoDocumentoRepresentante} del Representante Legal
           </label>
           <input
             type="text"
-            value={formData.nit || ''}
-            onChange={(e) => onFieldChange('nit', e.target.value)}
+            value={formData.documentoRepresentante || ''}
+            onChange={(e) => onFieldChange('documentoRepresentante', e.target.value)}
             disabled={isViewMode}
             className={`w-full h-[50px] px-4 border rounded-[14px] focus:outline-none focus:ring-2 focus:ring-[#4B236A] disabled:bg-[#F7F7F7] disabled:text-[#6A6A6A] transition-colors ${
-              errors.nit ? 'border-red-500' : 'border-[#E0E0E0]'
+              errors.documentoRepresentante ? 'border-red-500' : 'border-[#E0E0E0]'
             }`}
             placeholder="Ej: 900123456-7"
           />
-          {errors.nit && (
-            <p className="mt-1 text-sm text-red-500">{errors.nit}</p>
+          {errors.documentoRepresentante && (
+            <p className="mt-1 text-sm text-red-500">{errors.documentoRepresentante}</p>
           )}
         </div>
 

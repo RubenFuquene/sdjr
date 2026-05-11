@@ -72,7 +72,7 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     representanteLegal: representanteLegal.trim(),
     tipoDocumentoRepresentante: commerce.legal_representatives?.[0]?.document_type === 'CC' ? 'Cédula de ciudadanía' : (commerce.legal_representatives?.[0]?.document_type === 'CE' ? 'Cédula de extranjería' : (commerce.legal_representatives?.[0]?.document_type === 'PAS' ? 'Pasaporte' : 'Cédula de ciudadanía')),
     documentoRepresentante: commerce.legal_representatives?.[0]?.document || '',
-    tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible
+    tipoEstablecimiento: commerce.establishment_type?.name || '', // TODO: Obtener del backend si está disponible
     telefono: commerce.phone || '',
     email: commerce.email || '',
     departamento: commerce.department?.name || '',

@@ -16,12 +16,53 @@ type LoginPayload = {
   password: string;
 };
 
+type ForgotPasswordPayload = {
+  email: string;
+};
+
+type ResetPasswordPayload = {
+  email: string;
+  token: string;
+  password: string;
+  password_confirmation: string;
+};
+
 export type LoginResult = {
   ok: true;
   redirectTo?: string;
   user?: SessionData;
   token?: string;
 };
+
+export type ForgotPasswordResult = {
+  ok: true;
+  message: string;
+};
+
+export type ResetPasswordResult = {
+  ok: true;
+  message: string;
+};
+
+type BasicApiResponse = {
+  status?: boolean;
+  message?: string;
+};
+
+function extractApiMessage(payload: unknown, fallback: string): string {
+  if (payload && typeof payload === "object" && "message" in payload) {
+    const value = (payload as { message?: unknown }).message;
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value;
+    }
+  }
+
+  return fallback;
+}
+
+async function readErrorBody(response: Response): Promise<unknown> {
+  return await response.json().catch(() => null);
+}
 
 // ============================================
 // API Functions
@@ -106,6 +147,118 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
     }
     
     // Error genérico de red u otros
+    throw new ApiError("No se pudo conectar con el servidor", 0, error);
+  }
+}
+
+/**
+ * POST /api/v1/password/forgot
+ * Solicita correo de recuperación para una cuenta existente.
+ */
+export async function requestPasswordReset({ email }: ForgotPasswordPayload): Promise<ForgotPasswordResult> {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!normalizedEmail) {
+    throw new ApiError("Ingresa un correo electrónico.", 422);
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    throw new ApiError("Ingresa un correo válido.", 422);
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/password/forgot`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ email: normalizedEmail }),
+    });
+
+    if (!response.ok) {
+      const errorData = await readErrorBody(response);
+      const apiMessage = extractApiMessage(errorData, "No se pudo enviar el correo de recuperación.");
+      throw new ApiError(apiMessage, response.status, errorData);
+    }
+
+    const data = (await response.json().catch(() => null)) as BasicApiResponse | null;
+    const message = extractApiMessage(data, "Recovery email sent successfully.");
+
+    return {
+      ok: true,
+      message,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    if (error instanceof Error) {
+      throw new ApiError(error.message || "Error del servidor", 0, error);
+    }
+
+    throw new ApiError("No se pudo conectar con el servidor", 0, error);
+  }
+}
+
+/**
+ * POST /api/v1/password/reset
+ * Restablece contraseña usando token enviado al correo.
+ */
+export async function resetPassword({
+  email,
+  token,
+  password,
+  password_confirmation,
+}: ResetPasswordPayload): Promise<ResetPasswordResult> {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!normalizedEmail || !token.trim() || !password || !password_confirmation) {
+    throw new ApiError("Completa todos los campos.", 422);
+  }
+
+  if (password !== password_confirmation) {
+    throw new ApiError("Las contraseñas no coinciden.", 422);
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/password/reset`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        email: normalizedEmail,
+        token: token.trim(),
+        password,
+        password_confirmation,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await readErrorBody(response);
+      const apiMessage = extractApiMessage(errorData, "No se pudo restablecer la contraseña.");
+      throw new ApiError(apiMessage, response.status, errorData);
+    }
+
+    const data = (await response.json().catch(() => null)) as BasicApiResponse | null;
+    const message = extractApiMessage(data, "Password reset successfully.");
+
+    return {
+      ok: true,
+      message,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    if (error instanceof Error) {
+      throw new ApiError(error.message || "Error del servidor", 0, error);
+    }
+
     throw new ApiError("No se pudo conectar con el servidor", 0, error);
   }
 }

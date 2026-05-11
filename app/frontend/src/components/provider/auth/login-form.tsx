@@ -9,7 +9,11 @@ import { Input } from "@/components/provider/ui/input";
 import { Label } from "@/components/provider/ui/label";
 import { cn } from "@/components/provider/ui/utils";
 
-export function LoginForm() {
+interface LoginFormProps {
+  onForgotPassword?: () => void;
+}
+
+export function LoginForm({ onForgotPassword }: LoginFormProps) {
   const router = useRouter();
   const { handleLogin, loading, error, clearError } = useAuthForm();
   
@@ -118,9 +122,13 @@ export function LoginForm() {
 
       {/* Forgot password link */}
       <p className="text-center text-sm text-[#6A6A6A]">
-        <a href="#" className="font-medium text-[#4B236A] hover:underline">
+        <button
+          type="button"
+          onClick={onForgotPassword}
+          className="font-medium text-[#4B236A] hover:underline"
+        >
           ¿Olvidaste tu contraseña?
-        </a>
+        </button>
       </p>
     </form>
   );

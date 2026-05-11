@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const SESSION_COOKIE = "sdjr_session";
 const BYPASS_AUTH = process.env.NEXT_PUBLIC_BYPASS_AUTH === "true";
-const PUBLIC_ROUTES = ["/admin/login", "/provider/login", "/app/login"];
+const PUBLIC_ROUTES = ["/admin/login", "/provider/login", "/app/login", "/reset-password"];
 const LOGIN_BY_SEGMENT: Record<string, string> = {
   admin: "/admin/login",
   provider: "/provider/login",
