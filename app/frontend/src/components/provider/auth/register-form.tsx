@@ -12,9 +12,10 @@ import { cn } from "@/components/provider/ui/utils";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
+  onSwitchToLogin?: () => void;
 }
 
-export function RegisterForm({ onSuccess }: RegisterFormProps) {
+export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
   const router = useRouter();
   const { handleRegister, loading, error, clearError } = useAuthForm();
   const [showPassword, setShowPassword] = useState(false);
@@ -281,9 +282,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       {/* Link Login */}
       <p className="text-center text-sm text-[#6A6A6A]">
         ¿Ya tienes cuenta?{" "}
-        <a href="#" className="font-medium text-[#4B236A] hover:underline">
+        <button
+          type="button"
+          onClick={onSwitchToLogin}
+          className="font-medium text-[#4B236A] hover:underline"
+        >
           Inicia sesión
-        </a>
+        </button>
       </p>
     </form>
   );

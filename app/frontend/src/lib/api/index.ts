@@ -15,8 +15,8 @@ export type { ApiSuccess, PaginatedApiResponse, PaginationMeta, PaginationLinks 
 export { API_URL, ApiError, getAuthHeaders, fetchWithErrorHandling } from "./client";
 
 // Authentication
-export { login, logout } from "./auth";
-export type { LoginResult } from "./auth";
+export { login, logout, requestPasswordReset, resetPassword } from "./auth";
+export type { LoginResult, ForgotPasswordResult, ResetPasswordResult } from "./auth";
 
 // Provider Authentication
 export { registerProvider } from "./provider-auth";

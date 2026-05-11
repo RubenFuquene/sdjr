@@ -1,13 +1,19 @@
+"use client";
+
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/provider/ui/tabs";
 import { LoginForm } from "./login-form";
 import { RegisterForm } from "./register-form";
 import { AuthBranding } from "./auth-branding";
+import { ForgotPasswordForm } from "@/components/provider/auth/forgot-password-form";
 
 interface ProviderAuthPageProps {
-  defaultTab?: "login" | "register";
+  defaultTab?: "login" | "register" | "forgot-password";
 }
 
 export function ProviderAuthPage({ defaultTab = "login" }: ProviderAuthPageProps) {
+  const [activeTab, setActiveTab] = useState<"login" | "register" | "forgot-password">(defaultTab);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#DDE8BB]/30 via-white to-[#DDE8BB]/10 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl">
@@ -18,7 +24,7 @@ export function ProviderAuthPage({ defaultTab = "login" }: ProviderAuthPageProps
           {/* Formularios */}
           <div className="flex items-center justify-center">
             <div className="w-full max-w-md bg-white rounded-[18px] shadow-lg border-0 p-8">
-              <Tabs defaultValue={defaultTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "register" | "forgot-password")} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 bg-[#DDE8BB]/20 rounded-[14px] p-1">
                   <TabsTrigger
                     value="login"
@@ -36,12 +42,17 @@ export function ProviderAuthPage({ defaultTab = "login" }: ProviderAuthPageProps
 
                 {/* Tab Login */}
                 <TabsContent value="login" className="mt-8">
-                  <LoginForm />
+                  <LoginForm onForgotPassword={() => setActiveTab("forgot-password")} />
                 </TabsContent>
 
                 {/* Tab Registro */}
                 <TabsContent value="register" className="mt-8">
-                  <RegisterForm />
+                  <RegisterForm onSwitchToLogin={() => setActiveTab("login")} />
+                </TabsContent>
+
+                {/* Recover Password Panel */}
+                <TabsContent value="forgot-password" className="mt-8">
+                  <ForgotPasswordForm onBackToLogin={() => setActiveTab("login")} />
                 </TabsContent>
               </Tabs>
             </div>
