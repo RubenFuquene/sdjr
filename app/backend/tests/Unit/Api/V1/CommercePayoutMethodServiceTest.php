@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Api\V1;
 
 use App\Models\CommercePayoutMethod;
 use App\Services\CommercePayoutMethodService;
