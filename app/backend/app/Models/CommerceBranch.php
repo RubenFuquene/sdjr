@@ -138,6 +138,31 @@ class CommerceBranch extends Model
     }
 
     /**
+     * Get all commerce branch user assignments for this branch.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function commerceBranchUsers()
+    {
+        return $this->hasMany(CommerceBranchUser::class);
+    }
+
+    /**
+     * Get users with branch_leader role assigned to this branch.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function branchLeaders()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'commerce_branch_users',
+            'commerce_branch_id',
+            'user_id'
+        )->withTimestamps();
+    }
+
+    /**
      * Scope: filtra sucursales cercanas usando la fórmula de Haversine.
      */
     public function scopeNearby(Builder $query, float $lat, float $lng, float $radiusKm): Builder

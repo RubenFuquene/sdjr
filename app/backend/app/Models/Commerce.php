@@ -222,4 +222,29 @@ class Commerce extends Model
     {
         return $this->commerceDocuments()->where('upload_status', Constant::UPLOAD_STATUS_CONFIRMED)->get();
     }
+
+    /**
+     * Get all commerce branch user assignments for this commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function commerceBranchUsers()
+    {
+        return $this->hasMany(CommerceBranchUser::class);
+    }
+
+    /**
+     * Get unique users with branch_leader role assigned to branches in this commerce.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function branchLeaders()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'commerce_branch_users',
+            'commerce_id',
+            'user_id'
+        )->distinct();
+    }
 }

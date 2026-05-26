@@ -204,6 +204,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'superadmin', 'guard_name' => $guardName, 'description' => 'Rol Super Administrador', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'admin', 'guard_name' => $guardName, 'description' => 'Rol Administrador', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'provider', 'guard_name' => $guardName, 'description' => 'Rol Proveedor', 'status' => Constant::STATUS_ACTIVE],
+            ['name' => 'branch_leader', 'guard_name' => $guardName, 'description' => 'Rol Líder de Sucursal', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'user', 'guard_name' => $guardName, 'description' => 'Rol Usuario', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'support', 'guard_name' => $guardName, 'description' => 'Rol Soporte', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'guest', 'guard_name' => $guardName, 'description' => 'Rol Invitado', 'status' => Constant::STATUS_INACTIVE],
@@ -443,6 +444,17 @@ class RolePermissionSeeder extends Seeder
 
         $supportRole = Role::where('name', 'support')->first();
         $supportRole->givePermissionTo($supportPermissions);
+
+        // Branch Leader tiene permisos específicos
+        $branchLeaderPermissions = [
+            'provider.products.show',
+            'provider.branches.update',
+        ];
+
+        $branchLeaderRole = Role::where('name', 'branch_leader')->first();
+        if ($branchLeaderRole) {
+            $branchLeaderRole->givePermissionTo($branchLeaderPermissions);
+        }
 
         // Invitado no tiene permisos asignados
     }

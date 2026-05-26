@@ -125,4 +125,52 @@ class User extends Authenticatable
             })
             ->value('id');
     }
+
+    /**
+     * Get all commerce branch user assignments for this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function commerceBranchUsers()
+    {
+        return $this->hasMany(CommerceBranchUser::class);
+    }
+
+    /**
+     * Get commerce branches where this user is assigned as branch_leader.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function assignedBranches()
+    {
+        return $this->belongsToMany(
+            CommerceBranch::class,
+            'commerce_branch_users',
+            'user_id',
+            'commerce_branch_id'
+        )->withTimestamps();
+    }
+
+    /**
+     * Get commerces where this user is assigned as branch_leader.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function commercesAsBranchLeader()
+    {
+        return $this->belongsToMany(
+            Commerce::class,
+            'commerce_branch_users',
+            'user_id',
+            'commerce_id'
+        )->distinct();
+    }
+
+    /**
+     * Check if user has branch_leader role.
+     */
+    public function isBranchLeader(): bool
+    {
+        return $this->hasRole('branch_leader');
+    }
 }
