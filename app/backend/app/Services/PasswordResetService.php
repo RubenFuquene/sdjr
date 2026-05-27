@@ -82,4 +82,36 @@ class PasswordResetService
             throw $e;
         }
     }
+
+    /**
+     * Create a password reset token for a user (without sending email).
+     *
+     * This method is used when creating new users without password (e.g., branch leaders).
+     * The token will be sent via a separate notification.
+     *
+     * @param  string  $email  User's email address
+     * @return string The generated password reset token
+     *
+     * @throws Exception
+     */
+    public function createTokenForUser(string $email): string
+    {
+        try {
+            $user = User::where('email', $email)->firstOrFail();
+            $token = Password::broker()->createToken($user);
+
+            Log::info('Password reset token created', [
+                'user_id' => $user->id,
+                'email' => $email,
+            ]);
+
+            return $token;
+        } catch (Exception $e) {
+            Log::error('Error creating password reset token', [
+                'email' => $email,
+                'message' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
 }

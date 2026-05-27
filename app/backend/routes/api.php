@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CityController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\CommerceBranchController;
+use App\Http\Controllers\Api\V1\CommerceBranchUserController;
 use App\Http\Controllers\Api\V1\CommerceCommentController;
 use App\Http\Controllers\Api\V1\CommerceController;
 use App\Http\Controllers\Api\V1\CountryController;
@@ -134,6 +135,15 @@ Route::prefix('v1')->group(function () {
 
         Route::patch('commerce-branches/photos/confirm', [CommerceBranchController::class, 'confirmPhotoUpload']);
         Route::delete('commerce-branches/photos/{photo}', [CommerceBranchController::class, 'removePhoto']);
+
+        // Commerce Branch Users (Branch Leaders)
+        Route::prefix('commerce-branch-users')->group(function () {
+            Route::get('/', [CommerceBranchUserController::class, 'index']); // List branch leaders by commerce_id
+            Route::post('/', [CommerceBranchUserController::class, 'store']); // Create new branch leader
+            Route::post('/assign', [CommerceBranchUserController::class, 'assign']); // Assign existing user
+            Route::delete('/', [CommerceBranchUserController::class, 'remove']); // Remove user from branch
+            Route::get('/commerce-branch/{commerce_branch_id}', [CommerceBranchUserController::class, 'showBranchUsers']); // Get users for a branch
+        });
 
         // Legal Representative routes
         Route::apiResource('legal-representatives', LegalRepresentativeController::class);

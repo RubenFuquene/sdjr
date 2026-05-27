@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Constant;
 use App\Models\User;
 use App\Notifications\WelcomeUserNotification;
 use Illuminate\Database\Eloquent\Collection;
@@ -214,6 +215,59 @@ class UserService
             ]);
 
             throw $e; // Re-throw the exception after logging
+        }
+    }
+
+    /**
+     * Create a new user without password (for branch leaders awaiting password setup).
+     *
+     * The created user will have a NULL password and cannot authenticate until
+     * they set their password via the password reset token flow.
+     *
+     * @param  array<string, mixed>  $data  User data including name, last_name, email, phone
+     * @return User The created user instance
+     *
+     * @throws \Exception
+     */
+    public function createUserWithoutPassword(array $data): User
+    {
+        try {
+            // Validate required fields
+            $requiredFields = ['name', 'last_name', 'email', 'phone'];
+            foreach ($requiredFields as $field) {
+                if (empty($data[$field])) {
+                    throw new \InvalidArgumentException("Missing required field: {$field}");
+                }
+            }
+
+            // Check if email already exists
+            if (User::where('email', $data['email'])->exists()) {
+                throw new \Exception('User with this email already exists');
+            }
+
+            $user = User::create([
+                'name' => $data['name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'password' => Hash::make(Str::random(16)), // Set a random password that cannot be used for authentication
+                'remember_token' => Str::random(10),
+                'status' => $data['status'] ?? Constant::STATUS_ACTIVE,
+            ]);
+
+            Log::info('User created without password', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+
+            return $user;
+        } catch (\Exception $e) {
+            Log::error('Error creating user without password', [
+                'email' => $data['email'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
         }
     }
 }
