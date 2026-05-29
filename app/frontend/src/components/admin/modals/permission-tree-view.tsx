@@ -6,8 +6,9 @@
 
 import { useState } from 'react';
 import { ChevronRight, ChevronLeft, FolderOpen, Folder, Users, Settings, BarChart3, ShieldCheck } from 'lucide-react';
-import { PermissionTree, PermissionNavigationState } from '../../../types/role-form-types';
-import { getPermissionsFromPath } from '../../../utils/permission-tree-builder';
+import { PermissionTree } from '../../../types/role-form-types';
+import { usePermissionTreeNavigation } from './hooks/use-permission-tree-navigation';
+import { usePermissionSummary } from './hooks/use-permission-summary';
 
 interface PermissionTreeViewProps {
   permissionTree: PermissionTree;
@@ -22,10 +23,29 @@ export function PermissionTreeView({
   onPermissionToggle,
   disabled = false
 }: PermissionTreeViewProps) {
-  const [navigationState, setNavigationState] = useState<PermissionNavigationState>({
-    currentPath: [],
-    selectedPermissions: new Set(selectedPermissions),
-    permissionTree
+  const [summarySearch, setSummarySearch] = useState('');
+  const {
+    currentContent,
+    breadcrumb,
+    canGoBack,
+    isAtPermissionLevel,
+    navigateTo,
+    navigateBack,
+    navigateToBreadcrumbIndex
+  } = usePermissionTreeNavigation({ permissionTree });
+
+  const {
+    permissionSummary,
+    selectedPermissionDetails,
+    filteredSelectedPermissionDetails,
+    selectedInCurrentSectionCount,
+    hasSummaryFilter,
+    getModuleDisplayName
+  } = usePermissionSummary({
+    permissionTree,
+    selectedPermissions,
+    summarySearch,
+    currentContent
   });
 
   // Obtener icono para módulo
@@ -48,133 +68,6 @@ export function PermissionTreeView({
     }
   };
 
-  // Navegar hacia un nivel
-  const navigateTo = (level: string) => {
-    setNavigationState(prev => ({
-      ...prev,
-      currentPath: [...prev.currentPath, level]
-    }));
-  };
-
-  // Navegar hacia atrás
-  const navigateBack = () => {
-    setNavigationState(prev => ({
-      ...prev,
-      currentPath: prev.currentPath.slice(0, -1)
-    }));
-  };
-
-  // Ir al inicio
-  const navigateHome = () => {
-    setNavigationState(prev => ({
-      ...prev,
-      currentPath: []
-    }));
-  };
-
-  // Obtener contenido actual
-  const getCurrentContent = () => {
-    const { currentPath } = navigationState;
-    
-    if (currentPath.length === 0) {
-      // Nivel 1: Módulos
-      return Object.keys(permissionTree).map(moduleKey => ({
-        key: moduleKey,
-        name: permissionTree[moduleKey].name,
-        type: 'module' as const,
-        icon: getModuleIcon(moduleKey)
-      }));
-    }
-    
-    if (currentPath.length === 1) {
-      // Nivel 2: Sidebar Groups
-      const moduleKey = currentPath[0];
-      const treeModule = permissionTree[moduleKey];
-      return Object.keys(treeModule.children || {}).map(sidebarKey => ({
-        key: sidebarKey,
-        name: treeModule.children![sidebarKey].name,
-        type: 'sidebar' as const,
-        icon: getSidebarIcon(sidebarKey)
-      }));
-    }
-    
-    if (currentPath.length === 2) {
-      // Nivel 3: Entidades
-      const [moduleKey, sidebarKey] = currentPath;
-      const sidebar = permissionTree[moduleKey].children![sidebarKey];
-      return Object.keys(sidebar.children || {}).map(entityKey => ({
-        key: entityKey,
-        name: sidebar.children![entityKey].name,
-        type: 'entity' as const,
-        icon: <Folder className="w-4 h-4 text-[#4B236A]" />
-      }));
-    }
-    
-    if (currentPath.length === 3) {
-      // Nivel 4: Permisos (acciones)
-      const permissions = getPermissionsFromPath(permissionTree, currentPath);
-      return permissions.map(permission => ({
-        key: permission.name,
-        name: permission.description,
-        type: 'permission' as const,
-        action: permission.action,
-        permission
-      }));
-    }
-    
-    return [];
-  };
-
-  // Obtener breadcrumb
-  const getBreadcrumb = () => {
-    const breadcrumb = ['Permisos'];
-    
-    if (navigationState.currentPath.length > 0) {
-      breadcrumb.push(permissionTree[navigationState.currentPath[0]]?.name || '');
-    }
-    
-    if (navigationState.currentPath.length > 1) {
-      const moduleKey = navigationState.currentPath[0];
-      const sidebarKey = navigationState.currentPath[1];
-      breadcrumb.push(permissionTree[moduleKey].children![sidebarKey]?.name || '');
-    }
-    
-    if (navigationState.currentPath.length > 2) {
-      const [moduleKey, sidebarKey, entityKey] = navigationState.currentPath;
-      breadcrumb.push(permissionTree[moduleKey].children![sidebarKey].children![entityKey]?.name || '');
-    }
-    
-    return breadcrumb;
-  };
-
-  // Obtener resumen detallado de permisos seleccionados
-  const getPermissionSummary = () => {
-    const summary = {
-      total: selectedPermissions.length,
-      byModule: {} as Record<string, number>,
-      byAction: {} as Record<string, number>
-    };
-
-    selectedPermissions.forEach(permissionName => {
-      // Extraer módulo y acción del permiso (formato: admin.profiles.roles.create)
-      const parts = permissionName.split('.');
-      if (parts.length >= 4) {
-        const moduleKey = parts[0];
-        const action = parts[parts.length - 1];
-        
-        summary.byModule[moduleKey] = (summary.byModule[moduleKey] || 0) + 1;
-        summary.byAction[action] = (summary.byAction[action] || 0) + 1;
-      }
-    });
-
-    return summary;
-  };
-
-  const currentContent = getCurrentContent();
-  const breadcrumb = getBreadcrumb();
-  const canGoBack = navigationState.currentPath.length > 0;
-  const isAtPermissionLevel = navigationState.currentPath.length === 3;
-  const permissionSummary = getPermissionSummary();
 
   return (
     <div className="border border-[#E0E0E0] rounded-[14px] p-4 space-y-4">
@@ -189,11 +82,7 @@ export function PermissionTreeView({
                   ? "text-[#1A1A1A] font-medium" 
                   : "text-[#6A6A6A] hover:text-[#4B236A] cursor-pointer"
                 }
-                onClick={() => {
-                  if (index === 0) navigateHome();
-                  else if (index === 1) setNavigationState(prev => ({ ...prev, currentPath: [prev.currentPath[0]] }));
-                  else if (index === 2) setNavigationState(prev => ({ ...prev, currentPath: prev.currentPath.slice(0, 2) }));
-                }}
+                onClick={() => navigateToBreadcrumbIndex(index)}
               >
                 {crumb}
               </span>
@@ -230,7 +119,10 @@ export function PermissionTreeView({
             }}
           >
             <div className="flex items-center space-x-3">
-              {item.type !== 'permission' ? item.icon : <Settings className="w-4 h-4 text-[#4B236A]" />}
+              {item.type === 'module' && getModuleIcon(item.key)}
+              {item.type === 'sidebar' && getSidebarIcon(item.key)}
+              {item.type === 'entity' && <Folder className="w-4 h-4 text-[#4B236A]" />}
+              {item.type === 'permission' && <Settings className="w-4 h-4 text-[#4B236A]" />}
               <div>
                 <p className="text-sm font-medium text-[#1A1A1A]">
                   {item.name}
@@ -264,20 +156,62 @@ export function PermissionTreeView({
       {isAtPermissionLevel && (
         <div className="pt-3 border-t border-[#E0E0E0] space-y-2">
           <p className="text-xs text-[#6A6A6A]">
-            {currentContent.filter(item => selectedPermissions.includes(item.key)).length} de {currentContent.length} permisos seleccionados en esta sección
+            {selectedInCurrentSectionCount} de {currentContent.length} permisos seleccionados en esta sección
           </p>
           
           {permissionSummary.total > 0 && (
-            <div className="bg-[#F7F7F7] rounded-lg p-2 space-y-1">
+            <div className="bg-[#F7F7F7] rounded-lg p-2 space-y-2">
               <p className="text-xs font-medium text-[#1A1A1A]">
                 Total seleccionados: {permissionSummary.total}
               </p>
+              <input
+                type="text"
+                value={summarySearch}
+                onChange={(event) => setSummarySearch(event.target.value)}
+                placeholder="Buscar por permiso, módulo o acción"
+                disabled={disabled}
+                className="w-full h-9 rounded-[10px] border border-[#E0E0E0] bg-white px-3 text-xs text-[#1A1A1A] placeholder:text-[#6A6A6A] focus:outline-none focus:ring-2 focus:ring-[#4B236A]/30 disabled:opacity-50"
+              />
+
+              {hasSummaryFilter && (
+                <p className="text-xs text-[#6A6A6A]">
+                  Mostrando {filteredSelectedPermissionDetails.length} de {selectedPermissionDetails.length} permisos
+                </p>
+              )}
+
               <div className="flex flex-wrap gap-2 text-xs text-[#6A6A6A]">
                 {Object.entries(permissionSummary.byModule).map(([moduleKey, count]) => (
                   <span key={moduleKey} className="bg-white px-2 py-1 rounded border">
-                    {moduleKey === 'admin' ? 'Admin' : moduleKey === 'provider' ? 'Provider' : 'Customer'}: {count}
+                    {getModuleDisplayName(moduleKey)}: {count}
                   </span>
                 ))}
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-[#1A1A1A]">
+                  Permisos del rol
+                </p>
+                {filteredSelectedPermissionDetails.length === 0 ? (
+                  <p className="text-xs text-[#6A6A6A]">
+                    No hay permisos que coincidan con la búsqueda.
+                  </p>
+                ) : (
+                  <div className="max-h-44 overflow-y-auto space-y-1 pr-1">
+                    {filteredSelectedPermissionDetails.map(permission => (
+                      <div key={permission.key} className="bg-white border border-[#E0E0E0] rounded p-2 space-y-1">
+                        <p className="text-xs font-medium text-[#1A1A1A]">
+                          {permission.description}
+                        </p>
+                        <p className="text-[11px] text-[#6A6A6A]">
+                          {permission.moduleName} / {permission.sidebarName} / {permission.entityName}
+                        </p>
+                        <p className="text-[11px] text-[#6A6A6A] font-mono break-all">
+                          {permission.key}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -302,26 +236,50 @@ export function PermissionTreeView({
                   </span>
                 )}
               </div>
-              
+
               <div className="space-y-1">
-                {/* Desglose por módulo */}
-                <div className="flex flex-wrap gap-1">
-                  {Object.entries(permissionSummary.byModule).map(([moduleKey, count]) => (
-                    <span key={moduleKey} className="text-xs bg-white border border-[#E0E0E0] px-2 py-1 rounded text-[#6A6A6A]">
-                      {moduleKey === 'admin' ? '👤 Admin' : moduleKey === 'provider' ? '🏪 Provider' : '🛒 Customer'}: {count}
-                    </span>
-                  ))}
-                </div>
-                
-                {/* Desglose por tipo de acción */}
-                {Object.keys(permissionSummary.byAction).length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {Object.entries(permissionSummary.byAction).map(([action, count]) => (
-                      <span key={action} className="text-xs bg-[#4B236A]/5 text-[#4B236A] px-2 py-1 rounded">
-                        {action === 'create' ? '➕' : action === 'view' ? '👁️' : action === 'edit' ? '✏️' : action === 'delete' ? '🗑️' : '⚙️'} {action}: {count}
-                      </span>
-                    ))}
-                  </div>
+                <p className="text-xs font-medium text-[#1A1A1A]">
+                  Permisos del rol
+                </p>
+                <input
+                  type="text"
+                  value={summarySearch}
+                  onChange={(event) => setSummarySearch(event.target.value)}
+                  placeholder="Buscar por permiso, módulo o acción"
+                  disabled={disabled}
+                  className="w-full h-9 rounded-[10px] border border-[#E0E0E0] bg-white px-3 text-xs text-[#1A1A1A] placeholder:text-[#6A6A6A] focus:outline-none focus:ring-2 focus:ring-[#4B236A]/30 disabled:opacity-50"
+                />
+
+                {hasSummaryFilter && (
+                  <p className="text-xs text-[#6A6A6A]">
+                    Mostrando {filteredSelectedPermissionDetails.length} de {selectedPermissionDetails.length} permisos
+                  </p>
+                )}
+
+                {filteredSelectedPermissionDetails.length === 0 ? (
+                  <p className="text-xs text-[#6A6A6A]">
+                    No hay permisos que coincidan con la búsqueda.
+                  </p>
+                ) : (
+                  <>
+                    <div className="max-h-32 overflow-y-auto space-y-1 pr-1">
+                      {filteredSelectedPermissionDetails.slice(0, 6).map(permission => (
+                        <div key={permission.key} className="bg-white border border-[#E0E0E0] rounded p-2">
+                          <p className="text-xs text-[#1A1A1A]">
+                            {permission.description}
+                          </p>
+                          <p className="text-[11px] text-[#6A6A6A] font-mono break-all">
+                            {permission.key}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    {filteredSelectedPermissionDetails.length > 6 && (
+                      <p className="text-xs text-[#6A6A6A]">
+                        +{filteredSelectedPermissionDetails.length - 6} permisos adicionales
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </>
