@@ -47,14 +47,14 @@ export async function createRole(data: {
 }
 
 /**
- * PATCH /api/v1/roles/{id}
+ * PATCH /api/v1/roles/{id}/status
  * Actualiza el estado de un rol (activo/inactivo)
  */
 export async function updateRoleStatus(
   id: number,
   status: "0" | "1"
 ): Promise<RoleFromAPI> {
-  return fetchWithErrorHandling<RoleFromAPI>(`/api/v1/roles/${id}`, {
+  return fetchWithErrorHandling<RoleFromAPI>(`/api/v1/roles/${id}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
   });

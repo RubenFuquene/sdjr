@@ -18,7 +18,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Proveedor, Perfil } from '@/types/admin';
 import {
   ProviderDatosBasicosTab,
@@ -28,6 +28,7 @@ import {
 } from '@/components/admin/shared/provider-details-tabs';
 import { formatDateDDMMYYYY } from '@/lib/utils/date';
 import { ProviderValidationActions } from './provider-validation-actions';
+import { ProviderValidationComments } from './provider-validation-comments';
 
 // ============================================
 // Props Interface
@@ -67,6 +68,11 @@ export function ProviderValidationDetail({
   onApprovalError,
 }: ProviderValidationDetailProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('basicos');
+  const [commentsRefreshTrigger, setCommentsRefreshTrigger] = useState(0);
+
+  const handleCommentCreated = useCallback(() => {
+    setCommentsRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   const verificationBadge =
     provider.verificado === 3
@@ -154,12 +160,21 @@ export function ProviderValidationDetail({
             <ProviderLegalTab formData={provider} />
           )}
         </div>
+
+        {/* Historial y captura de comentarios */}
+        <div className="pt-2 border-t border-[#E0E0E0]">
+          <ProviderValidationComments
+            providerId={provider.id}
+            refreshTrigger={commentsRefreshTrigger}
+          />
+        </div>
       </div>
 
       {/* Footer con acciones */}
       <div className="px-8 py-6 border-t border-[#E0E0E0]">
         <ProviderValidationActions
           providerId={provider.id}
+          onValidationCommentCreated={handleCommentCreated}
           onApprovalSuccess={onApprovalSuccess}
           onApprovalError={onApprovalError}
         />

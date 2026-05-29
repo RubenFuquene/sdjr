@@ -49,8 +49,16 @@ export {
   updateCommerce,
   deleteCommerce,
   acceptCommerceTerms,
+  getCommerceComments,
+  createCommerceComment,
 } from "./commerces";
-export type { AcceptCommerceTermsPayload } from "./commerces";
+export type {
+  AcceptCommerceTermsPayload,
+  CommerceCommentType,
+  CommerceCommentFromAPI,
+  GetCommerceCommentsParams,
+  CreateCommerceCommentPayload,
+} from "./commerces";
 
 // Branches (Sucursales)
 export { getCommerceBranches, createCommerceBranch, updateCommerceBranch } from "./branches";
