@@ -13,6 +13,7 @@
 
 import { useState } from 'react';
 import { MessageSquare, Send } from 'lucide-react';
+import { useProviderValidationComments } from '@/hooks/use-provider-validation-comments';
 
 // ============================================
 // Props Interface
@@ -20,44 +21,28 @@ import { MessageSquare, Send } from 'lucide-react';
 
 interface ProviderValidationCommentsProps {
   providerId: number;
+  refreshTrigger?: number;
 }
 
 // ============================================
 // Mock Data (TODO: Reemplazar con API)
 // ============================================
 
-interface Comment {
-  id: number;
-  author: string;
-  text: string;
-  date: string;
-}
-
-const MOCK_COMMENTS: Comment[] = [
-  {
-    id: 1,
-    author: 'Juan Pérez',
-    text: 'Se solicitó documentación adicional de cámara de comercio',
-    date: '2025-11-16T10:30:00Z',
-  },
-  {
-    id: 2,
-    author: 'María García',
-    text: 'Documentos recibidos y validados correctamente',
-    date: '2025-11-17T14:20:00Z',
-  },
-];
-
 // ============================================
 // Component
 // ============================================
 
-export function ProviderValidationComments({ providerId }: ProviderValidationCommentsProps) {
-  void providerId; // TODO: Usar para cargar comentarios desde API
-  
-  const [comments] = useState<Comment[]>(MOCK_COMMENTS);
+export function ProviderValidationComments({ providerId, refreshTrigger = 0 }: ProviderValidationCommentsProps) {
   const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    comments,
+    isLoading,
+    loadError,
+    isSubmitting,
+    submitError,
+    reloadComments,
+    addComment,
+  } = useProviderValidationComments(providerId, refreshTrigger);
 
   /**
    * Handler para agregar comentario
@@ -66,20 +51,11 @@ export function ProviderValidationComments({ providerId }: ProviderValidationCom
     if (!newComment.trim()) return;
 
     try {
-      setIsSubmitting(true);
-      
-      // TODO: Llamar a API para agregar comentario
-      console.log('Agregar comentario:', newComment);
-      
-      // Simular delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Limpiar input
+      await addComment(newComment);
+
       setNewComment('');
-    } catch (error) {
-      console.error('Error al agregar comentario:', error);
-    } finally {
-      setIsSubmitting(false);
+    } catch {
+      // El mensaje de error se gestiona en el hook.
     }
   };
 
@@ -113,7 +89,22 @@ export function ProviderValidationComments({ providerId }: ProviderValidationCom
 
       {/* Lista de Comentarios */}
       <div className="space-y-3 max-h-64 overflow-y-auto">
-        {comments.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-3">
+            <div className="h-[76px] animate-pulse rounded-xl border border-[#E0E0E0] bg-[#F7F7F7]" />
+            <div className="h-[76px] animate-pulse rounded-xl border border-[#E0E0E0] bg-[#F7F7F7]" />
+          </div>
+        ) : loadError ? (
+          <div className="p-6 text-center bg-[#F7F7F7] rounded-xl border border-[#E0E0E0] space-y-3">
+            <p className="text-sm text-[#6A6A6A]">{loadError}</p>
+            <button
+              onClick={() => void reloadComments()}
+              className="h-[40px] px-4 rounded-xl border border-[#C8D86D] text-[#4B236A] text-sm font-medium hover:bg-[#DDE8BB]/40 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : comments.length === 0 ? (
           <div className="p-6 text-center bg-[#F7F7F7] rounded-xl">
             <p className="text-sm text-[#6A6A6A]">
               No hay comentarios aún
@@ -127,13 +118,13 @@ export function ProviderValidationComments({ providerId }: ProviderValidationCom
             >
               <div className="flex items-baseline justify-between mb-2">
                 <span className="text-sm font-medium text-[#1A1A1A]">
-                  {comment.author}
+                  {`Usuario #${comment.created_by}`}
                 </span>
                 <span className="text-xs text-[#6A6A6A]">
-                  {formatDate(comment.date)}
+                  {formatDate(comment.created_at)}
                 </span>
               </div>
-              <p className="text-sm text-[#1A1A1A]">{comment.text}</p>
+              <p className="text-sm text-[#1A1A1A]">{comment.comment}</p>
             </div>
           ))
         )}
@@ -164,6 +155,12 @@ export function ProviderValidationComments({ providerId }: ProviderValidationCom
           {isSubmitting ? 'Enviando...' : 'Enviar'}
         </button>
       </div>
+
+      {submitError && (
+        <div className="p-3 rounded-xl border border-[#E0E0E0] bg-[#F7F7F7]">
+          <p className="text-sm text-[#6A6A6A]">{submitError}</p>
+        </div>
+      )}
     </div>
   );
 }

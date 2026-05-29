@@ -16,4 +16,5 @@ export { useProductCategories } from './provider/use-product-categories';
 export { useProviderProductForm } from './provider/use-provider-product-form';
 export { useProviderProducts } from './provider/use-provider-products';
 export { useEstablishmentTypes } from './use-establishment-types';
+export { useProviderValidationComments } from './use-provider-validation-comments';
 

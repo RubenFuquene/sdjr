@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { approveCommerce, rejectCommerce } from '@/lib/api/commerces';
+import { approveCommerce, createCommerceComment, rejectCommerce } from '@/lib/api/commerces';
 import { CommerceFromAPI } from '@/types/commerces';
 
 interface UseCommerceApprovalState {
@@ -18,6 +18,7 @@ interface UseCommerceApprovalState {
 interface UseCommerceApprovalReturn extends UseCommerceApprovalState {
   approveProvider: (commerceId: number, message?: string) => Promise<CommerceFromAPI>;
   rejectProvider: (commerceId: number, message: string) => Promise<CommerceFromAPI>;
+  createValidationComment: (commerceId: number, comment: string, commentType?: 'VA' | 'RJ') => Promise<void>;
   reset: () => void;
 }
 
@@ -116,12 +117,46 @@ export function useCommerceApproval(): UseCommerceApprovalReturn {
     }
   };
 
+  /**
+   * Crea comentario para el flujo de validación.
+   * Se usa para registrar observaciones después de aprobar/rechazar.
+   */
+  const createValidationComment = async (
+    commerceId: number,
+    comment: string,
+    commentType: 'VA' | 'RJ' = 'VA'
+  ): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const trimmedComment = comment.trim();
+      if (!trimmedComment) {
+        return;
+      }
+
+      await createCommerceComment(commerceId, {
+        comment: trimmedComment,
+        priority_type_id: 1,
+        comment_type: commentType,
+        status: '1',
+      });
+    } catch (err) {
+      const mensaje = err instanceof Error ? err.message : 'Error desconocido al registrar comentario';
+      setError(mensaje);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     error,
     success,
     approveProvider,
     rejectProvider,
+    createValidationComment,
     reset,
   };
 }

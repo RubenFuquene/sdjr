@@ -22,6 +22,45 @@ export interface GetCommercesParams {
   verified?: string; // optional: 1 (verified) | 0 (not verified) | all
 }
 
+export type CommerceCommentType = "PR" | "SU" | "IN" | "VA" | "RJ";
+
+export interface CommerceCommentFromAPI {
+  id: number;
+  commerce_id: number;
+  created_by: number;
+  comment: string;
+  priority_type_id: number;
+  priority_type: {
+    code: string | null;
+    name: string | null;
+  };
+  comment_type: {
+    code: string;
+    name: string | null;
+  };
+  color: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GetCommerceCommentsParams {
+  page?: number;
+  perPage?: number;
+  createdBy?: number;
+  priority?: string;
+  status?: string;
+}
+
+export interface CreateCommerceCommentPayload {
+  comment: string;
+  priority_type_id: number;
+  comment_type: CommerceCommentType;
+  color?: string;
+  status?: string;
+  created_by?: number;
+}
+
 /**
  * GET /api/v1/commerces
  * Obtiene listado paginado de comercios/proveedores
@@ -253,4 +292,51 @@ export async function rejectCommerce(
   message: string
 ): Promise<ApiSuccess<CommerceFromAPI>> {
   return updateCommerceVerification(id, 2, message);
+}
+
+// ============================================
+// Commerce Comments Endpoints
+// ============================================
+
+/**
+ * GET /api/v1/commerces/{commerceId}/comments
+ * Obtiene comentarios paginados de un comercio
+ */
+export async function getCommerceComments(
+  commerceId: number,
+  {
+    page = 1,
+    perPage = 15,
+    createdBy,
+    priority,
+    status,
+  }: GetCommerceCommentsParams = {}
+): Promise<ApiResponse<CommerceCommentFromAPI>> {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("per_page", String(perPage));
+  if (createdBy !== undefined) params.set("created_by", String(createdBy));
+  if (priority) params.set("priority", priority);
+  if (status) params.set("status", status);
+
+  return fetchWithErrorHandling<ApiResponse<CommerceCommentFromAPI>>(
+    `/api/v1/commerces/${commerceId}/comments?${params.toString()}`
+  );
+}
+
+/**
+ * POST /api/v1/commerces/{commerceId}/comments
+ * Crea un comentario para un comercio
+ */
+export async function createCommerceComment(
+  commerceId: number,
+  payload: CreateCommerceCommentPayload
+): Promise<ApiSuccess<CommerceCommentFromAPI>> {
+  return fetchWithErrorHandling<ApiSuccess<CommerceCommentFromAPI>>(
+    `/api/v1/commerces/${commerceId}/comments`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
 }

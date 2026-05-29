@@ -15,6 +15,8 @@ import { useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
 import { useCommerceApproval } from '@/hooks/use-commerce-approval';
+import { ApiError } from '@/lib/api';
+import { PROVIDER_VALIDATION_MESSAGES } from './provider-validation-messages';
 
 // ============================================
 // Props Interface
@@ -22,6 +24,7 @@ import { useCommerceApproval } from '@/hooks/use-commerce-approval';
 
 interface ProviderValidationActionsProps {
   providerId: number;
+  onValidationCommentCreated?: () => void;
   onApprovalSuccess?: (message: string) => void;
   onApprovalError?: (error: string) => void;
 }
@@ -32,10 +35,11 @@ interface ProviderValidationActionsProps {
 
 export function ProviderValidationActions({
   providerId,
+  onValidationCommentCreated,
   onApprovalSuccess,
   onApprovalError,
 }: ProviderValidationActionsProps) {
-  const { approveProvider, rejectProvider, isLoading } = useCommerceApproval();
+  const { approveProvider, rejectProvider, createValidationComment, isLoading } = useCommerceApproval();
   
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
@@ -63,10 +67,11 @@ export function ProviderValidationActions({
 
   /**
    * Handler para rechazar proveedor
-   * 
-   * Nota: Las observaciones se guardan localmente pero no se envían al backend
-   * (el endpoint de verificación no acepta observaciones)
-   * Para futuro: Crear endpoint separado PQRS/Comments para almacenar observaciones
+   *
+   * Flujo compatible:
+   * 1) Primero cambia estado de verificación (operación principal)
+   * 2) Luego intenta persistir observación como comentario
+   * 3) Si falla el comentario, no revierte el rechazo y muestra fallback funcional
    */
   const handleReject = async () => {
     if (!rejectReason.trim()) {
@@ -81,12 +86,33 @@ export function ProviderValidationActions({
 
     try {
       setApprovalError(null);
-      await rejectProvider(providerId, rejectReason.trim());
+      const reason = rejectReason.trim();
+
+      // 1) Operación principal: rechazo
+      await rejectProvider(providerId, reason);
+
+      // 2) Operación secundaria: observación en comentarios
+      let fallbackMessage: string | null = null;
+      try {
+        await createValidationComment(providerId, reason, 'RJ');
+        onValidationCommentCreated?.();
+      } catch (commentError) {
+        if (commentError instanceof ApiError && commentError.status === 422) {
+          fallbackMessage = PROVIDER_VALIDATION_MESSAGES.rejectionCommentBackendPending;
+        } else {
+          fallbackMessage = PROVIDER_VALIDATION_MESSAGES.rejectionCommentSaveError;
+        }
+      }
       
       // Limpiar y cerrar dialog
       setRejectReason('');
       setIsRejectDialogOpen(false);
-      onApprovalSuccess?.('Proveedor rechazado exitosamente');
+
+      onApprovalSuccess?.(
+        fallbackMessage
+          ? `Proveedor rechazado exitosamente. ${fallbackMessage}`
+          : 'Proveedor rechazado exitosamente'
+      );
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : 'Error desconocido';
       setApprovalError(mensaje);
