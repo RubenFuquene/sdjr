@@ -8,7 +8,11 @@ import { useAppAuthForm } from "@/hooks/app/use-app-auth-form";
 import { Button } from "@/components/app/ui/button";
 import { Input } from "@/components/app/ui/input";
 
-export default function AppLoginForm() {
+interface AppLoginFormProps {
+  onForgotPassword?: () => void;
+}
+
+export default function AppLoginForm({ onForgotPassword }: AppLoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -70,6 +74,7 @@ export default function AppLoginForm() {
       <div className="text-right">
         <button
           type="button"
+          onClick={onForgotPassword}
           disabled={loading}
           className="text-sm text-[#5A1E6B] hover:text-[#7A2E9A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5A1E6B]"
         >

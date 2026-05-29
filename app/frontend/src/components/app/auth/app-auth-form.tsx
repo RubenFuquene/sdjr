@@ -3,8 +3,9 @@
 import { useState } from "react";
 import AppLoginForm from "@/components/app/auth/app-login-form";
 import AppRegisterForm from "@/components/app/auth/app-register-form";
+import AppForgotPasswordForm from "@/components/app/auth/app-forgot-password-form";
 
-type ActiveTab = "login" | "register";
+type ActiveTab = "login" | "register" | "forgot-password";
 
 export default function AppAuthForm() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("login");
@@ -38,7 +39,15 @@ export default function AppAuthForm() {
         </button>
       </div>
 
-      {activeTab === "login" ? <AppLoginForm /> : <AppRegisterForm />}
+      {activeTab === "login" && (
+        <AppLoginForm onForgotPassword={() => setActiveTab("forgot-password")} />
+      )}
+
+      {activeTab === "register" && <AppRegisterForm />}
+
+      {activeTab === "forgot-password" && (
+        <AppForgotPasswordForm onBackToLogin={() => setActiveTab("login")} />
+      )}
     </div>
   );
 }
