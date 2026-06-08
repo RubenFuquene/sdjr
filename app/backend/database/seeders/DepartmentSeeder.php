@@ -14,7 +14,7 @@ class DepartmentSeeder extends Seeder
     {
         if (env('APP_ENV') == 'prd') {
             Department::insert([
-                ['name' => 'Cundinamarca', 'country_id' => 1, 'code' => '11', 'created_at' => now(), 'updated_at' => now()],                
+                ['name' => 'Cundinamarca', 'country_id' => 1, 'code' => '11', 'created_at' => now(), 'updated_at' => now()],
             ]);
         }
         if (env('DEMO_SEEDING') == 'true') {
