@@ -20,6 +20,7 @@ type ProductFormValidationInput = {
   branchId: string;
   productType: ProductType;
   packageItems: Array<{ productId: number; quantity: number }>;
+  maxPacks?: number;
 };
 
 export function validateProductForm(
@@ -71,6 +72,15 @@ export function validateProductForm(
     input.packageItems.some((item) => !Number.isInteger(item.quantity) || item.quantity < 1)
   ) {
     nextErrors.packageItems = "Cada item del pack debe tener una cantidad valida mayor o igual a 1.";
+  }
+
+  if (
+    input.productType === "package" &&
+    input.maxPacks !== undefined &&
+    parsedQuantityAvailable !== null &&
+    parsedQuantityAvailable > input.maxPacks
+  ) {
+    nextErrors.quantityAvailable = `La cantidad de paquetes no puede superar el máximo disponible (${input.maxPacks}) según el stock de los productos seleccionados.`;
   }
 
   return nextErrors;

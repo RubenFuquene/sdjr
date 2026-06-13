@@ -65,6 +65,7 @@ export function ProductForm({
         title: product.title,
         originalPrice: product.original_price,
         quantityAvailable: product.quantity_available,
+        availableForPackaging: product.available_for_packaging ?? product.quantity_available,
       }));
   }, [availableSingleProducts]);
 
@@ -86,6 +87,7 @@ export function ProductForm({
     branchId,
     setBranchId,
     packageItems,
+    maxPacks,
     mergedErrors,
     handleTogglePackItem,
     handlePackItemQuantityChange,
@@ -226,6 +228,18 @@ export function ProductForm({
         onChange={(event) => setQuantityAvailable(event.target.value)}
         disabled={submitting}
         error={mergedErrors.quantityAvailable}
+        helperText={
+          productType === "package" && maxPacks !== undefined ? (
+            <span id="product-quantity-max-packs-hint">
+              Máximo de packs disponibles: {maxPacks}
+            </span>
+          ) : undefined
+        }
+        describedBy={
+          productType === "package" && maxPacks !== undefined
+            ? "product-quantity-max-packs-hint"
+            : undefined
+        }
         placeholder="0"
       />
 

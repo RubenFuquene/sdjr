@@ -5,6 +5,7 @@ interface PackItemOption {
   title: string;
   originalPrice: number;
   quantityAvailable: number;
+  availableForPackaging: number;
 }
 
 interface ProductPackItemsSelectorProps {
@@ -62,6 +63,7 @@ export function ProductPackItemsSelector({
                   <span className="block text-[#1A1A1A]">{option.title}</span>
                   <span className="block text-[#6A6A6A]">
                     {formatCurrency(option.originalPrice)} · Disponible: {option.quantityAvailable}
+                    {" "}· Disponible para empacar: {option.availableForPackaging}
                   </span>
                 </span>
 
@@ -74,7 +76,7 @@ export function ProductPackItemsSelector({
                       id={`pack-item-qty-${option.id}`}
                       type="number"
                       min={1}
-                      max={option.quantityAvailable}
+                      max={option.availableForPackaging}
                       value={selectedQuantity}
                       disabled={disabled}
                       onChange={(event) => {

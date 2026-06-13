@@ -17,6 +17,23 @@ import {
   validateProductForm,
 } from "./product-form.validation";
 
+const MAX_PACKS_ERROR_PATTERN =
+  /^The requested quantity_available \((\d+)\) exceeds the maximum packs available given current stock \(max: (\d+)\)\.$/;
+
+function translateQuantityAvailableError(message?: string): string | undefined {
+  if (!message) {
+    return message;
+  }
+
+  const match = message.match(MAX_PACKS_ERROR_PATTERN);
+  if (!match) {
+    return message;
+  }
+
+  const [, requested, max] = match;
+  return `La cantidad de paquetes solicitada (${requested}) supera el máximo disponible según el stock actual (máx: ${max}).`;
+}
+
 type ProductFormInitialData = {
   commerceId?: number;
   quantityTotal?: number;
@@ -34,7 +51,12 @@ type ProductFormInitialData = {
 type UseProductFormStateParams = {
   initialData?: ProductFormInitialData | null;
   fieldErrors: ProviderProductFormFieldErrors;
-  packItemOptions: Array<{ id: number; originalPrice: number, quantityAvailable: number }>;
+  packItemOptions: Array<{
+    id: number;
+    originalPrice: number;
+    quantityAvailable: number;
+    availableForPackaging: number;
+  }>;
   onSubmit: (input: ProviderProductFormInput) => Promise<void>;
 };
 
@@ -73,7 +95,8 @@ export function useProductFormState({
       discountedPrice:
         localErrors.discountedPrice ?? fieldErrors["product.discounted_price"],
       quantityAvailable:
-        localErrors.quantityAvailable ?? fieldErrors["product.quantity_available"],
+        localErrors.quantityAvailable ??
+        translateQuantityAvailableError(fieldErrors["product.quantity_available"]),
       branchId:
         localErrors.branchId ?? fieldErrors["commerce_branch_ids.0"] ?? fieldErrors["commerce_branches.0"],
       packageItems: localErrors.packageItems ?? packageItemsFieldError,
@@ -101,6 +124,39 @@ export function useProductFormState({
         : ""
       : originalPrice;
 
+  // En modo edición, available_for_packaging ya descuenta el compromiso actual de
+  // este mismo pack sobre cada producto; lo sumamos de vuelta para reflejar cuánto
+  // queda disponible si este pack ajusta su cantidad.
+  const effectiveAvailableForPackaging = useMemo(() => {
+    const originalQuantities = new Map(
+      (initialData?.packageItems ?? []).map((item) => [item.productId, item.quantity])
+    );
+    const currentPackQuantity = initialData?.quantityAvailable ?? 0;
+
+    const result = new Map<number, number>();
+    packItemOptions.forEach((option) => {
+      const originalPivotQuantity = originalQuantities.get(option.id) ?? 0;
+      result.set(
+        option.id,
+        option.availableForPackaging + originalPivotQuantity * currentPackQuantity
+      );
+    });
+
+    return result;
+  }, [packItemOptions, initialData]);
+
+  const maxPacks = useMemo(() => {
+    if (productType !== "package" || packageItems.length === 0) {
+      return undefined;
+    }
+
+    return packageItems.reduce((min, item) => {
+      const available = effectiveAvailableForPackaging.get(item.productId) ?? 0;
+      const possiblePacks = item.quantity > 0 ? Math.floor(available / item.quantity) : 0;
+      return Math.min(min, possiblePacks);
+    }, Number.MAX_SAFE_INTEGER);
+  }, [productType, packageItems, effectiveAvailableForPackaging]);
+
   const validate = (): boolean => {
     const nextErrors = validateProductForm({
       title,
@@ -111,6 +167,7 @@ export function useProductFormState({
       branchId,
       productType,
       packageItems,
+      maxPacks,
     });
 
     setLocalErrors(nextErrors);
@@ -144,7 +201,10 @@ export function useProductFormState({
 
   const handlePackItemQuantityChange = (productId: number, quantity: number) => {
     const option = packItemOptions.find((item) => item.id === productId);
-    const maxQuantity = option?.quantityAvailable ?? Number.MAX_SAFE_INTEGER;
+    const maxQuantity =
+      effectiveAvailableForPackaging.get(productId) ??
+      option?.quantityAvailable ??
+      Number.MAX_SAFE_INTEGER;
     const normalizedQuantity = Math.max(1, Math.min(quantity, maxQuantity));
 
     setPackageItems((previous) => {
@@ -216,6 +276,7 @@ export function useProductFormState({
     branchId,
     setBranchId,
     packageItems,
+    maxPacks,
     mergedErrors,
     handleTogglePackItem,
     handlePackItemQuantityChange,
