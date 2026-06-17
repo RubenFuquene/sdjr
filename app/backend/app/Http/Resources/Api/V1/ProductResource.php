@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Constants\Constant;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -21,6 +22,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="discounted_price", type="number", format="float", nullable=true),
  *   @OA\Property(property="quantity_total", type="integer"),
  *   @OA\Property(property="quantity_available", type="integer"),
+ *   @OA\Property(property="available_for_packaging", type="integer", nullable=true, description="Stock still available to be committed to packages (only present for product_type=single)"),
  *   @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
  *   @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
  *   @OA\Property(
@@ -65,6 +67,10 @@ class ProductResource extends JsonResource
             'discounted_price' => $this->discounted_price,
             'quantity_total' => $this->quantity_total,
             'quantity_available' => $this->quantity_available,
+            'available_for_packaging' => $this->when(
+                $this->product_type === Constant::PRODUCT_TYPE_SINGLE,
+                fn () => $this->available_for_packaging
+            ),
             'expires_at' => $this->expires_at,
             'photos' => $this->whenLoaded('photos', function () {
                 return $this->photos->map(function ($photo) {

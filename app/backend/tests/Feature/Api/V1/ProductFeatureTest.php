@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -435,6 +436,8 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 2,
+            'quantity_available' => 2,
         ]);
         $product = Product::factory()->create([
             'commerce_id' => $package->commerce_id,
@@ -555,5 +558,323 @@ class ProductFeatureTest extends TestCase
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['package_items.0.quantity']);
+    }
+
+    public function test_store_package_items_within_max_packs_succeeds()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 5,
+                'quantity_available' => 5, // max packs = floor(10 / 2) = 5
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 2],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertOk();
+    }
+
+    public function test_store_package_items_rejects_quantity_available_exceeding_max_packs()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 6,
+                'quantity_available' => 6, // max packs = floor(10 / 2) = 5
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 2],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['product.quantity_available'])
+            ->assertJsonFragment([
+                'product.quantity_available' => [
+                    'The requested quantity_available (6) exceeds the maximum packs available given current stock (max: 5).',
+                ],
+            ]);
+    }
+
+    public function test_store_package_items_rejects_package_type_product_as_item()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $existingPackage = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+        ]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Test Package',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 1,
+                'quantity_available' => 1,
+            ],
+            'package_items' => [
+                ['product_id' => $existingPackage->id, 'quantity' => 1],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['package_items.0.product_id']);
+    }
+
+    public function test_update_package_items_within_new_max_packs_succeeds()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 5,
+            'quantity_available' => 5,
+        ]);
+        $package->packageItems()->attach($product->id, ['quantity' => 2]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                // own previous commitment (5 * 2 = 10) is excluded, so available stays 10.
+                // New max packs = floor(10 / 5) = 2.
+                'quantity_available' => 2,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 5],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+        $response->assertOk();
+
+        $this->assertEquals(2, $package->fresh()->quantity_available);
+        $this->assertEquals(5, $package->fresh()->packageItems()->first()->pivot->quantity);
+    }
+
+    public function test_update_package_items_rejects_quantity_available_exceeding_new_max_packs()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 5,
+            'quantity_available' => 5,
+        ]);
+        $package->packageItems()->attach($product->id, ['quantity' => 2]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                // own previous commitment (5 * 2 = 10) is excluded, so available stays 10.
+                // New max packs = floor(10 / 5) = 2, but 3 is requested.
+                'quantity_available' => 3,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 5],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['product.quantity_available'])
+            ->assertJsonFragment([
+                'product.quantity_available' => [
+                    'The requested quantity_available (3) exceeds the maximum packs available given current stock (max: 2).',
+                ],
+            ]);
+    }
+
+    public function test_store_package_items_respects_remainder_committed_by_other_packs()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $category = ProductCategory::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        // Pack A already commits 2 packs * 3 units = 6 units, leaving a remainder of 4.
+        $packA = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 2,
+            'quantity_available' => 2,
+        ]);
+        $packA->packageItems()->attach($product->id, ['quantity' => 3]);
+
+        $basePayload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Pack B',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 100,
+                'quantity_total' => 3,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 2],
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+        ];
+
+        // Remainder = 4 units, requested item quantity = 2 -> max packs = floor(4 / 2) = 2.
+        $exceedingPayload = $basePayload;
+        $exceedingPayload['product']['quantity_available'] = 3;
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $exceedingPayload);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['product.quantity_available'])
+            ->assertJsonFragment([
+                'product.quantity_available' => [
+                    'The requested quantity_available (3) exceeds the maximum packs available given current stock (max: 2).',
+                ],
+            ]);
+
+        $withinRemainderPayload = $basePayload;
+        $withinRemainderPayload['product']['quantity_available'] = 2;
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $withinRemainderPayload);
+        $response->assertOk();
+    }
+
+    public function test_product_resource_exposes_available_for_packaging_for_single_products_only()
+    {
+        $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 3,
+            'quantity_available' => 3,
+        ]);
+        $package->packageItems()->attach($product->id, ['quantity' => 2]);
+
+        // Single product: 10 - (3 packs * 2 units) = 4
+        $singleResponse = $this->getJson('/api/v1/products/'.$product->id);
+        $singleResponse->assertOk()->assertJsonPath('data.available_for_packaging', 4);
+
+        $packageResponse = $this->getJson('/api/v1/products/'.$package->id);
+        $packageResponse->assertOk();
+        $this->assertArrayNotHasKey('available_for_packaging', $packageResponse->json('data'));
+    }
+
+    public function test_available_for_packaging_does_not_n_plus_one_per_associated_package()
+    {
+        $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 100,
+            'quantity_available' => 100,
+        ]);
+
+        $packA = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 1,
+            'quantity_available' => 1,
+        ]);
+        $packA->packageItems()->attach($product->id, ['quantity' => 1]);
+
+        // Warm up permission/model caches so they do not skew the query count comparison below.
+        $this->getJson('/api/v1/products/'.$product->id)->assertOk();
+
+        DB::enableQueryLog();
+        $this->getJson('/api/v1/products/'.$product->id)->assertOk();
+        $queryCountForOnePackage = count(DB::getQueryLog());
+        DB::flushQueryLog();
+        DB::disableQueryLog();
+
+        $packB = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 1,
+            'quantity_available' => 1,
+        ]);
+        $packC = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 1,
+            'quantity_available' => 1,
+        ]);
+        $packB->packageItems()->attach($product->id, ['quantity' => 1]);
+        $packC->packageItems()->attach($product->id, ['quantity' => 1]);
+
+        DB::enableQueryLog();
+        $this->getJson('/api/v1/products/'.$product->id)->assertOk();
+        $queryCountForThreePackages = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        $this->assertSame(
+            $queryCountForOnePackage,
+            $queryCountForThreePackages,
+            'Computing available_for_packaging should issue the same number of queries regardless of how many packages reference the product (no N+1 per package).'
+        );
     }
 }

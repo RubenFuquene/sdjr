@@ -39,6 +39,7 @@ export interface ProductFromAPI {
   discounted_price: number | null;
   quantity_total: number;
   quantity_available: number;
+  available_for_packaging?: number;
   expires_at: string | null;
   photos?: ProductPhotoFromAPI[];
   status: string;

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Constants\Constant;
 use App\Models\Commerce;
 use App\Models\Product;
+use App\Services\PackageAvailabilityCalculator;
 use App\Services\ProductService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -110,20 +112,65 @@ class UpdateProductRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            if ($this->has('package_items')) {
-                foreach ($this->input('package_items', []) as $index => $item) {
-                    if (isset($item['product_id']) && isset($item['quantity'])) {
-                        $product = Product::find($item['product_id']);
-                        if ($product) {
-                            if ($item['quantity'] > $product->quantity_available) {
-                                $validator->errors()->add(
-                                    "package_items.{$index}.quantity",
-                                    "The quantity cannot exceed the available quantity ({$product->quantity_available}) of product '{$product->title}'."
-                                );
-                            }
-                        }
-                    }
+            // TODO: For product_type=single, only the basic rules() (types/ranges/existence) are
+            // enforced. No cross-field business validation is performed (e.g. discounted_price <
+            // original_price, quantity_available <= quantity_total). Analyze in a future task.
+            if (! $this->has('package_items')) {
+                return;
+            }
+
+            $routeParameters = $this->route()?->parameters() ?? [];
+            $currentPackageId = $routeParameters !== [] ? (int) reset($routeParameters) : null;
+            $existingPackage = $currentPackageId ? Product::find($currentPackageId) : null;
+
+            $packageItems = collect();
+
+            foreach ($this->input('package_items', []) as $index => $item) {
+                if (! isset($item['product_id'], $item['quantity'])) {
+                    continue;
                 }
+
+                $product = Product::find($item['product_id']);
+
+                if (! $product) {
+                    continue;
+                }
+
+                if ($product->product_type !== Constant::PRODUCT_TYPE_SINGLE) {
+                    $validator->errors()->add(
+                        "package_items.{$index}.product_id",
+                        "The product '{$product->title}' must be of type 'single' to be included in a package."
+                    );
+
+                    continue;
+                }
+
+                if ($item['quantity'] > $product->quantity_available) {
+                    $validator->errors()->add(
+                        "package_items.{$index}.quantity",
+                        "The quantity cannot exceed the available quantity ({$product->quantity_available}) of product '{$product->title}'."
+                    );
+
+                    continue;
+                }
+
+                $packageItems->push(['product' => $product, 'quantity' => (int) $item['quantity']]);
+            }
+
+            $productType = $this->input('product.product_type', $existingPackage?->product_type);
+
+            if ($packageItems->isEmpty() || $productType !== Constant::PRODUCT_TYPE_PACKAGE) {
+                return;
+            }
+
+            $maxPacks = app(PackageAvailabilityCalculator::class)->maxPackageQuantity($packageItems, $currentPackageId);
+            $requestedPacks = (int) $this->input('product.quantity_available', $existingPackage?->quantity_available ?? 0);
+
+            if ($requestedPacks > $maxPacks) {
+                $validator->errors()->add(
+                    'product.quantity_available',
+                    "The requested quantity_available ({$requestedPacks}) exceeds the maximum packs available given current stock (max: {$maxPacks})."
+                );
             }
         });
     }

@@ -221,7 +221,7 @@ class ProductService
     public function getByCommerce(int $commerce_id)
     {
         try {
-            return Product::with(['photos', 'packageItems', 'packageItems.photos'])
+            return Product::with(['photos', 'packageItems', 'packageItems.photos', 'package'])
                 ->where('commerce_id', $commerce_id)
                 ->get();
         } catch (ModelNotFoundException $e) {
@@ -237,7 +237,7 @@ class ProductService
      */
     public function getByCommerceBranch(int $branch_id)
     {
-        $products = Product::with(['photos', 'packageItems', 'packageItems.photos'])
+        $products = Product::with(['photos', 'packageItems', 'packageItems.photos', 'package'])
             ->whereHas('commerce.commerceBranches', function ($query) use ($branch_id) {
                 $query->where('id', $branch_id);
             })->get();

@@ -157,6 +157,10 @@ function normalizeProduct(product: ProductFromAPI): ProductFromAPI {
         : toNumber(product.discounted_price),
     quantity_total: toInteger(product.quantity_total),
     quantity_available: toInteger(product.quantity_available),
+    available_for_packaging:
+      product.available_for_packaging === undefined
+        ? undefined
+        : toInteger(product.available_for_packaging),
     photos: product.photos ?? [],
   };
 }

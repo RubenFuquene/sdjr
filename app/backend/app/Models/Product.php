@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Constants\Constant;
 use App\Models\Traits\SanitizesTextAttributes;
+use App\Services\PackageAvailabilityCalculator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -91,6 +92,15 @@ class Product extends Model
         })->where('product_id', $this->id)->sum('quantity');
 
         return (int) $this->attributes['quantity_available'] - intval($reservedQuantity);
+    }
+
+    /**
+     * Get the stock of this product still available to be committed to packages,
+     * after subtracting the stock already committed by packages that include it.
+     */
+    public function getAvailableForPackagingAttribute(): int
+    {
+        return app(PackageAvailabilityCalculator::class)->availableForPackaging($this);
     }
 
     /**
