@@ -6,6 +6,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Constants\Constant;
 use App\Models\Commerce;
+use App\Models\PriorityType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -110,10 +111,14 @@ class PatchCommerceVerificationTest extends TestCase
 
     public function test_patch_commerce_verification_rejected_with_message(): void
     {
+        // El rechazo persiste la observación como comentario RJ con prioridad alta (SCRUM-297).
+        PriorityType::factory()->create(['code' => Constant::COMMENT_PRIORITY_HIGH]);
         $commerce = Commerce::factory()->create(['is_verified' => Constant::STATUS_INACTIVE]);
+        $message = 'Lamentablemente tu comercio no cumple con los requisitos mínimos establecidos.';
+
         $response = $this->patchJson("/api/v1/commerces/{$commerce->id}/verification", [
             'is_verified' => Constant::COMMERCE_REJECTED,
-            'message' => 'Lamentablemente tu comercio no cumple con los requisitos mínimos establecidos.',
+            'message' => $message,
         ]);
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -127,6 +132,11 @@ class PatchCommerceVerificationTest extends TestCase
         $this->assertDatabaseHas('commerces', [
             'id' => $commerce->id,
             'is_verified' => Constant::COMMERCE_REJECTED,
+        ]);
+        $this->assertDatabaseHas('commerce_comments', [
+            'commerce_id' => $commerce->id,
+            'comment_type' => Constant::COMMENT_TYPE_REJECTION,
+            'comment' => $message,
         ]);
     }
 }

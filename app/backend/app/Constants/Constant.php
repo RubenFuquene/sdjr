@@ -137,11 +137,22 @@ class Constant
 
     public const COMMENT_TYPE_VALIDATION = 'VA';
 
+    public const COMMENT_TYPE_REJECTION = 'RJ';
+
     public const COMMENT_TYPE_ARRAY = [
         self::COMMENT_TYPE_PRODUCT => 'Producto',
         self::COMMENT_TYPE_SUPPORT => 'Soporte',
         self::COMMENT_TYPE_INFO => 'Información',
         self::COMMENT_TYPE_VALIDATION => 'Validación',
+        self::COMMENT_TYPE_REJECTION => 'Rechazo',
+    ];
+
+    /**
+     * Comment types visible to the owning provider.
+     * TODO Escalable: agregar aquí los tipos que el proveedor dueño puede leer.
+     */
+    public const PROVIDER_VISIBLE_COMMENT_TYPES = [
+        self::COMMENT_TYPE_REJECTION,
     ];
 
     // Nearby search radius (km)
