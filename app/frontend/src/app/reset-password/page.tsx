@@ -7,10 +7,10 @@ export const metadata = {
 };
 
 interface ResetPasswordPageProps {
-  searchParams?: {
+  searchParams?: Promise<{
     email?: string | string[];
     token?: string | string[];
-  };
+  }>;
 }
 
 function getSingleQueryParam(param?: string | string[]): string {
@@ -19,9 +19,10 @@ function getSingleQueryParam(param?: string | string[]): string {
   return "";
 }
 
-export default function ResetPasswordPage({ searchParams }: ResetPasswordPageProps) {
-  const initialEmail = getSingleQueryParam(searchParams?.email);
-  const initialToken = getSingleQueryParam(searchParams?.token);
+export default async function ResetPasswordPage({ searchParams }: ResetPasswordPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const initialEmail = getSingleQueryParam(resolvedSearchParams?.email);
+  const initialToken = getSingleQueryParam(resolvedSearchParams?.token);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#DDE8BB]/30 via-white to-[#DDE8BB]/10 flex items-center justify-center p-4">
