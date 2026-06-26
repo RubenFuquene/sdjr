@@ -133,7 +133,7 @@ Tomadas de `.env.example.prd`. Railway suele inyectar `DATABASE_URL` / `MYSQL*`,
 | Almacenamiento (MinIO/S3) | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BUCKET`, `AWS_ENDPOINT`, `AWS_URL`, `AWS_USE_PATH_STYLE_ENDPOINT` |
 | CORS | `CORS_ALLOWED_ORIGINS`, `CORS_SUPPORTS_CREDENTIALS`, `SANCTUM_STATEFUL_DOMAINS` |
 
-> En `APP_ENV=production`/`prod`, el entrypoint **exige** las variables de almacenamiento
+> En `APP_ENV=production`/`prod`/`prd`, el entrypoint **exige** las variables de almacenamiento
 > (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`)
 > y aborta el arranque si falta alguna.
 
@@ -191,6 +191,45 @@ php artisan tinker --execute="
      si pasa, revisa duplicados preexistentes en la tabla afectada (ver Riesgos del plan).
 4. Reproduce localmente: `php artisan app:deploy-release` contra una BD limpia y de nuevo
    sobre una ya sembrada (debe pasar dos veces sin error).
+
+### Reiniciar un entorno desde cero (instalación limpia)
+
+Para volver un entorno **ya desplegado** (p. ej. staging) a un estado limpio —borrar todo
+el esquema y resembrar solo el catálogo, descartando datos demo/acumulados de pruebas
+anteriores— existe el comando guardado `app:reset-environment`:
+
+```bash
+# Solo catálogo (roles, permisos, países, bancos, prioridades, superadmin...)
+php artisan app:reset-environment --force
+
+# Catálogo + datos demo (comercios, productos, órdenes de ejemplo)
+php artisan app:reset-environment --with-demo --force
+```
+
+Qué hace, en orden:
+
+1. **Seguro de producción**: si `APP_ENV` es `production`, `prod` o `prd`, el comando se
+   niega a ejecutarse y termina con error, sin tocar nada.
+2. **Confirmación**: sin `--force`, pide confirmación interactiva antes de borrar nada
+   (útil al correrlo a mano). Con `--force` no pregunta — pensado para invocación remota.
+3. `migrate:fresh --force` — elimina **todas** las tablas y vuelve a correr todas las
+   migraciones desde cero.
+4. `db:seed --class=CatalogSeeder --force` — resiembra el catálogo de referencia.
+5. Si pasaste `--with-demo`, además `db:seed --class=DemoSeeder --force`.
+
+**Cómo ejecutarlo contra staging en Railway:** este comando corre dentro del contenedor
+del servicio, no en tu máquina. Usa una shell conectada al servicio desplegado —por
+ejemplo `railway shell` (Railway CLI, requiere `railway login` y el proyecto enlazado con
+`railway link`) o la terminal del servicio desde el dashboard de Railway— y desde ahí
+ejecuta `php artisan app:reset-environment --force`.
+
+> ⚠️ **Esto es destructivo e irreversible**: borra TODOS los datos del entorno (incluida
+> cualquier data manual de pruebas). Úsalo solo en entornos no productivos. El comando
+> **no** toca archivos en almacenamiento (S3/MinIO); si "desde cero" debe incluir también
+> los documentos/fotos subidos, hay que limpiar el bucket por separado.
+>
+> El seguro de `APP_ENV` es la última línea de defensa, no la única: confirma siempre en
+> qué entorno estás conectado antes de correrlo.
 
 > ⚠️ **Formato de `preDeployCommand`:** En `railway.json` se define como string
 > (`"php artisan app:deploy-release"`). Si una versión de Railway lo rechaza, envuélvelo en

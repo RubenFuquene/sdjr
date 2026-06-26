@@ -51,7 +51,7 @@ bootstrap_env_file() {
 validate_required_runtime_env() {
     local app_env=$(get_app_environment)
 
-    if [[ "$app_env" != "production" && "$app_env" != "prod" ]]; then
+    if [[ "$app_env" != "production" && "$app_env" != "prod" && "$app_env" != "prd" ]]; then
         return
     fi
 
