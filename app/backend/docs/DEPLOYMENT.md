@@ -168,6 +168,25 @@ Tomadas de `.env.example.prd`. Railway suele inyectar `DATABASE_URL` / `MYSQL*`,
 > En `APP_ENV=production`/`prod`/`prd`, el entrypoint **exige** las variables de almacenamiento
 > (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`)
 > y aborta el arranque si falta alguna.
+>
+> **Excepción — servicios sin storage (p. ej. el cron/scheduler).** El mismo entrypoint
+> **omite** esa validación si el contenedor corre en modo cron (ver `is_cron_mode`:
+> `APP_RUN_MODE=cron` / `CONTAINER_ROLE=cron` / `RAILWAY_CRON_JOB`) o si se setea
+> `SKIP_STORAGE_VALIDATION=true`. Útil cuando el servicio cron no expone la API y no
+> necesita `AWS_*` para arrancar. ⚠️ Si alguna tarea programada **sí** toca el disco
+> (S3/MinIO), entonces ese servicio sí necesita las `AWS_*`: no las omitas, configúralas.
+
+### Servicio cron / scheduler (segundo servicio Railway)
+
+Si despliegas un segundo servicio desde la misma imagen para el scheduler:
+
+- Márcalo como cron con `APP_RUN_MODE=cron` (el entrypoint arranca `php artisan schedule:work`
+  y, gracias a eso, **omite** la validación de `AWS_*`).
+- Necesita el **mismo set de variables de runtime** que el servicio web para que las tareas
+  funcionen: BD (`DB_CONNECTION` + `DB_URL`, ver arriba), mail (`RESEND_API_KEY`...), Redis,
+  y `AWS_*` **solo si** alguna tarea programada usa almacenamiento.
+- Recomendado: usar *shared variables* a nivel de proyecto/entorno en Railway y referenciarlas
+  en ambos servicios, para evitar que se desincronicen.
 
 ### Variables **deprecadas** en el deploy (no usarlas)
 
