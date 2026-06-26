@@ -121,7 +121,39 @@ Configúralas en **Railway → Service → Variables**. Nunca las comitees con v
 ### Base de datos y servicios (referencia)
 
 Tomadas de `.env.example.prd`. Railway suele inyectar `DATABASE_URL` / `MYSQL*`, que el
-`docker-entrypoint.sh` traduce a `DB_*` automáticamente.
+`docker-entrypoint.sh` traduce a `DB_*` automáticamente **al arrancar el contenedor**.
+
+> 🔴 **Crítico para el Pre-deploy Command.** El `preDeployCommand`
+> (`php artisan app:deploy-release`) corre en un **contenedor aparte que NO ejecuta
+> `docker-entrypoint.sh`**, así que esa traducción de `DATABASE_URL`/`MYSQL*` → `DB_*`
+> **no ocurre**. Si solo dependes del entrypoint, el pre-deploy cae a los defaults de
+> `config/database.php` (`127.0.0.1:3306`, base `laravel`) y falla con
+> `SQLSTATE[HY000] [2002] Connection refused`.
+>
+> **Solución:** define las variables de BD **directamente** en el servicio backend de
+> Railway (referenciando el servicio MySQL), para que Laravel se conecte sin depender del
+> entrypoint. Dos opciones equivalentes:
+>
+> **A (recomendada, 2 variables)** — `config/database.php` ya soporta `DB_URL` nativo:
+> ```
+> DB_CONNECTION = mysql
+> DB_URL        = ${{MySQL.MYSQL_URL}}
+> ```
+> `DB_CONNECTION=mysql` es obligatoria porque el default del proyecto es `sqlite`.
+>
+> **B (explícita, 6 variables):**
+> ```
+> DB_CONNECTION = mysql
+> DB_HOST       = ${{MySQL.MYSQLHOST}}
+> DB_PORT       = ${{MySQL.MYSQLPORT}}
+> DB_DATABASE   = ${{MySQL.MYSQLDATABASE}}
+> DB_USERNAME   = ${{MySQL.MYSQLUSER}}
+> DB_PASSWORD   = ${{MySQL.MYSQLPASSWORD}}
+> ```
+>
+> Si el host privado (`*.railway.internal`) da timeout/refused en el pre-deploy, usa el
+> proxy público: `DB_URL = ${{MySQL.MYSQL_PUBLIC_URL}}`. Estas variables benefician también
+> al runtime (el entrypoint solo sobreescribe `.env`, no entra en conflicto).
 
 | Grupo | Variables |
 |-------|-----------|
@@ -185,6 +217,9 @@ php artisan tinker --execute="
    versión rota expuesta.
 2. Revisa los **logs del Pre-deploy** en Railway (Deployments → el release fallido).
 3. Causas típicas:
+   - **`Connection refused` apuntando a `127.0.0.1:3306` / base `laravel`** → el pre-deploy
+     no ve las `DB_*` porque corre sin el entrypoint. Define `DB_CONNECTION` + `DB_URL`
+     (o las 6 `DB_*`) directamente en Railway. Ver §4 → "Crítico para el Pre-deploy Command".
    - **BD no alcanzable / credenciales** → revisa `DB_*` / `DATABASE_URL` / `MYSQL*`.
    - **Migración con error** → corrige la migración y vuelve a desplegar.
    - **Choque de unique en seeding** → no debería ocurrir (todo es `upsert`/`firstOrCreate`);
