@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Constants\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteCommerceCommentRequest;
 use App\Http\Requests\Api\V1\IndexCommerceCommentRequest;
@@ -11,6 +12,7 @@ use App\Http\Requests\Api\V1\ShowCommerceCommentRequest;
 use App\Http\Requests\Api\V1\StoreCommerceCommentRequest;
 use App\Http\Requests\Api\V1\UpdateCommerceCommentRequest;
 use App\Http\Resources\Api\V1\CommerceCommentResource;
+use App\Models\User;
 use App\Services\CommerceCommentService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -32,6 +34,20 @@ class CommerceCommentController extends Controller
     public function __construct(CommerceCommentService $service)
     {
         $this->commerceCommentService = $service;
+    }
+
+    /**
+     * Resolve which comment types the given user is allowed to read.
+     * Admins/superadmins see every type (null = sin restricción); any other
+     * role (e.g. the owning provider) only sees the provider-visible whitelist.
+     */
+    private function visibleCommentTypesFor(?User $user): ?array
+    {
+        if ($user !== null && $user->hasAnyRole(['superadmin', 'admin'])) {
+            return null;
+        }
+
+        return Constant::PROVIDER_VISIBLE_COMMENT_TYPES;
     }
 
     /**
@@ -104,7 +120,8 @@ class CommerceCommentController extends Controller
         try {
             $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
-            $comments = $this->commerceCommentService->getCommentsByCommerce($commerce_id, $filters, $perPage);
+            $restrictToTypes = $this->visibleCommentTypesFor($request->user());
+            $comments = $this->commerceCommentService->getCommentsByCommerce($commerce_id, $filters, $perPage, $restrictToTypes);
             $resource = CommerceCommentResource::collection($comments);
 
             return $this->paginatedResponse($comments, $resource, 'Comments retrieved successfully');
@@ -203,7 +220,7 @@ class CommerceCommentController extends Controller
     public function show(ShowCommerceCommentRequest $request, int $commerce_id, int $id): JsonResponse
     {
         try {
-            $comment = $this->commerceCommentService->getComment($commerce_id, $id);
+            $comment = $this->commerceCommentService->getComment($commerce_id, $id, $this->visibleCommentTypesFor($request->user()));
 
             return $this->successResponse(new CommerceCommentResource($comment), 'Comment retrieved successfully');
         } catch (ModelNotFoundException $e) {

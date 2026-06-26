@@ -31,32 +31,14 @@ class DatabaseSeeder extends Seeder
 
         Log::info('Starting database seeding...');
 
-        $this->call([
-            RolePermissionSeeder::class,
-            UserSeeder::class,
-            CountrySeeder::class,
-            DepartmentSeeder::class,
-            CitySeeder::class,
-            EstablishmentTypeSeeder::class,
-            CategorySeeder::class,
-            NeighborhoodSeeder::class,
-            CommerceSeeder::class,
-            LegalRepresentativeSeeder::class,
-            BankSeeder::class,
-            SupportStatusSeeder::class,
-            PqrsTypeSeeder::class,
-            PriorityTypeSeeder::class,
-            CommercePayoutMethodSeeder::class,
-            CommerceBranchSeeder::class,
-            CommerceDocumentSeeder::class,
-            CommerceBranchPhotoSeeder::class,
-            CommerceBranchHourSeeder::class,
-            LegalDocumentSeeder::class,
-            ProductCategorySeeder::class,
-            ProductSeeder::class,
-            OrderSeeder::class,
-            CommerceCommentSeeder::class,
-        ]);
+        // Catálogo de referencia: datos fijos idempotentes, base de todos los entornos.
+        // En el deploy se invoca directamente vía `db:seed --class=CatalogSeeder`.
+        $this->call(CatalogSeeder::class);
+
+        // Datos demo: solo en entornos de prueba bajo flag explícito.
+        if (env('DEMO_SEEDING', false)) {
+            $this->call(DemoSeeder::class);
+        }
 
         Log::info('Database seeding completed');
     }

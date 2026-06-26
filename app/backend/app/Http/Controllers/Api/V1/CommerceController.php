@@ -23,12 +23,14 @@ use App\Http\Resources\Api\V1\CommerceResource;
 use App\Notifications\CommerceRejectedNotification;
 use App\Notifications\CommerceVerifiedNotification;
 use App\Services\CommerceBranchService;
+use App\Services\CommerceCommentService;
 use App\Services\CommercePayoutMethodService;
 use App\Services\CommerceService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -48,14 +50,18 @@ class CommerceController extends Controller
 
     private CommercePayoutMethodService $commercePayoutMethodService;
 
+    private CommerceCommentService $commerceCommentService;
+
     public function __construct(
         CommerceService $commerceService,
         CommerceBranchService $commerceBranchService,
-        CommercePayoutMethodService $commercePayoutMethodService
+        CommercePayoutMethodService $commercePayoutMethodService,
+        CommerceCommentService $commerceCommentService
     ) {
         $this->commerceService = $commerceService;
         $this->commerceBranchService = $commerceBranchService;
         $this->commercePayoutMethodService = $commercePayoutMethodService;
+        $this->commerceCommentService = $commerceCommentService;
     }
 
     /**
@@ -372,10 +378,21 @@ class CommerceController extends Controller
     {
         try {
 
-            $commerce = $this->commerceService->updateVerification($id, (int) $request->validated('is_verified'));
+            $isVerified = (int) $request->validated('is_verified');
             $customMessage = (string) $request->validated('message');
 
-            // Si el comercio fue verificado o rechazado enviar notificación
+            // Actualiza la verificación y, si es rechazo, persiste la observación como comentario RJ de forma atómica
+            $commerce = DB::transaction(function () use ($id, $isVerified, $customMessage) {
+                $commerce = $this->commerceService->updateVerification($id, $isVerified);
+
+                if ((int) $commerce->is_verified === Constant::COMMERCE_REJECTED) {
+                    $this->commerceCommentService->createRejectionComment($commerce->id, $customMessage);
+                }
+
+                return $commerce;
+            });
+
+            // Si el comercio fue verificado o rechazado enviar notificación (tras commit)
             $user = $commerce->ownerUser;
             Log::info('Commerce verification updated', ['commerce_id' => $commerce->id, 'is_verified' => $commerce->is_verified]);
             switch ($commerce->is_verified) {

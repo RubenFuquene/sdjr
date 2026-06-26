@@ -128,6 +128,16 @@ class Constant
 
     public const COMMENT_PRIORITY_LOW = 'BA';
 
+    /**
+     * Catálogo canónico de prioridades (code => nombre).
+     * Fuente única para el seeder y para la resolución on-demand del flujo de rechazo.
+     */
+    public const PRIORITY_TYPE_CATALOG = [
+        self::COMMENT_PRIORITY_HIGH => 'Alta',
+        self::COMMENT_PRIORITY_MEDIUM => 'Media',
+        self::COMMENT_PRIORITY_LOW => 'Baja',
+    ];
+
     // Commerce Comment Types
     public const COMMENT_TYPE_PRODUCT = 'PR';
 
@@ -137,11 +147,22 @@ class Constant
 
     public const COMMENT_TYPE_VALIDATION = 'VA';
 
+    public const COMMENT_TYPE_REJECTION = 'RJ';
+
     public const COMMENT_TYPE_ARRAY = [
         self::COMMENT_TYPE_PRODUCT => 'Producto',
         self::COMMENT_TYPE_SUPPORT => 'Soporte',
         self::COMMENT_TYPE_INFO => 'Información',
         self::COMMENT_TYPE_VALIDATION => 'Validación',
+        self::COMMENT_TYPE_REJECTION => 'Rechazo',
+    ];
+
+    /**
+     * Comment types visible to the owning provider.
+     * TODO Escalable: agregar aquí los tipos que el proveedor dueño puede leer.
+     */
+    public const PROVIDER_VISIBLE_COMMENT_TYPES = [
+        self::COMMENT_TYPE_REJECTION,
     ];
 
     // Nearby search radius (km)

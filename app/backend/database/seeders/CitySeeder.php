@@ -1,24 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\City;
+use App\Models\Department;
 use Illuminate\Database\Seeder;
 
 class CitySeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * Catálogo idempotente: resuelve el departamento por su clave natural ('11')
+     * y hace upsert por `code`.
      */
     public function run(): void
     {
-        if (env('APP_ENV') == 'prd') {
-            City::insert([
-                ['name' => 'Bogotá', 'department_id' => 1, 'code' => '11001', 'created_at' => now(), 'updated_at' => now()],
-            ]);
+        $departmentId = Department::where('code', '11')->value('id');
+
+        if ($departmentId === null) {
+            return;
         }
-        if (env('DEMO_SEEDING') == 'true') {
-            City::factory(5)->create();
-        }
+
+        City::upsert(
+            [
+                ['name' => 'Bogotá', 'code' => '11001', 'department_id' => $departmentId, 'created_at' => now(), 'updated_at' => now()],
+            ],
+            ['code'],
+            ['name', 'department_id', 'updated_at'],
+        );
     }
 }

@@ -51,7 +51,7 @@ bootstrap_env_file() {
 validate_required_runtime_env() {
     local app_env=$(get_app_environment)
 
-    if [[ "$app_env" != "production" && "$app_env" != "prod" ]]; then
+    if [[ "$app_env" != "production" && "$app_env" != "prod" && "$app_env" != "prd" ]]; then
         return
     fi
 
@@ -208,35 +208,10 @@ ensure_sqlite_file_if_needed() {
     fi
 }
 
-run_migrations() {
-    # Determine application environment, preferring the current environment
-    # variable and falling back to the value in the .env file if needed.
-    local app_env=$(get_app_environment)
-
-    # Support common production environment names (production, prod)
-    if [[ "$app_env" == "production" || "$app_env" == "prod" ]]; then
-        echo "Production environment detected, running non-destructive migrations..."
-        php artisan migrate --force --no-interaction
-    else
-        echo "Non-production environment detected, running migrations..."
-        php artisan migrate --force --no-interaction
-    fi
-}
-
-run_seeders() {
-    # Read ENABLE_SEEDING from .env file or environment variable
-    local enable_seeding="${ENABLE_SEEDING:-$(grep '^ENABLE_SEEDING=' "$ENV_FILE" 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs)}"
-    
-    # Only run seeders if explicitly enabled
-    if [ "$enable_seeding" = "true" ]; then
-        echo "Restoring database from seeders..."
-        php artisan migrate:refresh --force --no-interaction
-        echo "Running database seeders..."
-        php artisan db:seed --force --no-interaction
-    else
-        echo "Seeding disabled (set ENABLE_SEEDING=true to enable)"
-    fi
-}
+# Nota: las migraciones y el seeding de catálogo se ejecutan en el Pre-deploy Command
+# de Railway (ver railway.json -> `php artisan app:deploy-release`), una sola vez por
+# release y de forma idempotente. El arranque del contenedor ya NO corre migraciones ni
+# seeders, para evitar ejecución por réplica y eliminar el `migrate:refresh` destructivo.
 
 generate_documentation() {
     echo "Generating API documentation..."
@@ -300,8 +275,7 @@ main() {
     wait_for_database
 
     if ! is_cron_mode && { [ "$#" -eq 0 ] || is_default_serve_command "$@"; }; then
-        run_migrations
-        run_seeders
+        # Migraciones y seeders se ejecutan en el Pre-deploy Command (railway.json).
         generate_documentation
     fi
 

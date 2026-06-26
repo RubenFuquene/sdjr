@@ -25,7 +25,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(
  *         property="comment_type",
  *         type="object",
- *         @OA\Property(property="code", type="string", enum={"SU", "IN", "VA"}, example="SU"),
+ *         @OA\Property(property="code", type="string", enum={"PR", "SU", "IN", "VA", "RJ"}, example="SU"),
  *         @OA\Property(property="name", type="string", example="Soporte")
  *     ),
  *     @OA\Property(property="color", type="string", example="red"),
