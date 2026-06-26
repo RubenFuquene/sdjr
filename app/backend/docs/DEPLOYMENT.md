@@ -185,6 +185,13 @@ Si despliegas un segundo servicio desde la misma imagen para el scheduler:
 - Necesita el **mismo set de variables de runtime** que el servicio web para que las tareas
   funcionen: BD (`DB_CONNECTION` + `DB_URL`, ver arriba), mail (`RESEND_API_KEY`...), Redis,
   y `AWS_*` **solo si** alguna tarea programada usa almacenamiento.
+- ⚠️ **Variables de app usadas por notificaciones encoladas.** Las notificaciones `ShouldQueue`
+  (ej. `ResetPasswordNotification`) se procesan **en el servicio cron**, no en la solicitud web
+  (via `Schedule::command('queues:process')->everyMinute()`). Si esas notificaciones usan
+  `config()` para referencias a la app (ej. `config('app.frontend_prod_url')`), esas variables
+  deben estar también en el servicio cron, de lo contrario caerán a sus defaults hardcodeados.
+  **Ejemplo:** si `FRONTEND_PROD_URL` solo está en el backend, el correo de reset terminará con
+  `http://localhost:3000` en lugar de la URL de producción.
 - Recomendado: usar *shared variables* a nivel de proyecto/entorno en Railway y referenciarlas
   en ambos servicios, para evitar que se desincronicen.
 
@@ -245,6 +252,22 @@ php artisan tinker --execute="
      si pasa, revisa duplicados preexistentes en la tabla afectada (ver Riesgos del plan).
 4. Reproduce localmente: `php artisan app:deploy-release` contra una BD limpia y de nuevo
    sobre una ya sembrada (debe pasar dos veces sin error).
+
+### Correos con URLs de localhost en lugar de producción (servicio cron sin variables de app)
+
+Síntoma: correos de restablecimiento de contraseña (`reset-password?token=...`) apuntan a
+`http://localhost:3000` en lugar de `FRONTEND_PROD_URL` (ej. `https://sdjr.vercel.app/`),
+pero otros datos del correo (`MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`) se ven correctos.
+
+**Causa raíz:** `ResetPasswordNotification` implementa `ShouldQueue` y se procesa
+**en el servicio cron** (vía `Schedule::command('queues:process')->everyMinute()`), no en la
+solicitud HTTP del backend. El contenido del correo usa `config('app.frontend_prod_url')`, que
+cae al default `http://localhost:3000` (`config/app.php:68`) si `FRONTEND_PROD_URL` no está
+configurada en el servicio cron de Railway.
+
+**Fix:** Agrega `FRONTEND_PROD_URL` (y `FRONTEND_URL`) al servicio cron en Railway, con los
+mismos valores que el servicio backend. Mejor aún: usa *shared variables* de Railway a nivel
+de proyecto/entorno para mantener ambos servicios sincronizados (ver §4 "Servicio cron / scheduler").
 
 ### Reiniciar un entorno desde cero (instalación limpia)
 
