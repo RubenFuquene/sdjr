@@ -48,10 +48,25 @@ bootstrap_env_file() {
     cp .env.example.ci "$ENV_FILE"
 }
 
+is_storage_validation_skipped() {
+    local flag="${SKIP_STORAGE_VALIDATION:-false}"
+    flag=$(echo "$flag" | tr '[:upper:]' '[:lower:]' | xargs)
+
+    [ "$flag" = "true" ] || [ "$flag" = "1" ] || [ "$flag" = "yes" ]
+}
+
 validate_required_runtime_env() {
     local app_env=$(get_app_environment)
 
     if [[ "$app_env" != "production" && "$app_env" != "prod" && "$app_env" != "prd" ]]; then
+        return
+    fi
+
+    # El servicio cron (scheduler) usa la misma imagen pero no expone la API ni necesita
+    # forzosamente las credenciales de almacenamiento para arrancar. Se omite la validación
+    # de AWS_* en modo cron, o cuando se pide explícitamente con SKIP_STORAGE_VALIDATION.
+    if is_cron_mode || is_storage_validation_skipped; then
+        echo "Skipping storage env validation (cron mode or SKIP_STORAGE_VALIDATION enabled)."
         return
     fi
 
