@@ -9,17 +9,21 @@ use Illuminate\Database\Seeder;
 
 class EstablishmentTypeSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     *
+     * Catálogo idempotente: upsert por la clave natural `code`.
+     */
     public function run(): void
     {
-        if (env('APP_ENV') == 'prd') {
-            EstablishmentType::insert([
+        EstablishmentType::upsert(
+            [
                 ['name' => 'Restaurante', 'code' => 'RE', 'created_at' => now(), 'updated_at' => now()],
                 ['name' => 'Panadería y Pastelería', 'code' => 'PA', 'created_at' => now(), 'updated_at' => now()],
                 ['name' => 'Retail', 'code' => 'RT', 'created_at' => now(), 'updated_at' => now()],
-            ]);
-        }
-        if (env('DEMO_SEEDING') == 'true') {
-            EstablishmentType::factory()->count(10)->create();
-        }
+            ],
+            ['code'],
+            ['name', 'updated_at'],
+        );
     }
 }

@@ -128,6 +128,16 @@ class Constant
 
     public const COMMENT_PRIORITY_LOW = 'BA';
 
+    /**
+     * Catálogo canónico de prioridades (code => nombre).
+     * Fuente única para el seeder y para la resolución on-demand del flujo de rechazo.
+     */
+    public const PRIORITY_TYPE_CATALOG = [
+        self::COMMENT_PRIORITY_HIGH => 'Alta',
+        self::COMMENT_PRIORITY_MEDIUM => 'Media',
+        self::COMMENT_PRIORITY_LOW => 'Baja',
+    ];
+
     // Commerce Comment Types
     public const COMMENT_TYPE_PRODUCT = 'PR';
 

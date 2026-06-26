@@ -3,66 +3,72 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
  * Class UserSeeder
  *
- * Seeder responsible for populating the users table.
- * Creates a default admin user and a set of random users for testing.
+ * Garantiza un usuario superadmin base en todos los entornos (idempotente por email,
+ * credenciales tomadas de variables de entorno) y, bajo DEMO_SEEDING, un set de usuarios
+ * de prueba.
+ *
+ * Es un Seeder plano (no ControlledSeeder): debe ejecutarse en cada deploy para asegurar
+ * que el superadmin exista; la idempotencia la garantiza firstOrCreate por email.
  */
-class UserSeeder extends ControlledSeeder
+class UserSeeder extends Seeder
 {
-    protected string $version = '1.0';
-
-    protected bool $idempotent = true; // Can be safely re-run
-
     /**
      * Run the database seeds.
      */
-    protected function runSeeder(): void
+    public function run(): void
     {
-        if (env('APP_ENV') == 'prd') {
-
-            $superadmin = User::create([
-                'name' => 'Administrator',
-                'last_name' => 'Ñapa App',
-                'email' => 'admin@napaapp.com',
-                'phone' => '3000000000',
-                'password' => Hash::make('secret'),
+        // Superadmin base: debe existir en todos los entornos para poder operar.
+        // Las credenciales se toman de variables de entorno; el valor por defecto es un
+        // placeholder que DEBE sobreescribirse vía SEED_ADMIN_* en staging/producción.
+        // Se usa firstOrCreate para no sobrescribir la contraseña si ya fue cambiada.
+        $superadmin = User::firstOrCreate(
+            ['email' => env('SEED_ADMIN_EMAIL', 'admin@napaapp.com')],
+            [
+                'name' => env('SEED_ADMIN_NAME', 'Administrator'),
+                'last_name' => env('SEED_ADMIN_LAST_NAME', 'Ñapa App'),
+                'phone' => env('SEED_ADMIN_PHONE', '3000000000'),
+                'password' => Hash::make(env('SEED_ADMIN_PASSWORD', 'ChangeMe!Napa2026')),
                 'email_verified_at' => now(),
-            ]);
+            ],
+        );
 
-            $superadmin->assignRole('superadmin');
-        }
+        $superadmin->assignRole('superadmin');
 
         if (env('DEMO_SEEDING') == 'true') {
-
-            $admin = User::create([
-                'name' => 'Admin',
-                'last_name' => 'User',
-                'email' => 'admin@example.com',
-                'phone' => '3000000001',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]);
-
+            $admin = User::firstOrCreate(
+                ['email' => 'admin@example.com'],
+                [
+                    'name' => 'Admin',
+                    'last_name' => 'User',
+                    'phone' => '3000000001',
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ],
+            );
             $admin->assignRole('admin');
 
-            $provider = User::create([
-                'name' => 'Provider',
-                'last_name' => 'User',
-                'email' => 'provider@example.com',
-                'phone' => '3000000002',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]);
-
+            $provider = User::firstOrCreate(
+                ['email' => 'provider@example.com'],
+                [
+                    'name' => 'Provider',
+                    'last_name' => 'User',
+                    'phone' => '3000000002',
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ],
+            );
             $provider->assignRole('provider');
 
-            // Always create 10 additional test users
-            User::factory(10)->create();
-
+            // Usuarios de prueba adicionales (solo si aún no se generaron).
+            if (User::count() < 13) {
+                User::factory(10)->create();
+            }
         }
     }
 }

@@ -196,10 +196,12 @@ class RolePermissionSeeder extends Seeder
 
         ];
 
-        // Crear permisos si no existen
-        Permission::insert($permissions);
+        // Crear/actualizar permisos de forma idempotente (incremental): los permisos
+        // nuevos agregados al array se crean en cada deploy; los existentes no se duplican.
+        Permission::upsert($permissions, ['name', 'guard_name'], ['description', 'updated_at']);
 
         // Crear roles si no existen
+        $now = now();
         $roles = [
             ['name' => 'superadmin', 'guard_name' => $guardName, 'description' => 'Rol Super Administrador', 'status' => Constant::STATUS_ACTIVE],
             ['name' => 'admin', 'guard_name' => $guardName, 'description' => 'Rol Administrador', 'status' => Constant::STATUS_ACTIVE],
@@ -210,7 +212,11 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'guest', 'guard_name' => $guardName, 'description' => 'Rol Invitado', 'status' => Constant::STATUS_INACTIVE],
         ];
 
-        Role::insert($roles);
+        // Timestamps para el upsert (el array de roles no los define).
+        $roles = array_map(static fn (array $role): array => $role + ['created_at' => $now, 'updated_at' => $now], $roles);
+
+        // Crear/actualizar roles de forma idempotente por (name, guard_name).
+        Role::upsert($roles, ['name', 'guard_name'], ['description', 'status', 'updated_at']);
 
         // Asignar permisos a roles
         // Superadmin tiene todos los permisos
