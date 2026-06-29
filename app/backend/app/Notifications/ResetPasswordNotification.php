@@ -60,13 +60,40 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable): MailMessage
     {
-        $frontendBaseUrl = (string) config('app.frontend_prod_url');
-        $url = rtrim($frontendBaseUrl, '/').'/reset-password?token='.$this->token.'&email='.urlencode($this->email);
+        $frontendBaseUrl = rtrim((string) config('app.frontend_prod_url'), '/');
+        $url = $frontendBaseUrl.$this->resolveResetPath($notifiable)
+            .'?token='.$this->token.'&email='.urlencode($this->email);
 
         return (new MailMessage)
             ->subject('Restablecimiento de contraseña')
             ->line('Recibiste este correo porque se solicitó un restablecimiento de contraseña para tu cuenta.')
             ->action('Restablecer contraseña', $url)
             ->line('Si no solicitaste el restablecimiento, ignora este correo.');
+    }
+
+    /**
+     * Resolve the frontend reset path for the notifiable based on its role,
+     * so the email link lands on the module matching the user (admin/app/provider).
+     *
+     * @param  mixed  $notifiable
+     */
+    private function resolveResetPath($notifiable): string
+    {
+        // Degrade gracefully to the global reset page if roles cannot be
+        // resolved (e.g. relation/table unavailable): it works for any role.
+        try {
+            $roles = method_exists($notifiable, 'getRoleNames')
+                ? $notifiable->getRoleNames()->all()
+                : [];
+        } catch (\Throwable) {
+            return '/reset-password';
+        }
+
+        return match (true) {
+            (bool) array_intersect(['admin', 'superadmin'], $roles) => '/admin/reset-password',
+            (bool) array_intersect(['provider', 'branch_leader'], $roles) => '/provider/reset-password',
+            in_array('user', $roles, true) => '/app/reset-password',
+            default => '/reset-password',
+        };
     }
 }

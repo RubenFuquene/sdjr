@@ -72,7 +72,7 @@ export default function AppForgotPasswordForm({ onBackToLogin }: AppForgotPasswo
           </div>
 
           <Link
-            href={`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`}
+            href={`/app/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`}
             className="block w-full"
           >
             <Button
