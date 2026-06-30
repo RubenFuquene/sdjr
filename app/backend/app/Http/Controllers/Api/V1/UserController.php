@@ -120,7 +120,14 @@ class UserController extends Controller
     public function store(StoreUserRequest $request): JsonResponse
     {
         try {
-            $user = $this->userService->create($request->validated());
+            $data = $request->validated();
+
+            // When no password is supplied (admin invitation flow), create the user
+            // with an unusable random password and send a welcome email with a
+            // password-setup link so the new admin can define their own credentials.
+            $user = empty($data['password'])
+                ? $this->userService->createWithoutPasswordAndNotify($data)
+                : $this->userService->create($data);
 
             return $this->successResponse(new UserResource($user), 'User created successfully', Response::HTTP_CREATED);
         } catch (\Throwable $e) {

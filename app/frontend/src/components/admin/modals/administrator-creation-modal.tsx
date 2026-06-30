@@ -104,14 +104,14 @@ export function AdministratorCreationModal({
       );
     }
 
-    // Preparar payload para backend
+    // Preparar payload para backend — sin password: el backend crea al usuario
+    // con password inutilizable y le envía un correo de invitación para que
+    // defina su propia contraseña vía /admin/reset-password.
     const payload: CreateUserPayload = {
       name: updatedUsuario.nombres,
       last_name: updatedUsuario.apellidos,
       email: updatedUsuario.email,
       phone: updatedUsuario.celular,
-      password: 'TempPassword123!', // TODO: Implementar generación/envío de password temporal
-      password_confirmation: 'TempPassword123!',
       status: (updatedUsuario.activo ? '1' : '0') as '1' | '0',
       roles: [updatedUsuario.perfil],
     };
