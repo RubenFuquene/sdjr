@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Api\V1;
 
 use App\Models\User;
+use App\Notifications\AdminWelcomeNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -176,5 +178,42 @@ class UserTest extends TestCase
         $user = User::factory()->create();
         $response = $this->deleteJson('/api/v1/users/'.$user->id);
         $response->assertForbidden();
+    }
+
+    public function test_creating_admin_without_password_sends_welcome_invitation(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create();
+        $admin->givePermissionTo('admin.profiles.users.create');
+        Sanctum::actingAs($admin);
+
+        $data = [
+            'name' => 'Nuevo',
+            'last_name' => 'Admin',
+            'email' => 'nuevo.admin@example.com',
+            'phone' => '3001234567',
+            'roles' => ['admin'],
+        ];
+
+        $response = $this->postJson('/api/v1/users', $data);
+
+        $response->assertCreated();
+        $response->assertJsonFragment(['name' => 'Nuevo', 'last_name' => 'Admin']);
+
+        $newUser = User::where('email', 'nuevo.admin@example.com')->firstOrFail();
+        Notification::assertSentTo($newUser, AdminWelcomeNotification::class);
+    }
+
+    public function test_admin_welcome_notification_contains_setup_link(): void
+    {
+        $user = User::factory()->create(['email' => 'inv@example.com', 'name' => 'Invitado']);
+        $user->assignRole('admin');
+
+        $mail = (new AdminWelcomeNotification($user, 'setup-token-123'))->toMail($user);
+
+        $this->assertStringContainsString('/admin/reset-password', (string) $mail->actionUrl);
+        $this->assertStringContainsString('token=setup-token-123', (string) $mail->actionUrl);
+        $this->assertStringContainsString('email=inv%40example.com', (string) $mail->actionUrl);
     }
 }

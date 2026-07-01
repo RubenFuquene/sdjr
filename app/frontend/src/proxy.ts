@@ -2,7 +2,18 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const SESSION_COOKIE = "sdjr_session";
 const BYPASS_AUTH = process.env.NEXT_PUBLIC_BYPASS_AUTH === "true";
-const PUBLIC_ROUTES = ["/admin/login", "/provider/login", "/app/login", "/reset-password"];
+const PUBLIC_ROUTES = [
+  "/admin/login",
+  "/provider/login",
+  "/app/login",
+  "/reset-password",
+  // Flujos de recuperación de contraseña por módulo (públicos: el usuario no
+  // tiene sesión cuando los usa).
+  "/admin/forgot-password",
+  "/admin/reset-password",
+  "/app/reset-password",
+  "/provider/reset-password",
+];
 const LOGIN_BY_SEGMENT: Record<string, string> = {
   admin: "/admin/login",
   provider: "/provider/login",

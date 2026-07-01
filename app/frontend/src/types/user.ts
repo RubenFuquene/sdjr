@@ -49,7 +49,7 @@ export interface CreateUserPayload {
   last_name: string;
   email: string;
   phone: string;
-  password: string;
+  password?: string;
   password_confirmation?: string;
   status?: '1' | '0';
   roles?: string[];

@@ -73,7 +73,7 @@ export function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordFormProps) {
           </div>
 
           <Link
-            href={`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`}
+            href={`/provider/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`}
             className="block w-full"
           >
             <Button

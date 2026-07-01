@@ -45,7 +45,9 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
-            'password' => ['required_if:action,store', 'string', 'min:8', 'confirmed'],
+            // Nullable: admin creation uses a passwordless invitation flow.
+            // When provided (e.g., explicit creation with password), must be confirmed.
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['string', 'exists:roles,name'],
             'status' => 'nullable|integer|in:0,1',

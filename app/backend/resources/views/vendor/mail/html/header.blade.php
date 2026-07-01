@@ -1,11 +1,12 @@
 @props(['url'])
+@php($brandBaseUrl = rtrim(config('app.frontend_prod_url', config('app.url')), '/'))
 <tr>
 <td class="header">
-<a href="{{ config('app.frontend_prod_url', $url) }}" style="display: inline-block;">
+<a href="{{ $brandBaseUrl }}" style="display: inline-block;">
 <img
-    src="{{ asset('brand/isotipo-512-napa.png') }}"
+    src="{{ $brandBaseUrl.'/brand/isotipo-512-napa.png' }}"
     class="logo"
-    alt="{{ config('mail.from.name', config('app.name')) }} Logo"
+    alt="{{ config('mail.from.name', config('app.name')) }}"
 >
 </a>
 </td>

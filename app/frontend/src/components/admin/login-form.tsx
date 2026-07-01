@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api/index";
 import type { SessionData } from "@/types/auth";
@@ -109,9 +110,12 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
       </label>
 
       <div className="text-right">
-        <a href="#" className="text-[var(--color-brand)] hover:text-[var(--color-brand-600)] transition text-sm">
+        <Link
+          href="/admin/forgot-password"
+          className="text-[var(--color-brand)] hover:text-[var(--color-brand-600)] transition text-sm"
+        >
           {labels.forgot}
-        </a>
+        </Link>
       </div>
 
       {error ? (

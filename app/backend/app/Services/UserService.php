@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\Constant;
 use App\Models\User;
+use App\Notifications\AdminWelcomeNotification;
 use App\Notifications\WelcomeUserNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -22,9 +23,12 @@ class UserService
 {
     private RoleService $roleService;
 
-    public function __construct(RoleService $roleService)
+    private PasswordResetService $passwordResetService;
+
+    public function __construct(RoleService $roleService, PasswordResetService $passwordResetService)
     {
         $this->roleService = $roleService;
+        $this->passwordResetService = $passwordResetService;
     }
 
     /**
@@ -269,5 +273,39 @@ class UserService
 
             throw $e;
         }
+    }
+
+    /**
+     * Create a new admin user without password and send a welcome email with a
+     * password-setup link so the new admin can define their own credentials.
+     *
+     * Mirrors the pattern used for branch leaders (CommerceBranchUserService).
+     *
+     * @param  array<string, mixed>  $data  Must include name, last_name, email, phone; optional roles.
+     * @return User The created user (with roles assigned).
+     *
+     * @throws \Exception
+     */
+    public function createWithoutPasswordAndNotify(array $data): User
+    {
+        $user = $this->createUserWithoutPassword($data);
+
+        if (! empty($data['roles'])) {
+            $user->syncRoles($data['roles']);
+        }
+
+        $token = $this->passwordResetService->createTokenForUser($user->email);
+
+        try {
+            Notification::send($user, new AdminWelcomeNotification($user, $token));
+        } catch (Throwable $e) {
+            Log::warning('Admin welcome notification dispatch failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $user;
     }
 }
