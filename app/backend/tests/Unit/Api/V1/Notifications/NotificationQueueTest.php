@@ -11,11 +11,15 @@ use App\Notifications\CommerceVerifiedNotification;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\WelcomeUserNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\Messages\MailMessage;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class NotificationQueueTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_notifications_mail_header_uses_company_isotipo_logo(): void
     {
         $html = view('vendor.mail.html.header', [
@@ -41,6 +45,28 @@ class NotificationQueueTest extends TestCase
         $mail = $notification->toMail($user);
         $this->assertInstanceOf(MailMessage::class, $mail);
         $this->assertSame('¡Bienvenido a Ñapa App!', $mail->subject);
+    }
+
+    public function test_welcome_notification_renders_provider_view_for_provider_role(): void
+    {
+        Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'sanctum']);
+        $user = User::factory()->create();
+        $user->assignRole('provider');
+
+        $mail = (new WelcomeUserNotification($user))->toMail($user);
+
+        $this->assertSame('emails.welcome-provider', $mail->view);
+    }
+
+    public function test_welcome_notification_renders_user_view_for_app_customer_role(): void
+    {
+        Role::firstOrCreate(['name' => 'user', 'guard_name' => 'sanctum']);
+        $user = User::factory()->create();
+        $user->assignRole('user');
+
+        $mail = (new WelcomeUserNotification($user))->toMail($user);
+
+        $this->assertSame('emails.welcome-user', $mail->view);
     }
 
     public function test_commerce_verified_notification_uses_queue_and_mail_channel(): void

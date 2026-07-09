@@ -71,14 +71,14 @@ class BranchLeaderWelcomeNotification extends Notification implements ShouldQueu
         $url = rtrim($frontendBaseUrl, '/').'/newPassword?token='.$this->token.'&email='.urlencode($this->user->email);
 
         return (new MailMessage)
-            ->subject('Welcome to Ñapa App - Set Your Password')
-            ->greeting('Hello '.$this->user->name.',')
-            ->line('You have been assigned as Branch Leader for: '.$this->commerceBranch->name)
-            ->line('To get started, please set your password by clicking the button below:')
-            ->action('Set Password', $url)
-            ->line('This link will expire in '.config('auth.passwords.users.expire').' minutes.')
-            ->line('If you did not expect this invitation, please contact the commerce owner.')
-            ->line('Thank you for joining our team!');
+            ->subject('Bienvenido a Ñapa App - Configura tu contraseña')
+            ->greeting('Hola '.$this->user->name.',')
+            ->line('Has sido asignado como líder de sucursal para: '.$this->commerceBranch->name)
+            ->line('Para comenzar, configura tu contraseña haciendo clic en el botón de abajo:')
+            ->action('Configurar contraseña', $url)
+            ->line('Este enlace expirará en '.config('auth.passwords.users.expire').' minutos.')
+            ->line('Si no esperabas esta invitación, contacta al dueño del comercio.')
+            ->line('¡Gracias por unirte a nuestro equipo!');
     }
 
     /**

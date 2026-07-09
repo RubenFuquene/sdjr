@@ -66,9 +66,10 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Restablecimiento de contraseña')
-            ->line('Recibiste este correo porque se solicitó un restablecimiento de contraseña para tu cuenta.')
-            ->action('Restablecer contraseña', $url)
-            ->line('Si no solicitaste el restablecimiento, ignora este correo.');
+            ->view('emails.reset-password', [
+                'url' => $url,
+                'expireMinutes' => (int) config('auth.passwords.users.expire'),
+            ]);
     }
 
     /**

@@ -68,14 +68,14 @@ class BranchAssignmentNotification extends Notification implements ShouldQueue
         $dashboardUrl = rtrim($frontendBaseUrl, '/').'/dashboard';
 
         return (new MailMessage)
-            ->subject('Branch Assignment - Ñapa App')
-            ->greeting('Hello '.$this->user->name.',')
-            ->line('You have been assigned as Branch Leader for: '.$this->commerceBranch->name)
-            ->line('Branch Address: '.$this->commerceBranch->address)
-            ->line('You now have access to manage this branch.')
-            ->action('Go to Dashboard', $dashboardUrl)
-            ->line('If you have any questions, please contact the commerce owner.')
-            ->line('Thank you!');
+            ->subject('Asignación de sucursal - Ñapa App')
+            ->greeting('Hola '.$this->user->name.',')
+            ->line('Has sido asignado como líder de sucursal para: '.$this->commerceBranch->name)
+            ->line('Dirección de la sucursal: '.$this->commerceBranch->address)
+            ->line('Ahora tienes acceso para gestionar esta sucursal.')
+            ->action('Ir al panel', $dashboardUrl)
+            ->line('Si tienes alguna pregunta, contacta al dueño del comercio.')
+            ->line('¡Gracias!');
     }
 
     /**
