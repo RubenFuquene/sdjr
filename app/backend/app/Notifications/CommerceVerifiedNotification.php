@@ -64,11 +64,11 @@ class CommerceVerifiedNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('¡Tu comercio ha sido verificado!')
-            ->greeting('Hola '.$notifiable->name)
-            ->line('Nos complace informarte que tu comercio "'.$this->commerce->name.'" ha sido verificado y ahora se encuentra activo en la plataforma.')
-            ->line($this->customMessage)
-            ->line('Ya puedes acceder a todas las funcionalidades disponibles para comercios verificados.')
-            ->action('Acceder a tu comercio', $commerceUrl)
-            ->line('Gracias por confiar en nosotros.');
+            ->view('emails.commerce-verified', [
+                'notifiable' => $notifiable,
+                'commerce' => $this->commerce,
+                'customMessage' => $this->customMessage,
+                'commerceUrl' => $commerceUrl,
+            ]);
     }
 }

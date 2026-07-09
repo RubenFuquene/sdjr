@@ -45,7 +45,7 @@ export const commerceToProveedorListItem = (commerce: CommerceFromAPI): Proveedo
     estado: commerce.is_active,
     estadoVerificacion: normalizedVerificationStatus,
     verificado: normalizedVerificationStatus === 1,
-    tipoEstablecimiento: 'Comercial', // TODO: Obtener del backend si está disponible (actualmente no proporcionado)
+    tipoEstablecimiento: commerce.establishment_type?.name ?? '—',
     createdAt: commerce.created_at,
   };
 };

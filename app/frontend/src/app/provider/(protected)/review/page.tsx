@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CheckCircle2 } from "lucide-react";
+import { ProviderMessageThread } from "@/components/provider/messages/provider-message-thread";
 
 export const metadata: Metadata = {
   title: "Revisión | Panel Provider - Sumass",
@@ -49,11 +50,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-[18px] shadow-sm p-6 md:p-8">
-          <p className="text-gray-600">
-            Aquí podrás ver el estado de revisión de tu perfil y cualquier observación del equipo de Ñapa.
-          </p>
-        </div>
+        <ProviderMessageThread />
       </div>
     </div>
   );

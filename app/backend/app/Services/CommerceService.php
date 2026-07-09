@@ -77,7 +77,8 @@ class CommerceService
      */
     public function paginateWithFilters(int $perPage = 15, int $page = 1, $search = null, $status = null, $verified = null, string $sortBy = 'name', string $sortDir = 'asc'): LengthAwarePaginator
     {
-        $query = Commerce::query();
+        // Eager-load del tipo de establecimiento para evitar N+1 al serializarlo por fila (CommerceResource)
+        $query = Commerce::query()->with('establishmentType');
 
         if ($search) {
             $query->where(function ($q) use ($search) {

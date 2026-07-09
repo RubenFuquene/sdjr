@@ -26,3 +26,7 @@ temp/
 *.tmp
 
 design-reference-*
+design-layout-emails/
+
+# Documentos de contexto/planeacion locales (no versionar)
+.opencode/plans/

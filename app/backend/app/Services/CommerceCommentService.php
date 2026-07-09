@@ -24,7 +24,7 @@ class CommerceCommentService
      */
     public function getCommentsByCommerce(int $commerceId, array $filters, int $perPage, ?array $restrictToTypes = null): LengthAwarePaginator
     {
-        $comments = CommerceComment::with('priorityType')
+        $comments = CommerceComment::with(['priorityType', 'creator:id,name'])
             ->where(['commerce_id' => $commerceId, 'status' => Constant::STATUS_ACTIVE]);
 
         if ($restrictToTypes !== null) {

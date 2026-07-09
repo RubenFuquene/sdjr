@@ -231,6 +231,22 @@ export function ProviderDatosBasicosTab({
         </div>
       </div>
 
+      {/* Observaciones del proveedor (solo lectura — las diligencia el aliado) */}
+      <div>
+        <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+          Observaciones del proveedor
+        </label>
+        {formData.descripcion?.trim() ? (
+          <p className="w-full min-h-[64px] px-4 py-3 border border-[#E0E0E0] rounded-[14px] bg-[#F7F7F7] text-sm text-[#1A1A1A] whitespace-pre-wrap">
+            {formData.descripcion}
+          </p>
+        ) : (
+          <p className="w-full px-4 py-3 border border-[#E0E0E0] rounded-[14px] bg-[#F7F7F7] text-sm text-[#6A6A6A]">
+            Sin observaciones registradas
+          </p>
+        )}
+      </div>
+
       {/* Sección de Documentos */}
       <div>
         <label className="block text-sm font-medium text-[#1A1A1A] mb-3">

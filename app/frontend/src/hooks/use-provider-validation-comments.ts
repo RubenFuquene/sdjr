@@ -4,6 +4,7 @@ import {
   createCommerceComment,
   getCommerceComments,
   type CommerceCommentFromAPI,
+  type CommerceCommentType,
 } from '@/lib/api';
 import { PROVIDER_VALIDATION_MESSAGES } from '@/components/admin/validacion-proveedores/provider-validation-messages';
 
@@ -14,7 +15,7 @@ interface UseProviderValidationCommentsReturn {
   isSubmitting: boolean;
   submitError: string | null;
   reloadComments: () => Promise<void>;
-  addComment: (comment: string) => Promise<void>;
+  addComment: (comment: string, commentType?: CommerceCommentType) => Promise<void>;
 }
 
 /**
@@ -54,7 +55,7 @@ export function useProviderValidationComments(
   }, [reloadComments, refreshTrigger]);
 
   const addComment = useCallback(
-    async (comment: string) => {
+    async (comment: string, commentType: CommerceCommentType = 'MS') => {
       const commentText = comment.trim();
       if (!commentText) return;
 
@@ -62,10 +63,11 @@ export function useProviderValidationComments(
         setIsSubmitting(true);
         setSubmitError(null);
 
+        // MS (Mensaje) → visible al proveedor dueño; VA (Nota interna) → solo admin.
         await createCommerceComment(providerId, {
           comment: commentText,
           priority_type_id: 1,
-          comment_type: 'VA',
+          comment_type: commentType,
           status: '1',
         });
 

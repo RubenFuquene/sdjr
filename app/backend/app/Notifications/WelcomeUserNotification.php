@@ -59,16 +59,37 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      *
+     * Renders a role-specific design: the provider ("aliado") gets the
+     * onboarding hero, the app customer gets the sustainability-focused one.
+     *
      * @param  mixed  $notifiable
      */
     public function toMail($notifiable): MailMessage
     {
+        $frontendBaseUrl = rtrim((string) config('app.frontend_prod_url'), '/');
+        $isProvider = $this->userHasProviderRole();
+
         return (new MailMessage)
             ->subject('¡Bienvenido a Ñapa App!')
-            ->greeting('Hola '.$this->user->name.',')
-            ->line('Tu registro ha sido exitoso.')
-            ->line('Ya puedes acceder a tu cuenta y comenzar a utilizar nuestros servicios.')
-            ->line('¡Gracias por confiar en nosotros!');
+            ->view($isProvider ? 'emails.welcome-provider' : 'emails.welcome-user', [
+                'notifiable' => $notifiable,
+                'ctaUrl' => $frontendBaseUrl.($isProvider ? '/provider/login' : '/app/login'),
+            ]);
+    }
+
+    /**
+     * Whether the user has the provider role.
+     *
+     * Degrades gracefully to false (app-customer design) if roles cannot be
+     * resolved (e.g. unsaved model in tests without a roles table).
+     */
+    private function userHasProviderRole(): bool
+    {
+        try {
+            return $this->user->hasRole('provider');
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**

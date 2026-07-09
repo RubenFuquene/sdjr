@@ -47,13 +47,14 @@ class ResetPasswordNotificationTest extends TestCase
                 ->toMail($this->notifiableWithRoles($roles));
 
             $this->assertInstanceOf(MailMessage::class, $mail);
+            $url = (string) $mail->viewData['url'];
             $this->assertStringContainsString(
                 $expectedPath,
-                (string) $mail->actionUrl,
+                $url,
                 'Roles ['.implode(',', $roles).'] should target '.$expectedPath
             );
-            $this->assertStringContainsString('token=tok123', (string) $mail->actionUrl);
-            $this->assertStringContainsString('email=user%40test.com', (string) $mail->actionUrl);
+            $this->assertStringContainsString('token=tok123', $url);
+            $this->assertStringContainsString('email=user%40test.com', $url);
         }
     }
 
@@ -63,6 +64,6 @@ class ResetPasswordNotificationTest extends TestCase
 
         $mail = (new ResetPasswordNotification('t', 'a@b.com'))->toMail($notifiable);
 
-        $this->assertStringContainsString('/admin/reset-password?', (string) $mail->actionUrl);
+        $this->assertStringContainsString('/admin/reset-password?', (string) $mail->viewData['url']);
     }
 }

@@ -66,13 +66,16 @@ class CommerceRejectedNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable): MailMessage
     {
+        $frontendBaseUrl = rtrim((string) config('app.frontend_prod_url'), '/');
+
         return (new MailMessage)
             ->subject('Comercio rechazado')
-            ->greeting('Hola '.($notifiable->name ?? 'Usuario').',')
-            ->line('Lamentamos informarte que tu comercio "'.$this->commerce->name.'" ha sido rechazado tras el proceso de verificación.')
-            ->line('Por favor revisa la información registrada y vuelve a intentarlo o contacta soporte para más detalles.')
-            ->line($this->customMessage)
-            ->line('Gracias por tu interés en nuestra plataforma.');
+            ->view('emails.commerce-rejected', [
+                'notifiable' => $notifiable,
+                'commerce' => $this->commerce,
+                'customMessage' => $this->customMessage,
+                'ctaUrl' => $frontendBaseUrl.'/provider/login',
+            ]);
     }
 
     /**

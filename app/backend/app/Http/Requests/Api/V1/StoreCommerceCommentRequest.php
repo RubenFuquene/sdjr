@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Models\Commerce;
 use App\Traits\AuthorizesCommerceOwnership;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -41,5 +43,40 @@ class StoreCommerceCommentRequest extends FormRequest
             'status' => ['nullable', 'string', 'max:1', 'in: '.Constant::STATUS_ACTIVE.','.Constant::STATUS_INACTIVE],
             'created_by' => ['nullable', 'integer', 'exists:users,id'],
         ];
+    }
+
+    /**
+     * Reglas de dominio adicionales:
+     * - Un no-admin (proveedor dueño) solo puede crear tipos permitidos (MS).
+     * - Los mensajes (MS) solo se aceptan mientras el comercio está en ruta de
+     *   aprobación; el canal se cierra al aprobar/rechazar.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $type = (string) $this->input('comment_type');
+            $isAdmin = $this->user()?->hasAnyRole(['superadmin', 'admin']) ?? false;
+
+            if (! $isAdmin && ! in_array($type, Constant::PROVIDER_CREATABLE_COMMENT_TYPES, true)) {
+                $validator->errors()->add('comment_type', 'No autorizado para crear este tipo de comentario.');
+
+                return;
+            }
+
+            if ($type === Constant::COMMENT_TYPE_MESSAGE && ! $this->commerceAcceptsMessages()) {
+                $validator->errors()->add('comment_type', 'El canal de mensajes no está disponible para el estado actual del comercio.');
+            }
+        });
+    }
+
+    /**
+     * Whether the target commerce is in an approval-route state that accepts messages.
+     */
+    private function commerceAcceptsMessages(): bool
+    {
+        $state = Commerce::query()->whereKey($this->resolveCommerceId())->value('is_verified');
+
+        return $state !== null
+            && in_array((int) $state, Constant::COMMERCE_MESSAGING_STATES, true);
     }
 }

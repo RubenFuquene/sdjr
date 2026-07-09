@@ -22,12 +22,16 @@ export interface GetCommercesParams {
   verified?: string; // optional: 1 (verified) | 0 (not verified) | all
 }
 
-export type CommerceCommentType = "PR" | "SU" | "IN" | "VA" | "RJ";
+export type CommerceCommentType = "PR" | "SU" | "IN" | "VA" | "RJ" | "MS";
 
 export interface CommerceCommentFromAPI {
   id: number;
   commerce_id: number;
   created_by: number;
+  created_by_user?: {
+    id: number;
+    name: string;
+  } | null;
   comment: string;
   priority_type_id: number;
   priority_type: {
