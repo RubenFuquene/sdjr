@@ -26,3 +26,6 @@ temp/
 *.tmp
 
 design-reference-*
+
+# Documentos de contexto/planeacion locales (no versionar)
+.opencode/plans/
