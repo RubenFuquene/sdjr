@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Constants\Constant;
+use App\Models\CommerceDocument;
 use Aws\S3\S3Client;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DocumentUploadService
@@ -116,6 +118,11 @@ class DocumentUploadService
 
     /**
      * Actualizar documento tras confirmación
+     *
+     * Si el modelo es un CommerceDocument con document_type, sustituye
+     * (soft-delete) al documento confirmado previo del mismo
+     * (commerce_id, document_type) y encadena el versionado, para que
+     * solo quede un documento activo por tipo.
      */
     public function confirmUpload($model, array $data): bool
     {
@@ -130,14 +137,39 @@ class DocumentUploadService
             }
         }
 
-        return $model->update([
-            'upload_status' => Constant::UPLOAD_STATUS_CONFIRMED,
-            's3_etag' => $data['s3_metadata']['etag'],
-            's3_object_size' => $data['s3_metadata']['object_size'],
-            's3_last_modified' => $lastModified,
-            'expires_at' => null,
-            'failed_attempts' => 0,
-        ]);
+        return DB::transaction(function () use ($model, $data, $lastModified) {
+            $updateData = [
+                'upload_status' => Constant::UPLOAD_STATUS_CONFIRMED,
+                's3_etag' => $data['s3_metadata']['etag'],
+                's3_object_size' => $data['s3_metadata']['object_size'],
+                's3_last_modified' => $lastModified,
+                'expires_at' => null,
+                'failed_attempts' => 0,
+            ];
+
+            $previousDocument = null;
+
+            if ($model instanceof CommerceDocument && $model->document_type) {
+                $previousDocument = CommerceDocument::where('commerce_id', $model->commerce_id)
+                    ->where('document_type', $model->document_type)
+                    ->where('upload_status', Constant::UPLOAD_STATUS_CONFIRMED)
+                    ->where('id', '!=', $model->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($previousDocument) {
+                    $updateData['replacement_of_id'] = $previousDocument->id;
+                    $updateData['version_of_id'] = $previousDocument->version_of_id ?? $previousDocument->id;
+                    $updateData['version_number'] = $previousDocument->version_number + 1;
+                }
+            }
+
+            $result = $model->update($updateData);
+
+            $previousDocument?->delete();
+
+            return $result;
+        });
     }
 
     /**
