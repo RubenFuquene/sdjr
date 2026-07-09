@@ -7,8 +7,4 @@ export const PROVIDER_VALIDATION_MESSAGES = {
     'No fue posible registrar el comentario con el contrato actual del backend.',
   commentSubmitError:
     'No se pudo enviar el comentario. Intenta nuevamente.',
-  rejectionCommentBackendPending:
-    'Funcionalidad de observaciones detalladas en desarrollo por backend.',
-  rejectionCommentSaveError:
-    'No se pudo registrar la observación en historial, pero el rechazo fue aplicado.',
 } as const;

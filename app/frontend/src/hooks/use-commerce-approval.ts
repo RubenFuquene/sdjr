@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { approveCommerce, createCommerceComment, rejectCommerce } from '@/lib/api/commerces';
+import { approveCommerce, rejectCommerce } from '@/lib/api/commerces';
 import { CommerceFromAPI } from '@/types/commerces';
 
 interface UseCommerceApprovalState {
@@ -18,7 +18,6 @@ interface UseCommerceApprovalState {
 interface UseCommerceApprovalReturn extends UseCommerceApprovalState {
   approveProvider: (commerceId: number, message?: string) => Promise<CommerceFromAPI>;
   rejectProvider: (commerceId: number, message: string) => Promise<CommerceFromAPI>;
-  createValidationComment: (commerceId: number, comment: string, commentType?: 'VA' | 'RJ') => Promise<void>;
   reset: () => void;
 }
 
@@ -82,11 +81,12 @@ export function useCommerceApproval(): UseCommerceApprovalReturn {
   };
 
   /**
-    * Rechaza un proveedor (is_verified = 2)
-   * 
-   * ⚠️ Nota: El backend no almacena las observaciones de rechazo en este endpoint.
-   * Las observaciones deben manejarse en un endpoint separado de PQRS/Comments.
-   * 
+   * Rechaza un proveedor (is_verified = 2)
+   *
+   * El backend persiste la observación de rechazo como comentario RJ de forma
+   * atómica dentro de este mismo endpoint (SCRUM-297); no se debe crear un
+   * comentario adicional desde el cliente para evitar duplicidad.
+   *
    * @param commerceId - ID del comercio a rechazar
    * @returns Datos actualizados del comercio
    * @throws Error si falla el rechazo
@@ -117,46 +117,12 @@ export function useCommerceApproval(): UseCommerceApprovalReturn {
     }
   };
 
-  /**
-   * Crea comentario para el flujo de validación.
-   * Se usa para registrar observaciones después de aprobar/rechazar.
-   */
-  const createValidationComment = async (
-    commerceId: number,
-    comment: string,
-    commentType: 'VA' | 'RJ' = 'VA'
-  ): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const trimmedComment = comment.trim();
-      if (!trimmedComment) {
-        return;
-      }
-
-      await createCommerceComment(commerceId, {
-        comment: trimmedComment,
-        priority_type_id: 1,
-        comment_type: commentType,
-        status: '1',
-      });
-    } catch (err) {
-      const mensaje = err instanceof Error ? err.message : 'Error desconocido al registrar comentario';
-      setError(mensaje);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return {
     isLoading,
     error,
     success,
     approveProvider,
     rejectProvider,
-    createValidationComment,
     reset,
   };
 }

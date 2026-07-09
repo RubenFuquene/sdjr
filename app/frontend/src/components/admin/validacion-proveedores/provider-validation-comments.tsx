@@ -118,7 +118,7 @@ export function ProviderValidationComments({ providerId, refreshTrigger = 0 }: P
             >
               <div className="flex items-baseline justify-between mb-2">
                 <span className="text-sm font-medium text-[#1A1A1A]">
-                  {`Usuario #${comment.created_by}`}
+                  {comment.created_by_user?.name ?? `Usuario #${comment.created_by}`}
                 </span>
                 <span className="text-xs text-[#6A6A6A]">
                   {formatDate(comment.created_at)}

@@ -15,8 +15,6 @@ import { useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { ConfirmationDialog } from '@/components/admin/shared/confirmation-dialog';
 import { useCommerceApproval } from '@/hooks/use-commerce-approval';
-import { ApiError } from '@/lib/api';
-import { PROVIDER_VALIDATION_MESSAGES } from './provider-validation-messages';
 
 // ============================================
 // Props Interface
@@ -39,7 +37,7 @@ export function ProviderValidationActions({
   onApprovalSuccess,
   onApprovalError,
 }: ProviderValidationActionsProps) {
-  const { approveProvider, rejectProvider, createValidationComment, isLoading } = useCommerceApproval();
+  const { approveProvider, rejectProvider, isLoading } = useCommerceApproval();
   
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
@@ -68,10 +66,10 @@ export function ProviderValidationActions({
   /**
    * Handler para rechazar proveedor
    *
-   * Flujo compatible:
-   * 1) Primero cambia estado de verificación (operación principal)
-   * 2) Luego intenta persistir observación como comentario
-   * 3) Si falla el comentario, no revierte el rechazo y muestra fallback funcional
+   * El endpoint de verificación (rejectProvider) persiste la observación como
+   * comentario RJ de forma atómica en el backend (SCRUM-297), por lo que aquí
+   * NO se crea un comentario adicional para evitar duplicidad. Tras el rechazo
+   * exitoso se refresca el historial de comentarios.
    */
   const handleReject = async () => {
     if (!rejectReason.trim()) {
@@ -88,31 +86,15 @@ export function ProviderValidationActions({
       setApprovalError(null);
       const reason = rejectReason.trim();
 
-      // 1) Operación principal: rechazo
+      // El backend crea el comentario RJ atómicamente junto con el rechazo
       await rejectProvider(providerId, reason);
+      onValidationCommentCreated?.();
 
-      // 2) Operación secundaria: observación en comentarios
-      let fallbackMessage: string | null = null;
-      try {
-        await createValidationComment(providerId, reason, 'RJ');
-        onValidationCommentCreated?.();
-      } catch (commentError) {
-        if (commentError instanceof ApiError && commentError.status === 422) {
-          fallbackMessage = PROVIDER_VALIDATION_MESSAGES.rejectionCommentBackendPending;
-        } else {
-          fallbackMessage = PROVIDER_VALIDATION_MESSAGES.rejectionCommentSaveError;
-        }
-      }
-      
       // Limpiar y cerrar dialog
       setRejectReason('');
       setIsRejectDialogOpen(false);
 
-      onApprovalSuccess?.(
-        fallbackMessage
-          ? `Proveedor rechazado exitosamente. ${fallbackMessage}`
-          : 'Proveedor rechazado exitosamente'
-      );
+      onApprovalSuccess?.('Proveedor rechazado exitosamente');
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : 'Error desconocido';
       setApprovalError(mensaje);

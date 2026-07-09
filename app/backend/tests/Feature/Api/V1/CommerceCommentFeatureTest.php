@@ -74,6 +74,22 @@ class CommerceCommentFeatureTest extends TestCase
         $response->assertStatus(200)->assertJsonStructure(['data'])->assertJsonCount(3, 'data');
     }
 
+    public function test_index_comments_exposes_creator_name(): void
+    {
+        $commerce = Commerce::factory()->create();
+        $author = User::factory()->create(['name' => 'Ana Gómez']);
+        CommerceComment::factory()->create([
+            'commerce_id' => $commerce->id,
+            'created_by' => $author->id,
+        ]);
+        $this->actingAsAdmin();
+
+        $response = $this->getJson("/api/v1/commerces/{$commerce->id}/comments");
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.created_by_user.id', $author->id)
+            ->assertJsonPath('data.0.created_by_user.name', 'Ana Gómez');
+    }
+
     public function test_store_comment_success(): void
     {
         $commerce = Commerce::factory()->create();

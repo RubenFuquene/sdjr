@@ -16,6 +16,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="commerce_id", type="integer", example=10),
  *     @OA\Property(property="created_by", type="integer", example=5),
+ *     @OA\Property(property="created_by_user", type="object", nullable=true,
+ *         @OA\Property(property="id", type="integer", example=5),
+ *         @OA\Property(property="name", type="string", example="Ana Gómez")
+ *     ),
  *     @OA\Property(property="comment", type="string", example="Comentario de prueba"),
  *     @OA\Property(property="priority_type_id", type="integer", example=1),
  *     @OA\Property(property="priority_type", type="object",
@@ -47,6 +51,10 @@ class CommerceCommentResource extends JsonResource
             'id' => $this->id,
             'commerce_id' => $this->commerce_id,
             'created_by' => $this->created_by,
+            'created_by_user' => $this->whenLoaded('creator', fn () => $this->creator ? [
+                'id' => $this->creator->id,
+                'name' => $this->creator->name,
+            ] : null),
             'comment' => $this->comment,
             'priority_type_id' => $this->priority_type_id,
             'priority_type' => [
