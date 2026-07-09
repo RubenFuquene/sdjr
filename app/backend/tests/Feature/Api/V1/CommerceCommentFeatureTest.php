@@ -213,6 +213,81 @@ class CommerceCommentFeatureTest extends TestCase
             ->assertJsonPath('data.0.comment_type.code', Constant::COMMENT_TYPE_REJECTION);
     }
 
+    // ----- Mensajería admin<->proveedor (tipo MS) -----
+
+    /** El proveedor dueño puede crear un mensaje (MS) en un comercio en ruta de aprobación. */
+    public function test_provider_owner_can_create_message(): void
+    {
+        $commerce = Commerce::factory()->create(['is_verified' => Constant::COMMERCE_PENDING]);
+        $priorityType = PriorityType::factory()->create();
+        $owner = $this->actingAsCommerceOwner($commerce, ['provider.comments.create']);
+
+        $response = $this->postJson("/api/v1/commerces/{$commerce->id}/comments", [
+            'comment' => 'Adjunté nuevamente la cámara de comercio.',
+            'priority_type_id' => $priorityType->id,
+            'comment_type' => Constant::COMMENT_TYPE_MESSAGE,
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('commerce_comments', [
+            'commerce_id' => $commerce->id,
+            'comment_type' => Constant::COMMENT_TYPE_MESSAGE,
+            'created_by' => $owner->id,
+        ]);
+    }
+
+    /** El proveedor no puede crear tipos reservados (RJ/VA); solo MS. */
+    public function test_provider_owner_cannot_create_reserved_type_returns_422(): void
+    {
+        $commerce = Commerce::factory()->create(['is_verified' => Constant::COMMERCE_PENDING]);
+        $priorityType = PriorityType::factory()->create();
+        $this->actingAsCommerceOwner($commerce, ['provider.comments.create']);
+
+        $response = $this->postJson("/api/v1/commerces/{$commerce->id}/comments", [
+            'comment' => 'Intento de rechazo falseado.',
+            'priority_type_id' => $priorityType->id,
+            'comment_type' => Constant::COMMENT_TYPE_REJECTION,
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors('comment_type');
+    }
+
+    /** El canal de mensajes se cierra cuando el comercio ya fue aprobado/rechazado. */
+    public function test_message_blocked_when_commerce_not_in_approval_route(): void
+    {
+        $commerce = Commerce::factory()->create(['is_verified' => Constant::COMMERCE_VERIFIED]);
+        $priorityType = PriorityType::factory()->create();
+        $this->actingAsCommerceOwner($commerce, ['provider.comments.create']);
+
+        $response = $this->postJson("/api/v1/commerces/{$commerce->id}/comments", [
+            'comment' => 'Mensaje fuera de la ruta de aprobación.',
+            'priority_type_id' => $priorityType->id,
+            'comment_type' => Constant::COMMENT_TYPE_MESSAGE,
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors('comment_type');
+    }
+
+    /** El proveedor dueño ve su hilo: mensajes (MS) y rechazos (RJ), no los internos. */
+    public function test_provider_owner_sees_message_and_rejection_thread(): void
+    {
+        $commerce = Commerce::factory()->create(['is_verified' => Constant::COMMERCE_PENDING]);
+        CommerceComment::factory()->create(['commerce_id' => $commerce->id, 'comment_type' => Constant::COMMENT_TYPE_MESSAGE]);
+        CommerceComment::factory()->create(['commerce_id' => $commerce->id, 'comment_type' => Constant::COMMENT_TYPE_REJECTION]);
+        CommerceComment::factory()->create(['commerce_id' => $commerce->id, 'comment_type' => Constant::COMMENT_TYPE_INFO]);
+
+        $this->actingAsCommerceOwner($commerce, ['provider.comments.index']);
+
+        $response = $this->getJson("/api/v1/commerces/{$commerce->id}/comments");
+
+        $response->assertStatus(200)->assertJsonCount(2, 'data');
+        $codes = collect($response->json('data'))->pluck('comment_type.code')->all();
+        $this->assertEqualsCanonicalizing(
+            [Constant::COMMENT_TYPE_MESSAGE, Constant::COMMENT_TYPE_REJECTION],
+            $codes
+        );
+    }
+
     /** 5. Lectura por tercero (con permiso pero sin ser dueño ni admin) → 403. Cierra A01. */
     public function test_non_owner_cannot_list_comments_returns_403(): void
     {

@@ -22,7 +22,7 @@ export interface GetCommercesParams {
   verified?: string; // optional: 1 (verified) | 0 (not verified) | all
 }
 
-export type CommerceCommentType = "PR" | "SU" | "IN" | "VA" | "RJ";
+export type CommerceCommentType = "PR" | "SU" | "IN" | "VA" | "RJ" | "MS";
 
 export interface CommerceCommentFromAPI {
   id: number;

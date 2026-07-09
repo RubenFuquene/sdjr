@@ -110,6 +110,8 @@ class Constant
 
     public const COMMERCE_REJECTED = 2;
 
+    public const COMMERCE_REVALIDATION = 3;
+
     // Commerce Document Types
     public const COMMERCE_DOCUMENT_TYPE_NIT = 'NIT';
 
@@ -149,12 +151,15 @@ class Constant
 
     public const COMMENT_TYPE_REJECTION = 'RJ';
 
+    public const COMMENT_TYPE_MESSAGE = 'MS';
+
     public const COMMENT_TYPE_ARRAY = [
         self::COMMENT_TYPE_PRODUCT => 'Producto',
         self::COMMENT_TYPE_SUPPORT => 'Soporte',
         self::COMMENT_TYPE_INFO => 'Información',
         self::COMMENT_TYPE_VALIDATION => 'Validación',
         self::COMMENT_TYPE_REJECTION => 'Rechazo',
+        self::COMMENT_TYPE_MESSAGE => 'Mensaje',
     ];
 
     /**
@@ -163,6 +168,24 @@ class Constant
      */
     public const PROVIDER_VISIBLE_COMMENT_TYPES = [
         self::COMMENT_TYPE_REJECTION,
+        self::COMMENT_TYPE_MESSAGE,
+    ];
+
+    /**
+     * Comment types que un no-admin (proveedor dueño) puede crear.
+     * Impide que el proveedor genere tipos reservados (VA/RJ/etc.).
+     */
+    public const PROVIDER_CREATABLE_COMMENT_TYPES = [
+        self::COMMENT_TYPE_MESSAGE,
+    ];
+
+    /**
+     * Estados de verificación en los que el hilo de mensajes está activo
+     * (en ruta de aprobación): pendiente y "por aprobar nuevamente".
+     */
+    public const COMMERCE_MESSAGING_STATES = [
+        self::COMMERCE_PENDING,
+        self::COMMERCE_REVALIDATION,
     ];
 
     // Nearby search radius (km)
