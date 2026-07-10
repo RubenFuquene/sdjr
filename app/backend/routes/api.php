@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BankController;
-use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CityController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\CommerceBranchController;
@@ -64,7 +63,6 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('countries', CountryController::class);
         Route::apiResource('departments', DepartmentController::class);
         Route::apiResource('cities', CityController::class);
-        Route::apiResource('categories', CategoryController::class);
         Route::apiResource('neighborhoods', NeighborhoodController::class);
         Route::apiResource('establishment-types', EstablishmentTypeController::class);
         Route::apiResource('pqrs-types', PqrsTypeController::class);
