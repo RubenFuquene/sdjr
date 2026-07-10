@@ -21,7 +21,7 @@ class AuthService
         // All failures return the same message to prevent user enumeration
         if (! $user || is_null($user->password) || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Invalid credentials provided.'],
+                'email' => [__('auth.failed')],
             ]);
         }
         $token = $user->createToken('api-token')->plainTextToken;
