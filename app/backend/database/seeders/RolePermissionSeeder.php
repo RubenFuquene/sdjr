@@ -387,6 +387,7 @@ class RolePermissionSeeder extends Seeder
             'provider.commerces.show',
             'provider.legal_representatives.show',
             'provider.establishment_types.show',
+            'provider.product_categories.index',
             'provider.product_categories.show',
             'provider.products.show',
             'provider.comments.index',
