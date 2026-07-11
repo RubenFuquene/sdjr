@@ -23,6 +23,9 @@ class NeighborhoodService
         if (! empty($filters['code'])) {
             $query->where('code', 'like', "%{$filters['code']}%");
         }
+        if (! empty($filters['city_id'])) {
+            $query->where('city_id', $filters['city_id']);
+        }
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }

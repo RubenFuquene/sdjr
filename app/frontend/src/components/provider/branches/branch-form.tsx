@@ -1,20 +1,40 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { MapPin } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MapPin, Navigation } from "lucide-react";
 import { useLocation } from "@/hooks/index";
-import { CitySelect, DepartmentSelect, NeighborhoodSelect } from "@/components/provider/ui";
+import { getCities, getNeighborhoods } from "@/lib/api/location";
+import { geocode, reverseGeocodePoint } from "@/lib/geolocation/geocoding-client";
+import { matchNeighborhoodByName } from "@/lib/geolocation/neighborhood-match";
+import { isLowConfidenceGeocode } from "@/lib/geolocation/geocode-confidence";
+import type { GeocodeResult } from "@/lib/api/geocode";
+import { CitySelect, DepartmentSelect, NeighborhoodCombobox } from "@/components/provider/ui";
 import type {
   ProviderBranchFormFieldErrors,
   ProviderBranchFormInput,
 } from "@/hooks/provider/use-provider-branch-form";
 import { validateBranchForm } from "@/lib/provider/validations/branch-form";
 
-const LocationPickerModal = dynamic(
-  () => import("./location-picker-modal").then((module) => module.LocationPickerModal),
+const LocationMapField = dynamic(
+  () => import("./location-map-field").then((module) => module.LocationMapField),
   { ssr: false }
 );
+
+const ADDRESS_BLUR_GEOCODE_DELAY_MS = 600;
+
+/**
+ * Construye una dirección corta y legible a partir del resultado de
+ * geocoding (ej. "Calle 10 #5-20"). Si Nominatim no devuelve `road`, cae al
+ * `display_name` completo (más largo, pero mejor que dejar el campo vacío).
+ */
+function buildSuggestedAddress(result: GeocodeResult): string | null {
+  const { road, house_number } = result.address;
+  if (road) {
+    return house_number ? `${road} #${house_number}` : road;
+  }
+  return result.display_name;
+}
 
 export type BranchFormMode = "create" | "edit";
 
@@ -152,23 +172,18 @@ export function BranchForm({
   const [phone, setPhone] = useState(initialValues.phone);
   const [email, setEmail] = useState(initialValues.email);
   const [schedule, setSchedule] = useState<DaySchedule[]>(initialValues.schedule);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [localErrors, setLocalErrors] = useState<ProviderBranchFormFieldErrors>({});
+  const [recenterSignal, setRecenterSignal] = useState(0);
+  const [geocoding, setGeocoding] = useState(false);
+  const [reverseGeocoding, setReverseGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
+  const [neighborhoodMatchWarning, setNeighborhoodMatchWarning] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const addressBlurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     nameInputRef.current?.focus();
   }, [mode, initialData]);
-
-  const filteredCities = useMemo(() => {
-    if (!selectedDept) return [];
-    return cities.filter((city) => city.department_id === selectedDept);
-  }, [cities, selectedDept]);
-
-  const filteredNeighborhoods = useMemo(() => {
-    if (!selectedCity) return [];
-    return neighborhoods.filter((neighborhood) => neighborhood.city_id === selectedCity);
-  }, [neighborhoods, selectedCity]);
 
   useEffect(() => {
     if (mode !== "edit" || !initialData?.departmentName || departments.length === 0 || selectedDept) {
@@ -187,30 +202,30 @@ export function BranchForm({
   }, [mode, initialData, departments, selectedDept, setSelectedDept]);
 
   useEffect(() => {
-    if (mode !== "edit" || !initialData?.cityName || filteredCities.length === 0 || selectedCity) {
+    if (mode !== "edit" || !initialData?.cityName || cities.length === 0 || selectedCity) {
       return;
     }
 
-    const match = filteredCities.find(
+    const match = cities.find(
       (city) => city.name.trim().toLowerCase() === initialData.cityName?.trim().toLowerCase()
     );
 
     if (match) {
       setSelectedCity(match.id);
     }
-  }, [mode, initialData, filteredCities, selectedCity, setSelectedCity]);
+  }, [mode, initialData, cities, selectedCity, setSelectedCity]);
 
   useEffect(() => {
     if (
       mode !== "edit" ||
       !initialData?.neighborhoodName ||
-      filteredNeighborhoods.length === 0 ||
+      neighborhoods.length === 0 ||
       selectedNeighborhood
     ) {
       return;
     }
 
-    const match = filteredNeighborhoods.find(
+    const match = neighborhoods.find(
       (neighborhood) =>
         neighborhood.name.trim().toLowerCase() ===
         initialData.neighborhoodName?.trim().toLowerCase()
@@ -222,7 +237,7 @@ export function BranchForm({
   }, [
     mode,
     initialData,
-    filteredNeighborhoods,
+    neighborhoods,
     selectedNeighborhood,
     setSelectedNeighborhood,
   ]);
@@ -316,10 +331,189 @@ export function BranchForm({
     clearLocalError("commerce_branch.city_id", "commerce_branch.neighborhood_id");
   };
 
-  const handleNeighborhoodChange = (value: string) => {
-    const neighborhoodId = value ? Number(value) : null;
+  const handleNeighborhoodChange = (neighborhoodId: number | null) => {
     setSelectedNeighborhood(neighborhoodId);
     clearLocalError("commerce_branch.neighborhood_id");
+    setNeighborhoodMatchWarning(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (addressBlurTimeoutRef.current) {
+        clearTimeout(addressBlurTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  /**
+   * Resuelve depto/ciudad/barrio a partir de un resultado de geocoding, para
+   * mantener coherencia con el punto físico (fuente de verdad). MVP: depto/
+   * ciudad son siempre Bogotá D.C. (único registro sembrado) — si aún no
+   * están seleccionados se resuelven directo contra la API en vez de esperar
+   * el ciclo de fetch del hook de cascada. El barrio se resuelve por match
+   * difuso de nombre (Nominatim no conoce nuestro catálogo de sectores).
+   */
+  const applyAdminSyncFromResult = useCallback(
+    async (result: GeocodeResult) => {
+      let resolvedDeptId = selectedDept;
+      let resolvedCityId = selectedCity;
+      let resolvedNeighborhoods = neighborhoods;
+
+      if (!resolvedDeptId && departments.length > 0) {
+        resolvedDeptId = departments[0].id;
+        setSelectedDept(resolvedDeptId);
+        clearLocalError("commerce_branch.department_id");
+      }
+
+      if (!resolvedCityId && resolvedDeptId) {
+        try {
+          const citiesResponse = await getCities({ department_id: resolvedDeptId, per_page: 1 });
+          resolvedCityId = citiesResponse.data[0]?.id ?? null;
+          if (resolvedCityId) {
+            setSelectedCity(resolvedCityId);
+            clearLocalError("commerce_branch.city_id");
+          }
+        } catch {
+          resolvedCityId = null;
+        }
+      }
+
+      if (!resolvedCityId) {
+        return;
+      }
+
+      // El backend ya descarta artefactos administrativos (UPZ, Localidad):
+      // si no hay barrio real detectado, no se puede sincronizar contra el
+      // catálogo. No se toca la selección del usuario (podría ser una elección
+      // manual válida), pero se limpia cualquier advertencia previa obsoleta.
+      if (!result.address.neighborhood) {
+        setNeighborhoodMatchWarning(null);
+        return;
+      }
+
+      if (resolvedCityId !== selectedCity) {
+        // Ciudad recién resuelta en esta misma llamada: el set de barrios
+        // del hook todavía no la refleja (su fetch es asíncrono).
+        try {
+          const neighborhoodsResponse = await getNeighborhoods({
+            city_id: resolvedCityId,
+            per_page: 2000,
+          });
+          resolvedNeighborhoods = neighborhoodsResponse.data;
+        } catch {
+          resolvedNeighborhoods = [];
+        }
+      }
+
+      // El barrio SIEMPRE se resincroniza con el punto (fuente de verdad):
+      // si no hay match en el catálogo, se limpia la selección anterior en
+      // vez de dejar un barrio que ya no corresponde al pin actual.
+      const match = matchNeighborhoodByName(result.address.neighborhood, resolvedNeighborhoods);
+      setSelectedNeighborhood(match ? match.id : null);
+      if (match) {
+        clearLocalError("commerce_branch.neighborhood_id");
+        setNeighborhoodMatchWarning(null);
+      } else {
+        setNeighborhoodMatchWarning(
+          `No encontramos "${result.address.neighborhood}" en nuestro catálogo de barrios. Selecciónalo manualmente.`
+        );
+      }
+    },
+    [selectedDept, selectedCity, departments, neighborhoods, setSelectedDept, setSelectedCity, setSelectedNeighborhood]
+  );
+
+  /**
+   * Geocoding inverso: se dispara cada vez que el usuario fija/mueve el pin
+   * en el mapa. El pin ya quedó fijado (fuente de verdad) antes de esperar
+   * la respuesta — si Nominatim falla, la ubicación manual sigue siendo válida.
+   */
+  const handlePinChange = useCallback(
+    async (lat: number, lng: number) => {
+      setLatitude(lat);
+      setLongitude(lng);
+      clearLocalError("commerce_branch.location");
+
+      setReverseGeocoding(true);
+      const result = await reverseGeocodePoint(lat, lng);
+      setReverseGeocoding(false);
+
+      if (!result) {
+        return;
+      }
+
+      // El pin es la fuente de verdad: la dirección sugerida siempre se
+      // actualiza al mover el punto (evita inconsistencias pin↔dirección).
+      const suggestedAddress = buildSuggestedAddress(result);
+      if (suggestedAddress) {
+        setAddress(suggestedAddress);
+        clearLocalError("commerce_branch.address");
+      }
+
+      await applyAdminSyncFromResult(result);
+    },
+    [applyAdminSyncFromResult]
+  );
+
+  /**
+   * Geocoding directo: dirección de texto → punto. Se dispara on-demand
+   * (botón) o tras una pausa breve al salir del campo dirección (blur
+   * debounced), nunca por cada tecla — respeta la política de uso de Nominatim.
+   */
+  const runLocateAddress = useCallback(async () => {
+    if (!address.trim()) {
+      return;
+    }
+
+    const cityName = cities.find((city) => city.id === selectedCity)?.name;
+    const neighborhoodName = neighborhoods.find((n) => n.id === selectedNeighborhood)?.name;
+    const query = [address.trim(), neighborhoodName, cityName ?? "Bogotá D.C."]
+      .filter((part): part is string => Boolean(part))
+      .join(", ");
+
+    setGeocoding(true);
+    setGeocodeError(null);
+    const result = await geocode(query);
+    setGeocoding(false);
+
+    if (!result) {
+      setGeocodeError(
+        "No pudimos ubicar esa dirección automáticamente. Puedes marcarla manualmente en el mapa."
+      );
+      return;
+    }
+
+    setLatitude(result.lat);
+    setLongitude(result.lng);
+    setRecenterSignal((previous) => previous + 1);
+    clearLocalError("commerce_branch.location");
+
+    // Nominatim puede devolver la vía más "cercana" en vez de un no-match
+    // cuando no encuentra la dirección exacta (ej. buscar "Cra 99f" y recibir
+    // "Cra 71D") — el pin igual se coloca (es asistencia), pero se advierte.
+    setGeocodeError(
+      isLowConfidenceGeocode(address, result)
+        ? "Encontramos una ubicación aproximada: la dirección exacta podría no coincidir. Verifica y ajusta el pin en el mapa si hace falta."
+        : null
+    );
+
+    await applyAdminSyncFromResult(result);
+  }, [address, cities, selectedCity, neighborhoods, selectedNeighborhood, applyAdminSyncFromResult]);
+
+  const handleLocateButtonClick = () => {
+    if (addressBlurTimeoutRef.current) {
+      clearTimeout(addressBlurTimeoutRef.current);
+      addressBlurTimeoutRef.current = null;
+    }
+    runLocateAddress();
+  };
+
+  const handleAddressBlur = () => {
+    if (addressBlurTimeoutRef.current) {
+      clearTimeout(addressBlurTimeoutRef.current);
+    }
+    addressBlurTimeoutRef.current = setTimeout(() => {
+      runLocateAddress();
+    }, ADDRESS_BLUR_GEOCODE_DELAY_MS);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -407,7 +601,7 @@ export function BranchForm({
         />
 
         <CitySelect
-          cities={filteredCities}
+          cities={cities}
           departmentId={selectedDept}
           value={selectedCity}
           onChange={(id) => handleCityChange(id?.toString() ?? "")}
@@ -417,60 +611,84 @@ export function BranchForm({
           error={getFieldError("commerce_branch.city_id")}
         />
 
-        <NeighborhoodSelect
-          neighborhoods={filteredNeighborhoods}
+        <NeighborhoodCombobox
+          neighborhoods={neighborhoods}
           cityId={selectedCity}
-          value={selectedNeighborhood?.toString() ?? ""}
+          value={selectedNeighborhood}
           onChange={handleNeighborhoodChange}
           disabled={submitting}
           loading={loading.neighborhoods}
           required
           error={getFieldError("commerce_branch.neighborhood_id")}
-          allowManualEntry={false}
         />
       </div>
+
+      {neighborhoodMatchWarning && (
+        <p className="text-sm text-amber-700 -mt-4">{neighborhoodMatchWarning}</p>
+      )}
 
       <div className="space-y-2">
         <label htmlFor="branch-address" className="text-sm text-[#1A1A1A]">
           Dirección *
         </label>
-        <input
-          id="branch-address"
-          type="text"
-          value={address}
-          onChange={(event) => {
-            setAddress(event.target.value);
-            clearLocalError("commerce_branch.address");
-          }}
-          className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 outline-none focus:ring-2 focus:ring-[#4B236A]/20"
-          placeholder="Ej: Calle 10 #5-20"
-        />
+        <div className="flex gap-2">
+          <input
+            id="branch-address"
+            type="text"
+            value={address}
+            onChange={(event) => {
+              setAddress(event.target.value);
+              clearLocalError("commerce_branch.address");
+            }}
+            onBlur={handleAddressBlur}
+            className="flex-1 h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 outline-none focus:ring-2 focus:ring-[#4B236A]/20"
+            placeholder="Ej: Calle 10 #5-20"
+          />
+          <button
+            type="button"
+            onClick={handleLocateButtonClick}
+            disabled={submitting || geocoding || !address.trim()}
+            className="h-[50px] px-4 rounded-[14px] border border-[#E0E0E0] bg-[#F7F7F7] hover:bg-[#DDE8BB] text-[#1A1A1A] transition-colors inline-flex items-center gap-2 disabled:opacity-60 shrink-0"
+            title="Ubicar esta dirección en el mapa"
+          >
+            <Navigation size={16} className="text-[#4B236A]" />
+            <span className="hidden sm:inline">{geocoding ? "Ubicando..." : "Ubicar en mapa"}</span>
+          </button>
+        </div>
         {getFieldError("commerce_branch.address") && (
           <p className="text-sm text-red-600">{getFieldError("commerce_branch.address")}</p>
         )}
+        {geocodeError && <p className="text-sm text-amber-700">{geocodeError}</p>}
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm text-[#1A1A1A]">Ubicación en mapa *</label>
+        <label className="text-sm text-[#1A1A1A]">Ubicación en el mapa *</label>
+        <p className="text-xs text-[#6A6A6A]">
+          Haz clic en el mapa para fijar el punto exacto. La dirección y el barrio se
+          sincronizan automáticamente con el punto seleccionado.
+        </p>
 
-        <button
-          type="button"
-          onClick={() => setShowLocationPicker(true)}
-          disabled={submitting}
-          className="w-full h-[50px] rounded-[14px] border border-[#E0E0E0] px-4 bg-[#F7F7F7] hover:bg-[#DDE8BB] text-[#1A1A1A] transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-60"
-        >
-          <MapPin size={16} className="text-[#4B236A]" />
-          {latitude !== null && longitude !== null
-            ? "Cambiar ubicación seleccionada"
-            : "Seleccionar ubicación en mapa"}
-        </button>
+        <LocationMapField
+          latitude={latitude}
+          longitude={longitude}
+          onPinChange={handlePinChange}
+          recenterSignal={recenterSignal}
+        />
 
-        {latitude !== null && longitude !== null && (
-          <p className="text-sm text-[#1A1A1A]">
-            Coordenadas: <span className="font-medium">{latitude.toFixed(4)}</span>,{" "}
-            <span className="font-medium">{longitude.toFixed(4)}</span>
-          </p>
-        )}
+        <div className="flex items-center justify-between gap-2 min-h-[20px]">
+          {latitude !== null && longitude !== null ? (
+            <p className="text-sm text-[#1A1A1A] flex items-center gap-1.5">
+              <MapPin size={14} className="text-[#4B236A]" />
+              Coordenadas: <span className="font-medium">{latitude.toFixed(4)}</span>,{" "}
+              <span className="font-medium">{longitude.toFixed(4)}</span>
+            </p>
+          ) : (
+            <span />
+          )}
+          {reverseGeocoding && (
+            <p className="text-xs text-[#6A6A6A]">Detectando ubicación...</p>
+          )}
+        </div>
 
         {getFieldError("commerce_branch.location") && (
           <p className="text-sm text-red-600">{getFieldError("commerce_branch.location")}</p>
@@ -626,21 +844,6 @@ export function BranchForm({
               : "Guardar Sucursal"}
         </button>
       </div>
-
-      {showLocationPicker && (
-        <LocationPickerModal
-          isOpen={showLocationPicker}
-          initialLat={latitude}
-          initialLng={longitude}
-          onClose={() => setShowLocationPicker(false)}
-          onSelect={(lat, lng) => {
-            setLatitude(lat);
-            setLongitude(lng);
-            clearLocalError("commerce_branch.location");
-            setShowLocationPicker(false);
-          }}
-        />
-      )}
     </form>
   );
 }

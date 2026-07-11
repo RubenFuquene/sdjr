@@ -76,7 +76,7 @@ export function useLocation(): UseLocationReturn {
       setLoading((prev) => ({ ...prev, departments: true }));
       setError((prev) => ({ ...prev, departments: null }));
       try {
-        const response = await getDepartments({ per_page: 100 });
+        const response = await getDepartments({ per_page: 2000 });
         setDepartments(response.data);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al cargar departamentos';
@@ -105,14 +105,7 @@ export function useLocation(): UseLocationReturn {
       setLoading((prev) => ({ ...prev, cities: true }));
       setError((prev) => ({ ...prev, cities: null }));
       try {
-        // TODO: Backend should support department_id filter
-        // For now: fetch all cities, frontend will filter if needed
-        const response = await getCities({ per_page: 100 });
-        
-        // Optional client-side filtering if backend doesn't support it
-        // const filtered = response.data.filter((city) => city.department_id === selectedDept);
-        // setCity(filtered);
-        
+        const response = await getCities({ department_id: selectedDept, per_page: 2000 });
         setCities(response.data);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al cargar ciudades';
@@ -139,14 +132,7 @@ export function useLocation(): UseLocationReturn {
       setLoading((prev) => ({ ...prev, neighborhoods: true }));
       setError((prev) => ({ ...prev, neighborhoods: null }));
       try {
-        // TODO: Backend should support city_id filter
-        // For now: fetch all neighborhoods, frontend will filter if needed
-        const response = await getNeighborhoods({ per_page: 100 });
-        
-        // Optional client-side filtering if backend doesn't support it
-        // const filtered = response.data.filter((nbh) => nbh.city_id === selectedCity);
-        // setNeighborhoods(filtered);
-        
+        const response = await getNeighborhoods({ city_id: selectedCity, per_page: 2000 });
         setNeighborhoods(response.data);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al cargar barrios';

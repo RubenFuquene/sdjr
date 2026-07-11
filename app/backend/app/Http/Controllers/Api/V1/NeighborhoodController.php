@@ -39,13 +39,14 @@ class NeighborhoodController extends Controller
      *     operationId="indexNeighborhoods",
      *     tags={"Neighborhoods"},
      *     summary="List neighborhoods",
-     *     description="Get paginated list of neighborhoods. Permite filtrar por nombre (name), código (code), estado (status) y cantidad por página (per_page).",
+     *     description="Get paginated list of neighborhoods. Permite filtrar por nombre (name), código (code), ciudad (city_id), estado (status) y cantidad por página (per_page).",
      *     security={{"sanctum":{}}},
      *
      *     @OA\Parameter(name="name", in="query", required=false, description="Filtrar por nombre del barrio (texto parcial)", @OA\Schema(type="string")),
      *     @OA\Parameter(name="code", in="query", required=false, description="Filtrar por código del barrio", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="city_id", in="query", required=false, description="Filtrar por ciudad", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filtrar por estado: 1=activos, 0=inactivos", @OA\Schema(type="string", enum={"1","0"}, default="1")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-100)", @OA\Schema(type="integer", example=15)),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Items per page (1-2000)", @OA\Schema(type="integer", example=15)),
      *     @OA\Parameter(name="sort_by", in="query", required=false, description="Campo de orden", @OA\Schema(type="string", enum={"name","code","status","created_at","updated_at"}, default="name")),
      *     @OA\Parameter(name="sort_dir", in="query", required=false, description="Dirección de orden", @OA\Schema(type="string", enum={"asc","desc"}, default="asc")),
      *

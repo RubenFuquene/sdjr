@@ -28,6 +28,9 @@ class CityService
         if (! empty($filters['code'])) {
             $query->where('code', 'like', "%{$filters['code']}%");
         }
+        if (! empty($filters['department_id'])) {
+            $query->where('department_id', $filters['department_id']);
+        }
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }

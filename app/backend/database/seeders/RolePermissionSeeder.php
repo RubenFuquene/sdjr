@@ -128,6 +128,10 @@ class RolePermissionSeeder extends Seeder
             // Módulo de Sucursales
             ['name' => 'provider.branches.index', 'guard_name' => $guardName, 'description' => 'Listar sucursales', 'created_at' => now(), 'updated_at' => now()],
 
+            // Módulo de Geocodificación (proxy Nominatim)
+            ['name' => 'provider.geocode.search', 'guard_name' => $guardName, 'description' => 'Geocodificar dirección de texto', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.geocode.reverse', 'guard_name' => $guardName, 'description' => 'Geocodificación inversa desde coordenadas', 'created_at' => now(), 'updated_at' => now()],
+
             // Permisos para Órdenes (Orders):
             ['name' => 'customer.orders.create', 'guard_name' => $guardName, 'description' => 'Crear órdenes como cliente', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'customer.orders.show', 'guard_name' => $guardName, 'description' => 'Ver órdenes propias como cliente', 'created_at' => now(), 'updated_at' => now()],
@@ -366,6 +370,8 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.index',
             'provider.basic_data.show',
             'provider.branches.show',
+            'provider.geocode.search',
+            'provider.geocode.reverse',
             'provider.products.show',
             'provider.my_account.show',
             'provider.my_wallet.show',

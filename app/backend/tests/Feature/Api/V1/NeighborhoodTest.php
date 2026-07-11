@@ -35,6 +35,57 @@ class NeighborhoodTest extends TestCase
     }
 
     /**
+     * Prueba que el endpoint index filtra barrios por ciudad (city_id).
+     */
+    public function test_index_filters_neighborhoods_by_city_id(): void
+    {
+        Permission::firstOrCreate(['name' => 'admin.params.neighborhoods.index', 'guard_name' => 'sanctum']);
+        $user = User::factory()->create();
+        $user->givePermissionTo('admin.params.neighborhoods.index');
+        Sanctum::actingAs($user);
+        $bogota = City::factory()->create(['name' => 'Bogotá', 'code' => 'CT0001']);
+        $medellin = City::factory()->create(['name' => 'Medellín', 'code' => 'CT0002']);
+        Neighborhood::factory()->create(['city_id' => $bogota->id, 'name' => 'Chapinero', 'code' => 'NB0010']);
+        Neighborhood::factory()->create(['city_id' => $bogota->id, 'name' => 'Usaquén', 'code' => 'NB0011']);
+        Neighborhood::factory()->create(['city_id' => $medellin->id, 'name' => 'El Poblado', 'code' => 'NB0012']);
+
+        $response = $this->getJson("/api/v1/neighborhoods?city_id={$bogota->id}&per_page=100");
+
+        $response->assertStatus(200)->assertJsonCount(2, 'data');
+        $names = collect($response->json('data'))->pluck('name');
+        $this->assertTrue($names->contains('Chapinero'));
+        $this->assertTrue($names->contains('Usaquén'));
+        $this->assertFalse($names->contains('El Poblado'));
+    }
+
+    /**
+     * Prueba que el filtro city_id, combinado con un per_page elevado, permite
+     * traer el catálogo completo de barrios de Bogotá (1.091) sin truncar a 100.
+     */
+    public function test_index_returns_full_bogota_catalog_without_truncation(): void
+    {
+        $this->seed([
+            \Database\Seeders\CountrySeeder::class,
+            \Database\Seeders\DepartmentSeeder::class,
+            \Database\Seeders\CitySeeder::class,
+            \Database\Seeders\NeighborhoodSeeder::class,
+        ]);
+
+        Permission::firstOrCreate(['name' => 'admin.params.neighborhoods.index', 'guard_name' => 'sanctum']);
+        $user = User::factory()->create();
+        $user->givePermissionTo('admin.params.neighborhoods.index');
+        Sanctum::actingAs($user);
+
+        $bogota = City::where('code', '11001')->firstOrFail();
+
+        $response = $this->getJson("/api/v1/neighborhoods?city_id={$bogota->id}&per_page=2000");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1091, 'data')
+            ->assertJsonPath('meta.total', 1091);
+    }
+
+    /**
      * Prueba que el endpoint store crea un barrio correctamente.
      */
     public function test_store_creates_neighborhood(): void

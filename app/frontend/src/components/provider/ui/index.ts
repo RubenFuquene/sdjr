@@ -49,6 +49,8 @@ export { CitySelect } from "./city-select";
 
 export { NeighborhoodSelect } from "./neighborhood-select";
 
+export { NeighborhoodCombobox } from "./neighborhood-combobox";
+
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 
 export { Separator } from "./separator";
