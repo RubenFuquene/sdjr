@@ -5,24 +5,20 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Country;
+use Database\Seeders\Concerns\SeedsFromDataFile;
 use Illuminate\Database\Seeder;
 
 class CountrySeeder extends Seeder
 {
+    use SeedsFromDataFile;
+
     /**
-     * Run the database seeds.
-     *
-     * Catálogo idempotente: se ejecuta en todos los entornos (sin gate de APP_ENV)
-     * y usa upsert por la clave natural `code`, de modo que re-ejecutarlo no duplica.
+     * Catálogo idempotente leído desde database/data/geo/countries.json.
      */
     public function run(): void
     {
-        Country::upsert(
-            [
-                ['name' => 'Colombia', 'code' => 'CO', 'created_at' => now(), 'updated_at' => now()],
-            ],
-            ['code'],
-            ['name', 'updated_at'],
-        );
+        $rows = $this->loadDataFile('countries.json');
+
+        $this->upsertChunked(Country::class, $rows, ['name']);
     }
 }

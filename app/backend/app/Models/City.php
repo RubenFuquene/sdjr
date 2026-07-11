@@ -39,7 +39,7 @@ class City extends Model
      */
     public function setNameAttribute($value): void
     {
-        $this->attributes['name'] = $this->sanitizeText($value);
+        $this->attributes['name'] = $this->capitalizeText($value);
     }
 
     /**

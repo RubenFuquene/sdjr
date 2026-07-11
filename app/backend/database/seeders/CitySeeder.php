@@ -6,30 +6,40 @@ namespace Database\Seeders;
 
 use App\Models\City;
 use App\Models\Department;
+use Database\Seeders\Concerns\SeedsFromDataFile;
 use Illuminate\Database\Seeder;
 
 class CitySeeder extends Seeder
 {
+    use SeedsFromDataFile;
+
     /**
-     * Run the database seeds.
-     *
-     * Catálogo idempotente: resuelve el departamento por su clave natural ('11')
-     * y hace upsert por `code`.
+     * Catálogo idempotente leído desde database/data/geo/cities.json.
+     * El departamento padre se resuelve por clave natural (department_code),
+     * precargado en un mapa code→id para evitar N+1.
      */
     public function run(): void
     {
-        $departmentId = Department::where('code', '11')->value('id');
+        $departmentIds = Department::pluck('id', 'code');
 
-        if ($departmentId === null) {
-            return;
-        }
+        $rows = collect($this->loadDataFile('cities.json'))
+            ->map(function (array $row) use ($departmentIds) {
+                $departmentId = $departmentIds[$row['department_code']] ?? null;
 
-        City::upsert(
-            [
-                ['name' => 'Bogotá', 'code' => '11001', 'department_id' => $departmentId, 'created_at' => now(), 'updated_at' => now()],
-            ],
-            ['code'],
-            ['name', 'department_id', 'updated_at'],
-        );
+                if ($departmentId === null) {
+                    return null;
+                }
+
+                return [
+                    'code' => $row['code'],
+                    'name' => $row['name'],
+                    'department_id' => $departmentId,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+
+        $this->upsertChunked(City::class, $rows, ['name', 'department_id']);
     }
 }

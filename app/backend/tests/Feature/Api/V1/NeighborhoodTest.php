@@ -52,11 +52,11 @@ class NeighborhoodTest extends TestCase
         ];
         $response = $this->postJson('/api/v1/neighborhoods', $data);
         $response->assertStatus(201)
-            ->assertJsonPath('data.name', 'La soledad')
+            ->assertJsonPath('data.name', 'La Soledad')
             ->assertJsonPath('data.code', 'NB0002');
         $this->assertDatabaseHas('neighborhoods', [
             'city_id' => $city->id,
-            'name' => 'La soledad',
+            'name' => 'La Soledad',
             'code' => 'NB0002',
             'status' => $data['status'],
         ]);
@@ -98,11 +98,11 @@ class NeighborhoodTest extends TestCase
         ];
         $response = $this->putJson("/api/v1/neighborhoods/{$neighborhood->id}", $data);
         $response->assertStatus(200)
-            ->assertJsonPath('data.name', 'San luis updated')
+            ->assertJsonPath('data.name', 'San Luis Updated')
             ->assertJsonPath('data.code', 'NB0005');
         $this->assertDatabaseHas('neighborhoods', [
             'city_id' => $city->id,
-            'name' => 'San luis updated',
+            'name' => 'San Luis Updated',
             'code' => 'NB0005',
             'status' => $data['status'],
         ]);

@@ -180,11 +180,11 @@ class CityTest extends TestCase
         $response = $this->putJson("/api/v1/cities/{$city->id}", $data);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.name', 'Barranquilla updated')
+            ->assertJsonPath('data.name', 'Barranquilla Updated')
             ->assertJsonPath('data.code', 'CITY05');
 
         $this->assertDatabaseHas('cities', [
-            'name' => 'Barranquilla updated',
+            'name' => 'Barranquilla Updated',
             'code' => 'CITY05',
             'department_id' => $department->id,
             'status' => $data['status'],
