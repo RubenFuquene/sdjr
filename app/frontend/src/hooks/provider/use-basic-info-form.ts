@@ -23,11 +23,15 @@ type DocumentStatus = { status: 'idle' | 'uploading' | 'success' | 'error'; erro
 type DocumentStatusMap = {
   commerceChamber: DocumentStatus;
   legalRepresentativeId: DocumentStatus;
+  rut: DocumentStatus;
+  form1876: DocumentStatus;
 };
 
 type DocumentFiles = {
   commerceChamber: File | null;
   legalRepresentativeId: File | null;
+  rut: File | null;
+  form1876: File | null;
 };
 
 type DocumentFileKey = keyof DocumentFiles;
@@ -42,10 +46,14 @@ export const useBasicInfoForm = () => {
   const [documentFiles, setDocumentFiles] = useState<DocumentFiles>({
     commerceChamber: null,
     legalRepresentativeId: null,
+    rut: null,
+    form1876: null,
   });
   const [documentStatus, setDocumentStatus] = useState<DocumentStatusMap>({
     commerceChamber: { status: 'idle', error: null },
     legalRepresentativeId: { status: 'idle', error: null },
+    rut: { status: 'idle', error: null },
+    form1876: { status: 'idle', error: null },
   });
 
   useEffect(() => {
@@ -66,6 +74,8 @@ export const useBasicInfoForm = () => {
       'legalRepresentative.documentFile': 'legalRepresentativeDocumentFile',
       'documents.identity': 'identity',
       'documents.commerceChamber': 'commerceChamber',
+      'documents.rut': 'rut',
+      'documents.form1876': 'form1876',
     };
 
     if (nestedFieldMap[fieldPath]) {
@@ -101,7 +111,7 @@ export const useBasicInfoForm = () => {
     });
   };
 
-  const handleFieldChange = (fieldPath: string, value: string | number | null) => {
+  const handleFieldChange = (fieldPath: string, value: string | number | boolean | null) => {
     setFormData((prev) => {
       if (fieldPath.includes('.')) {
         const [parent, child] = fieldPath.split('.');
@@ -148,6 +158,8 @@ export const useBasicInfoForm = () => {
       setDocumentStatus({
         commerceChamber: { status: 'idle', error: null },
         legalRepresentativeId: { status: 'idle', error: null },
+        rut: { status: 'idle', error: null },
+        form1876: { status: 'idle', error: null },
       });
       const session = getSessionFromCookie();
       const ownerUserId = session?.userId ? Number.parseInt(session.userId, 10) : Number.NaN;
@@ -181,6 +193,7 @@ export const useBasicInfoForm = () => {
           department_id: payload.commerce.department_id,
           city_id: payload.commerce.city_id,
           neighborhood_id: payload.commerce.neighborhood_id,
+          electronic_invoicing_required: payload.commerce.electronic_invoicing_required,
         });
       } else {
         const commerceResponse = await createCommerceBasic(payload);
@@ -261,6 +274,18 @@ export const useBasicInfoForm = () => {
       );
     }
 
+    if (documentFiles.rut) {
+      uploads.push(
+        uploadDocumentForCommerce(commerceId, documentFiles.rut, 'RUT', 'rut')
+      );
+    }
+
+    if (documentFiles.form1876) {
+      uploads.push(
+        uploadDocumentForCommerce(commerceId, documentFiles.form1876, '1876', 'form1876')
+      );
+    }
+
     if (uploads.length > 0) {
       await Promise.all(uploads);
     }
@@ -269,7 +294,7 @@ export const useBasicInfoForm = () => {
   const uploadDocumentForCommerce = async (
     commerceId: number,
     file: File,
-    documentType: 'CAMARA_COMERCIO' | 'ID_CARD',
+    documentType: 'CAMARA_COMERCIO' | 'ID_CARD' | 'RUT' | '1876',
     statusKey: DocumentFileKey
   ) => {
     setDocumentStatus((prev) => ({
@@ -329,19 +354,24 @@ export const useBasicInfoForm = () => {
       [key]: { status: 'idle', error: null },
     }));
 
-    const fieldPath = key === 'commerceChamber'
-      ? 'documents.commerceChamber'
-      : 'legalRepresentative.documentFile';
-    clearFieldErrors(fieldPath);
+    const fieldPathByKey: Record<DocumentFileKey, string> = {
+      commerceChamber: 'documents.commerceChamber',
+      legalRepresentativeId: 'legalRepresentative.documentFile',
+      rut: 'documents.rut',
+      form1876: 'documents.form1876',
+    };
+    clearFieldErrors(fieldPathByKey[key]);
   };
 
   const handleCancel = () => {
     setFormData(INITIAL_BASIC_INFO_FORM);
     setErrors({});
-    setDocumentFiles({ commerceChamber: null, legalRepresentativeId: null });
+    setDocumentFiles({ commerceChamber: null, legalRepresentativeId: null, rut: null, form1876: null });
     setDocumentStatus({
       commerceChamber: { status: 'idle', error: null },
       legalRepresentativeId: { status: 'idle', error: null },
+      rut: { status: 'idle', error: null },
+      form1876: { status: 'idle', error: null },
     });
     toast.info('Cambios descartados', {
       description: 'El formulario ha sido reiniciado',
@@ -372,7 +402,13 @@ const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormDat
   const legalRepresentativeDocument = commerce.documents?.find(
     (document) => document.document_type === 'ID_CARD'
   );
-  
+  const rutDocument = commerce.documents?.find(
+    (document) => document.document_type === 'RUT'
+  );
+  const form1876Document = commerce.documents?.find(
+    (document) => document.document_type === '1876'
+  );
+
   return {
     commercialName: commerce.name || '',
     documentType: mapBackendDocumentTypeToFrontend(commerce.tax_id_type),
@@ -386,6 +422,7 @@ const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormDat
     cityId: commerce.city?.id ?? null,
     neighborhood: commerce.neighborhood?.id ? String(commerce.neighborhood.id) : '',
     mainAddress: commerce.address || '',
+    electronicInvoicingRequired: commerce.electronic_invoicing_required ?? null,
     legalRepresentative: {
       firstName: primaryLegalRepresentative?.name || '',
       lastName: primaryLegalRepresentative?.last_name || '',
@@ -396,6 +433,8 @@ const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormDat
     documents: {
       identity: legalRepresentativeDocument?.file_path || null,
       commerceChamber: commerceChamberDocument?.file_path || null,
+      rut: rutDocument?.file_path || null,
+      form1876: form1876Document?.file_path || null,
     },
     observations: commerce.description || '',
   };

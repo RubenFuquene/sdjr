@@ -16,11 +16,6 @@ class CommerceBasicDataService
     private LegalRepresentativeService $legalRepresentativeService;
 
     /**
-     * CommerceDocumentService instance.
-     */
-    private CommerceDocumentService $commerceDocumentService;
-
-    /**
      * CommercePayoutMethodService instance.
      */
     private CommercePayoutMethodService $myAccountService;
@@ -31,7 +26,6 @@ class CommerceBasicDataService
     public function __construct()
     {
         $this->legalRepresentativeService = new LegalRepresentativeService;
-        $this->commerceDocumentService = new CommerceDocumentService;
         $this->myAccountService = new CommercePayoutMethodService;
     }
 
@@ -50,12 +44,6 @@ class CommerceBasicDataService
                 $legalRepresentativeData = $data['legal_representative'];
                 $legalRepresentativeData['commerce_id'] = $commerce->id;
                 $this->legalRepresentativeService->store($legalRepresentativeData);
-            }
-
-            if (! empty($data['commerce_documents'])) {
-                $commerceDocumentsData = $data['commerce_documents'];
-                $commerceDocumentsData['commerce_id'] = $commerce->id;
-                $this->commerceDocumentService->store($commerceDocumentsData);
             }
 
             if (! empty($data['my_account'])) {

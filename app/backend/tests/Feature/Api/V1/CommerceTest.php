@@ -123,4 +123,52 @@ class CommerceTest extends TestCase
         $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
         $response->assertForbidden();
     }
+
+    /**
+     * person_type se deriva de tax_id_type (SCRUM-242): NIT → jurídica.
+     */
+    public function test_show_commerce_exposes_person_type_juridica_for_nit(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.commerces.show');
+        $this->actingAs($user, 'sanctum');
+
+        $commerce = Commerce::factory()->create(['tax_id_type' => 'NIT']);
+        $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.person_type', 'juridica');
+    }
+
+    /**
+     * person_type se deriva de tax_id_type (SCRUM-242): CC/CE/PS → natural.
+     */
+    public function test_show_commerce_exposes_person_type_natural_for_cc(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.commerces.show');
+        $this->actingAs($user, 'sanctum');
+
+        $commerce = Commerce::factory()->create(['tax_id_type' => 'CC']);
+        $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.person_type', 'natural');
+    }
+
+    /**
+     * electronic_invoicing_required se expone en el resource (SCRUM-242).
+     */
+    public function test_show_commerce_exposes_electronic_invoicing_required(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.commerces.show');
+        $this->actingAs($user, 'sanctum');
+
+        $commerce = Commerce::factory()->create(['electronic_invoicing_required' => true]);
+        $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.electronic_invoicing_required', true);
+    }
 }

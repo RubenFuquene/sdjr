@@ -16,7 +16,8 @@ export type DocumentType =
   | "OTHER"
   | "CAMARA_COMERCIO"
   | "RUT"
-  | "REGISTRATION";
+  | "REGISTRATION"
+  | "1876";
 
 export interface PresignedDocumentRequest {
   document_type: DocumentType;

@@ -103,6 +103,8 @@ export interface CommerceFromAPI {
   } | null;
   tax_id: string;
   tax_id_type: string;
+  person_type?: 'natural' | 'juridica';
+  electronic_invoicing_required?: boolean;
   address: string;
   phone?: string;
   email?: string;
@@ -142,7 +144,7 @@ export interface ProveedorListItem {
  */
 export interface DocumentoProveedor {
   id?: string;
-  tipo: 'cedula_ciudadania' | 'cedula_extranjeria' | 'pasaporte' | 'camara_comercio';
+  tipo: 'cedula_ciudadania' | 'cedula_extranjeria' | 'pasaporte' | 'camara_comercio' | 'rut' | 'form_1876' | 'otro';
   nombre: string;
   url: string; // URL para descarga
   fechaSubida?: string;
@@ -267,6 +269,9 @@ export interface CommerceBasicPayload {
     email?: string;
     is_verified?: CommerceVerificationStatus;
     is_active?: boolean;
+    // Autodeclaración: si el comercio está obligado a facturar electrónicamente.
+    // Requerido por el backend (CommerceBasicDataRequest). Determina si aplica el formato 1876.
+    electronic_invoicing_required: boolean;
   };
   legal_representative?: {
     name: string;
@@ -277,16 +282,10 @@ export interface CommerceBasicPayload {
     phone?: string;
     is_primary?: boolean;
   };
-  commerce_documents?: Array<{
-    verified_by_id?: number;
-    uploaded_by_id?: number;
-    document_type?: string;
-    file_path?: string;
-    mime_type?: string;
-    verified?: boolean;
-    uploaded_at?: string;
-    verified_at?: string;
-  }>;
+  // Nota: los documentos (RUT, 1876, cámara de comercio, etc.) NO se envían en este
+  // payload. Se cargan después de crear el comercio vía el flujo presigned
+  // (createPresignedDocument + confirmDocumentUpload), que exige un commerce_id
+  // existente para verificar ownership.
   my_account?: {
     type: string;
     account_type: string;

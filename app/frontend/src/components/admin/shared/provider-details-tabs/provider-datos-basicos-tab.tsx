@@ -303,6 +303,9 @@ function DocumentItem({ documento }: DocumentItemProps) {
         cedula_extranjeria: 'cedula_extranjeria',
         pasaporte: 'pasaporte',
         camara_comercio: 'camara_comercio',
+        rut: 'rut',
+        form_1876: 'formato_1876',
+        otro: 'documento',
       };
       
       const nombreTipo = tipoMap[documento.tipo] || 'documento';
@@ -327,6 +330,9 @@ function DocumentItem({ documento }: DocumentItemProps) {
     cedula_extranjeria: 'Cédula de Extranjería',
     pasaporte: 'Pasaporte',
     camara_comercio: 'Cámara de Comercio',
+    rut: 'RUT',
+    form_1876: 'Formato 1876',
+    otro: 'Documento',
   };
 
   return (

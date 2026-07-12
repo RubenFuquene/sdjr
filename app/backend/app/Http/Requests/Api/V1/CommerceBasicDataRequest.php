@@ -14,7 +14,7 @@ use Illuminate\Validation\Rule;
  * @OA\Schema(
  *     schema="CommerceBasicDataRequest",
  *     type="object",
- *     description="Request schema for basic commerce onboarding data, including commerce, legal representative, and documents.",
+ *     description="Request schema for basic commerce onboarding data, including commerce and legal representative. Documents (RUT, 1876, etc.) are uploaded separately via the presigned upload flow once the commerce exists.",
  *     required={"commerce","legal_representative"},
  *
  *     @OA\Property(
@@ -34,7 +34,8 @@ use Illuminate\Validation\Rule;
  *         @OA\Property(property="phone", type="string", maxLength=20, example="3001234567"),
  *         @OA\Property(property="email", type="string", format="email", maxLength=100, example="info@acme.com"),
  *         @OA\Property(property="is_verified", type="boolean", example=false),
- *         @OA\Property(property="is_active", type="boolean", example=true)
+ *         @OA\Property(property="is_active", type="boolean", example=true),
+ *         @OA\Property(property="electronic_invoicing_required", type="boolean", example=false, description="Autodeclaración: si el comercio está obligado a emitir factura electrónica. Determina si se exige el formato 1876.")
  *     ),
  *     @OA\Property(
  *         property="legal_representative",
@@ -47,23 +48,6 @@ use Illuminate\Validation\Rule;
  *         @OA\Property(property="email", type="string", format="email", maxLength=100, example="john.doe@example.com"),
  *         @OA\Property(property="phone", type="string", maxLength=20, example="3007654321"),
  *         @OA\Property(property="is_primary", type="boolean", example=true)
- *     ),
- *     @OA\Property(
- *         property="commerce_documents",
- *         type="array",
- *
- *         @OA\Items(
- *             type="object",
- *
- *             @OA\Property(property="verified_by_id", type="integer", nullable=true, example=2),
- *             @OA\Property(property="uploaded_by_id", type="integer", nullable=true, example=1),
- *             @OA\Property(property="document_type", type="string", maxLength=100, nullable=true, example="RUT"),
- *             @OA\Property(property="file_path", type="string", maxLength=255, nullable=true, example="documents/commerce/rut.pdf"),
- *             @OA\Property(property="mime_type", type="string", maxLength=100, nullable=true, example="application/pdf"),
- *             @OA\Property(property="verified", type="boolean", example=false),
- *             @OA\Property(property="uploaded_at", type="string", format="date-time", nullable=true),
- *             @OA\Property(property="verified_at", type="string", format="date-time", nullable=true)
- *         )
  *     )
  * )
  */
@@ -104,6 +88,7 @@ class CommerceBasicDataRequest extends FormRequest
             'commerce.email' => ['nullable', 'string', 'email', 'max:100'],
             'commerce.is_verified' => ['boolean'],
             'commerce.is_active' => ['boolean'],
+            'commerce.electronic_invoicing_required' => ['required', 'boolean'],
 
             'legal_representative' => ['nullable', 'array'],
             'legal_representative.name' => ['required', 'string', 'max:255'],
@@ -113,16 +98,6 @@ class CommerceBasicDataRequest extends FormRequest
             'legal_representative.email' => ['nullable', 'string', 'email', 'max:100'],
             'legal_representative.phone' => ['nullable', 'string', 'max:20'],
             'legal_representative.is_primary' => ['boolean'],
-
-            'commerce_documents' => ['nullable', 'array'],
-            'commerce_documents.*.verified_by_id' => ['nullable', 'integer', 'exists:users,id'],
-            'commerce_documents.*.uploaded_by_id' => ['nullable', 'integer', 'exists:users,id'],
-            'commerce_documents.*.document_type' => ['nullable', 'string', 'max:100'],
-            'commerce_documents.*.file_path' => ['nullable', 'string', 'max:255'],
-            'commerce_documents.*.mime_type' => ['nullable', 'string', 'max:100'],
-            'commerce_documents.*.verified' => ['boolean'],
-            'commerce_documents.*.uploaded_at' => ['nullable', 'date'],
-            'commerce_documents.*.verified_at' => ['nullable', 'date'],
 
             // 'my_account.type' => ['required', 'string', 'max:15'],
             // 'my_account.account_type' => ['required', 'string', 'max:50'],

@@ -170,6 +170,7 @@ class RolePermissionSeeder extends Seeder
 
             ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'Ver módulo de carga de documentos de proveedor en admin', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.photos.upload', 'guard_name' => $guardName, 'description' => 'Actualizar fotos por proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.documents.upload', 'guard_name' => $guardName, 'description' => 'Cargar documentos (RUT, 1876, etc.) del propio comercio como proveedor', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'Listar categorías de producto', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Crear categoría de producto', 'created_at' => now(), 'updated_at' => now()],
@@ -422,7 +423,7 @@ class RolePermissionSeeder extends Seeder
             'provider.comments.delete',
 
             'provider.commerces.accept-terms',
-            'admin.providers.upload_documents',
+            'provider.documents.upload',
             'provider.photos.upload',
         ]);
 

@@ -160,9 +160,13 @@ export const mapearCommerceDocumentsADocumentos = (
       'PASAPORTE': 'pasaporte',
       'CAMARA_COMERCIO': 'camara_comercio',
       'ID_CARD': 'cedula_ciudadania', // Mapeo alternativo
+      'RUT': 'rut',
+      '1876': 'form_1876',
     };
-    
-    const tipo = tipoMap[doc.document_type] || 'cedula_ciudadania';
+
+    // Sin match conocido: 'otro' en vez del default previo ('cedula_ciudadania'),
+    // que mostraba mal etiquetados los tipos no mapeados (ej. RUT antes de este fix).
+    const tipo = tipoMap[doc.document_type] ?? 'otro';
     
     // ✅ USAR: download.endpoint para obtener URL presignada
     // ❌ NO USAR: file_path (ruta interna S3, no descargable directamente)
@@ -467,6 +471,7 @@ export const basicInfoToCommerceBasicPayload = (
       email: formData.email?.trim() || undefined,
       is_verified: 0,
       is_active: true,
+      electronic_invoicing_required: formData.electronicInvoicingRequired ?? false,
     },
     legal_representative: {
       name: formData.legalRepresentative?.firstName?.trim() || 'N/A',
