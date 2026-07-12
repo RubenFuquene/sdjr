@@ -6,30 +6,40 @@ namespace Database\Seeders;
 
 use App\Models\Country;
 use App\Models\Department;
+use Database\Seeders\Concerns\SeedsFromDataFile;
 use Illuminate\Database\Seeder;
 
 class DepartmentSeeder extends Seeder
 {
+    use SeedsFromDataFile;
+
     /**
-     * Run the database seeds.
-     *
-     * Catálogo idempotente: resuelve el país por su clave natural ('CO') en lugar de
-     * asumir un id fijo, y hace upsert por `code`.
+     * Catálogo idempotente leído desde database/data/geo/departments.json.
+     * El país padre se resuelve por clave natural (country_code), precargado
+     * en un mapa code→id para evitar N+1.
      */
     public function run(): void
     {
-        $countryId = Country::where('code', 'CO')->value('id');
+        $countryIds = Country::pluck('id', 'code');
 
-        if ($countryId === null) {
-            return;
-        }
+        $rows = collect($this->loadDataFile('departments.json'))
+            ->map(function (array $row) use ($countryIds) {
+                $countryId = $countryIds[$row['country_code']] ?? null;
 
-        Department::upsert(
-            [
-                ['name' => 'Cundinamarca', 'code' => '11', 'country_id' => $countryId, 'created_at' => now(), 'updated_at' => now()],
-            ],
-            ['code'],
-            ['name', 'country_id', 'updated_at'],
-        );
+                if ($countryId === null) {
+                    return null;
+                }
+
+                return [
+                    'code' => $row['code'],
+                    'name' => $row['name'],
+                    'country_id' => $countryId,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+
+        $this->upsertChunked(Department::class, $rows, ['name', 'country_id']);
     }
 }

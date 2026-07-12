@@ -52,6 +52,8 @@ class Constant
 
     public const DOCUMENT_TYPE_REGISTRATION = 'REGISTRATION';
 
+    public const DOCUMENT_TYPE_1876 = '1876';
+
     // Legal Document Types
     public const LEGAL_DOCUMENT_TYPE_TERMS = 'terms';
 
@@ -120,6 +122,11 @@ class Constant
     public const COMMERCE_DOCUMENT_TYPE_PS = 'PS';
 
     public const COMMERCE_DOCUMENT_TYPE_CE = 'CE';
+
+    // Person types (derivados de tax_id_type: NIT → jurídica; CC/CE/PS → natural)
+    public const PERSON_TYPE_NATURAL = 'natural';
+
+    public const PERSON_TYPE_JURIDICA = 'juridica';
 
     // Commerce Comment Priorities
     public const COMMENT_PRIORITY = 'PR';

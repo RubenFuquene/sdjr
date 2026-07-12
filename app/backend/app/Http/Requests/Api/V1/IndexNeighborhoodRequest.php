@@ -25,8 +25,9 @@ class IndexNeighborhoodRequest extends FormRequest
         return [
             'name' => ['nullable', 'string', 'max:100'],
             'code' => ['nullable', 'string', 'max:20'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'status' => ['nullable', Rule::in(['1', '0', 'all'])],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:2000'],
             'sort_by' => ['nullable', 'string', Rule::in(['name', 'code', 'status', 'created_at', 'updated_at'])],
             'sort_dir' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
         ];
@@ -45,6 +46,6 @@ class IndexNeighborhoodRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'code', 'status', 'sort_by', 'sort_dir']);
+        return $this->only(['name', 'code', 'city_id', 'status', 'sort_by', 'sort_dir']);
     }
 }

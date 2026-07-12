@@ -20,6 +20,9 @@ class CatalogSeederIdempotencyTest extends TestCase
         'roles',
         'priority_types',
         'countries',
+        'departments',
+        'cities',
+        'neighborhoods',
         'establishment_types',
         'banks',
     ];
@@ -44,6 +47,9 @@ class CatalogSeederIdempotencyTest extends TestCase
         $this->assertDatabaseHas('priority_types', ['code' => Constant::COMMENT_PRIORITY_HIGH]);
         $this->assertDatabaseHas('roles', ['name' => 'superadmin', 'guard_name' => 'sanctum']);
         $this->assertDatabaseHas('countries', ['code' => 'CO']);
+        $this->assertDatabaseHas('departments', ['code' => '11', 'name' => 'Bogotá D.C.']);
+        $this->assertDatabaseHas('cities', ['code' => '11001', 'name' => 'Bogotá D.C.']);
+        $this->assertDatabaseCount('neighborhoods', 1091);
         $this->assertDatabaseHas('establishment_types', ['code' => 'RE']);
         $this->assertDatabaseHas('establishment_types', ['code' => 'PA']);
         $this->assertDatabaseHas('establishment_types', ['code' => 'RT']);

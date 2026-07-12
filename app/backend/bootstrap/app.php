@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // API middleware group
         $middleware->group('api', [
             \Illuminate\Http\Middleware\HandleCors::class,
+            \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\AuditMiddleware::class,
         ]);
     })

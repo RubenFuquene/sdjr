@@ -87,6 +87,11 @@ Datos de referencia que deben existir en todos los entornos, todos idempotentes:
 `SupportStatusSeeder`, `PqrsTypeSeeder`, `PriorityTypeSeeder`, `ProductCategorySeeder`,
 `UserSeeder` (superadmin base).
 
+> **Catálogo geográfico** (`Country/Department/City/Neighborhood`Seeder): los datos viven en
+> `database/data/geo/*.json` (separados del código), no en arrays PHP. Agregar territorio =
+> agregar filas al archivo, sin tocar el seeder. Alcance actual: solo Bogotá D.C. (MVP). Ver
+> `database/data/geo/README.md` para fuentes oficiales (DANE DIVIPOLA, IDECA) y regeneración.
+
 ### Datos demo — **solo bajo flag** (`DemoSeeder`)
 
 Comercios, productos, órdenes, representantes legales, documentos, comentarios, etc.

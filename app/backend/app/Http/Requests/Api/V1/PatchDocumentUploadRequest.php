@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Models\CommerceDocument;
+use App\Traits\AuthorizesCommerceOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -25,9 +27,32 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class PatchDocumentUploadRequest extends FormRequest
 {
+    use AuthorizesCommerceOwnership;
+
     public function authorize(): bool
     {
-        return $this->user()?->hasAnyPermission(['admin.providers.upload_documents', 'provider.photos.upload']) ?? false;
+        $user = $this->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->can('admin.providers.upload_documents')) {
+            return true;
+        }
+
+        if (! $user->hasAnyPermission(['provider.documents.upload', 'provider.photos.upload'])) {
+            return false;
+        }
+
+        $document = CommerceDocument::where('upload_token', $this->input('upload_token'))->first();
+
+        if (! $document) {
+            // Sin documento aún resuelto: el controller responde 404 (ModelNotFoundException), no 403.
+            return true;
+        }
+
+        return $this->userCanAccessCommerce((int) $document->commerce_id);
     }
 
     public function rules(): array

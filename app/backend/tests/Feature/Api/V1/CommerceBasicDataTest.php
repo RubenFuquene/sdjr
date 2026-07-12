@@ -53,6 +53,7 @@ class CommerceBasicDataTest extends TestCase
                 'email' => 'test@comercio.com',
                 'is_verified' => false,
                 'is_active' => true,
+                'electronic_invoicing_required' => false,
             ],
             'legal_representative' => [
 
@@ -63,18 +64,6 @@ class CommerceBasicDataTest extends TestCase
                 'email' => 'juan@comercio.com',
                 'phone' => '3001234567',
                 'is_primary' => true,
-            ],
-            'commerce_documents' => [
-                [
-                    'verified_by_id' => null,
-                    'uploaded_by_id' => $user->id,
-                    'document_type' => 'RUT',
-                    'file_path' => 'docs/rut.pdf',
-                    'mime_type' => 'application/pdf',
-                    'verified' => false,
-                    'uploaded_at' => now()->toDateString(),
-                    'verified_at' => null,
-                ],
             ],
             'my_account' => [
                 'type' => 'bank',
@@ -145,6 +134,7 @@ class CommerceBasicDataTest extends TestCase
             'commerce.tax_id',
             'commerce.tax_id_type',
             'commerce.address',
+            'commerce.electronic_invoicing_required',
             'legal_representative.name',
             'legal_representative.last_name',
             'legal_representative.document',
@@ -193,6 +183,7 @@ class CommerceBasicDataTest extends TestCase
                 'email' => 'dup@example.com',
                 'is_verified' => false,
                 'is_active' => true,
+                'electronic_invoicing_required' => false,
             ],
             'legal_representative' => [
                 'name' => 'Rep',

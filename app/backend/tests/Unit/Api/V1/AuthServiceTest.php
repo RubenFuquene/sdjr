@@ -63,7 +63,7 @@ class AuthServiceTest extends TestCase
             ]);
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('email', $e->errors());
-            $this->assertEquals('Invalid credentials provided.', $e->errors()['email'][0]);
+            $this->assertEquals(__('auth.failed'), $e->errors()['email'][0]);
 
             throw $e;
         }
@@ -83,7 +83,7 @@ class AuthServiceTest extends TestCase
             ]);
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('email', $e->errors());
-            $this->assertEquals('Invalid credentials provided.', $e->errors()['email'][0]);
+            $this->assertEquals(__('auth.failed'), $e->errors()['email'][0]);
 
             throw $e;
         }

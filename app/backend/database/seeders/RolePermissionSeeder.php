@@ -46,12 +46,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'admin.params.neighborhoods.update', 'guard_name' => $guardName, 'description' => 'Permiso para actualizar barrios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.neighborhoods.delete', 'guard_name' => $guardName, 'description' => 'Permiso para eliminar barrios', 'created_at' => now(), 'updated_at' => now()],
 
-            ['name' => 'admin.params.categories.index', 'guard_name' => $guardName, 'description' => 'Listar categorías', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.categories.create', 'guard_name' => $guardName, 'description' => 'Crear categorías', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.categories.show', 'guard_name' => $guardName, 'description' => 'Ver categorías', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.categories.update', 'guard_name' => $guardName, 'description' => 'Permiso para actualizar categorías', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin.params.categories.delete', 'guard_name' => $guardName, 'description' => 'Permiso para eliminar categorías', 'created_at' => now(), 'updated_at' => now()],
-
             ['name' => 'admin.params.banks.index', 'guard_name' => $guardName, 'description' => 'Listar bancos', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.banks.create', 'guard_name' => $guardName, 'description' => 'Crear bancos', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin.params.banks.show', 'guard_name' => $guardName, 'description' => 'Ver bancos', 'created_at' => now(), 'updated_at' => now()],
@@ -134,6 +128,10 @@ class RolePermissionSeeder extends Seeder
             // Módulo de Sucursales
             ['name' => 'provider.branches.index', 'guard_name' => $guardName, 'description' => 'Listar sucursales', 'created_at' => now(), 'updated_at' => now()],
 
+            // Módulo de Geocodificación (proxy Nominatim)
+            ['name' => 'provider.geocode.search', 'guard_name' => $guardName, 'description' => 'Geocodificar dirección de texto', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.geocode.reverse', 'guard_name' => $guardName, 'description' => 'Geocodificación inversa desde coordenadas', 'created_at' => now(), 'updated_at' => now()],
+
             // Permisos para Órdenes (Orders):
             ['name' => 'customer.orders.create', 'guard_name' => $guardName, 'description' => 'Crear órdenes como cliente', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'customer.orders.show', 'guard_name' => $guardName, 'description' => 'Ver órdenes propias como cliente', 'created_at' => now(), 'updated_at' => now()],
@@ -172,6 +170,7 @@ class RolePermissionSeeder extends Seeder
 
             ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'Ver módulo de carga de documentos de proveedor en admin', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.photos.upload', 'guard_name' => $guardName, 'description' => 'Actualizar fotos por proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.documents.upload', 'guard_name' => $guardName, 'description' => 'Cargar documentos (RUT, 1876, etc.) del propio comercio como proveedor', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'Listar categorías de producto', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Crear categoría de producto', 'created_at' => now(), 'updated_at' => now()],
@@ -230,7 +229,6 @@ class RolePermissionSeeder extends Seeder
             'admin.params.departments.index',
             'admin.params.cities.index',
             'admin.params.neighborhoods.index',
-            'admin.params.categories.index',
             'admin.params.banks.index',
             'admin.params.support_statuses.index',
             'admin.params.pqrs_types.index',
@@ -257,7 +255,6 @@ class RolePermissionSeeder extends Seeder
             'admin.params.departments.show',
             'admin.params.cities.show',
             'admin.params.neighborhoods.show',
-            'admin.params.categories.show',
             'admin.params.banks.show',
             'admin.params.support_statuses.show',
             'admin.params.pqrs_types.show',
@@ -299,7 +296,6 @@ class RolePermissionSeeder extends Seeder
             'admin.params.departments.create',
             'admin.params.cities.create',
             'admin.params.neighborhoods.create',
-            'admin.params.categories.create',
             'admin.params.banks.create',
             'admin.params.support_statuses.create',
             'admin.params.pqrs_types.create',
@@ -323,7 +319,6 @@ class RolePermissionSeeder extends Seeder
             'admin.params.departments.update',
             'admin.params.cities.update',
             'admin.params.neighborhoods.update',
-            'admin.params.categories.update',
             'admin.params.banks.update',
             'admin.params.support_statuses.update',
             'admin.params.pqrs_types.update',
@@ -346,7 +341,6 @@ class RolePermissionSeeder extends Seeder
             'admin.params.departments.delete',
             'admin.params.cities.delete',
             'admin.params.neighborhoods.delete',
-            'admin.params.categories.delete',
             'admin.params.banks.delete',
             'admin.params.support_statuses.delete',
             'admin.params.pqrs_types.delete',
@@ -377,6 +371,8 @@ class RolePermissionSeeder extends Seeder
             'provider.establishment_types.index',
             'provider.basic_data.show',
             'provider.branches.show',
+            'provider.geocode.search',
+            'provider.geocode.reverse',
             'provider.products.show',
             'provider.my_account.show',
             'provider.my_wallet.show',
@@ -387,6 +383,7 @@ class RolePermissionSeeder extends Seeder
             'provider.commerces.show',
             'provider.legal_representatives.show',
             'provider.establishment_types.show',
+            'provider.product_categories.index',
             'provider.product_categories.show',
             'provider.products.show',
             'provider.comments.index',
@@ -426,7 +423,7 @@ class RolePermissionSeeder extends Seeder
             'provider.comments.delete',
 
             'provider.commerces.accept-terms',
-            'admin.providers.upload_documents',
+            'provider.documents.upload',
             'provider.photos.upload',
         ]);
 

@@ -17,7 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *         property="per_page",
  *         type="integer",
  *         minimum=1,
- *         maximum=100,
+ *         maximum=2000,
  *         description="Cantidad de registros por página (default: 15)",
  *         example=10
  *     ),
@@ -40,7 +40,7 @@ class IndexDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:2000'],
             'status' => ['nullable', 'in:1,0,all'],
             'sort_by' => ['nullable', 'string', 'in:name,code,status,created_at,updated_at'],
             'sort_dir' => ['nullable', 'string', 'in:asc,desc'],

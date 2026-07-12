@@ -21,7 +21,6 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            CategorySeeder::class,
             LegalDocumentSeeder::class,
             CommerceSeeder::class,
             LegalRepresentativeSeeder::class,

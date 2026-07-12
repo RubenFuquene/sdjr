@@ -3,6 +3,7 @@
 import { EstablecimientoCard } from './establecimiento-card';
 import { RepresentanteLegalCard } from './representante-legal-card';
 import { CamaraComercioCard } from './camara-comercio-card';
+import { RutCard } from './rut-card';
 import { ObservacionesCard } from './observaciones-card';
 import { useBasicInfoForm } from '@/hooks/provider/use-basic-info-form';
 
@@ -41,6 +42,18 @@ export function BasicInfoForm() {
         onFileSelected={(file) => handleDocumentFileSelected('commerceChamber', file)}
         uploadStatus={documentStatus.commerceChamber.status}
         uploadError={documentStatus.commerceChamber.error}
+        errors={errors}
+      />
+
+      <RutCard
+        formData={formData}
+        onFieldChange={handleFieldChange}
+        onRutFileSelected={(file) => handleDocumentFileSelected('rut', file)}
+        onForm1876FileSelected={(file) => handleDocumentFileSelected('form1876', file)}
+        rutUploadStatus={documentStatus.rut.status}
+        rutUploadError={documentStatus.rut.error}
+        form1876UploadStatus={documentStatus.form1876.status}
+        form1876UploadError={documentStatus.form1876.error}
         errors={errors}
       />
 

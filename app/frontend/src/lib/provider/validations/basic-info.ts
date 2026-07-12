@@ -75,5 +75,17 @@ export const validateBasicInfoForm = (formData: BasicInfoFormData): FormErrors =
     newErrors.commerceChamber = 'El documento de Cámara de Comercio es obligatorio';
   }
 
+  if (formData.electronicInvoicingRequired === null) {
+    newErrors.electronicInvoicingRequired = 'Debes indicar si estás obligado a emitir factura electrónica';
+  }
+
+  if (!formData.documents.rut?.trim()) {
+    newErrors.rut = 'El RUT es obligatorio';
+  }
+
+  if (formData.electronicInvoicingRequired === true && !formData.documents.form1876?.trim()) {
+    newErrors.form1876 = 'El formato 1876 es obligatorio para comercios obligados a facturar electrónicamente';
+  }
+
   return newErrors;
 };

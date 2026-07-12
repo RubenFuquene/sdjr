@@ -59,6 +59,7 @@ class Commerce extends Model
         'is_verified',
         'terms_accepted_at',
         'terms_accepted_version',
+        'electronic_invoicing_required',
     ];
 
     protected $casts = [
@@ -66,6 +67,7 @@ class Commerce extends Model
         'is_verified' => 'integer',
         'terms_accepted_at' => 'datetime',
         'terms_accepted_version' => 'integer',
+        'electronic_invoicing_required' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -211,6 +213,20 @@ class Commerce extends Model
     public function setEmailAttribute($value)
     {
         $this->attributes['email'] = $this->sanitizeEmail($value);
+    }
+
+    /**
+     * Tipo de persona derivado de tax_id_type — no se persiste como columna.
+     * NIT identifica personas jurídicas; CC/CE/PS identifican personas naturales
+     * en Colombia. Único punto de derivación reutilizado por toda la app.
+     *
+     * @return string
+     */
+    public function getPersonTypeAttribute()
+    {
+        return $this->tax_id_type === Constant::COMMERCE_DOCUMENT_TYPE_NIT
+            ? Constant::PERSON_TYPE_JURIDICA
+            : Constant::PERSON_TYPE_NATURAL;
     }
 
     /**

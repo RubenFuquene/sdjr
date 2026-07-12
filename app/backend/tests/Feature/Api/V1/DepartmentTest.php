@@ -119,7 +119,7 @@ class DepartmentTest extends TestCase
         $response = $this->getJson("/api/v1/departments/{$department->id}");
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.name', 'Valle del cauca')
+            ->assertJsonPath('data.name', 'Valle Del Cauca')
             ->assertJsonPath('data.code', 'DEP003');
     }
 

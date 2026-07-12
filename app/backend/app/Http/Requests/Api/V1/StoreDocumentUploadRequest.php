@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Models\Commerce;
+use App\Traits\AuthorizesCommerceOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -25,9 +27,25 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class StoreDocumentUploadRequest extends FormRequest
 {
+    use AuthorizesCommerceOwnership;
+
     public function authorize(): bool
     {
-        return $this->user()?->can('admin.providers.upload_documents') ?? false;
+        $user = $this->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->can('admin.providers.upload_documents')) {
+            return true;
+        }
+
+        if (! $user->can('provider.documents.upload')) {
+            return false;
+        }
+
+        return $this->userCanAccessCommerce((int) $this->input('commerce_id'));
     }
 
     public function rules(): array
@@ -40,7 +58,18 @@ class StoreDocumentUploadRequest extends FormRequest
                 Constant::DOCUMENT_TYPE_RUT,
                 Constant::DOCUMENT_TYPE_REGISTRATION,
                 Constant::DOCUMENT_TYPE_ID_CARD,
-            ])],
+                Constant::DOCUMENT_TYPE_1876,
+            ]), function ($attribute, $value, $fail) {
+                if ($value !== Constant::DOCUMENT_TYPE_1876) {
+                    return;
+                }
+
+                $commerce = Commerce::find($this->input('commerce_id'));
+
+                if (! $commerce || ! $commerce->electronic_invoicing_required) {
+                    $fail('El formato 1876 solo aplica para comercios obligados a facturar electrónicamente.');
+                }
+            }],
             'file_name' => ['required', 'string', 'max:255'],
             'mime_type' => ['required', 'string', 'in:'.implode(',', Constant::ALLOWED_FILE_EXTENSIONS)],
             'file_size_bytes' => ['required', 'integer', 'min:1', 'max:'.Constant::ALLOWED_SIZE_BYTES],

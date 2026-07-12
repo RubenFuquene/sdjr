@@ -434,4 +434,233 @@ class DocumentUploadControllerTest extends TestCase
         $this->assertNull($document->replacement_of_id);
         $this->assertSame(1, $document->version_number);
     }
+
+    /**
+     * @return void
+     */
+    public function test_provider_can_upload_rut_for_own_commerce()
+    {
+        Permission::create(['name' => 'provider.documents.upload', 'guard_name' => 'sanctum']);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.documents.upload');
+        $this->actingAs($user);
+
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+
+        $payload = [
+            'commerce_id' => $commerce->id,
+            'document_type' => 'RUT',
+            'file_name' => 'rut.pdf',
+            'mime_type' => 'pdf',
+            'file_size_bytes' => 1024,
+        ];
+
+        $response = $this->postJson('/api/v1/documents/presigned', $payload);
+
+        $response->assertStatus(201);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_provider_cannot_upload_document_for_foreign_commerce()
+    {
+        Permission::create(['name' => 'provider.documents.upload', 'guard_name' => 'sanctum']);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.documents.upload');
+        $this->actingAs($user);
+
+        $foreignCommerce = Commerce::factory()->create();
+
+        $payload = [
+            'commerce_id' => $foreignCommerce->id,
+            'document_type' => 'RUT',
+            'file_name' => 'rut.pdf',
+            'mime_type' => 'pdf',
+            'file_size_bytes' => 1024,
+        ];
+
+        $response = $this->postJson('/api/v1/documents/presigned', $payload);
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_provider_without_permission_cannot_upload_document()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+
+        $payload = [
+            'commerce_id' => $commerce->id,
+            'document_type' => 'RUT',
+            'file_name' => 'rut.pdf',
+            'mime_type' => 'pdf',
+            'file_size_bytes' => 1024,
+        ];
+
+        $response = $this->postJson('/api/v1/documents/presigned', $payload);
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_provider_cannot_upload_1876_when_not_required_to_invoice_electronically()
+    {
+        Permission::create(['name' => 'provider.documents.upload', 'guard_name' => 'sanctum']);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.documents.upload');
+        $this->actingAs($user);
+
+        $commerce = Commerce::factory()->create([
+            'owner_user_id' => $user->id,
+            'electronic_invoicing_required' => false,
+        ]);
+
+        $payload = [
+            'commerce_id' => $commerce->id,
+            'document_type' => '1876',
+            'file_name' => 'formato-1876.pdf',
+            'mime_type' => 'pdf',
+            'file_size_bytes' => 1024,
+        ];
+
+        $response = $this->postJson('/api/v1/documents/presigned', $payload);
+
+        $response->assertStatus(422);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_provider_can_upload_1876_when_required_to_invoice_electronically()
+    {
+        Permission::create(['name' => 'provider.documents.upload', 'guard_name' => 'sanctum']);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.documents.upload');
+        $this->actingAs($user);
+
+        $commerce = Commerce::factory()->create([
+            'owner_user_id' => $user->id,
+            'electronic_invoicing_required' => true,
+        ]);
+
+        $payload = [
+            'commerce_id' => $commerce->id,
+            'document_type' => '1876',
+            'file_name' => 'formato-1876.pdf',
+            'mime_type' => 'pdf',
+            'file_size_bytes' => 1024,
+        ];
+
+        $response = $this->postJson('/api/v1/documents/presigned', $payload);
+
+        $response->assertStatus(201);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_provider_can_confirm_document_of_own_commerce()
+    {
+        Permission::create(['name' => 'provider.documents.upload', 'guard_name' => 'sanctum']);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.documents.upload');
+        $this->actingAs($user);
+
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+
+        $document = CommerceDocument::factory()->create([
+            'commerce_id' => $commerce->id,
+            'upload_token' => Str::uuid()->toString(),
+            'expires_at' => now()->addHour(),
+            'upload_status' => 'pending',
+        ]);
+
+        $payload = [
+            'upload_token' => $document->upload_token,
+            's3_metadata' => [
+                'etag' => 'etag12345',
+                'object_size' => 2048,
+                'last_modified' => now()->toIso8601String(),
+            ],
+        ];
+
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_provider_cannot_confirm_document_of_foreign_commerce()
+    {
+        Permission::create(['name' => 'provider.documents.upload', 'guard_name' => 'sanctum']);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.documents.upload');
+        $this->actingAs($user);
+
+        $foreignCommerce = Commerce::factory()->create();
+
+        $document = CommerceDocument::factory()->create([
+            'commerce_id' => $foreignCommerce->id,
+            'upload_token' => Str::uuid()->toString(),
+            'expires_at' => now()->addHour(),
+            'upload_status' => 'pending',
+        ]);
+
+        $payload = [
+            'upload_token' => $document->upload_token,
+            's3_metadata' => [
+                'etag' => 'etag12345',
+                'object_size' => 2048,
+                'last_modified' => now()->toIso8601String(),
+            ],
+        ];
+
+        $response = $this->patchJson('/api/v1/documents/confirm', $payload);
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Regresión del retiro de admin.providers.upload_documents del rol provider
+     * (Tarea 2, SCRUM-242): el usuario con el permiso admin sigue operando
+     * cualquier comercio sin verificación de ownership.
+     *
+     * @return void
+     */
+    public function test_admin_permission_bypasses_ownership_check()
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('admin.providers.upload_documents');
+        $this->actingAs($user);
+
+        $foreignCommerce = Commerce::factory()->create();
+
+        $payload = [
+            'commerce_id' => $foreignCommerce->id,
+            'document_type' => 'RUT',
+            'file_name' => 'rut.pdf',
+            'mime_type' => 'pdf',
+            'file_size_bytes' => 1024,
+        ];
+
+        $response = $this->postJson('/api/v1/documents/presigned', $payload);
+
+        $response->assertStatus(201);
+    }
 }

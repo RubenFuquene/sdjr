@@ -40,7 +40,8 @@ class IndexCityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:2000'],
+            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'status' => ['nullable', 'in:1,0,all'],
             'sort_by' => ['nullable', 'string', 'in:name,code,status,created_at,updated_at'],
             'sort_dir' => ['nullable', 'string', 'in:asc,desc'],
@@ -57,6 +58,6 @@ class IndexCityRequest extends FormRequest
      */
     public function validatedFilters(): array
     {
-        return $this->only(['name', 'code', 'status', 'sort_by', 'sort_dir']);
+        return $this->only(['name', 'code', 'department_id', 'status', 'sort_by', 'sort_dir']);
     }
 }

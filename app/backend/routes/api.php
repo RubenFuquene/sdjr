@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BankController;
-use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CityController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\CommerceBranchController;
@@ -15,6 +14,7 @@ use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\DocumentUploadController;
 use App\Http\Controllers\Api\V1\EstablishmentTypeController;
 use App\Http\Controllers\Api\V1\ForgotPasswordController;
+use App\Http\Controllers\Api\V1\GeocodeController;
 use App\Http\Controllers\Api\V1\LegalDocumentController;
 use App\Http\Controllers\Api\V1\LegalRepresentativeController;
 use App\Http\Controllers\Api\V1\LogoutController;
@@ -64,7 +64,6 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('countries', CountryController::class);
         Route::apiResource('departments', DepartmentController::class);
         Route::apiResource('cities', CityController::class);
-        Route::apiResource('categories', CategoryController::class);
         Route::apiResource('neighborhoods', NeighborhoodController::class);
         Route::apiResource('establishment-types', EstablishmentTypeController::class);
         Route::apiResource('pqrs-types', PqrsTypeController::class);
@@ -135,6 +134,10 @@ Route::prefix('v1')->group(function () {
 
         Route::patch('commerce-branches/photos/confirm', [CommerceBranchController::class, 'confirmPhotoUpload']);
         Route::delete('commerce-branches/photos/{photo}', [CommerceBranchController::class, 'removePhoto']);
+
+        // Geocode (proxy Nominatim/OpenStreetMap)
+        Route::get('geocode', [GeocodeController::class, 'search']);
+        Route::get('geocode/reverse', [GeocodeController::class, 'reverse']);
 
         // Commerce Branch Users (Branch Leaders)
         Route::prefix('commerce-branch-users')->group(function () {

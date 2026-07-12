@@ -99,6 +99,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Idiomas soportados
+    |--------------------------------------------------------------------------
+    |
+    | Whitelist de locales que la aplicación puede resolver por request (ver
+    | App\Http\Middleware\SetLocale). El middleware acota el header
+    | Accept-Language a esta lista; el primer valor es el idioma por defecto.
+    | Para agregar un idioma: crear lang/<code>/ y añadir su código aquí.
+    |
+    */
+
+    'supported_locales' => ['es', 'en'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

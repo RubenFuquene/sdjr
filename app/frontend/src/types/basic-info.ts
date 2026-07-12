@@ -30,6 +30,8 @@ export interface LegalRepresentative {
 export interface DocumentsInfo {
   identity: string | null; // Cédula de ciudadanía, extranjería o pasaporte del representante
   commerceChamber: string | null; // Cámara de comercio del establecimiento
+  rut: string | null; // RUT del comercio (obligatorio)
+  form1876: string | null; // Formato 1876, solo si electronicInvoicingRequired
 }
 
 /**
@@ -47,6 +49,9 @@ export interface BasicInfoFormData {
   cityId: number | null;
   neighborhood: string; // Puede ser ID o nombre manual
   mainAddress: string;
+
+  // Autodeclaración: ¿obligado a emitir factura electrónica? null = sin responder aún
+  electronicInvoicingRequired: boolean | null;
 
   // Representante Legal
   legalRepresentative: LegalRepresentative;
@@ -79,6 +84,9 @@ export interface FormErrors {
   legalRepresentativeDocumentFile?: string;
   identity?: string;
   commerceChamber?: string;
+  electronicInvoicingRequired?: string;
+  rut?: string;
+  form1876?: string;
   observations?: string;
 }
 
@@ -105,6 +113,8 @@ export const INITIAL_BASIC_INFO_FORM: BasicInfoFormData = {
   neighborhood: '',
   mainAddress: '',
 
+  electronicInvoicingRequired: null,
+
   legalRepresentative: {
     firstName: '',
     lastName: '',
@@ -116,6 +126,8 @@ export const INITIAL_BASIC_INFO_FORM: BasicInfoFormData = {
   documents: {
     identity: null,
     commerceChamber: null,
+    rut: null,
+    form1876: null,
   },
 
   observations: '',

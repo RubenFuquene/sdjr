@@ -1,0 +1,5457 @@
+[
+  {
+    "code": "001101",
+    "name": "Las Brisas",
+    "city_code": "11001"
+  },
+  {
+    "code": "001102",
+    "name": "Buenos Aires",
+    "city_code": "11001"
+  },
+  {
+    "code": "001103",
+    "name": "Vitelma",
+    "city_code": "11001"
+  },
+  {
+    "code": "001104",
+    "name": "Molinos de Oriente",
+    "city_code": "11001"
+  },
+  {
+    "code": "001106",
+    "name": "San Blas",
+    "city_code": "11001"
+  },
+  {
+    "code": "001107",
+    "name": "Las Mercedes",
+    "city_code": "11001"
+  },
+  {
+    "code": "001108",
+    "name": "San Cristobal Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001109",
+    "name": "La Maria",
+    "city_code": "11001"
+  },
+  {
+    "code": "001110",
+    "name": "San Javier",
+    "city_code": "11001"
+  },
+  {
+    "code": "001111",
+    "name": "Santa Ana Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001112",
+    "name": "Primero de Mayo",
+    "city_code": "11001"
+  },
+  {
+    "code": "001113",
+    "name": "San Blas II",
+    "city_code": "11001"
+  },
+  {
+    "code": "001114",
+    "name": "Velodromo",
+    "city_code": "11001"
+  },
+  {
+    "code": "001115",
+    "name": "Monte Carlo",
+    "city_code": "11001"
+  },
+  {
+    "code": "001116",
+    "name": "Tibaque Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "001118",
+    "name": "Los Laureles Sur Oriental I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001119",
+    "name": "Aguas Claras I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001121",
+    "name": "El Triangulo I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001201",
+    "name": "Sevilla",
+    "city_code": "11001"
+  },
+  {
+    "code": "001202",
+    "name": "Ciudad Berna",
+    "city_code": "11001"
+  },
+  {
+    "code": "001203",
+    "name": "Caracas",
+    "city_code": "11001"
+  },
+  {
+    "code": "001204",
+    "name": "Ciudad Jardin Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001205",
+    "name": "Sociego",
+    "city_code": "11001"
+  },
+  {
+    "code": "001206",
+    "name": "Quinta Ramos",
+    "city_code": "11001"
+  },
+  {
+    "code": "001207",
+    "name": "Narino Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001208",
+    "name": "La Hortua",
+    "city_code": "11001"
+  },
+  {
+    "code": "001209",
+    "name": "Modelo Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001210",
+    "name": "Calvo Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001211",
+    "name": "Policarpa",
+    "city_code": "11001"
+  },
+  {
+    "code": "001301",
+    "name": "Granada Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001302",
+    "name": "Montebello",
+    "city_code": "11001"
+  },
+  {
+    "code": "001303",
+    "name": "Cordoba",
+    "city_code": "11001"
+  },
+  {
+    "code": "001304",
+    "name": "Bello Horizonte",
+    "city_code": "11001"
+  },
+  {
+    "code": "001305",
+    "name": "Atenas",
+    "city_code": "11001"
+  },
+  {
+    "code": "001306",
+    "name": "San Pedro",
+    "city_code": "11001"
+  },
+  {
+    "code": "001307",
+    "name": "Ramajal",
+    "city_code": "11001"
+  },
+  {
+    "code": "001308",
+    "name": "Santa Ines Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001309",
+    "name": "San Vicente",
+    "city_code": "11001"
+  },
+  {
+    "code": "001310",
+    "name": "La Victoria",
+    "city_code": "11001"
+  },
+  {
+    "code": "001311",
+    "name": "La Gloria Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "001312",
+    "name": "Los Alpes",
+    "city_code": "11001"
+  },
+  {
+    "code": "001313",
+    "name": "Bellavista Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001314",
+    "name": "San Jose Sur Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "001315",
+    "name": "Altamira",
+    "city_code": "11001"
+  },
+  {
+    "code": "001316",
+    "name": "Moralba",
+    "city_code": "11001"
+  },
+  {
+    "code": "001317",
+    "name": "Puente Colorado",
+    "city_code": "11001"
+  },
+  {
+    "code": "001318",
+    "name": "Quindio",
+    "city_code": "11001"
+  },
+  {
+    "code": "001319",
+    "name": "La Gloria Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "001320",
+    "name": "Nueva Gloria",
+    "city_code": "11001"
+  },
+  {
+    "code": "001321",
+    "name": "San Martin Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001322",
+    "name": "San Rafael Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "001323",
+    "name": "Nueva Delhi",
+    "city_code": "11001"
+  },
+  {
+    "code": "001324",
+    "name": "El Pinar",
+    "city_code": "11001"
+  },
+  {
+    "code": "001325",
+    "name": "Juan Rey (la Paz)",
+    "city_code": "11001"
+  },
+  {
+    "code": "001327",
+    "name": "Los Libertadores",
+    "city_code": "11001"
+  },
+  {
+    "code": "001328",
+    "name": "Santa Rita Sur Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "001329",
+    "name": "El Paraiso",
+    "city_code": "11001"
+  },
+  {
+    "code": "001330",
+    "name": "Canada O Guira",
+    "city_code": "11001"
+  },
+  {
+    "code": "001331",
+    "name": "Altos del Zuque",
+    "city_code": "11001"
+  },
+  {
+    "code": "001332",
+    "name": "Villabel",
+    "city_code": "11001"
+  },
+  {
+    "code": "001333",
+    "name": "Altos del Poblado",
+    "city_code": "11001"
+  },
+  {
+    "code": "001334",
+    "name": "Las Gaviotas",
+    "city_code": "11001"
+  },
+  {
+    "code": "001335",
+    "name": "Villa Diana",
+    "city_code": "11001"
+  },
+  {
+    "code": "001336",
+    "name": "Juan Jose Rondon I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001337",
+    "name": "San Pedro Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001338",
+    "name": "La Belleza",
+    "city_code": "11001"
+  },
+  {
+    "code": "001339",
+    "name": "Bosque de los Alpes",
+    "city_code": "11001"
+  },
+  {
+    "code": "001340",
+    "name": "Tihuaque",
+    "city_code": "11001"
+  },
+  {
+    "code": "001342",
+    "name": "Altos del Zipa",
+    "city_code": "11001"
+  },
+  {
+    "code": "001344",
+    "name": "Los Soches",
+    "city_code": "11001"
+  },
+  {
+    "code": "001345",
+    "name": "Dona Liliana",
+    "city_code": "11001"
+  },
+  {
+    "code": "001346",
+    "name": "Ciudad Londres I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001347",
+    "name": "Juan Rey Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001348",
+    "name": "La Cabana",
+    "city_code": "11001"
+  },
+  {
+    "code": "001350",
+    "name": "Yomasa",
+    "city_code": "11001"
+  },
+  {
+    "code": "001352",
+    "name": "Las Guacamayas II",
+    "city_code": "11001"
+  },
+  {
+    "code": "001353",
+    "name": "Las Guacamayas IV",
+    "city_code": "11001"
+  },
+  {
+    "code": "001354",
+    "name": "Las Guacamayas III",
+    "city_code": "11001"
+  },
+  {
+    "code": "001355",
+    "name": "Las Guacamayas I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001356",
+    "name": "Villa del Cerro",
+    "city_code": "11001"
+  },
+  {
+    "code": "001357",
+    "name": "Santa Ines Sur II",
+    "city_code": "11001"
+  },
+  {
+    "code": "001358",
+    "name": "Chiguaza Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "001362",
+    "name": "Arboleda Santa Teresita",
+    "city_code": "11001"
+  },
+  {
+    "code": "001363",
+    "name": "Colmena I los Pinares",
+    "city_code": "11001"
+  },
+  {
+    "code": "001401",
+    "name": "San Jose Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001402",
+    "name": "Gustavo Restrepo",
+    "city_code": "11001"
+  },
+  {
+    "code": "001403",
+    "name": "Hospital San Carlos",
+    "city_code": "11001"
+  },
+  {
+    "code": "001404",
+    "name": "Sosiego Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001405",
+    "name": "Veinte de Julio",
+    "city_code": "11001"
+  },
+  {
+    "code": "001406",
+    "name": "San Isidro",
+    "city_code": "11001"
+  },
+  {
+    "code": "001407",
+    "name": "Suramerica",
+    "city_code": "11001"
+  },
+  {
+    "code": "001408",
+    "name": "Villa de los Alpes",
+    "city_code": "11001"
+  },
+  {
+    "code": "001409",
+    "name": "Las Lomas",
+    "city_code": "11001"
+  },
+  {
+    "code": "001410",
+    "name": "Marco Fidel Suarez",
+    "city_code": "11001"
+  },
+  {
+    "code": "001411",
+    "name": "San Jorge Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001412",
+    "name": "Granjas San Pablo",
+    "city_code": "11001"
+  },
+  {
+    "code": "001413",
+    "name": "La Resurreccion",
+    "city_code": "11001"
+  },
+  {
+    "code": "001414",
+    "name": "Molinos del Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001415",
+    "name": "Marco Fidel Suarez I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001416",
+    "name": "San Agustin",
+    "city_code": "11001"
+  },
+  {
+    "code": "001417",
+    "name": "Los Molinos",
+    "city_code": "11001"
+  },
+  {
+    "code": "001418",
+    "name": "Marruecos",
+    "city_code": "11001"
+  },
+  {
+    "code": "001419",
+    "name": "Callejon Santa Barbara",
+    "city_code": "11001"
+  },
+  {
+    "code": "001420",
+    "name": "El Playon",
+    "city_code": "11001"
+  },
+  {
+    "code": "001421",
+    "name": "Diana Turbay",
+    "city_code": "11001"
+  },
+  {
+    "code": "001422",
+    "name": "Diana Turbay Arrayanes",
+    "city_code": "11001"
+  },
+  {
+    "code": "001423",
+    "name": "Arboleda Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001424",
+    "name": "Barcelona Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "001425",
+    "name": "Granjas de Santa Sofia",
+    "city_code": "11001"
+  },
+  {
+    "code": "001426",
+    "name": "San Luis",
+    "city_code": "11001"
+  },
+  {
+    "code": "001427",
+    "name": "Puerto Rico",
+    "city_code": "11001"
+  },
+  {
+    "code": "001428",
+    "name": "Cerros de Oriente",
+    "city_code": "11001"
+  },
+  {
+    "code": "001429",
+    "name": "Guiparma",
+    "city_code": "11001"
+  },
+  {
+    "code": "001430",
+    "name": "Villa de los Alpes I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001431",
+    "name": "La Resurreccion I",
+    "city_code": "11001"
+  },
+  {
+    "code": "001432",
+    "name": "Diana Turbay Cultivos",
+    "city_code": "11001"
+  },
+  {
+    "code": "001434",
+    "name": "Carmen del Sol",
+    "city_code": "11001"
+  },
+  {
+    "code": "001435",
+    "name": "Los Arrayanes II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002101",
+    "name": "La Fraguita",
+    "city_code": "11001"
+  },
+  {
+    "code": "002102",
+    "name": "San Antonio",
+    "city_code": "11001"
+  },
+  {
+    "code": "002103",
+    "name": "Restrepo",
+    "city_code": "11001"
+  },
+  {
+    "code": "002104",
+    "name": "Restrepo Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "002105",
+    "name": "Santander",
+    "city_code": "11001"
+  },
+  {
+    "code": "002106",
+    "name": "Sena",
+    "city_code": "11001"
+  },
+  {
+    "code": "002107",
+    "name": "La Fragua",
+    "city_code": "11001"
+  },
+  {
+    "code": "002201",
+    "name": "Olaya",
+    "city_code": "11001"
+  },
+  {
+    "code": "002202",
+    "name": "Quiroga",
+    "city_code": "11001"
+  },
+  {
+    "code": "002203",
+    "name": "Quiroga Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "002204",
+    "name": "Quiroga Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002205",
+    "name": "Santa Lucia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002209",
+    "name": "Quiroga I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002301",
+    "name": "Eduardo Frey",
+    "city_code": "11001"
+  },
+  {
+    "code": "002302",
+    "name": "Santander Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002303",
+    "name": "Centenario",
+    "city_code": "11001"
+  },
+  {
+    "code": "002304",
+    "name": "Santiago Perez",
+    "city_code": "11001"
+  },
+  {
+    "code": "002305",
+    "name": "Libertador",
+    "city_code": "11001"
+  },
+  {
+    "code": "002306",
+    "name": "Bravo Paez",
+    "city_code": "11001"
+  },
+  {
+    "code": "002307",
+    "name": "Ingles",
+    "city_code": "11001"
+  },
+  {
+    "code": "002308",
+    "name": "Claret",
+    "city_code": "11001"
+  },
+  {
+    "code": "002309",
+    "name": "Villa Mayor Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "002310",
+    "name": "Murillo Toro",
+    "city_code": "11001"
+  },
+  {
+    "code": "002311",
+    "name": "Villa Mayor",
+    "city_code": "11001"
+  },
+  {
+    "code": "002401",
+    "name": "Tunal Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "002402",
+    "name": "San Vicente Ferrer",
+    "city_code": "11001"
+  },
+  {
+    "code": "002403",
+    "name": "Venecia Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "002404",
+    "name": "Venecia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002405",
+    "name": "Escuela General Santander",
+    "city_code": "11001"
+  },
+  {
+    "code": "002406",
+    "name": "Samore",
+    "city_code": "11001"
+  },
+  {
+    "code": "002407",
+    "name": "El Carmen",
+    "city_code": "11001"
+  },
+  {
+    "code": "002408",
+    "name": "Fatima",
+    "city_code": "11001"
+  },
+  {
+    "code": "002409",
+    "name": "Nuevo Muzu",
+    "city_code": "11001"
+  },
+  {
+    "code": "002410",
+    "name": "Parque el Tunal",
+    "city_code": "11001"
+  },
+  {
+    "code": "002411",
+    "name": "Isla del Sol",
+    "city_code": "11001"
+  },
+  {
+    "code": "002412",
+    "name": "Verona",
+    "city_code": "11001"
+  },
+  {
+    "code": "002413",
+    "name": "Muzu",
+    "city_code": "11001"
+  },
+  {
+    "code": "002414",
+    "name": "Ismael Perdomo",
+    "city_code": "11001"
+  },
+  {
+    "code": "002415",
+    "name": "Madelena",
+    "city_code": "11001"
+  },
+  {
+    "code": "002416",
+    "name": "El Ensueno",
+    "city_code": "11001"
+  },
+  {
+    "code": "002417",
+    "name": "Barlovento",
+    "city_code": "11001"
+  },
+  {
+    "code": "002418",
+    "name": "La Estancia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002419",
+    "name": "Rincon de la Valvanera",
+    "city_code": "11001"
+  },
+  {
+    "code": "002420",
+    "name": "La Coruna",
+    "city_code": "11001"
+  },
+  {
+    "code": "002421",
+    "name": "Rafael Escamilla",
+    "city_code": "11001"
+  },
+  {
+    "code": "002422",
+    "name": "Atlanta",
+    "city_code": "11001"
+  },
+  {
+    "code": "002423",
+    "name": "Espino",
+    "city_code": "11001"
+  },
+  {
+    "code": "002424",
+    "name": "Rincon de Galicia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002426",
+    "name": "Santo Domingo",
+    "city_code": "11001"
+  },
+  {
+    "code": "002427",
+    "name": "Galicia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002428",
+    "name": "Primavera II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002429",
+    "name": "Maria Cano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002430",
+    "name": "Las Brisas",
+    "city_code": "11001"
+  },
+  {
+    "code": "002431",
+    "name": "Potosi",
+    "city_code": "11001"
+  },
+  {
+    "code": "002432",
+    "name": "Arborizadora Baja",
+    "city_code": "11001"
+  },
+  {
+    "code": "002433",
+    "name": "El Penon del Cortijo",
+    "city_code": "11001"
+  },
+  {
+    "code": "002434",
+    "name": "Jerusalen",
+    "city_code": "11001"
+  },
+  {
+    "code": "002435",
+    "name": "El Chircal Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002436",
+    "name": "Bellavista",
+    "city_code": "11001"
+  },
+  {
+    "code": "002437",
+    "name": "La Pradera",
+    "city_code": "11001"
+  },
+  {
+    "code": "002438",
+    "name": "Sierra Morena",
+    "city_code": "11001"
+  },
+  {
+    "code": "002439",
+    "name": "Sierra Morena",
+    "city_code": "11001"
+  },
+  {
+    "code": "002440",
+    "name": "Sierra Morena",
+    "city_code": "11001"
+  },
+  {
+    "code": "002441",
+    "name": "Los Tres Reyes I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002442",
+    "name": "Santa Viviana",
+    "city_code": "11001"
+  },
+  {
+    "code": "002443",
+    "name": "La Primavera I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002444",
+    "name": "Sierra Morena II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002445",
+    "name": "Caracoli",
+    "city_code": "11001"
+  },
+  {
+    "code": "002446",
+    "name": "Los Tres Reyes",
+    "city_code": "11001"
+  },
+  {
+    "code": "002447",
+    "name": "El Mirador de la Estancia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002448",
+    "name": "Perdomo Alto",
+    "city_code": "11001"
+  },
+  {
+    "code": "002449",
+    "name": "Espino I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002450",
+    "name": "Perdomo Alto",
+    "city_code": "11001"
+  },
+  {
+    "code": "002451",
+    "name": "San Antonio del Mirador",
+    "city_code": "11001"
+  },
+  {
+    "code": "002453",
+    "name": "Ciudad Bolivar",
+    "city_code": "11001"
+  },
+  {
+    "code": "002455",
+    "name": "La Valvanera",
+    "city_code": "11001"
+  },
+  {
+    "code": "002456",
+    "name": "Quiba I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002460",
+    "name": "Arborizadora Alta I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002461",
+    "name": "Arborizadora Alta II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002501",
+    "name": "San Carlos",
+    "city_code": "11001"
+  },
+  {
+    "code": "002502",
+    "name": "Millan",
+    "city_code": "11001"
+  },
+  {
+    "code": "002503",
+    "name": "La Aurora",
+    "city_code": "11001"
+  },
+  {
+    "code": "002504",
+    "name": "Compartir",
+    "city_code": "11001"
+  },
+  {
+    "code": "002505",
+    "name": "Nuevo San Andres",
+    "city_code": "11001"
+  },
+  {
+    "code": "002506",
+    "name": "Gran Yomasa",
+    "city_code": "11001"
+  },
+  {
+    "code": "002507",
+    "name": "Abraham Lincoln",
+    "city_code": "11001"
+  },
+  {
+    "code": "002508",
+    "name": "Tunjuelito",
+    "city_code": "11001"
+  },
+  {
+    "code": "002509",
+    "name": "San Benito",
+    "city_code": "11001"
+  },
+  {
+    "code": "002510",
+    "name": "La Picota Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "002511",
+    "name": "La Picota",
+    "city_code": "11001"
+  },
+  {
+    "code": "002512",
+    "name": "Area Artilleria",
+    "city_code": "11001"
+  },
+  {
+    "code": "002513",
+    "name": "Las Acacias",
+    "city_code": "11001"
+  },
+  {
+    "code": "002514",
+    "name": "Meissen",
+    "city_code": "11001"
+  },
+  {
+    "code": "002515",
+    "name": "San Francisco",
+    "city_code": "11001"
+  },
+  {
+    "code": "002516",
+    "name": "Mexico",
+    "city_code": "11001"
+  },
+  {
+    "code": "002517",
+    "name": "Lucero del Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002518",
+    "name": "Ronda",
+    "city_code": "11001"
+  },
+  {
+    "code": "002519",
+    "name": "Danubio",
+    "city_code": "11001"
+  },
+  {
+    "code": "002520",
+    "name": "Las Manas",
+    "city_code": "11001"
+  },
+  {
+    "code": "002521",
+    "name": "Lucero Alto",
+    "city_code": "11001"
+  },
+  {
+    "code": "002522",
+    "name": "El Mochuelo Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "002523",
+    "name": "La Alameda",
+    "city_code": "11001"
+  },
+  {
+    "code": "002524",
+    "name": "La Andrea",
+    "city_code": "11001"
+  },
+  {
+    "code": "002525",
+    "name": "Barranquillita",
+    "city_code": "11001"
+  },
+  {
+    "code": "002526",
+    "name": "Santa Librada",
+    "city_code": "11001"
+  },
+  {
+    "code": "002527",
+    "name": "La Cabana",
+    "city_code": "11001"
+  },
+  {
+    "code": "002528",
+    "name": "Santa Librada Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "002529",
+    "name": "La Marichuela",
+    "city_code": "11001"
+  },
+  {
+    "code": "002530",
+    "name": "Quiba",
+    "city_code": "11001"
+  },
+  {
+    "code": "002531",
+    "name": "Candelaria la Nueva",
+    "city_code": "11001"
+  },
+  {
+    "code": "002532",
+    "name": "Quintas del Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002533",
+    "name": "Sotavento",
+    "city_code": "11001"
+  },
+  {
+    "code": "002534",
+    "name": "Casa de Teja",
+    "city_code": "11001"
+  },
+  {
+    "code": "002535",
+    "name": "Palermo Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002536",
+    "name": "Monteblanco",
+    "city_code": "11001"
+  },
+  {
+    "code": "002537",
+    "name": "Chuniza",
+    "city_code": "11001"
+  },
+  {
+    "code": "002538",
+    "name": "Usminia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002539",
+    "name": "San Rafael",
+    "city_code": "11001"
+  },
+  {
+    "code": "002540",
+    "name": "Estrella del Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002541",
+    "name": "Granada Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002542",
+    "name": "Serranias",
+    "city_code": "11001"
+  },
+  {
+    "code": "002543",
+    "name": "Comuneros",
+    "city_code": "11001"
+  },
+  {
+    "code": "002544",
+    "name": "Los Laureles II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002545",
+    "name": "El Satelite",
+    "city_code": "11001"
+  },
+  {
+    "code": "002546",
+    "name": "Naciones Unidas",
+    "city_code": "11001"
+  },
+  {
+    "code": "002547",
+    "name": "El Tesoro",
+    "city_code": "11001"
+  },
+  {
+    "code": "002548",
+    "name": "El Virrey",
+    "city_code": "11001"
+  },
+  {
+    "code": "002549",
+    "name": "Villa Gloria",
+    "city_code": "11001"
+  },
+  {
+    "code": "002550",
+    "name": "Duitama",
+    "city_code": "11001"
+  },
+  {
+    "code": "002551",
+    "name": "Alaska",
+    "city_code": "11001"
+  },
+  {
+    "code": "002552",
+    "name": "Juan Pablo II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002553",
+    "name": "Sumapaz",
+    "city_code": "11001"
+  },
+  {
+    "code": "002554",
+    "name": "Gibraltar Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002555",
+    "name": "San Juan Bautista",
+    "city_code": "11001"
+  },
+  {
+    "code": "002556",
+    "name": "Desarrollo Brazuelos I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002557",
+    "name": "Juan Jose Rondon",
+    "city_code": "11001"
+  },
+  {
+    "code": "002558",
+    "name": "Villas el Diamante",
+    "city_code": "11001"
+  },
+  {
+    "code": "002559",
+    "name": "Los Alpes Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002560",
+    "name": "Bellavista Lucero Alto",
+    "city_code": "11001"
+  },
+  {
+    "code": "002561",
+    "name": "Cordillera del Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002562",
+    "name": "Central de Mezclas",
+    "city_code": "11001"
+  },
+  {
+    "code": "002563",
+    "name": "El Pedregal",
+    "city_code": "11001"
+  },
+  {
+    "code": "002564",
+    "name": "El Minuto de Maria",
+    "city_code": "11001"
+  },
+  {
+    "code": "002565",
+    "name": "Paraiso Quiba",
+    "city_code": "11001"
+  },
+  {
+    "code": "002566",
+    "name": "La Paz",
+    "city_code": "11001"
+  },
+  {
+    "code": "002568",
+    "name": "Arborizadora Alta",
+    "city_code": "11001"
+  },
+  {
+    "code": "002569",
+    "name": "Arborizadora Alta",
+    "city_code": "11001"
+  },
+  {
+    "code": "002570",
+    "name": "El Mirador",
+    "city_code": "11001"
+  },
+  {
+    "code": "002571",
+    "name": "Antonio Jose de Sucre",
+    "city_code": "11001"
+  },
+  {
+    "code": "002572",
+    "name": "Salazar Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "002573",
+    "name": "Arborizadora Alta",
+    "city_code": "11001"
+  },
+  {
+    "code": "002574",
+    "name": "Cedritos del Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002575",
+    "name": "Cerro Colorado",
+    "city_code": "11001"
+  },
+  {
+    "code": "002576",
+    "name": "Serranias I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002577",
+    "name": "Danubio II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002578",
+    "name": "Arabia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002579",
+    "name": "Villa Candelaria",
+    "city_code": "11001"
+  },
+  {
+    "code": "002580",
+    "name": "Bella Flor",
+    "city_code": "11001"
+  },
+  {
+    "code": "002581",
+    "name": "La Torre",
+    "city_code": "11001"
+  },
+  {
+    "code": "002582",
+    "name": "Bella Flor Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002583",
+    "name": "Quiba Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002584",
+    "name": "El Mochuelo",
+    "city_code": "11001"
+  },
+  {
+    "code": "002585",
+    "name": "El Mochuelo Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002586",
+    "name": "Yomasa Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "002587",
+    "name": "Brisas del Volador",
+    "city_code": "11001"
+  },
+  {
+    "code": "002589",
+    "name": "Porvenir",
+    "city_code": "11001"
+  },
+  {
+    "code": "002590",
+    "name": "La Fiscala",
+    "city_code": "11001"
+  },
+  {
+    "code": "002591",
+    "name": "Brazuelos Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "002592",
+    "name": "Desarrollo Brazuelos",
+    "city_code": "11001"
+  },
+  {
+    "code": "002593",
+    "name": "Tunjuelito",
+    "city_code": "11001"
+  },
+  {
+    "code": "002594",
+    "name": "Villa Israel",
+    "city_code": "11001"
+  },
+  {
+    "code": "002595",
+    "name": "Lagunitas Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002597",
+    "name": "La Fiscala Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "002598",
+    "name": "El Mochuelo II Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002599",
+    "name": "Centro Usme Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002601",
+    "name": "Arrayanes I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002602",
+    "name": "Fiscala Alta",
+    "city_code": "11001"
+  },
+  {
+    "code": "002604",
+    "name": "Los Olivares",
+    "city_code": "11001"
+  },
+  {
+    "code": "002605",
+    "name": "Bolonia",
+    "city_code": "11001"
+  },
+  {
+    "code": "002606",
+    "name": "El Curubo",
+    "city_code": "11001"
+  },
+  {
+    "code": "002607",
+    "name": "La Esperanza Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "002608",
+    "name": "El Bosque Central I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002609",
+    "name": "El Bosque",
+    "city_code": "11001"
+  },
+  {
+    "code": "002610",
+    "name": "Chapinerito",
+    "city_code": "11001"
+  },
+  {
+    "code": "002611",
+    "name": "Charala",
+    "city_code": "11001"
+  },
+  {
+    "code": "002612",
+    "name": "La Comuna",
+    "city_code": "11001"
+  },
+  {
+    "code": "002613",
+    "name": "El Progreso Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "002614",
+    "name": "La Orquidea de Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "002615",
+    "name": "La Esperanza de Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "002616",
+    "name": "El Nuevo Portal",
+    "city_code": "11001"
+  },
+  {
+    "code": "002617",
+    "name": "El Refugio I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002618",
+    "name": "Puerta Al Llano de Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "002619",
+    "name": "Villa Anita",
+    "city_code": "11001"
+  },
+  {
+    "code": "002620",
+    "name": "El Nuevo Portal II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002621",
+    "name": "San Felipe de Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "002622",
+    "name": "Tocaimita Oriental I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002625",
+    "name": "Arrayanes V",
+    "city_code": "11001"
+  },
+  {
+    "code": "002626",
+    "name": "Bolonia I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002627",
+    "name": "La Reforma",
+    "city_code": "11001"
+  },
+  {
+    "code": "002629",
+    "name": "El Nevado II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002630",
+    "name": "El Portal del Divino",
+    "city_code": "11001"
+  },
+  {
+    "code": "002631",
+    "name": "El Nevado",
+    "city_code": "11001"
+  },
+  {
+    "code": "002632",
+    "name": "La Requilina",
+    "city_code": "11001"
+  },
+  {
+    "code": "002633",
+    "name": "Las Violetas",
+    "city_code": "11001"
+  },
+  {
+    "code": "002634",
+    "name": "El Tuno",
+    "city_code": "11001"
+  },
+  {
+    "code": "002635",
+    "name": "Brisas del Llano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002636",
+    "name": "La Huerta",
+    "city_code": "11001"
+  },
+  {
+    "code": "002637",
+    "name": "Arrayanes VI",
+    "city_code": "11001"
+  },
+  {
+    "code": "002640",
+    "name": "El Pedregal II",
+    "city_code": "11001"
+  },
+  {
+    "code": "002642",
+    "name": "El Portal Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "002643",
+    "name": "El Salteador",
+    "city_code": "11001"
+  },
+  {
+    "code": "002644",
+    "name": "Centro Usme Urbano I",
+    "city_code": "11001"
+  },
+  {
+    "code": "002645",
+    "name": "Puerta Al Llano I",
+    "city_code": "11001"
+  },
+  {
+    "code": "003101",
+    "name": "La Alameda",
+    "city_code": "11001"
+  },
+  {
+    "code": "003102",
+    "name": "Las Nieves",
+    "city_code": "11001"
+  },
+  {
+    "code": "003103",
+    "name": "Las Aguas",
+    "city_code": "11001"
+  },
+  {
+    "code": "003104",
+    "name": "La Concordia",
+    "city_code": "11001"
+  },
+  {
+    "code": "003105",
+    "name": "Egipto",
+    "city_code": "11001"
+  },
+  {
+    "code": "003106",
+    "name": "Centro Administrativo",
+    "city_code": "11001"
+  },
+  {
+    "code": "003107",
+    "name": "Santa Ines",
+    "city_code": "11001"
+  },
+  {
+    "code": "003108",
+    "name": "La Capuchina",
+    "city_code": "11001"
+  },
+  {
+    "code": "003109",
+    "name": "Veracruz",
+    "city_code": "11001"
+  },
+  {
+    "code": "003110",
+    "name": "La Catedral",
+    "city_code": "11001"
+  },
+  {
+    "code": "003201",
+    "name": "San Bernardo",
+    "city_code": "11001"
+  },
+  {
+    "code": "003202",
+    "name": "Las Cruces",
+    "city_code": "11001"
+  },
+  {
+    "code": "003203",
+    "name": "Santa Barbara",
+    "city_code": "11001"
+  },
+  {
+    "code": "003204",
+    "name": "Belen",
+    "city_code": "11001"
+  },
+  {
+    "code": "003205",
+    "name": "El Guavio",
+    "city_code": "11001"
+  },
+  {
+    "code": "003206",
+    "name": "La Pena",
+    "city_code": "11001"
+  },
+  {
+    "code": "003207",
+    "name": "Los Laches",
+    "city_code": "11001"
+  },
+  {
+    "code": "003208",
+    "name": "El Rocio",
+    "city_code": "11001"
+  },
+  {
+    "code": "003209",
+    "name": "El Dorado",
+    "city_code": "11001"
+  },
+  {
+    "code": "003210",
+    "name": "Ramirez",
+    "city_code": "11001"
+  },
+  {
+    "code": "003211",
+    "name": "Girardot",
+    "city_code": "11001"
+  },
+  {
+    "code": "003212",
+    "name": "Lourdes",
+    "city_code": "11001"
+  },
+  {
+    "code": "003215",
+    "name": "San Francisco Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "003221",
+    "name": "La Peña I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004101",
+    "name": "Ricaurte",
+    "city_code": "11001"
+  },
+  {
+    "code": "004102",
+    "name": "La Sabana",
+    "city_code": "11001"
+  },
+  {
+    "code": "004103",
+    "name": "Voto Nacional",
+    "city_code": "11001"
+  },
+  {
+    "code": "004104",
+    "name": "La Estanzuela",
+    "city_code": "11001"
+  },
+  {
+    "code": "004105",
+    "name": "Eduardo Santos",
+    "city_code": "11001"
+  },
+  {
+    "code": "004106",
+    "name": "El Vergel",
+    "city_code": "11001"
+  },
+  {
+    "code": "004107",
+    "name": "Santa Isabel Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004108",
+    "name": "Santa Isabel",
+    "city_code": "11001"
+  },
+  {
+    "code": "004109",
+    "name": "Veraguas",
+    "city_code": "11001"
+  },
+  {
+    "code": "004110",
+    "name": "La Pepita",
+    "city_code": "11001"
+  },
+  {
+    "code": "004111",
+    "name": "El Progreso",
+    "city_code": "11001"
+  },
+  {
+    "code": "004201",
+    "name": "Pensilvania",
+    "city_code": "11001"
+  },
+  {
+    "code": "004202",
+    "name": "Comuneros",
+    "city_code": "11001"
+  },
+  {
+    "code": "004203",
+    "name": "La Asuncion",
+    "city_code": "11001"
+  },
+  {
+    "code": "004204",
+    "name": "Montes",
+    "city_code": "11001"
+  },
+  {
+    "code": "004205",
+    "name": "Primavera Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004206",
+    "name": "San Francisco",
+    "city_code": "11001"
+  },
+  {
+    "code": "004207",
+    "name": "Gorgonzola",
+    "city_code": "11001"
+  },
+  {
+    "code": "004208",
+    "name": "Los Ejidos",
+    "city_code": "11001"
+  },
+  {
+    "code": "004209",
+    "name": "Santa Matilde",
+    "city_code": "11001"
+  },
+  {
+    "code": "004210",
+    "name": "Jorge Gaitan Cortes",
+    "city_code": "11001"
+  },
+  {
+    "code": "004211",
+    "name": "Bochica",
+    "city_code": "11001"
+  },
+  {
+    "code": "004212",
+    "name": "Tibana",
+    "city_code": "11001"
+  },
+  {
+    "code": "004301",
+    "name": "San Rafael Industrial",
+    "city_code": "11001"
+  },
+  {
+    "code": "004302",
+    "name": "San Rafael",
+    "city_code": "11001"
+  },
+  {
+    "code": "004303",
+    "name": "Barcelona",
+    "city_code": "11001"
+  },
+  {
+    "code": "004304",
+    "name": "Galan",
+    "city_code": "11001"
+  },
+  {
+    "code": "004305",
+    "name": "La Pradera",
+    "city_code": "11001"
+  },
+  {
+    "code": "004306",
+    "name": "La Trinidad",
+    "city_code": "11001"
+  },
+  {
+    "code": "004307",
+    "name": "San Gabriel",
+    "city_code": "11001"
+  },
+  {
+    "code": "004308",
+    "name": "Colon",
+    "city_code": "11001"
+  },
+  {
+    "code": "004309",
+    "name": "La Camelia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004310",
+    "name": "Provivienda Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "004316",
+    "name": "Las Margaritas",
+    "city_code": "11001"
+  },
+  {
+    "code": "004317",
+    "name": "La Camelia II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004401",
+    "name": "San Eusebio",
+    "city_code": "11001"
+  },
+  {
+    "code": "004402",
+    "name": "Remanso",
+    "city_code": "11001"
+  },
+  {
+    "code": "004403",
+    "name": "Autopista Muzu",
+    "city_code": "11001"
+  },
+  {
+    "code": "004404",
+    "name": "Autopista Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004405",
+    "name": "Ospina Perez Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004406",
+    "name": "Ospina Perez",
+    "city_code": "11001"
+  },
+  {
+    "code": "004407",
+    "name": "Alcala",
+    "city_code": "11001"
+  },
+  {
+    "code": "004408",
+    "name": "Tejar",
+    "city_code": "11001"
+  },
+  {
+    "code": "004409",
+    "name": "Alqueria",
+    "city_code": "11001"
+  },
+  {
+    "code": "004412",
+    "name": "Remanso Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004413",
+    "name": "Autopista Muzu Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004501",
+    "name": "Hipotecho",
+    "city_code": "11001"
+  },
+  {
+    "code": "004502",
+    "name": "Hipotecho Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004503",
+    "name": "Provivienda Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004504",
+    "name": "Provivienda",
+    "city_code": "11001"
+  },
+  {
+    "code": "004505",
+    "name": "Provivienda Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004506",
+    "name": "La Campina",
+    "city_code": "11001"
+  },
+  {
+    "code": "004507",
+    "name": "Ciudad Kennedy Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004508",
+    "name": "Ciudad Kennedy Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004509",
+    "name": "Ciudad Kennedy",
+    "city_code": "11001"
+  },
+  {
+    "code": "004510",
+    "name": "Ciudad Kennedy Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004511",
+    "name": "Ciudad Kennedy Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "004512",
+    "name": "Timiza",
+    "city_code": "11001"
+  },
+  {
+    "code": "004513",
+    "name": "San Diego-Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004514",
+    "name": "Ciudad Kennedy Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "004515",
+    "name": "Tundama",
+    "city_code": "11001"
+  },
+  {
+    "code": "004516",
+    "name": "Boita",
+    "city_code": "11001"
+  },
+  {
+    "code": "004517",
+    "name": "Jacqueline",
+    "city_code": "11001"
+  },
+  {
+    "code": "004518",
+    "name": "Timiza a",
+    "city_code": "11001"
+  },
+  {
+    "code": "004519",
+    "name": "Escocia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004520",
+    "name": "La Paz Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004521",
+    "name": "La Estacion Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004522",
+    "name": "Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004523",
+    "name": "Jimenez de Quesada",
+    "city_code": "11001"
+  },
+  {
+    "code": "004524",
+    "name": "San Pablo Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004525",
+    "name": "Pastrana",
+    "city_code": "11001"
+  },
+  {
+    "code": "004526",
+    "name": "Bosa Nova",
+    "city_code": "11001"
+  },
+  {
+    "code": "004527",
+    "name": "Nueva Granada Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004528",
+    "name": "Paso Ancho",
+    "city_code": "11001"
+  },
+  {
+    "code": "004529",
+    "name": "Cementerio Jardines Apogeo",
+    "city_code": "11001"
+  },
+  {
+    "code": "004530",
+    "name": "Timiza B",
+    "city_code": "11001"
+  },
+  {
+    "code": "004531",
+    "name": "Mandalay",
+    "city_code": "11001"
+  },
+  {
+    "code": "004532",
+    "name": "La Cecilia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004533",
+    "name": "El Retazo",
+    "city_code": "11001"
+  },
+  {
+    "code": "004534",
+    "name": "Roma",
+    "city_code": "11001"
+  },
+  {
+    "code": "004535",
+    "name": "Class",
+    "city_code": "11001"
+  },
+  {
+    "code": "004536",
+    "name": "El Rubi",
+    "city_code": "11001"
+  },
+  {
+    "code": "004537",
+    "name": "Casablanca",
+    "city_code": "11001"
+  },
+  {
+    "code": "004538",
+    "name": "Olarte",
+    "city_code": "11001"
+  },
+  {
+    "code": "004539",
+    "name": "Gran Colombiano",
+    "city_code": "11001"
+  },
+  {
+    "code": "004540",
+    "name": "Catalina II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004541",
+    "name": "El Paraiso Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004542",
+    "name": "Alqueria la Fragua Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "004543",
+    "name": "Alqueria la Fragua",
+    "city_code": "11001"
+  },
+  {
+    "code": "004544",
+    "name": "Las Delicias",
+    "city_code": "11001"
+  },
+  {
+    "code": "004545",
+    "name": "Catalina",
+    "city_code": "11001"
+  },
+  {
+    "code": "004546",
+    "name": "Villa del Rio",
+    "city_code": "11001"
+  },
+  {
+    "code": "004547",
+    "name": "Corabastos",
+    "city_code": "11001"
+  },
+  {
+    "code": "004548",
+    "name": "Techo",
+    "city_code": "11001"
+  },
+  {
+    "code": "004549",
+    "name": "Nueva York",
+    "city_code": "11001"
+  },
+  {
+    "code": "004550",
+    "name": "Jose Maria Carbonel",
+    "city_code": "11001"
+  },
+  {
+    "code": "004551",
+    "name": "Hipotecho Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004552",
+    "name": "Gualoche",
+    "city_code": "11001"
+  },
+  {
+    "code": "004553",
+    "name": "Andalucia II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004554",
+    "name": "Patio Bonito",
+    "city_code": "11001"
+  },
+  {
+    "code": "004555",
+    "name": "Patio Bonito II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004556",
+    "name": "Gran Britalia I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004557",
+    "name": "Gran Britalia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004558",
+    "name": "Campo Hermoso",
+    "city_code": "11001"
+  },
+  {
+    "code": "004559",
+    "name": "El Carmelo",
+    "city_code": "11001"
+  },
+  {
+    "code": "004560",
+    "name": "Saucedal",
+    "city_code": "11001"
+  },
+  {
+    "code": "004561",
+    "name": "El Jardin",
+    "city_code": "11001"
+  },
+  {
+    "code": "004562",
+    "name": "Llano Grande",
+    "city_code": "11001"
+  },
+  {
+    "code": "004563",
+    "name": "Guadalupe",
+    "city_code": "11001"
+  },
+  {
+    "code": "004564",
+    "name": "Tairona",
+    "city_code": "11001"
+  },
+  {
+    "code": "004565",
+    "name": "Tocarema",
+    "city_code": "11001"
+  },
+  {
+    "code": "004566",
+    "name": "Patio Bonito III",
+    "city_code": "11001"
+  },
+  {
+    "code": "004567",
+    "name": "Villas del Progreso",
+    "city_code": "11001"
+  },
+  {
+    "code": "004568",
+    "name": "Jorge Uribe Botero",
+    "city_code": "11001"
+  },
+  {
+    "code": "004569",
+    "name": "Jose Antonio Galan",
+    "city_code": "11001"
+  },
+  {
+    "code": "004570",
+    "name": "Antonia Santos",
+    "city_code": "11001"
+  },
+  {
+    "code": "004572",
+    "name": "Corredor Ferreo del Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004573",
+    "name": "Ciudadela el Recreo",
+    "city_code": "11001"
+  },
+  {
+    "code": "004574",
+    "name": "Charles de Gaulle",
+    "city_code": "11001"
+  },
+  {
+    "code": "004575",
+    "name": "Los Laureles",
+    "city_code": "11001"
+  },
+  {
+    "code": "004576",
+    "name": "Casa Blanca Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004577",
+    "name": "San Bernardino Xxii Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "004578",
+    "name": "Villa Nelly III Sector",
+    "city_code": "11001"
+  },
+  {
+    "code": "004579",
+    "name": "Escocia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004580",
+    "name": "Bosa Nova el Porvenir",
+    "city_code": "11001"
+  },
+  {
+    "code": "004581",
+    "name": "Timiza C",
+    "city_code": "11001"
+  },
+  {
+    "code": "004582",
+    "name": "Renania Urapanes",
+    "city_code": "11001"
+  },
+  {
+    "code": "004583",
+    "name": "Argelia II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004584",
+    "name": "Santa Catalina",
+    "city_code": "11001"
+  },
+  {
+    "code": "004586",
+    "name": "Jimenez de Quesada II Sector",
+    "city_code": "11001"
+  },
+  {
+    "code": "004587",
+    "name": "Los Sauces",
+    "city_code": "11001"
+  },
+  {
+    "code": "004588",
+    "name": "El Danubio Azul",
+    "city_code": "11001"
+  },
+  {
+    "code": "004589",
+    "name": "San Pedro",
+    "city_code": "11001"
+  },
+  {
+    "code": "004590",
+    "name": "San Bernardino Xxv Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "004591",
+    "name": "El Portal del Brasil",
+    "city_code": "11001"
+  },
+  {
+    "code": "004592",
+    "name": "San Martin",
+    "city_code": "11001"
+  },
+  {
+    "code": "004593",
+    "name": "La Libertad",
+    "city_code": "11001"
+  },
+  {
+    "code": "004594",
+    "name": "San Antonio",
+    "city_code": "11001"
+  },
+  {
+    "code": "004595",
+    "name": "Chico Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "004596",
+    "name": "Alqueria la Fragua II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004597",
+    "name": "San Bernardino I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004598",
+    "name": "Villa Anny I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004599",
+    "name": "Villa Anny II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004601",
+    "name": "Calandaima",
+    "city_code": "11001"
+  },
+  {
+    "code": "004602",
+    "name": "Remanso Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "004603",
+    "name": "El Paraiso",
+    "city_code": "11001"
+  },
+  {
+    "code": "004604",
+    "name": "Brasilia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004605",
+    "name": "Chicala",
+    "city_code": "11001"
+  },
+  {
+    "code": "004607",
+    "name": "Ciudad de Cali",
+    "city_code": "11001"
+  },
+  {
+    "code": "004609",
+    "name": "Los Almendros",
+    "city_code": "11001"
+  },
+  {
+    "code": "004611",
+    "name": "El Jazmin",
+    "city_code": "11001"
+  },
+  {
+    "code": "004612",
+    "name": "Dindalito",
+    "city_code": "11001"
+  },
+  {
+    "code": "004613",
+    "name": "Provivienda Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "004614",
+    "name": "Dindalito",
+    "city_code": "11001"
+  },
+  {
+    "code": "004615",
+    "name": "Osorio XII",
+    "city_code": "11001"
+  },
+  {
+    "code": "004616",
+    "name": "Osorio X Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "004617",
+    "name": "Tintalito",
+    "city_code": "11001"
+  },
+  {
+    "code": "004618",
+    "name": "Dintalito",
+    "city_code": "11001"
+  },
+  {
+    "code": "004619",
+    "name": "Chucua de la Vaca III",
+    "city_code": "11001"
+  },
+  {
+    "code": "004620",
+    "name": "Chucua de la Vaca II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004621",
+    "name": "Chucua de la Vaca I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004622",
+    "name": "Brasil",
+    "city_code": "11001"
+  },
+  {
+    "code": "004623",
+    "name": "San Bernardino Potreritos",
+    "city_code": "11001"
+  },
+  {
+    "code": "004624",
+    "name": "La Vega San Bernardino",
+    "city_code": "11001"
+  },
+  {
+    "code": "004625",
+    "name": "El Remanso I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004626",
+    "name": "Las Acacias",
+    "city_code": "11001"
+  },
+  {
+    "code": "004627",
+    "name": "Galan",
+    "city_code": "11001"
+  },
+  {
+    "code": "004628",
+    "name": "Betania",
+    "city_code": "11001"
+  },
+  {
+    "code": "004630",
+    "name": "Parcela el Porvenir",
+    "city_code": "11001"
+  },
+  {
+    "code": "004631",
+    "name": "El Corzo",
+    "city_code": "11001"
+  },
+  {
+    "code": "004632",
+    "name": "La Cabana",
+    "city_code": "11001"
+  },
+  {
+    "code": "004633",
+    "name": "Santa Fe Bosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "004634",
+    "name": "Canaveralejo",
+    "city_code": "11001"
+  },
+  {
+    "code": "004635",
+    "name": "San Bernardino II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004637",
+    "name": "Las Margaritas",
+    "city_code": "11001"
+  },
+  {
+    "code": "004638",
+    "name": "Ciudadela el Recreo II",
+    "city_code": "11001"
+  },
+  {
+    "code": "004641",
+    "name": "La Independencia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004642",
+    "name": "Islandia",
+    "city_code": "11001"
+  },
+  {
+    "code": "004643",
+    "name": "El Corzo I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004645",
+    "name": "Cañaveralejo I",
+    "city_code": "11001"
+  },
+  {
+    "code": "004646",
+    "name": "El Corzo II",
+    "city_code": "11001"
+  },
+  {
+    "code": "005101",
+    "name": "Jose Joaquin Vargas",
+    "city_code": "11001"
+  },
+  {
+    "code": "005102",
+    "name": "Popular Modelo",
+    "city_code": "11001"
+  },
+  {
+    "code": "005103",
+    "name": "San Miguel",
+    "city_code": "11001"
+  },
+  {
+    "code": "005104",
+    "name": "El Rosario",
+    "city_code": "11001"
+  },
+  {
+    "code": "005105",
+    "name": "Campin Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005106",
+    "name": "Nicolas de Federman",
+    "city_code": "11001"
+  },
+  {
+    "code": "005107",
+    "name": "Acevedo Tejada",
+    "city_code": "11001"
+  },
+  {
+    "code": "005108",
+    "name": "Ciudad Universitaria",
+    "city_code": "11001"
+  },
+  {
+    "code": "005109",
+    "name": "Centro Administrativo Occ.",
+    "city_code": "11001"
+  },
+  {
+    "code": "005110",
+    "name": "El Salitre",
+    "city_code": "11001"
+  },
+  {
+    "code": "005111",
+    "name": "La Esmeralda",
+    "city_code": "11001"
+  },
+  {
+    "code": "005112",
+    "name": "Parque Distrital Salitre",
+    "city_code": "11001"
+  },
+  {
+    "code": "005113",
+    "name": "Paulo VI",
+    "city_code": "11001"
+  },
+  {
+    "code": "005114",
+    "name": "Campo Eucaristico",
+    "city_code": "11001"
+  },
+  {
+    "code": "005115",
+    "name": "Parque Popular Salitre",
+    "city_code": "11001"
+  },
+  {
+    "code": "005116",
+    "name": "Pablo VI Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "005117",
+    "name": "Rafael Nunez",
+    "city_code": "11001"
+  },
+  {
+    "code": "005201",
+    "name": "Jorge Eliecer Gaitan",
+    "city_code": "11001"
+  },
+  {
+    "code": "005202",
+    "name": "Doce de Octubre",
+    "city_code": "11001"
+  },
+  {
+    "code": "005203",
+    "name": "San Fernando",
+    "city_code": "11001"
+  },
+  {
+    "code": "005204",
+    "name": "San Fernando Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005205",
+    "name": "Simon Bolivar",
+    "city_code": "11001"
+  },
+  {
+    "code": "005206",
+    "name": "La Libertad",
+    "city_code": "11001"
+  },
+  {
+    "code": "005207",
+    "name": "Metropolis",
+    "city_code": "11001"
+  },
+  {
+    "code": "005304",
+    "name": "La Castellana",
+    "city_code": "11001"
+  },
+  {
+    "code": "005305",
+    "name": "La Patria",
+    "city_code": "11001"
+  },
+  {
+    "code": "005306",
+    "name": "Entrerios",
+    "city_code": "11001"
+  },
+  {
+    "code": "005307",
+    "name": "Los Andes",
+    "city_code": "11001"
+  },
+  {
+    "code": "005308",
+    "name": "Rionegro",
+    "city_code": "11001"
+  },
+  {
+    "code": "005310",
+    "name": "Escuela Militar",
+    "city_code": "11001"
+  },
+  {
+    "code": "005401",
+    "name": "Potosi",
+    "city_code": "11001"
+  },
+  {
+    "code": "005402",
+    "name": "Santa Rosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "005403",
+    "name": "Julio Florez",
+    "city_code": "11001"
+  },
+  {
+    "code": "005404",
+    "name": "Las Ferias",
+    "city_code": "11001"
+  },
+  {
+    "code": "005405",
+    "name": "Las Ferias Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005406",
+    "name": "Bonanza",
+    "city_code": "11001"
+  },
+  {
+    "code": "005501",
+    "name": "Palo Blanco",
+    "city_code": "11001"
+  },
+  {
+    "code": "005502",
+    "name": "La Estrada",
+    "city_code": "11001"
+  },
+  {
+    "code": "005503",
+    "name": "Bellavista Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005504",
+    "name": "La Estradita",
+    "city_code": "11001"
+  },
+  {
+    "code": "005505",
+    "name": "Bosque Popular",
+    "city_code": "11001"
+  },
+  {
+    "code": "005506",
+    "name": "Jardin Botanico",
+    "city_code": "11001"
+  },
+  {
+    "code": "005507",
+    "name": "Normandia",
+    "city_code": "11001"
+  },
+  {
+    "code": "005508",
+    "name": "La Cabana",
+    "city_code": "11001"
+  },
+  {
+    "code": "005509",
+    "name": "San Joaquin",
+    "city_code": "11001"
+  },
+  {
+    "code": "005510",
+    "name": "El Laurel",
+    "city_code": "11001"
+  },
+  {
+    "code": "005601",
+    "name": "El Minuto de Dios",
+    "city_code": "11001"
+  },
+  {
+    "code": "005602",
+    "name": "Santa Maria",
+    "city_code": "11001"
+  },
+  {
+    "code": "005603",
+    "name": "Boyaca",
+    "city_code": "11001"
+  },
+  {
+    "code": "005604",
+    "name": "El Real",
+    "city_code": "11001"
+  },
+  {
+    "code": "005605",
+    "name": "El Encanto",
+    "city_code": "11001"
+  },
+  {
+    "code": "005606",
+    "name": "Normandia Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005607",
+    "name": "San Ignacio",
+    "city_code": "11001"
+  },
+  {
+    "code": "005608",
+    "name": "Santa Helenita",
+    "city_code": "11001"
+  },
+  {
+    "code": "005609",
+    "name": "Tabora",
+    "city_code": "11001"
+  },
+  {
+    "code": "005610",
+    "name": "La Granja",
+    "city_code": "11001"
+  },
+  {
+    "code": "005611",
+    "name": "Autopista Medellin",
+    "city_code": "11001"
+  },
+  {
+    "code": "005612",
+    "name": "Paris Gaitan",
+    "city_code": "11001"
+  },
+  {
+    "code": "005613",
+    "name": "La Serena",
+    "city_code": "11001"
+  },
+  {
+    "code": "005614",
+    "name": "Villa Luz",
+    "city_code": "11001"
+  },
+  {
+    "code": "005615",
+    "name": "La Soledad Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "005616",
+    "name": "Los Cerezos",
+    "city_code": "11001"
+  },
+  {
+    "code": "005617",
+    "name": "Primavera",
+    "city_code": "11001"
+  },
+  {
+    "code": "005619",
+    "name": "Paris",
+    "city_code": "11001"
+  },
+  {
+    "code": "005620",
+    "name": "Florencia",
+    "city_code": "11001"
+  },
+  {
+    "code": "005621",
+    "name": "Florida Blanca",
+    "city_code": "11001"
+  },
+  {
+    "code": "005622",
+    "name": "Bolivia",
+    "city_code": "11001"
+  },
+  {
+    "code": "005623",
+    "name": "Los Angeles",
+    "city_code": "11001"
+  },
+  {
+    "code": "005624",
+    "name": "Aeropuerto el Dorado",
+    "city_code": "11001"
+  },
+  {
+    "code": "005625",
+    "name": "Los Alamos",
+    "city_code": "11001"
+  },
+  {
+    "code": "005626",
+    "name": "Los Alamos",
+    "city_code": "11001"
+  },
+  {
+    "code": "005627",
+    "name": "Garces Navas",
+    "city_code": "11001"
+  },
+  {
+    "code": "005628",
+    "name": "Garces Navas Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005629",
+    "name": "El Cedro",
+    "city_code": "11001"
+  },
+  {
+    "code": "005630",
+    "name": "Ciudad Bachue",
+    "city_code": "11001"
+  },
+  {
+    "code": "005631",
+    "name": "Ciudad Bachue I Etapa",
+    "city_code": "11001"
+  },
+  {
+    "code": "005632",
+    "name": "Bochica",
+    "city_code": "11001"
+  },
+  {
+    "code": "005634",
+    "name": "El Cortijo",
+    "city_code": "11001"
+  },
+  {
+    "code": "005635",
+    "name": "El Madrigal",
+    "city_code": "11001"
+  },
+  {
+    "code": "005636",
+    "name": "Engativa Zona Urbana",
+    "city_code": "11001"
+  },
+  {
+    "code": "005637",
+    "name": "Villa Gladys",
+    "city_code": "11001"
+  },
+  {
+    "code": "005638",
+    "name": "Santa Cecilia",
+    "city_code": "11001"
+  },
+  {
+    "code": "005639",
+    "name": "Quirigua Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005640",
+    "name": "Bolivia Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "005641",
+    "name": "Santa Monica",
+    "city_code": "11001"
+  },
+  {
+    "code": "005643",
+    "name": "Alamos",
+    "city_code": "11001"
+  },
+  {
+    "code": "005644",
+    "name": "Bochica II",
+    "city_code": "11001"
+  },
+  {
+    "code": "005647",
+    "name": "Villas de Granada",
+    "city_code": "11001"
+  },
+  {
+    "code": "005648",
+    "name": "Villa Amalia",
+    "city_code": "11001"
+  },
+  {
+    "code": "005649",
+    "name": "Villas de Granada I",
+    "city_code": "11001"
+  },
+  {
+    "code": "005650",
+    "name": "Ciudadela Colsubsidio",
+    "city_code": "11001"
+  },
+  {
+    "code": "005652",
+    "name": "El Muelle",
+    "city_code": "11001"
+  },
+  {
+    "code": "005654",
+    "name": "Gran Granada",
+    "city_code": "11001"
+  },
+  {
+    "code": "005655",
+    "name": "Garces Navas Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "005657",
+    "name": "Sabana del Dorado",
+    "city_code": "11001"
+  },
+  {
+    "code": "005658",
+    "name": "Villa Sagrario",
+    "city_code": "11001"
+  },
+  {
+    "code": "005660",
+    "name": "San Antonio Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "005661",
+    "name": "Luis Carlos Galan",
+    "city_code": "11001"
+  },
+  {
+    "code": "005662",
+    "name": "El Cedro",
+    "city_code": "11001"
+  },
+  {
+    "code": "005663",
+    "name": "El Dorado Industrial",
+    "city_code": "11001"
+  },
+  {
+    "code": "005664",
+    "name": "El Dorado",
+    "city_code": "11001"
+  },
+  {
+    "code": "005665",
+    "name": "Marandu",
+    "city_code": "11001"
+  },
+  {
+    "code": "005666",
+    "name": "La Faena",
+    "city_code": "11001"
+  },
+  {
+    "code": "005667",
+    "name": "Centro Engativa II",
+    "city_code": "11001"
+  },
+  {
+    "code": "005668",
+    "name": "Villas de Alcala",
+    "city_code": "11001"
+  },
+  {
+    "code": "005669",
+    "name": "El Gaco",
+    "city_code": "11001"
+  },
+  {
+    "code": "005670",
+    "name": "La Riviera",
+    "city_code": "11001"
+  },
+  {
+    "code": "005672",
+    "name": "Las Navetas",
+    "city_code": "11001"
+  },
+  {
+    "code": "005673",
+    "name": "Pueblo Viejo",
+    "city_code": "11001"
+  },
+  {
+    "code": "005675",
+    "name": "Bolivia",
+    "city_code": "11001"
+  },
+  {
+    "code": "005679",
+    "name": "San Antonio Engativa",
+    "city_code": "11001"
+  },
+  {
+    "code": "005680",
+    "name": "Villa del Mar",
+    "city_code": "11001"
+  },
+  {
+    "code": "005682",
+    "name": "Ciudad Bachue II",
+    "city_code": "11001"
+  },
+  {
+    "code": "005683",
+    "name": "Quirigua I",
+    "city_code": "11001"
+  },
+  {
+    "code": "005684",
+    "name": "Quirigua II",
+    "city_code": "11001"
+  },
+  {
+    "code": "006101",
+    "name": "Florida",
+    "city_code": "11001"
+  },
+  {
+    "code": "006103",
+    "name": "Santa Fe",
+    "city_code": "11001"
+  },
+  {
+    "code": "006104",
+    "name": "La Favorita",
+    "city_code": "11001"
+  },
+  {
+    "code": "006105",
+    "name": "San Victorino",
+    "city_code": "11001"
+  },
+  {
+    "code": "006106",
+    "name": "El Liston",
+    "city_code": "11001"
+  },
+  {
+    "code": "006107",
+    "name": "Paloquemao",
+    "city_code": "11001"
+  },
+  {
+    "code": "006108",
+    "name": "Samper Mendoza",
+    "city_code": "11001"
+  },
+  {
+    "code": "006109",
+    "name": "Colseguros",
+    "city_code": "11001"
+  },
+  {
+    "code": "006110",
+    "name": "Usatama",
+    "city_code": "11001"
+  },
+  {
+    "code": "006201",
+    "name": "El Recuerdo",
+    "city_code": "11001"
+  },
+  {
+    "code": "006202",
+    "name": "Gran America",
+    "city_code": "11001"
+  },
+  {
+    "code": "006203",
+    "name": "La Florida Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "006204",
+    "name": "Estacion Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "006205",
+    "name": "Industrial Centenario",
+    "city_code": "11001"
+  },
+  {
+    "code": "006206",
+    "name": "El Ejido",
+    "city_code": "11001"
+  },
+  {
+    "code": "006207",
+    "name": "Batallon Caldas",
+    "city_code": "11001"
+  },
+  {
+    "code": "006208",
+    "name": "Ortezal",
+    "city_code": "11001"
+  },
+  {
+    "code": "006209",
+    "name": "Quinta Paredes",
+    "city_code": "11001"
+  },
+  {
+    "code": "006210",
+    "name": "Centro Narino",
+    "city_code": "11001"
+  },
+  {
+    "code": "006211",
+    "name": "Cundinamarca",
+    "city_code": "11001"
+  },
+  {
+    "code": "006212",
+    "name": "Salazar Gomez",
+    "city_code": "11001"
+  },
+  {
+    "code": "006215",
+    "name": "Puente Aranda",
+    "city_code": "11001"
+  },
+  {
+    "code": "006216",
+    "name": "Ciudad Salitre Nor-Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "006217",
+    "name": "Ciudad Salitre Sur-Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "006218",
+    "name": "Centro Industrial",
+    "city_code": "11001"
+  },
+  {
+    "code": "006301",
+    "name": "Santa Cecilia",
+    "city_code": "11001"
+  },
+  {
+    "code": "006302",
+    "name": "Capellania",
+    "city_code": "11001"
+  },
+  {
+    "code": "006303",
+    "name": "La Esperanza Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "006306",
+    "name": "Granjas de Techo",
+    "city_code": "11001"
+  },
+  {
+    "code": "006307",
+    "name": "Montevideo",
+    "city_code": "11001"
+  },
+  {
+    "code": "006308",
+    "name": "Franco",
+    "city_code": "11001"
+  },
+  {
+    "code": "006311",
+    "name": "Modelia",
+    "city_code": "11001"
+  },
+  {
+    "code": "006312",
+    "name": "Modelia Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "006313",
+    "name": "Salitre Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "006315",
+    "name": "La Esperanza Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "006316",
+    "name": "Bosque de Modelia",
+    "city_code": "11001"
+  },
+  {
+    "code": "006319",
+    "name": "Terminal de Transportes",
+    "city_code": "11001"
+  },
+  {
+    "code": "006320",
+    "name": "Ciudad Hayuelos",
+    "city_code": "11001"
+  },
+  {
+    "code": "006401",
+    "name": "Versalles Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006402",
+    "name": "La Cabana Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006403",
+    "name": "San Jose de Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006404",
+    "name": "Puerta de Teja",
+    "city_code": "11001"
+  },
+  {
+    "code": "006405",
+    "name": "Ferrocaja Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006406",
+    "name": "Villemar",
+    "city_code": "11001"
+  },
+  {
+    "code": "006407",
+    "name": "Guadual Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006408",
+    "name": "El Carmen Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006409",
+    "name": "Belen Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006410",
+    "name": "Centro Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006411",
+    "name": "Charco Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "006413",
+    "name": "San Pablo Jerico",
+    "city_code": "11001"
+  },
+  {
+    "code": "006414",
+    "name": "Brisas Aldea Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006415",
+    "name": "La Laguna Fontibon",
+    "city_code": "11001"
+  },
+  {
+    "code": "006416",
+    "name": "Atahualpa",
+    "city_code": "11001"
+  },
+  {
+    "code": "006417",
+    "name": "Villa Carmenza",
+    "city_code": "11001"
+  },
+  {
+    "code": "006418",
+    "name": "Puente Grande",
+    "city_code": "11001"
+  },
+  {
+    "code": "006419",
+    "name": "El Refugio",
+    "city_code": "11001"
+  },
+  {
+    "code": "006420",
+    "name": "La Giralda",
+    "city_code": "11001"
+  },
+  {
+    "code": "006423",
+    "name": "El Tintal Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "006501",
+    "name": "Cooperativa de Sub-Oficiales",
+    "city_code": "11001"
+  },
+  {
+    "code": "006502",
+    "name": "Marsella",
+    "city_code": "11001"
+  },
+  {
+    "code": "006503",
+    "name": "Vision de Oriente",
+    "city_code": "11001"
+  },
+  {
+    "code": "006504",
+    "name": "Bavaria",
+    "city_code": "11001"
+  },
+  {
+    "code": "006505",
+    "name": "Pio XII",
+    "city_code": "11001"
+  },
+  {
+    "code": "006506",
+    "name": "Castilla",
+    "city_code": "11001"
+  },
+  {
+    "code": "006507",
+    "name": "Nuevo Techo",
+    "city_code": "11001"
+  },
+  {
+    "code": "006508",
+    "name": "Las Dos Avenidas",
+    "city_code": "11001"
+  },
+  {
+    "code": "006509",
+    "name": "Lusitania",
+    "city_code": "11001"
+  },
+  {
+    "code": "006510",
+    "name": "Villa Alsacia II",
+    "city_code": "11001"
+  },
+  {
+    "code": "006511",
+    "name": "La Pampa",
+    "city_code": "11001"
+  },
+  {
+    "code": "006512",
+    "name": "Villa Alsacia",
+    "city_code": "11001"
+  },
+  {
+    "code": "006514",
+    "name": "Vergel Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "006515",
+    "name": "Valladolid",
+    "city_code": "11001"
+  },
+  {
+    "code": "006516",
+    "name": "Tintala",
+    "city_code": "11001"
+  },
+  {
+    "code": "006517",
+    "name": "Maria Paz",
+    "city_code": "11001"
+  },
+  {
+    "code": "006518",
+    "name": "Osorio III",
+    "city_code": "11001"
+  },
+  {
+    "code": "006519",
+    "name": "Moravia",
+    "city_code": "11001"
+  },
+  {
+    "code": "006520",
+    "name": "Zona Franca",
+    "city_code": "11001"
+  },
+  {
+    "code": "006521",
+    "name": "Sabana Grande",
+    "city_code": "11001"
+  },
+  {
+    "code": "006522",
+    "name": "El Tintal II",
+    "city_code": "11001"
+  },
+  {
+    "code": "006523",
+    "name": "San Pedro de los Robles",
+    "city_code": "11001"
+  },
+  {
+    "code": "006524",
+    "name": "La Magdalena",
+    "city_code": "11001"
+  },
+  {
+    "code": "006525",
+    "name": "El Chanco I",
+    "city_code": "11001"
+  },
+  {
+    "code": "006527",
+    "name": "Interindustrial",
+    "city_code": "11001"
+  },
+  {
+    "code": "006528",
+    "name": "El Vergel",
+    "city_code": "11001"
+  },
+  {
+    "code": "006529",
+    "name": "El Vergel Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "006531",
+    "name": "Ciudad Techo II",
+    "city_code": "11001"
+  },
+  {
+    "code": "006532",
+    "name": "Kasandra",
+    "city_code": "11001"
+  },
+  {
+    "code": "006533",
+    "name": "El Tintal III",
+    "city_code": "11001"
+  },
+  {
+    "code": "006534",
+    "name": "El Tintal IV",
+    "city_code": "11001"
+  },
+  {
+    "code": "006535",
+    "name": "El Chanco III",
+    "city_code": "11001"
+  },
+  {
+    "code": "007101",
+    "name": "La Soledad",
+    "city_code": "11001"
+  },
+  {
+    "code": "007102",
+    "name": "Santa Teresita",
+    "city_code": "11001"
+  },
+  {
+    "code": "007103",
+    "name": "La Magdalena",
+    "city_code": "11001"
+  },
+  {
+    "code": "007104",
+    "name": "Teusaquillo",
+    "city_code": "11001"
+  },
+  {
+    "code": "007105",
+    "name": "Armenia",
+    "city_code": "11001"
+  },
+  {
+    "code": "007106",
+    "name": "Estrella",
+    "city_code": "11001"
+  },
+  {
+    "code": "007107",
+    "name": "Las Americas",
+    "city_code": "11001"
+  },
+  {
+    "code": "007201",
+    "name": "Campin",
+    "city_code": "11001"
+  },
+  {
+    "code": "007202",
+    "name": "San Luis",
+    "city_code": "11001"
+  },
+  {
+    "code": "007203",
+    "name": "Chapinero Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "007204",
+    "name": "Quesada",
+    "city_code": "11001"
+  },
+  {
+    "code": "007205",
+    "name": "Palermo",
+    "city_code": "11001"
+  },
+  {
+    "code": "007206",
+    "name": "Belalcazar",
+    "city_code": "11001"
+  },
+  {
+    "code": "007207",
+    "name": "Galerias",
+    "city_code": "11001"
+  },
+  {
+    "code": "007208",
+    "name": "Banco Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "007209",
+    "name": "Alfonso Lopez",
+    "city_code": "11001"
+  },
+  {
+    "code": "007301",
+    "name": "La Merced Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "007302",
+    "name": "Alcazares",
+    "city_code": "11001"
+  },
+  {
+    "code": "007303",
+    "name": "Colombia",
+    "city_code": "11001"
+  },
+  {
+    "code": "007304",
+    "name": "Concepcion Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "007305",
+    "name": "La Esperanza",
+    "city_code": "11001"
+  },
+  {
+    "code": "007306",
+    "name": "Baquero",
+    "city_code": "11001"
+  },
+  {
+    "code": "007307",
+    "name": "Muequeta",
+    "city_code": "11001"
+  },
+  {
+    "code": "007308",
+    "name": "Quinta Mutis",
+    "city_code": "11001"
+  },
+  {
+    "code": "007309",
+    "name": "Benjamin Herrera",
+    "city_code": "11001"
+  },
+  {
+    "code": "007310",
+    "name": "La Paz",
+    "city_code": "11001"
+  },
+  {
+    "code": "007311",
+    "name": "Siete de Agosto",
+    "city_code": "11001"
+  },
+  {
+    "code": "007312",
+    "name": "Rafael Uribe",
+    "city_code": "11001"
+  },
+  {
+    "code": "007401",
+    "name": "Polo Club",
+    "city_code": "11001"
+  },
+  {
+    "code": "007402",
+    "name": "Juan Xxiii",
+    "city_code": "11001"
+  },
+  {
+    "code": "007403",
+    "name": "San Felipe",
+    "city_code": "11001"
+  },
+  {
+    "code": "007404",
+    "name": "Alcazares Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "007405",
+    "name": "Once de Noviembre",
+    "city_code": "11001"
+  },
+  {
+    "code": "007406",
+    "name": "Santa Sofia",
+    "city_code": "11001"
+  },
+  {
+    "code": "007407",
+    "name": "La Aurora",
+    "city_code": "11001"
+  },
+  {
+    "code": "008101",
+    "name": "Sagrado Corazon",
+    "city_code": "11001"
+  },
+  {
+    "code": "008102",
+    "name": "Parque Nacional",
+    "city_code": "11001"
+  },
+  {
+    "code": "008103",
+    "name": "La Merced",
+    "city_code": "11001"
+  },
+  {
+    "code": "008104",
+    "name": "La Perseverancia",
+    "city_code": "11001"
+  },
+  {
+    "code": "008105",
+    "name": "La Macarena",
+    "city_code": "11001"
+  },
+  {
+    "code": "008106",
+    "name": "Bosque Izquierdo",
+    "city_code": "11001"
+  },
+  {
+    "code": "008107",
+    "name": "San Diego",
+    "city_code": "11001"
+  },
+  {
+    "code": "008108",
+    "name": "Samper",
+    "city_code": "11001"
+  },
+  {
+    "code": "008109",
+    "name": "San Martin",
+    "city_code": "11001"
+  },
+  {
+    "code": "008110",
+    "name": "El Paraiso",
+    "city_code": "11001"
+  },
+  {
+    "code": "008111",
+    "name": "Cataluna",
+    "city_code": "11001"
+  },
+  {
+    "code": "008112",
+    "name": "Sucre",
+    "city_code": "11001"
+  },
+  {
+    "code": "008114",
+    "name": "Parque Nacional Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "008201",
+    "name": "Quinta Camacho",
+    "city_code": "11001"
+  },
+  {
+    "code": "008202",
+    "name": "Emaus",
+    "city_code": "11001"
+  },
+  {
+    "code": "008203",
+    "name": "Las Acacias",
+    "city_code": "11001"
+  },
+  {
+    "code": "008204",
+    "name": "Granada",
+    "city_code": "11001"
+  },
+  {
+    "code": "008205",
+    "name": "Maria Cristina",
+    "city_code": "11001"
+  },
+  {
+    "code": "008206",
+    "name": "La Salle",
+    "city_code": "11001"
+  },
+  {
+    "code": "008207",
+    "name": "Bosque Calderon",
+    "city_code": "11001"
+  },
+  {
+    "code": "008208",
+    "name": "Pardo Rubio",
+    "city_code": "11001"
+  },
+  {
+    "code": "008211",
+    "name": "Juan Xxiii",
+    "city_code": "11001"
+  },
+  {
+    "code": "008212",
+    "name": "Marly",
+    "city_code": "11001"
+  },
+  {
+    "code": "008213",
+    "name": "Chapinero Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "008214",
+    "name": "Chapinero Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008215",
+    "name": "Ingemar",
+    "city_code": "11001"
+  },
+  {
+    "code": "008220",
+    "name": "Siberia Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "008221",
+    "name": "Siberia Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "008301",
+    "name": "Chico Norte II Sector",
+    "city_code": "11001"
+  },
+  {
+    "code": "008302",
+    "name": "Seminario",
+    "city_code": "11001"
+  },
+  {
+    "code": "008303",
+    "name": "El Refugio",
+    "city_code": "11001"
+  },
+  {
+    "code": "008304",
+    "name": "Los Rosales",
+    "city_code": "11001"
+  },
+  {
+    "code": "008305",
+    "name": "Bellavista",
+    "city_code": "11001"
+  },
+  {
+    "code": "008306",
+    "name": "Porciuncula",
+    "city_code": "11001"
+  },
+  {
+    "code": "008307",
+    "name": "Chico Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008308",
+    "name": "El Chico",
+    "city_code": "11001"
+  },
+  {
+    "code": "008309",
+    "name": "La Cabrera",
+    "city_code": "11001"
+  },
+  {
+    "code": "008310",
+    "name": "El Retiro",
+    "city_code": "11001"
+  },
+  {
+    "code": "008311",
+    "name": "El Nogal",
+    "city_code": "11001"
+  },
+  {
+    "code": "008312",
+    "name": "Espartillal",
+    "city_code": "11001"
+  },
+  {
+    "code": "008313",
+    "name": "Lago Gaitan",
+    "city_code": "11001"
+  },
+  {
+    "code": "008314",
+    "name": "Antiguo Country",
+    "city_code": "11001"
+  },
+  {
+    "code": "008315",
+    "name": "Chico Norte III Sector",
+    "city_code": "11001"
+  },
+  {
+    "code": "008319",
+    "name": "El Bagazal",
+    "city_code": "11001"
+  },
+  {
+    "code": "008320",
+    "name": "El Refugio Zona II",
+    "city_code": "11001"
+  },
+  {
+    "code": "008321",
+    "name": "Ingemar Oriental II",
+    "city_code": "11001"
+  },
+  {
+    "code": "008322",
+    "name": "Siberia Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "008401",
+    "name": "La Calleja",
+    "city_code": "11001"
+  },
+  {
+    "code": "008402",
+    "name": "Country Club",
+    "city_code": "11001"
+  },
+  {
+    "code": "008403",
+    "name": "La Carolina",
+    "city_code": "11001"
+  },
+  {
+    "code": "008404",
+    "name": "Bella Suiza",
+    "city_code": "11001"
+  },
+  {
+    "code": "008405",
+    "name": "Ginebra",
+    "city_code": "11001"
+  },
+  {
+    "code": "008406",
+    "name": "San Gabriel Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008407",
+    "name": "Usaquen",
+    "city_code": "11001"
+  },
+  {
+    "code": "008408",
+    "name": "Santa Ana",
+    "city_code": "11001"
+  },
+  {
+    "code": "008409",
+    "name": "Escuela de Caballeria I",
+    "city_code": "11001"
+  },
+  {
+    "code": "008410",
+    "name": "Escuela de Infanteria",
+    "city_code": "11001"
+  },
+  {
+    "code": "008411",
+    "name": "Rincon del Chico",
+    "city_code": "11001"
+  },
+  {
+    "code": "008412",
+    "name": "Santa Bibiana",
+    "city_code": "11001"
+  },
+  {
+    "code": "008413",
+    "name": "Santa Barbara Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "008414",
+    "name": "Santa Ana Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "008415",
+    "name": "Santa Barbara Central",
+    "city_code": "11001"
+  },
+  {
+    "code": "008416",
+    "name": "Molinos Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008417",
+    "name": "Santa Barbara Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "008418",
+    "name": "San Patricio",
+    "city_code": "11001"
+  },
+  {
+    "code": "008419",
+    "name": "Escuela de Caballeria II",
+    "city_code": "11001"
+  },
+  {
+    "code": "008420",
+    "name": "Paramo Urbano I",
+    "city_code": "11001"
+  },
+  {
+    "code": "008424",
+    "name": "Segundo Contador",
+    "city_code": "11001"
+  },
+  {
+    "code": "008425",
+    "name": "Ginebra II",
+    "city_code": "11001"
+  },
+  {
+    "code": "008426",
+    "name": "San Gabriel Norte II",
+    "city_code": "11001"
+  },
+  {
+    "code": "008501",
+    "name": "El Toberin",
+    "city_code": "11001"
+  },
+  {
+    "code": "008502",
+    "name": "La Pradera Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008503",
+    "name": "Santa Teresa",
+    "city_code": "11001"
+  },
+  {
+    "code": "008504",
+    "name": "La Cita",
+    "city_code": "11001"
+  },
+  {
+    "code": "008505",
+    "name": "San Cristobal Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008506",
+    "name": "Barrancas Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008507",
+    "name": "Barrancas",
+    "city_code": "11001"
+  },
+  {
+    "code": "008508",
+    "name": "Cedro Salazar",
+    "city_code": "11001"
+  },
+  {
+    "code": "008509",
+    "name": "Los Cedros Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "008510",
+    "name": "Acacias Usaquen",
+    "city_code": "11001"
+  },
+  {
+    "code": "008511",
+    "name": "Cedro Narvaez",
+    "city_code": "11001"
+  },
+  {
+    "code": "008512",
+    "name": "Cedritos",
+    "city_code": "11001"
+  },
+  {
+    "code": "008513",
+    "name": "Lisboa",
+    "city_code": "11001"
+  },
+  {
+    "code": "008514",
+    "name": "El Contador",
+    "city_code": "11001"
+  },
+  {
+    "code": "008515",
+    "name": "Los Cedros",
+    "city_code": "11001"
+  },
+  {
+    "code": "008516",
+    "name": "Las Orquideas",
+    "city_code": "11001"
+  },
+  {
+    "code": "008517",
+    "name": "La Liberia",
+    "city_code": "11001"
+  },
+  {
+    "code": "008518",
+    "name": "Caobos Salazar",
+    "city_code": "11001"
+  },
+  {
+    "code": "008519",
+    "name": "Estrella del Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008520",
+    "name": "Bosque de Pinos",
+    "city_code": "11001"
+  },
+  {
+    "code": "008521",
+    "name": "Tibabita",
+    "city_code": "11001"
+  },
+  {
+    "code": "008522",
+    "name": "El Rocio Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008523",
+    "name": "San Antonio Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008524",
+    "name": "La Granja Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008525",
+    "name": "La Uribe",
+    "city_code": "11001"
+  },
+  {
+    "code": "008526",
+    "name": "El Vervenal",
+    "city_code": "11001"
+  },
+  {
+    "code": "008527",
+    "name": "El Cerezo",
+    "city_code": "11001"
+  },
+  {
+    "code": "008528",
+    "name": "San Antonio Noroccidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "008529",
+    "name": "San Jose de Usaquen",
+    "city_code": "11001"
+  },
+  {
+    "code": "008530",
+    "name": "Las Margaritas",
+    "city_code": "11001"
+  },
+  {
+    "code": "008532",
+    "name": "El Redil",
+    "city_code": "11001"
+  },
+  {
+    "code": "008533",
+    "name": "Horizontes Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008535",
+    "name": "Buenavista",
+    "city_code": "11001"
+  },
+  {
+    "code": "008536",
+    "name": "Bosque de Pinos I",
+    "city_code": "11001"
+  },
+  {
+    "code": "008537",
+    "name": "Verbenal San Antonio",
+    "city_code": "11001"
+  },
+  {
+    "code": "008538",
+    "name": "Bosque de Pinos III",
+    "city_code": "11001"
+  },
+  {
+    "code": "008539",
+    "name": "Torca I",
+    "city_code": "11001"
+  },
+  {
+    "code": "008540",
+    "name": "La Estrellita I",
+    "city_code": "11001"
+  },
+  {
+    "code": "008542",
+    "name": "Tibabita I",
+    "city_code": "11001"
+  },
+  {
+    "code": "008543",
+    "name": "Santa Cecilia Puente Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008544",
+    "name": "Canaima",
+    "city_code": "11001"
+  },
+  {
+    "code": "008545",
+    "name": "Mirador del Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "008547",
+    "name": "La Estrellita III",
+    "city_code": "11001"
+  },
+  {
+    "code": "008549",
+    "name": "La Estrellita I",
+    "city_code": "11001"
+  },
+  {
+    "code": "008551",
+    "name": "Barrancas Oriental I",
+    "city_code": "11001"
+  },
+  {
+    "code": "009101",
+    "name": "Granada Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009102",
+    "name": "Britalia",
+    "city_code": "11001"
+  },
+  {
+    "code": "009103",
+    "name": "Cantagallo",
+    "city_code": "11001"
+  },
+  {
+    "code": "009104",
+    "name": "Victoria Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009105",
+    "name": "Prado Pinzon",
+    "city_code": "11001"
+  },
+  {
+    "code": "009106",
+    "name": "San Jose del Prado",
+    "city_code": "11001"
+  },
+  {
+    "code": "009107",
+    "name": "Prado Veraniego",
+    "city_code": "11001"
+  },
+  {
+    "code": "009108",
+    "name": "Ciudad Jardin Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009109",
+    "name": "Niza Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "009110",
+    "name": "Mazuren",
+    "city_code": "11001"
+  },
+  {
+    "code": "009111",
+    "name": "Monaco",
+    "city_code": "11001"
+  },
+  {
+    "code": "009112",
+    "name": "Niza Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009113",
+    "name": "San Jose de Bavaria",
+    "city_code": "11001"
+  },
+  {
+    "code": "009114",
+    "name": "Gilmar",
+    "city_code": "11001"
+  },
+  {
+    "code": "009115",
+    "name": "Iberia",
+    "city_code": "11001"
+  },
+  {
+    "code": "009116",
+    "name": "Prado Veraniego Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009117",
+    "name": "Prado Veraniego Sur",
+    "city_code": "11001"
+  },
+  {
+    "code": "009118",
+    "name": "Batan",
+    "city_code": "11001"
+  },
+  {
+    "code": "009119",
+    "name": "Atenas",
+    "city_code": "11001"
+  },
+  {
+    "code": "009120",
+    "name": "Nueva Zelandia",
+    "city_code": "11001"
+  },
+  {
+    "code": "009121",
+    "name": "Club de los Lagartos",
+    "city_code": "11001"
+  },
+  {
+    "code": "009122",
+    "name": "Las Villas",
+    "city_code": "11001"
+  },
+  {
+    "code": "009123",
+    "name": "Niza Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009124",
+    "name": "Puente Largo",
+    "city_code": "11001"
+  },
+  {
+    "code": "009125",
+    "name": "Pasadena",
+    "city_code": "11001"
+  },
+  {
+    "code": "009126",
+    "name": "Estoril",
+    "city_code": "11001"
+  },
+  {
+    "code": "009127",
+    "name": "Andes Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009128",
+    "name": "El Plan",
+    "city_code": "11001"
+  },
+  {
+    "code": "009129",
+    "name": "Villa del Prado",
+    "city_code": "11001"
+  },
+  {
+    "code": "009130",
+    "name": "Canodromo",
+    "city_code": "11001"
+  },
+  {
+    "code": "009131",
+    "name": "Santa Helena",
+    "city_code": "11001"
+  },
+  {
+    "code": "009132",
+    "name": "Escuela de Carabineros",
+    "city_code": "11001"
+  },
+  {
+    "code": "009133",
+    "name": "Mirandela",
+    "city_code": "11001"
+  },
+  {
+    "code": "009134",
+    "name": "San Jose V Sector",
+    "city_code": "11001"
+  },
+  {
+    "code": "009135",
+    "name": "Portales del Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009136",
+    "name": "Casablanca Suba Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "009138",
+    "name": "Casablanca Suba Urbano I",
+    "city_code": "11001"
+  },
+  {
+    "code": "009139",
+    "name": "Casablanca Suba Urbano II",
+    "city_code": "11001"
+  },
+  {
+    "code": "009140",
+    "name": "Nuestra Senora del Rosario",
+    "city_code": "11001"
+  },
+  {
+    "code": "009141",
+    "name": "La Candelaria",
+    "city_code": "11001"
+  },
+  {
+    "code": "009142",
+    "name": "Conejera",
+    "city_code": "11001"
+  },
+  {
+    "code": "009144",
+    "name": "El Otoño I",
+    "city_code": "11001"
+  },
+  {
+    "code": "009201",
+    "name": "Los Naranjos",
+    "city_code": "11001"
+  },
+  {
+    "code": "009202",
+    "name": "El Rincon",
+    "city_code": "11001"
+  },
+  {
+    "code": "009203",
+    "name": "Puerta del Sol",
+    "city_code": "11001"
+  },
+  {
+    "code": "009204",
+    "name": "El Rincon Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009205",
+    "name": "Aures",
+    "city_code": "11001"
+  },
+  {
+    "code": "009206",
+    "name": "Aures II",
+    "city_code": "11001"
+  },
+  {
+    "code": "009207",
+    "name": "Villa Elisa",
+    "city_code": "11001"
+  },
+  {
+    "code": "009208",
+    "name": "Costa Azul",
+    "city_code": "11001"
+  },
+  {
+    "code": "009209",
+    "name": "Villa Maria",
+    "city_code": "11001"
+  },
+  {
+    "code": "009210",
+    "name": "Las Flores",
+    "city_code": "11001"
+  },
+  {
+    "code": "009211",
+    "name": "El Poa",
+    "city_code": "11001"
+  },
+  {
+    "code": "009212",
+    "name": "Suba Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "009213",
+    "name": "El Pino",
+    "city_code": "11001"
+  },
+  {
+    "code": "009214",
+    "name": "Tuna Alta",
+    "city_code": "11001"
+  },
+  {
+    "code": "009215",
+    "name": "Casablanca Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009216",
+    "name": "La Gaitana",
+    "city_code": "11001"
+  },
+  {
+    "code": "009217",
+    "name": "Rincon de Santa Ines",
+    "city_code": "11001"
+  },
+  {
+    "code": "009218",
+    "name": "Almirante Colon",
+    "city_code": "11001"
+  },
+  {
+    "code": "009219",
+    "name": "Campanella",
+    "city_code": "11001"
+  },
+  {
+    "code": "009220",
+    "name": "Lago de Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009221",
+    "name": "La Chucua",
+    "city_code": "11001"
+  },
+  {
+    "code": "009222",
+    "name": "Altos de Chozica",
+    "city_code": "11001"
+  },
+  {
+    "code": "009223",
+    "name": "Ttes de Colombia",
+    "city_code": "11001"
+  },
+  {
+    "code": "009224",
+    "name": "Nueva Tibabuyes",
+    "city_code": "11001"
+  },
+  {
+    "code": "009225",
+    "name": "Tibabuyes Universal",
+    "city_code": "11001"
+  },
+  {
+    "code": "009226",
+    "name": "Salitre Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009227",
+    "name": "Lech Walesa",
+    "city_code": "11001"
+  },
+  {
+    "code": "009228",
+    "name": "Lombardia",
+    "city_code": "11001"
+  },
+  {
+    "code": "009229",
+    "name": "Toscana",
+    "city_code": "11001"
+  },
+  {
+    "code": "009230",
+    "name": "San Cayetano",
+    "city_code": "11001"
+  },
+  {
+    "code": "009231",
+    "name": "Suba Cerros",
+    "city_code": "11001"
+  },
+  {
+    "code": "009232",
+    "name": "Sabana de Tibabuyes",
+    "city_code": "11001"
+  },
+  {
+    "code": "009233",
+    "name": "Tibabuyes",
+    "city_code": "11001"
+  },
+  {
+    "code": "009234",
+    "name": "Sabana de Tibabuyes Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009235",
+    "name": "Ciudad Hunza",
+    "city_code": "11001"
+  },
+  {
+    "code": "009236",
+    "name": "La Carolina de Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009237",
+    "name": "Rincon de Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009238",
+    "name": "Santa Teresa de Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009239",
+    "name": "Las Mercedes Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009240",
+    "name": "Potrerillo",
+    "city_code": "11001"
+  },
+  {
+    "code": "009241",
+    "name": "Bosques de San Jorge",
+    "city_code": "11001"
+  },
+  {
+    "code": "009242",
+    "name": "Tuna Baja",
+    "city_code": "11001"
+  },
+  {
+    "code": "009243",
+    "name": "Las Mercedes I",
+    "city_code": "11001"
+  },
+  {
+    "code": "009244",
+    "name": "Villa Hermosa",
+    "city_code": "11001"
+  },
+  {
+    "code": "009245",
+    "name": "Pinos de Lombardia",
+    "city_code": "11001"
+  },
+  {
+    "code": "009246",
+    "name": "Delmonte",
+    "city_code": "11001"
+  },
+  {
+    "code": "009247",
+    "name": "Iragua",
+    "city_code": "11001"
+  },
+  {
+    "code": "009248",
+    "name": "Tibabuyes II",
+    "city_code": "11001"
+  },
+  {
+    "code": "009249",
+    "name": "Vereda Suba Naranjos",
+    "city_code": "11001"
+  },
+  {
+    "code": "009250",
+    "name": "Tibabuyes Occidental",
+    "city_code": "11001"
+  },
+  {
+    "code": "009251",
+    "name": "San Carlos de Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009252",
+    "name": "Bilbao",
+    "city_code": "11001"
+  },
+  {
+    "code": "009253",
+    "name": "San Pedro",
+    "city_code": "11001"
+  },
+  {
+    "code": "009254",
+    "name": "Lisboa",
+    "city_code": "11001"
+  },
+  {
+    "code": "009255",
+    "name": "Santa Rita de Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009256",
+    "name": "Santa Cecilia",
+    "city_code": "11001"
+  },
+  {
+    "code": "009257",
+    "name": "Tibabuyes",
+    "city_code": "11001"
+  },
+  {
+    "code": "009258",
+    "name": "Casa Blanca Suba I",
+    "city_code": "11001"
+  },
+  {
+    "code": "009259",
+    "name": "Berlin",
+    "city_code": "11001"
+  },
+  {
+    "code": "009260",
+    "name": "Altos de Suba",
+    "city_code": "11001"
+  },
+  {
+    "code": "009261",
+    "name": "Tuna",
+    "city_code": "11001"
+  },
+  {
+    "code": "009262",
+    "name": "La Gaitana Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "009263",
+    "name": "Villa Alcazar",
+    "city_code": "11001"
+  },
+  {
+    "code": "009265",
+    "name": "Vereda Suba Cerros II",
+    "city_code": "11001"
+  },
+  {
+    "code": "009266",
+    "name": "Rincon Altamar",
+    "city_code": "11001"
+  },
+  {
+    "code": "009267",
+    "name": "Villa Maria I",
+    "city_code": "11001"
+  },
+  {
+    "code": "009268",
+    "name": "Santa Cecilia de Suba I",
+    "city_code": "11001"
+  },
+  {
+    "code": "201105",
+    "name": "El Refugio I",
+    "city_code": "11001"
+  },
+  {
+    "code": "201108",
+    "name": "El Refugio II",
+    "city_code": "11001"
+  },
+  {
+    "code": "201109",
+    "name": "Ingemar I",
+    "city_code": "11001"
+  },
+  {
+    "code": "201110",
+    "name": "Ingemar Oriental I",
+    "city_code": "11001"
+  },
+  {
+    "code": "201302",
+    "name": "El Triangulo",
+    "city_code": "11001"
+  },
+  {
+    "code": "201304",
+    "name": "Aguas Claras",
+    "city_code": "11001"
+  },
+  {
+    "code": "201306",
+    "name": "Tibaque I",
+    "city_code": "11001"
+  },
+  {
+    "code": "201309",
+    "name": "Tibaque II",
+    "city_code": "11001"
+  },
+  {
+    "code": "201317",
+    "name": "Tibaque III",
+    "city_code": "11001"
+  },
+  {
+    "code": "201318",
+    "name": "El Triangulo II",
+    "city_code": "11001"
+  },
+  {
+    "code": "201404",
+    "name": "La Peña Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "201408",
+    "name": "La Perseverancia I",
+    "city_code": "11001"
+  },
+  {
+    "code": "201503",
+    "name": "Siberia II",
+    "city_code": "11001"
+  },
+  {
+    "code": "201508",
+    "name": "Pardo Rubio I",
+    "city_code": "11001"
+  },
+  {
+    "code": "202203",
+    "name": "Bolonia I",
+    "city_code": "11001"
+  },
+  {
+    "code": "202204",
+    "name": "La Esperanza Sur I",
+    "city_code": "11001"
+  },
+  {
+    "code": "202309",
+    "name": "El Bosque Sur Oriental Rural III",
+    "city_code": "11001"
+  },
+  {
+    "code": "202404",
+    "name": "San Felipe de Usme Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "202410",
+    "name": "Tocaimita Oriental",
+    "city_code": "11001"
+  },
+  {
+    "code": "202502",
+    "name": "El Uval",
+    "city_code": "11001"
+  },
+  {
+    "code": "202506",
+    "name": "El Nuevo Portal II Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "202511",
+    "name": "Puerta Al Llano Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "202513",
+    "name": "El Uval II",
+    "city_code": "11001"
+  },
+  {
+    "code": "202514",
+    "name": "El Uval I",
+    "city_code": "11001"
+  },
+  {
+    "code": "202515",
+    "name": "El Uval III",
+    "city_code": "11001"
+  },
+  {
+    "code": "202601",
+    "name": "Centro Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "202602",
+    "name": "Centro Usme",
+    "city_code": "11001"
+  },
+  {
+    "code": "202603",
+    "name": "Centro Usme Urbano I",
+    "city_code": "11001"
+  },
+  {
+    "code": "202604",
+    "name": "Portal",
+    "city_code": "11001"
+  },
+  {
+    "code": "204106",
+    "name": "Nueva Esperanza",
+    "city_code": "11001"
+  },
+  {
+    "code": "204107",
+    "name": "El Mirador II",
+    "city_code": "11001"
+  },
+  {
+    "code": "204108",
+    "name": "Quiba Bajo I",
+    "city_code": "11001"
+  },
+  {
+    "code": "204109",
+    "name": "Quiba Bajo II",
+    "city_code": "11001"
+  },
+  {
+    "code": "204110",
+    "name": "Quiba Bajo III",
+    "city_code": "11001"
+  },
+  {
+    "code": "204111",
+    "name": "Quiba Bajo IV",
+    "city_code": "11001"
+  },
+  {
+    "code": "204119",
+    "name": "Quiba Bajo V",
+    "city_code": "11001"
+  },
+  {
+    "code": "204127",
+    "name": "Arabia I",
+    "city_code": "11001"
+  },
+  {
+    "code": "204128",
+    "name": "Quiba Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "204129",
+    "name": "El Mochuelo II Norte",
+    "city_code": "11001"
+  },
+  {
+    "code": "204130",
+    "name": "Arabia II",
+    "city_code": "11001"
+  },
+  {
+    "code": "204132",
+    "name": "Mochuelo V",
+    "city_code": "11001"
+  },
+  {
+    "code": "204304",
+    "name": "Lagunitas",
+    "city_code": "11001"
+  },
+  {
+    "code": "205101",
+    "name": "Vereda el Tintal Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "205102",
+    "name": "Vereda el Tintal",
+    "city_code": "11001"
+  },
+  {
+    "code": "205109",
+    "name": "La Magdalena I",
+    "city_code": "11001"
+  },
+  {
+    "code": "205209",
+    "name": "El Jazmin",
+    "city_code": "11001"
+  },
+  {
+    "code": "205221",
+    "name": "Galan Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "205225",
+    "name": "Las Acacias Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "205227",
+    "name": "Osorio IV",
+    "city_code": "11001"
+  },
+  {
+    "code": "205229",
+    "name": "Osorio",
+    "city_code": "11001"
+  },
+  {
+    "code": "205308",
+    "name": "Canaveralejo Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "205316",
+    "name": "Villa Emma",
+    "city_code": "11001"
+  },
+  {
+    "code": "205318",
+    "name": "San Bernardino Xviii",
+    "city_code": "11001"
+  },
+  {
+    "code": "205319",
+    "name": "San Bernardino Xix",
+    "city_code": "11001"
+  },
+  {
+    "code": "205320",
+    "name": "El Remanso",
+    "city_code": "11001"
+  },
+  {
+    "code": "205322",
+    "name": "Campo Verde",
+    "city_code": "11001"
+  },
+  {
+    "code": "205325",
+    "name": "Bosa 37",
+    "city_code": "11001"
+  },
+  {
+    "code": "205401",
+    "name": "El Chanco II",
+    "city_code": "11001"
+  },
+  {
+    "code": "205402",
+    "name": "El Charco",
+    "city_code": "11001"
+  },
+  {
+    "code": "206154",
+    "name": "El Cedro I",
+    "city_code": "11001"
+  },
+  {
+    "code": "206502",
+    "name": "Dorado Industrial I",
+    "city_code": "11001"
+  },
+  {
+    "code": "207110",
+    "name": "Casablanca Suba Otoño",
+    "city_code": "11001"
+  },
+  {
+    "code": "207111",
+    "name": "El Otoño",
+    "city_code": "11001"
+  },
+  {
+    "code": "207112",
+    "name": "Casa Blanca Suba III",
+    "city_code": "11001"
+  },
+  {
+    "code": "207801",
+    "name": "Santa Cecilia de Suba II",
+    "city_code": "11001"
+  },
+  {
+    "code": "208101",
+    "name": "Paramo IV",
+    "city_code": "11001"
+  },
+  {
+    "code": "208104",
+    "name": "Paramo Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "208107",
+    "name": "La Esperanza",
+    "city_code": "11001"
+  },
+  {
+    "code": "208108",
+    "name": "San Isidro Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "208110",
+    "name": "San Luis Altos del Cabo Rural",
+    "city_code": "11001"
+  },
+  {
+    "code": "208111",
+    "name": "San Isidro",
+    "city_code": "11001"
+  },
+  {
+    "code": "208125",
+    "name": "San Luis Altos del Cabo Rural II",
+    "city_code": "11001"
+  },
+  {
+    "code": "208126",
+    "name": "San Isidro Rural II",
+    "city_code": "11001"
+  },
+  {
+    "code": "208127",
+    "name": "Paramo Rural V",
+    "city_code": "11001"
+  },
+  {
+    "code": "208128",
+    "name": "Torca II",
+    "city_code": "11001"
+  },
+  {
+    "code": "208129",
+    "name": "Las Delicias del Carmen II Sector",
+    "city_code": "11001"
+  },
+  {
+    "code": "208130",
+    "name": "Torca",
+    "city_code": "11001"
+  },
+  {
+    "code": "208131",
+    "name": "Torca III",
+    "city_code": "11001"
+  },
+  {
+    "code": "208132",
+    "name": "Tibabita el Rosario",
+    "city_code": "11001"
+  },
+  {
+    "code": "208203",
+    "name": "La Estrellita",
+    "city_code": "11001"
+  },
+  {
+    "code": "232808",
+    "name": "El Destino",
+    "city_code": "11001"
+  },
+  {
+    "code": "233106",
+    "name": "Nazareth Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "233201",
+    "name": "Betania",
+    "city_code": "11001"
+  },
+  {
+    "code": "234104",
+    "name": "Pasquilla Urbana",
+    "city_code": "11001"
+  },
+  {
+    "code": "234110",
+    "name": "Quiba Bajo Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "234131",
+    "name": "Mochuelo Alto Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "237106",
+    "name": "Chorillos",
+    "city_code": "11001"
+  },
+  {
+    "code": "238111",
+    "name": "Altos de Serrezuela",
+    "city_code": "11001"
+  },
+  {
+    "code": "239104",
+    "name": "San Juan Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "239106",
+    "name": "La Union Urbano",
+    "city_code": "11001"
+  },
+  {
+    "code": "239116",
+    "name": "Nueva Granada",
+    "city_code": "11001"
+  }
+]

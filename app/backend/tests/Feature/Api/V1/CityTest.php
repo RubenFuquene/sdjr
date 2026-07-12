@@ -62,6 +62,53 @@ class CityTest extends TestCase
     }
 
     /**
+     * Verifica que el endpoint index filtre ciudades por departamento (department_id).
+     */
+    public function test_index_filters_cities_by_department_id()
+    {
+        Permission::firstOrCreate(['name' => 'admin.params.cities.index', 'guard_name' => 'sanctum']);
+        $user = User::factory()->create();
+        $user->givePermissionTo('admin.params.cities.index');
+        Sanctum::actingAs($user);
+
+        $country = Country::create([
+            'name' => 'Colombia',
+            'code' => 'CO1234',
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+        $cundinamarca = Department::create([
+            'country_id' => $country->id,
+            'name' => 'Cundinamarca',
+            'code' => 'DEP010',
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+        $antioquia = Department::create([
+            'country_id' => $country->id,
+            'name' => 'Antioquia',
+            'code' => 'DEP011',
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+        City::create([
+            'department_id' => $cundinamarca->id,
+            'name' => 'Bogota',
+            'code' => 'CITY10',
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+        City::create([
+            'department_id' => $antioquia->id,
+            'name' => 'Medellin',
+            'code' => 'CITY11',
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->getJson("/api/v1/cities?department_id={$cundinamarca->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Bogota');
+    }
+
+    /**
      * Verifica que el endpoint store cree una nueva ciudad correctamente.
      *
      * Crea un usuario con permiso, un departamento y envía los datos para crear una ciudad, validando la respuesta y la base de datos.
@@ -180,11 +227,11 @@ class CityTest extends TestCase
         $response = $this->putJson("/api/v1/cities/{$city->id}", $data);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.name', 'Barranquilla updated')
+            ->assertJsonPath('data.name', 'Barranquilla Updated')
             ->assertJsonPath('data.code', 'CITY05');
 
         $this->assertDatabaseHas('cities', [
-            'name' => 'Barranquilla updated',
+            'name' => 'Barranquilla Updated',
             'code' => 'CITY05',
             'department_id' => $department->id,
             'status' => $data['status'],
