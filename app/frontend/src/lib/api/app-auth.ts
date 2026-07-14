@@ -129,7 +129,7 @@ async function parseAuthResponse(response: Response): Promise<LoginResponse> {
  * Uses shared login endpoint but remains separate from provider auth module.
  */
 export async function loginAppUser({ email, password }: AppLoginPayload): Promise<AppLoginResult> {
-  return login({ email, password });
+  return login({ email, password, scope: "customer" });
 }
 
 /**

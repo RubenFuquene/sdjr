@@ -47,7 +47,7 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
           last_name: ''
         };
       } else {
-        const result = await login({ email, password });
+        const result = await login({ email, password, scope: "admin" });
         redirectTo = result.redirectTo ?? redirectTo;
         
         // Usar datos del usuario de la respuesta de la API
