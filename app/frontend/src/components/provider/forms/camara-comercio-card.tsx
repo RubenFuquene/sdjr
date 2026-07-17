@@ -52,11 +52,13 @@ export function CamaraComercioCard({
       <CardContent className="space-y-4">
         <div className="flex flex-col space-y-2">
           <Label className="text-sm font-medium text-[#1A1A1A]">
-            Documento de Cámara de Comercio <span className="text-red-500">*</span>
+            Documento de Cámara de Comercio <span className="text-red-500" aria-hidden="true">*</span>
+            <span className="sr-only"> (obligatorio)</span>
           </Label>
           <FileUploadBox
             label="Carga el documento de Cámara de Comercio"
             fileName={documents.commerceChamber}
+            describedById="commerce-chamber-status"
             onUpload={async () => {
               const { openFileDialog, validateFile, generateFileName } = await import('@/lib/utils/file-upload');
               const file = await openFileDialog();
@@ -75,24 +77,26 @@ export function CamaraComercioCard({
             }}
             disabled={isUploadingCamara || uploadStatus === 'uploading'}
           />
-          {uploadStatus === 'uploading' && (
-            <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
-          )}
-          {uploadStatus === 'success' && (
-            <p className="text-xs text-green-600">Documento cargado correctamente.</p>
-          )}
-          {uploadStatus === 'error' && uploadError && (
-            <div className="flex items-center gap-2 text-xs text-red-600">
-              <AlertCircle size={14} />
-              <span>{uploadError}</span>
-            </div>
-          )}
-          {errors.commerceChamber && (
-            <div className="flex items-center gap-2 text-xs text-red-600">
-              <AlertCircle size={14} />
-              <span>{errors.commerceChamber}</span>
-            </div>
-          )}
+          <div id="commerce-chamber-status" aria-live="polite">
+            {uploadStatus === 'uploading' && (
+              <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
+            )}
+            {uploadStatus === 'success' && (
+              <p className="text-xs text-green-600">Documento cargado correctamente.</p>
+            )}
+            {uploadStatus === 'error' && uploadError && (
+              <div className="flex items-center gap-2 text-xs text-red-600">
+                <AlertCircle size={14} />
+                <span>{uploadError}</span>
+              </div>
+            )}
+            {errors.commerceChamber && (
+              <div className="flex items-center gap-2 text-xs text-red-600">
+                <AlertCircle size={14} />
+                <span>{errors.commerceChamber}</span>
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

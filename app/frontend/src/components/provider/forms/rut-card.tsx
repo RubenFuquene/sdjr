@@ -59,11 +59,13 @@ export function RutCard({
       <CardContent className="space-y-6">
         <div className="flex flex-col space-y-2">
           <Label className="text-sm font-medium text-[#1A1A1A]">
-            {rutLabel} <span className="text-red-500">*</span>
+            {rutLabel} <span className="text-red-500" aria-hidden="true">*</span>
+            <span className="sr-only"> (obligatorio)</span>
           </Label>
           <FileUploadBox
             label="Carga el RUT"
             fileName={documents.rut}
+            describedById="rut-status"
             onUpload={async () => {
               const { openFileDialog, validateFile, generateFileName } = await import('@/lib/utils/file-upload');
               const file = await openFileDialog();
@@ -82,31 +84,38 @@ export function RutCard({
             }}
             disabled={rutUploadStatus === 'uploading'}
           />
-          {rutUploadStatus === 'uploading' && (
-            <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
-          )}
-          {rutUploadStatus === 'success' && (
-            <p className="text-xs text-green-600">Documento cargado correctamente.</p>
-          )}
-          {rutUploadStatus === 'error' && rutUploadError && (
-            <div className="flex items-center gap-2 text-xs text-red-600">
-              <AlertCircle size={14} />
-              <span>{rutUploadError}</span>
-            </div>
-          )}
-          {errors.rut && (
-            <div className="flex items-center gap-2 text-xs text-red-600">
-              <AlertCircle size={14} />
-              <span>{errors.rut}</span>
-            </div>
-          )}
+          <div id="rut-status" aria-live="polite">
+            {rutUploadStatus === 'uploading' && (
+              <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
+            )}
+            {rutUploadStatus === 'success' && (
+              <p className="text-xs text-green-600">Documento cargado correctamente.</p>
+            )}
+            {rutUploadStatus === 'error' && rutUploadError && (
+              <div className="flex items-center gap-2 text-xs text-red-600">
+                <AlertCircle size={14} />
+                <span>{rutUploadError}</span>
+              </div>
+            )}
+            {errors.rut && (
+              <div className="flex items-center gap-2 text-xs text-red-600">
+                <AlertCircle size={14} />
+                <span>{errors.rut}</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        <fieldset className="flex flex-col space-y-2">
+        <fieldset
+          className="flex flex-col space-y-2"
+          aria-describedby="electronic-invoicing-status"
+        >
           <legend className="text-sm font-medium text-[#1A1A1A] mb-1">
-            ¿Está obligado a emitir factura electrónica? <span className="text-red-500">*</span>
+            ¿Está obligado a emitir factura electrónica?{' '}
+            <span className="text-red-500" aria-hidden="true">*</span>
+            <span className="sr-only"> (obligatorio)</span>
           </legend>
-          <div className="flex gap-6">
+          <div className="flex gap-6" role="radiogroup" aria-required="true">
             <label className="flex items-center gap-2 text-sm text-[#1A1A1A] cursor-pointer">
               <input
                 type="radio"
@@ -128,22 +137,26 @@ export function RutCard({
               No
             </label>
           </div>
-          {errors.electronicInvoicingRequired && (
-            <div className="flex items-center gap-2 text-xs text-red-600">
-              <AlertCircle size={14} />
-              <span>{errors.electronicInvoicingRequired}</span>
-            </div>
-          )}
+          <div id="electronic-invoicing-status" aria-live="polite">
+            {errors.electronicInvoicingRequired && (
+              <div className="flex items-center gap-2 text-xs text-red-600">
+                <AlertCircle size={14} />
+                <span>{errors.electronicInvoicingRequired}</span>
+              </div>
+            )}
+          </div>
         </fieldset>
 
         {electronicInvoicingRequired === true && (
           <div className="flex flex-col space-y-2">
             <Label className="text-sm font-medium text-[#1A1A1A]">
-              Formato 1876 <span className="text-red-500">*</span>
+              Formato 1876 <span className="text-red-500" aria-hidden="true">*</span>
+              <span className="sr-only"> (obligatorio)</span>
             </Label>
             <FileUploadBox
               label="Carga el formato 1876"
               fileName={documents.form1876}
+              describedById="form1876-status"
               onUpload={async () => {
                 const { openFileDialog, validateFile, generateFileName } = await import('@/lib/utils/file-upload');
                 const file = await openFileDialog();
@@ -162,30 +175,35 @@ export function RutCard({
               }}
               disabled={form1876UploadStatus === 'uploading'}
             />
-            {form1876UploadStatus === 'uploading' && (
-              <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
-            )}
-            {form1876UploadStatus === 'success' && (
-              <p className="text-xs text-green-600">Documento cargado correctamente.</p>
-            )}
-            {form1876UploadStatus === 'error' && form1876UploadError && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{form1876UploadError}</span>
-              </div>
-            )}
-            {errors.form1876 && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{errors.form1876}</span>
-              </div>
-            )}
+            <div id="form1876-status" aria-live="polite">
+              {form1876UploadStatus === 'uploading' && (
+                <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
+              )}
+              {form1876UploadStatus === 'success' && (
+                <p className="text-xs text-green-600">Documento cargado correctamente.</p>
+              )}
+              {form1876UploadStatus === 'error' && form1876UploadError && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{form1876UploadError}</span>
+                </div>
+              )}
+              {errors.form1876 && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{errors.form1876}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {electronicInvoicingRequired === false && (
-          <div className="flex items-start gap-2 rounded-[14px] bg-[#F3F0F7] p-3 text-xs text-[#4B236A]">
-            <Info size={14} className="mt-0.5 flex-shrink-0" />
+          <div
+            className="flex items-start gap-2 rounded-[14px] bg-[#F3F0F7] p-3 text-xs text-[#4B236A]"
+            aria-live="polite"
+          >
+            <Info size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
             <span>
               Podrás operar en la plataforma sin este requisito, aunque esta información
               podrá ser solicitada posteriormente si cambia tu situación tributaria.

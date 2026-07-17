@@ -105,25 +105,31 @@ export function RepresentanteLegalCard({
           {/* ============================================ */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="legalRep-firstName" className="text-sm font-medium text-[#1A1A1A]">
-              Nombres <span className="text-red-500">*</span>
+              Nombres <span className="text-red-500" aria-hidden="true">*</span>
+              <span className="sr-only"> (obligatorio)</span>
             </Label>
             <Input
               id="legalRep-firstName"
               placeholder="Ej: Juan Pedro"
               value={legalRepresentative.firstName}
               onChange={(e) => handleRepChange('firstName', formatLettersOnly(e.target.value))}
+              aria-required="true"
+              aria-invalid={!!errors.legalRepresentativeFirstName}
+              aria-describedby="legalRep-firstName-status"
               className={`h-[50px] rounded-[14px] border ${
                 errors.legalRepresentativeFirstName
                   ? 'border-red-500 bg-red-50'
                   : 'border-[#E0E0E0] bg-white'
               }`}
             />
-            {errors.legalRepresentativeFirstName && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{errors.legalRepresentativeFirstName}</span>
-              </div>
-            )}
+            <div id="legalRep-firstName-status" aria-live="polite">
+              {errors.legalRepresentativeFirstName && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{errors.legalRepresentativeFirstName}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ============================================ */}
@@ -131,25 +137,31 @@ export function RepresentanteLegalCard({
           {/* ============================================ */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="legalRep-lastName" className="text-sm font-medium text-[#1A1A1A]">
-              Apellidos <span className="text-red-500">*</span>
+              Apellidos <span className="text-red-500" aria-hidden="true">*</span>
+              <span className="sr-only"> (obligatorio)</span>
             </Label>
             <Input
               id="legalRep-lastName"
               placeholder="Ej: García López"
               value={legalRepresentative.lastName}
               onChange={(e) => handleRepChange('lastName', formatLettersOnly(e.target.value))}
+              aria-required="true"
+              aria-invalid={!!errors.legalRepresentativeLastName}
+              aria-describedby="legalRep-lastName-status"
               className={`h-[50px] rounded-[14px] border ${
                 errors.legalRepresentativeLastName
                   ? 'border-red-500 bg-red-50'
                   : 'border-[#E0E0E0] bg-white'
               }`}
             />
-            {errors.legalRepresentativeLastName && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{errors.legalRepresentativeLastName}</span>
-              </div>
-            )}
+            <div id="legalRep-lastName-status" aria-live="polite">
+              {errors.legalRepresentativeLastName && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{errors.legalRepresentativeLastName}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ============================================ */}
@@ -157,7 +169,8 @@ export function RepresentanteLegalCard({
           {/* ============================================ */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="legalRep-docType" className="text-sm font-medium text-[#1A1A1A]">
-              Tipo de Documento <span className="text-red-500">*</span>
+              Tipo de Documento <span className="text-red-500" aria-hidden="true">*</span>
+              <span className="sr-only"> (obligatorio)</span>
             </Label>
             <Select
               value={normalizedDocumentType}
@@ -165,6 +178,9 @@ export function RepresentanteLegalCard({
             >
               <SelectTrigger
                 id="legalRep-docType"
+                aria-required="true"
+                aria-invalid={!!errors.legalRepresentativeDocumentType}
+                aria-describedby="legalRep-docType-status"
                 className={`h-[50px] rounded-[14px] border ${
                   errors.legalRepresentativeDocumentType
                     ? 'border-red-500 bg-red-50'
@@ -181,12 +197,14 @@ export function RepresentanteLegalCard({
                 ))}
               </SelectContent>
             </Select>
-            {errors.legalRepresentativeDocumentType && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{errors.legalRepresentativeDocumentType}</span>
-              </div>
-            )}
+            <div id="legalRep-docType-status" aria-live="polite">
+              {errors.legalRepresentativeDocumentType && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{errors.legalRepresentativeDocumentType}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ============================================ */}
@@ -194,7 +212,8 @@ export function RepresentanteLegalCard({
           {/* ============================================ */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="legalRep-docNumber" className="text-sm font-medium text-[#1A1A1A]">
-              Número de Documento <span className="text-red-500">*</span>
+              Número de Documento <span className="text-red-500" aria-hidden="true">*</span>
+              <span className="sr-only"> (obligatorio)</span>
             </Label>
             <Input
               id="legalRep-docNumber"
@@ -204,18 +223,23 @@ export function RepresentanteLegalCard({
               onChange={(e) =>
                 handleRepChange('documentNumber', formatDocumentNumber(e.target.value))
               }
+              aria-required="true"
+              aria-invalid={!!errors.legalRepresentativeDocumentNumber}
+              aria-describedby="legalRep-docNumber-status"
               className={`h-[50px] rounded-[14px] border ${
                 errors.legalRepresentativeDocumentNumber
                   ? 'border-red-500 bg-red-50'
                   : 'border-[#E0E0E0] bg-white'
               }`}
             />
-            {errors.legalRepresentativeDocumentNumber && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{errors.legalRepresentativeDocumentNumber}</span>
-              </div>
-            )}
+            <div id="legalRep-docNumber-status" aria-live="polite">
+              {errors.legalRepresentativeDocumentNumber && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{errors.legalRepresentativeDocumentNumber}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ============================================ */}
@@ -223,11 +247,13 @@ export function RepresentanteLegalCard({
           {/* ============================================ */}
           <div className="md:col-span-2 flex flex-col space-y-2">
             <Label className="text-sm font-medium text-[#1A1A1A]">
-              Documento (Cédula/Pasaporte) <span className="text-red-500">*</span>
+              Documento (Cédula/Pasaporte) <span className="text-red-500" aria-hidden="true">*</span>
+              <span className="sr-only"> (obligatorio)</span>
             </Label>
             <FileUploadBox
               label="Carga el documento de identidad"
               fileName={legalRepresentative.documentFile}
+              describedById="legalRep-document-status"
               onUpload={async () => {
                 const { openFileDialog, validateFile, generateFileName } = await import('@/lib/utils/file-upload');
                 const file = await openFileDialog();
@@ -246,24 +272,26 @@ export function RepresentanteLegalCard({
               }}
               disabled={isUploadingDoc || uploadStatus === 'uploading'}
             />
-            {uploadStatus === 'uploading' && (
-              <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
-            )}
-            {uploadStatus === 'success' && (
-              <p className="text-xs text-green-600">Documento cargado correctamente.</p>
-            )}
-            {uploadStatus === 'error' && uploadError && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{uploadError}</span>
-              </div>
-            )}
-            {errors.legalRepresentativeDocumentFile && (
-              <div className="flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle size={14} />
-                <span>{errors.legalRepresentativeDocumentFile}</span>
-              </div>
-            )}
+            <div id="legalRep-document-status" aria-live="polite">
+              {uploadStatus === 'uploading' && (
+                <p className="text-xs text-[#6A6A6A]">Subiendo documento...</p>
+              )}
+              {uploadStatus === 'success' && (
+                <p className="text-xs text-green-600">Documento cargado correctamente.</p>
+              )}
+              {uploadStatus === 'error' && uploadError && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+              {errors.legalRepresentativeDocumentFile && (
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle size={14} />
+                  <span>{errors.legalRepresentativeDocumentFile}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
