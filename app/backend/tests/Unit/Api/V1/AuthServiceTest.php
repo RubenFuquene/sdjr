@@ -9,6 +9,7 @@ use App\Services\AuthService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AuthServiceTest extends TestCase
@@ -28,14 +29,18 @@ class AuthServiceTest extends TestCase
      */
     public function test_login_succeeds_with_valid_credentials()
     {
+        Role::create(['name' => 'user', 'guard_name' => 'sanctum']);
+
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => Hash::make('password123'),
         ]);
+        $user->assignRole('user');
 
         $result = $this->authService->login([
             'email' => 'test@example.com',
             'password' => 'password123',
+            'scope' => 'customer',
         ]);
 
         $this->assertArrayHasKey('token', $result);

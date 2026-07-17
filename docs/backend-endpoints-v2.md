@@ -499,7 +499,7 @@ Body: {"name":"Delete","description":"Delete","permissions":["admin.profiles.rol
   - `mime_type` en whitelist (pdf, jpg, png, docx) → 422 si inválido.
   - `file_size_bytes` máximo 50MB → 422 si excede.
   - `commerce_id` debe existir → 404 si no existe.
-  - Permiso `admin.providers.upload_documents` → 403 si sin permisos.
+  - Permiso `admin.providers.documents.manage` → 403 si sin permisos.
 - **Respuesta exitosa (201 CREATED):**
   ```json
   {

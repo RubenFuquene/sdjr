@@ -110,4 +110,27 @@ class SupportStatusTest extends TestCase
         $response = $this->postJson('/api/v1/support-statuses', $payload);
         $response->assertForbidden();
     }
+
+    /**
+     * Auditoría SCRUM-334: show/destroy no tenían FormRequest — cualquier
+     * autenticado podía ver/eliminar un estado de soporte sin ningún permiso.
+     */
+    public function test_cannot_show_support_status_without_permission()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $status = SupportStatus::factory()->create();
+        $response = $this->getJson('/api/v1/support-statuses/'.$status->id);
+        $response->assertForbidden();
+    }
+
+    public function test_cannot_delete_support_status_without_permission()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $status = SupportStatus::factory()->create();
+        $response = $this->deleteJson('/api/v1/support-statuses/'.$status->id);
+        $response->assertForbidden();
+        $this->assertDatabaseHas('support_statuses', ['id' => $status->id, 'deleted_at' => null]);
+    }
 }

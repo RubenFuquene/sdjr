@@ -37,7 +37,7 @@ class PatchDocumentUploadRequest extends FormRequest
             return false;
         }
 
-        if ($user->can('admin.providers.upload_documents')) {
+        if ($user->can('admin.providers.documents.manage')) {
             return true;
         }
 

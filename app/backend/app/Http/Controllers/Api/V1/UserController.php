@@ -408,6 +408,7 @@ class UserController extends Controller
             $tokenData = $this->authService->login([
                 'email' => $user->email,
                 'password' => $request->input('password'),
+                'scope' => 'provider',
             ]);
 
             return $this->loginResponse(new UserResource($user), $tokenData['token']);
@@ -468,6 +469,7 @@ class UserController extends Controller
             $tokenData = $this->authService->login([
                 'email' => $user->email,
                 'password' => $request->input('password'),
+                'scope' => 'customer',
             ]);
 
             return $this->loginResponse(new UserResource($user), $tokenData['token']);

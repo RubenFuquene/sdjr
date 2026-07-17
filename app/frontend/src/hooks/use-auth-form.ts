@@ -78,10 +78,11 @@ export function useAuthForm(): UseAuthFormReturn {
         throw new Error("La contraseña debe tener al menos 6 caracteres");
       }
 
-      // Llamar a API
+      // Llamar a API (este hook sirve a la superficie de proveedor)
       const result = await login({
         email: sanitizedEmail,
         password: sanitizedPassword,
+        scope: "provider",
       });
 
       if (!result.ok || !result.user) {

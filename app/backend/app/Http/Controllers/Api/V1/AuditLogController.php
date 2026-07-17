@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\IndexAuditLogRequest;
+use App\Http\Requests\Api\V1\ShowAuditLogRequest;
 use App\Http\Resources\Api\V1\AuditLogResource;
 use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
@@ -43,7 +45,7 @@ class AuditLogController extends Controller
      *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function index(): JsonResponse
+    public function index(IndexAuditLogRequest $request): JsonResponse
     {
         try {
             $logs = $this->auditLogService->getAll();
@@ -74,7 +76,7 @@ class AuditLogController extends Controller
      *     @OA\Response(response=429, description="Too Many Requests", @OA\JsonContent(example={"status":false,"message":"Too many requests. Please try again later.","code":429}), @OA\Header(header="Retry-After", description="Segundos hasta que se puede volver a intentar", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por ventana", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Remaining", description="Peticiones restantes en la ventana actual", @OA\Schema(type="integer")), @OA\Header(header="X-RateLimit-Reset", description="Timestamp de reseteo de ventana", @OA\Schema(type="integer")))
      * )
      */
-    public function show(int $id): JsonResponse
+    public function show(ShowAuditLogRequest $request, int $id): JsonResponse
     {
         try {
             $log = $this->auditLogService->getById($id);

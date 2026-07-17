@@ -18,7 +18,7 @@ class DocumentUploadControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Permission::create(['name' => 'admin.providers.upload_documents', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.providers.documents.manage', 'guard_name' => 'sanctum']);
         $this->setUpMockS3Disk();
     }
 
@@ -29,7 +29,7 @@ class DocumentUploadControllerTest extends TestCase
     {
         $user = User::factory()->create();
         // Asignar permiso necesario
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $payload = [
@@ -60,7 +60,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_confirm_document_upload_success()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         // Simular documento pendiente
@@ -107,7 +107,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_document_token_not_found()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $payload = [
@@ -133,7 +133,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_token_exists_but_not_pending()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         // Simular documento que no está en estado pendiente
@@ -165,7 +165,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_presigned_url_expired()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
         // Simular documento pendiente pero expirado
         $document = CommerceDocument::factory()->create([
@@ -196,7 +196,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_confirm_supersedes_previous_document_of_same_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $commerce = Commerce::factory()->create();
@@ -244,7 +244,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_confirmed_documents_list_excludes_superseded_document()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $commerce = Commerce::factory()->create();
@@ -287,7 +287,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_confirm_does_not_affect_document_of_different_type()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $commerce = Commerce::factory()->create();
@@ -334,7 +334,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_confirm_chains_three_versions_of_the_same_document()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $commerce = Commerce::factory()->create();
@@ -405,7 +405,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_confirm_first_document_of_its_type_does_not_supersede_anything()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $document = CommerceDocument::factory()->create([
@@ -637,7 +637,7 @@ class DocumentUploadControllerTest extends TestCase
     }
 
     /**
-     * Regresión del retiro de admin.providers.upload_documents del rol provider
+     * Regresión del retiro de admin.providers.documents.manage del rol provider
      * (Tarea 2, SCRUM-242): el usuario con el permiso admin sigue operando
      * cualquier comercio sin verificación de ownership.
      *
@@ -646,7 +646,7 @@ class DocumentUploadControllerTest extends TestCase
     public function test_admin_permission_bypasses_ownership_check()
     {
         $user = User::factory()->create();
-        $user->givePermissionTo('admin.providers.upload_documents');
+        $user->givePermissionTo('admin.providers.documents.manage');
         $this->actingAs($user);
 
         $foreignCommerce = Commerce::factory()->create();

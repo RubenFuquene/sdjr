@@ -2,14 +2,16 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Enums\LoginScope;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Schema(
  *     schema="LoginRequest",
  *     title="Login Request",
  *     description="Login request body data",
- *     required={"email", "password"},
+ *     required={"email", "password", "scope"},
  *
  *     @OA\Property(
  *         property="email",
@@ -24,6 +26,13 @@ use Illuminate\Foundation\Http\FormRequest;
  *         format="password",
  *         example="password",
  *         description="User's password"
+ *     ),
+ *     @OA\Property(
+ *         property="scope",
+ *         type="string",
+ *         enum={"admin", "provider", "customer"},
+ *         example="admin",
+ *         description="Módulo desde el que se inicia sesión; el rol del usuario debe pertenecer a este ámbito"
  *     )
  * )
  */
@@ -47,6 +56,9 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
+            // Ámbito/módulo desde el que se inicia sesión (admin|provider|customer).
+            // Obligatorio: el login rechaza credenciales de un módulo ajeno (SCRUM-325).
+            'scope' => ['required', Rule::enum(LoginScope::class)],
         ];
     }
 }

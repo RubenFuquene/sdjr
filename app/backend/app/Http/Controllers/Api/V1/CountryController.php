@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CountryRequest;
+use App\Http\Requests\Api\V1\DeleteCountryRequest;
 use App\Http\Requests\Api\V1\IndexCountryRequest;
 use App\Http\Requests\Api\V1\ShowCountryRequest;
 use App\Http\Resources\Api\V1\CountryResource;
@@ -204,7 +205,7 @@ class CountryController extends Controller
      *     @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(DeleteCountryRequest $request, string $id): JsonResponse
     {
         try {
             $country = $this->countryService->find($id);

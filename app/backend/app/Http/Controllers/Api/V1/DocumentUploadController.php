@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
 use App\Http\Requests\Api\V1\PatchDocumentUploadRequest;
+use App\Http\Requests\Api\V1\ShowDocumentDownloadUrlRequest;
 use App\Http\Requests\Api\V1\StoreDocumentUploadRequest;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
 use App\Models\CommerceDocument;
@@ -284,7 +285,7 @@ class DocumentUploadController extends Controller
      *   @OA\Response(response=500, description="Internal Server Error")
      * )
      */
-    public function downloadCommerceDocumentUrl(int $id): JsonResponse
+    public function downloadCommerceDocumentUrl(ShowDocumentDownloadUrlRequest $request, int $id): JsonResponse
     {
         try {
             $commerce_document = $this->commerceDocumentService->find($id);

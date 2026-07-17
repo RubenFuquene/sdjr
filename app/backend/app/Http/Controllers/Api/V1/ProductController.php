@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteProductRequest;
-use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
+use App\Http\Requests\Api\V1\DestroyProductPhotoRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\PatchProductStatusRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
@@ -557,7 +557,7 @@ class ProductController extends Controller
      *   @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function removePhoto(DestroyDocumentUploadRequest $request, int $photo_id): JsonResponse
+    public function removePhoto(DestroyProductPhotoRequest $request, int $photo_id): JsonResponse
     {
         try {
 

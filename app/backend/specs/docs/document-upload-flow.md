@@ -194,7 +194,7 @@ Llamada inicial del frontend para obtener datos del usuario.
 
 1. Obtener usuario autenticado del token JWT.
 2. Si no autenticado, retornar 401.
-3. Verificar permiso `admin.providers.upload_documents` o equivalente según rol.
+3. Verificar permiso `admin.providers.documents.manage` o equivalente según rol.
 4. Retornar datos de usuario incluyendo flag `can_upload_documents: boolean`.
 
 **Output Data (Response):**
@@ -245,7 +245,7 @@ Frontend hace submit del formulario con documento seleccionado.
 1. Obtener usuario autenticado del JWT.
 2. **Validar Permisos:**
    - Si no autenticado → retornar 401.
-   - Si no tiene permiso `admin.providers.upload_documents` → retornar 403.
+   - Si no tiene permiso `admin.providers.documents.manage` → retornar 403.
 3. **Validar Entrada:**
    - `document_type` requerido y en enum válido → 422 si inválido.
    - `file_name` requerido, máximo 255 caracteres → 422 si excede.
@@ -633,7 +633,7 @@ END IF;
 ### 6.1 Seguridad
 
 - **Autenticación:** Todo endpoint requiere token JWT válido.
-- **Autorización:** Permiso `admin.providers.upload_documents` o equivalente según rol.
+- **Autorización:** Permiso `admin.providers.documents.manage` o equivalente según rol.
 - **Validación MIME Types:**
   - Whitelist: `['application/pdf', 'image/jpeg', 'image/png', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']`
   - Validar en frontend (UX) y backend (seguridad).

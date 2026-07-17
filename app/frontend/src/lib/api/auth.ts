@@ -11,9 +11,17 @@ import { API_URL, ApiError } from "./client";
 // Types
 // ============================================
 
+/**
+ * Ámbito/módulo desde el que se inicia sesión. El backend valida que el rol del
+ * usuario pertenezca a este ámbito (SCRUM-325). El nombre de la clave `scope` debe
+ * coincidir exactamente con el que lee el backend (LoginRequest).
+ */
+export type LoginScope = "admin" | "provider" | "customer";
+
 type LoginPayload = {
   email: string;
   password: string;
+  scope: LoginScope;
 };
 
 type ForgotPasswordPayload = {
@@ -72,7 +80,7 @@ async function readErrorBody(response: Response): Promise<unknown> {
  * POST /api/v1/login
  * Autentica usuario y retorna token + datos de sesión
  */
-export async function login({ email, password }: LoginPayload): Promise<LoginResult> {
+export async function login({ email, password, scope }: LoginPayload): Promise<LoginResult> {
   if (!email || !password) {
     throw new ApiError("Ingresa correo y contraseña.", 422);
   }
@@ -80,11 +88,11 @@ export async function login({ email, password }: LoginPayload): Promise<LoginRes
   try {
     const response = await fetch(`${API_URL}/api/v1/login`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, scope }),
     });
 
     if (!response.ok) {
