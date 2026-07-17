@@ -26,8 +26,7 @@
         <tr>
           <td class="fnt" style="font-family:'DM Sans', Arial, sans-serif; font-size:15px; line-height:1.7; color:#333333;">
             <p style="margin:0 0 16px 0;">Hola {{ $notifiable->name }},</p>
-            <p style="margin:0 0 16px 0;">Nos complace informarte que tu comercio "{{ $commerce->name }}" ha sido verificado y ahora se encuentra activo en la plataforma.</p>
-            <p style="margin:0 0 16px 0;">Su registro como proveedor ha sido aprobado satisfactoriamente.</p>
+            <p style="margin:0 0 16px 0;">Nos complace informarte que tu comercio ha sido verificado y ahora se encuentra activo en la plataforma.</p>
             @if($customMessage)
             <p style="margin:0 0 16px 0;">{{ $customMessage }}</p>
             @endif

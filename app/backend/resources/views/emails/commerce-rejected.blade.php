@@ -31,8 +31,8 @@
         <tr>
           <td class="fnt" style="font-family:'DM Sans', Arial, sans-serif; font-size:15px; line-height:1.7; color:#333333;">
             <p style="margin:0 0 16px 0; font-weight:600;">Hola {{ $notifiable->name ?? 'Usuario' }},</p>
-            <p style="margin:0 0 16px 0;">Lamentamos informarte que tu comercio "{{ $commerce->name }}" ha sido rechazado tras el proceso de verificación.</p>
-            <p style="margin:0 0 16px 0;">Por favor revisa la información registrada y vuelve a intentarlo o contacta soporte para más detalles.</p>
+            <p style="margin:0 0 16px 0;">Lamentamos informarte que tu comercio ha sido rechazado tras el proceso de verificación.</p>
+            <p style="margin:0 0 16px 0;">El motivo del rechazo es:</p>
             <p style="margin:0 0 16px 0; color:#666666; font-style:italic;">{{ $customMessage }}</p>
             <p style="margin:0 0 16px 0;">Gracias por tu interés en nuestra plataforma.</p>
             <p style="margin:0;">Saludos,<br>Tu amigo Ñapa<br>Email: soporte@napaapp.com.co</p>
