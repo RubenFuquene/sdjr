@@ -9,11 +9,10 @@ use App\Traits\AuthorizesCommerceOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * SCRUM-316 — exclusivo para DocumentUploadController::remove. El permiso ya no es
- * provider.products.delete (ajeno a documentos); ahora exige provider.documents.delete
- * más ownership del comercio dueño del documento.
+ * SCRUM-315 — cierra el IDOR de download-url: exige ownership del comercio dueño
+ * del documento (o permiso admin) antes de generar la URL firmada de descarga.
  */
-class DestroyDocumentUploadRequest extends FormRequest
+class ShowDocumentDownloadUrlRequest extends FormRequest
 {
     use AuthorizesCommerceOwnership;
 
@@ -29,11 +28,11 @@ class DestroyDocumentUploadRequest extends FormRequest
             return true;
         }
 
-        if (! $user->can('provider.documents.delete')) {
+        if (! $user->can('provider.documents.view')) {
             return false;
         }
 
-        $document = CommerceDocument::find($this->route('document'));
+        $document = CommerceDocument::find($this->route('id'));
 
         if (! $document) {
             // Sin documento: el controller responde 404 (ModelNotFoundException), no 403.

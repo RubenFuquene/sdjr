@@ -168,9 +168,16 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.establishment_types.update', 'guard_name' => $guardName, 'description' => 'Actualizar tipo de establecimiento', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.establishment_types.delete', 'guard_name' => $guardName, 'description' => 'Eliminar tipo de establecimiento', 'created_at' => now(), 'updated_at' => now()],
 
-            ['name' => 'admin.providers.upload_documents', 'guard_name' => $guardName, 'description' => 'Ver módulo de carga de documentos de proveedor en admin', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.providers.documents.manage', 'guard_name' => $guardName, 'description' => 'Gestionar documentos y fotos de proveedores en admin (ver, cargar, descargar, eliminar) — bypass de ownership', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.photos.upload', 'guard_name' => $guardName, 'description' => 'Actualizar fotos por proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.photos.delete', 'guard_name' => $guardName, 'description' => 'Eliminar fotos (producto o sucursal) por proveedor', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.documents.upload', 'guard_name' => $guardName, 'description' => 'Cargar documentos (RUT, 1876, etc.) del propio comercio como proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.documents.view', 'guard_name' => $guardName, 'description' => 'Ver/descargar documentos del propio comercio como proveedor', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'provider.documents.delete', 'guard_name' => $guardName, 'description' => 'Eliminar documentos del propio comercio como proveedor', 'created_at' => now(), 'updated_at' => now()],
+
+            // Audit Logs
+            ['name' => 'admin.audit_logs.index', 'guard_name' => $guardName, 'description' => 'Listar logs de auditoría', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'admin.audit_logs.show', 'guard_name' => $guardName, 'description' => 'Ver detalle de log de auditoría', 'created_at' => now(), 'updated_at' => now()],
 
             ['name' => 'provider.product_categories.index', 'guard_name' => $guardName, 'description' => 'Listar categorías de producto', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.product_categories.create', 'guard_name' => $guardName, 'description' => 'Crear categoría de producto', 'created_at' => now(), 'updated_at' => now()],
@@ -288,6 +295,9 @@ class RolePermissionSeeder extends Seeder
             'admin.manage_pqrs.show',
             'provider.orders.show',
             'customer.orders.show',
+            'admin.audit_logs.index',
+            'admin.audit_logs.show',
+            'admin.providers.documents.manage',
         ];
 
         $adminPermissions = array_merge($indexShowPermissions, [
@@ -390,6 +400,7 @@ class RolePermissionSeeder extends Seeder
             'provider.comments.show',
             'provider.orders.index',
             'provider.orders.show',
+            'provider.documents.view',
         ];
 
         // Proveedor tiene permisos específicos
@@ -424,7 +435,9 @@ class RolePermissionSeeder extends Seeder
 
             'provider.commerces.accept-terms',
             'provider.documents.upload',
+            'provider.documents.delete',
             'provider.photos.upload',
+            'provider.photos.delete',
         ]);
 
         $providerRole = Role::where('name', 'provider')->first();

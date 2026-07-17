@@ -10,16 +10,29 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Covers;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
+/**
+ * Cobertura de estructura/contenido del recurso. La matriz de autorización
+ * (con/sin permiso, 401, 404) vive en AuditLogAuthorizationTest (SCRUM-334).
+ */
 #[Covers(AuditLogController::class)]
 class AuditLogTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Permission::findOrCreate('admin.audit_logs.index', 'sanctum');
+        Permission::findOrCreate('admin.audit_logs.show', 'sanctum');
+    }
+
     public function test_authenticated_user_can_list_audit_logs(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo('admin.audit_logs.index');
         AuditLog::factory()->count(3)->create();
         Sanctum::actingAs($user);
 
@@ -41,6 +54,7 @@ class AuditLogTest extends TestCase
     public function test_authenticated_user_can_view_a_single_audit_log(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo('admin.audit_logs.show');
         $log = AuditLog::factory()->create();
         Sanctum::actingAs($user);
 
@@ -55,6 +69,7 @@ class AuditLogTest extends TestCase
     public function test_not_found_for_nonexistent_audit_log(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo('admin.audit_logs.show');
         Sanctum::actingAs($user);
         $response = $this->getJson('/api/v1/audit-logs/99999');
         $response->assertNotFound();

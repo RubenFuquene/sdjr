@@ -34,10 +34,12 @@ class CommerceDocumentService
 
     /**
      * Find a document by ID.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function find(int $id): ?CommerceDocument
+    public function find(int $id): CommerceDocument
     {
-        return CommerceDocument::find($id);
+        return CommerceDocument::findOrFail($id);
     }
 
     /**

@@ -377,7 +377,7 @@ class DocumentUploadController extends Controller
      */
     public function presigned(Request $request): JsonResponse
     {
-        $this->authorize('admin.providers.upload_documents');
+        $this->authorize('admin.providers.documents.manage');
 
         try {
             $data = $request->validate([
@@ -425,7 +425,7 @@ class DocumentUploadController extends Controller
      */
     public function confirm(Request $request): JsonResponse
     {
-        $this->authorize('admin.providers.upload_documents');
+        $this->authorize('admin.providers.documents.manage');
 
         try {
             $data = $request->validate([

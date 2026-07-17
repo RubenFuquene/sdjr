@@ -200,4 +200,25 @@ class CountryTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    /**
+     * Auditoría SCRUM-334: destroy no tenía FormRequest — cualquier autenticado
+     * podía eliminar un país sin ningún permiso.
+     */
+    public function test_cannot_delete_country_without_permission()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $country = Country::create([
+            'name' => 'Ecuador',
+            'code' => 'EC0001',
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->deleteJson("/api/v1/countries/{$country->id}");
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('countries', ['id' => $country->id]);
+    }
 }

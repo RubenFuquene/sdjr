@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteCommerceBranchRequest;
-use App\Http\Requests\Api\V1\DestroyDocumentUploadRequest;
+use App\Http\Requests\Api\V1\DestroyCommerceBranchPhotoRequest;
 use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
 use App\Http\Requests\Api\V1\MyFavoriteCommerceBranchesRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
@@ -288,7 +288,7 @@ class CommerceBranchController extends Controller
      *   @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function removePhoto(DestroyDocumentUploadRequest $request, int $photo_id): JsonResponse
+    public function removePhoto(DestroyCommerceBranchPhotoRequest $request, int $photo_id): JsonResponse
     {
         try {
 

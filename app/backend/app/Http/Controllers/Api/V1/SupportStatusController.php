@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\DeleteSupportStatusRequest;
 use App\Http\Requests\Api\V1\IndexSupportStatusRequest;
+use App\Http\Requests\Api\V1\ShowSupportStatusRequest;
 use App\Http\Requests\Api\V1\SupportStatusStoreRequest;
 use App\Http\Requests\Api\V1\SupportStatusUpdateRequest;
 use App\Http\Resources\Api\V1\SupportStatusResource;
@@ -183,7 +185,7 @@ class SupportStatusController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function show(int $id): JsonResponse
+    public function show(ShowSupportStatusRequest $request, int $id): JsonResponse
     {
         try {
             $status = $this->supportStatusService->find($id);
@@ -250,7 +252,7 @@ class SupportStatusController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(DeleteSupportStatusRequest $request, int $id): JsonResponse
     {
         try {
             $this->supportStatusService->delete($id);
