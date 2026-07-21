@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, KeyRound, Lock, Mail } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, KeyRound, Lock, Mail } from "lucide-react";
 
 import { resetPassword } from "@/lib/api/auth";
 
@@ -19,6 +19,7 @@ export function AdminResetPasswordForm({
   const [token, setToken] = useState(initialToken);
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -140,47 +141,71 @@ export function AdminResetPasswordForm({
         </div>
       </label>
 
-      <label className="block">
-        <span className="mb-2 block text-[var(--color-text)]">Nueva Contraseña</span>
+      <div className="block">
+        <label htmlFor="admin-reset-password" className="mb-2 block text-[var(--color-text)]">
+          Nueva Contraseña
+        </label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--color-brand)]" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[var(--color-brand)] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <input
+            id="admin-reset-password"
             required
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             disabled={loading}
-            className={inputClassName}
+            className={`${inputClassName} pr-10`}
           />
         </div>
         {!isPasswordValid && password.length > 0 && (
           <p className="mt-1 text-xs text-red-600">Debe tener al menos 8 caracteres.</p>
         )}
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="mb-2 block text-[var(--color-text)]">Confirmar Contraseña</span>
+      <div className="block">
+        <label htmlFor="admin-reset-password-confirmation" className="mb-2 block text-[var(--color-text)]">
+          Confirmar Contraseña
+        </label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--color-brand)]" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[var(--color-brand)] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <input
+            id="admin-reset-password-confirmation"
             required
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password_confirmation"
             autoComplete="new-password"
             value={passwordConfirmation}
             onChange={(e) => setPasswordConfirmation(e.target.value)}
             placeholder="••••••••"
             disabled={loading}
-            className={inputClassName}
+            className={`${inputClassName} pr-10`}
           />
         </div>
         {passwordConfirmation.length > 0 && !passwordsMatch && (
           <p className="mt-1 text-xs text-red-600">Las contraseñas no coinciden.</p>
         )}
-      </label>
+      </div>
 
       {error ? (
         <div

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 
 import { useAppAuthForm } from "@/hooks/app/use-app-auth-form";
 import { PASSWORD_MIN_LENGTH, validatePasswordPolicy } from "@/lib/auth/password-policy";
@@ -78,11 +78,12 @@ export default function AppRegisterForm() {
         </div>
 
         <div className="relative">
+          <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7A2E9A]" />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             disabled={loading}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A2E9A]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A2E9A] disabled:opacity-50"
             aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
           >
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -92,7 +93,7 @@ export default function AppRegisterForm() {
             placeholder="Contraseña"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className={`h-12 rounded-xl bg-white pl-10 focus:ring-[#5A1E6B] ${
+            className={`h-12 rounded-xl bg-white pl-10 pr-10 focus:ring-[#5A1E6B] ${
               hasWeakPassword
                 ? "border-[#B9342D] focus:border-[#B9342D]"
                 : "border-[#E6E6E6] focus:border-[#5A1E6B]"
@@ -129,11 +130,12 @@ export default function AppRegisterForm() {
         </div>
 
         <div className="relative">
+          <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7A2E9A]" />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             disabled={loading}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A2E9A]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A2E9A] disabled:opacity-50"
             aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
           >
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -143,7 +145,7 @@ export default function AppRegisterForm() {
             placeholder="Repetir contrasena"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            className={`h-12 rounded-xl bg-white pl-10 focus:ring-[#5A1E6B] ${
+            className={`h-12 rounded-xl bg-white pl-10 pr-10 focus:ring-[#5A1E6B] ${
               hasPasswordMismatch
                 ? "border-[#B9342D] focus:border-[#B9342D]"
                 : "border-[#E6E6E6] focus:border-[#5A1E6B]"

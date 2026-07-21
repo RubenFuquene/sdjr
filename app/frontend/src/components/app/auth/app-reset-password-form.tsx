@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { KeyRound, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Lock, Mail } from "lucide-react";
 
 import { resetPassword } from "@/lib/api/auth";
 import { Button } from "@/components/app/ui/button";
@@ -21,6 +21,7 @@ export default function AppResetPasswordForm({
   const [token, setToken] = useState(initialToken);
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -142,14 +143,23 @@ export default function AppResetPasswordForm({
         <div className="space-y-1">
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7A2E9A]" />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              disabled={loading}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[#5A1E6B] disabled:opacity-50"
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
             <Input
               id="app-reset-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Nueva contraseña"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               disabled={loading}
-              className="h-12 rounded-xl border-[#E6E6E6] bg-white pl-10 focus:border-[#5A1E6B] focus:ring-[#5A1E6B]"
+              className="h-12 rounded-xl border-[#E6E6E6] bg-white pl-10 pr-10 focus:border-[#5A1E6B] focus:ring-[#5A1E6B]"
               aria-label="Nueva contraseña"
               autoComplete="new-password"
               required
@@ -163,14 +173,23 @@ export default function AppResetPasswordForm({
         <div className="space-y-1">
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7A2E9A]" />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              disabled={loading}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[#5A1E6B] disabled:opacity-50"
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
             <Input
               id="app-reset-password-confirmation"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Confirmar contraseña"
               value={passwordConfirmation}
               onChange={(event) => setPasswordConfirmation(event.target.value)}
               disabled={loading}
-              className="h-12 rounded-xl border-[#E6E6E6] bg-white pl-10 focus:border-[#5A1E6B] focus:ring-[#5A1E6B]"
+              className="h-12 rounded-xl border-[#E6E6E6] bg-white pl-10 pr-10 focus:border-[#5A1E6B] focus:ring-[#5A1E6B]"
               aria-label="Confirmar contraseña"
               autoComplete="new-password"
               required

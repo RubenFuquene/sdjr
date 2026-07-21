@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, KeyRound, Lock, Mail } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, KeyRound, Lock, Mail } from "lucide-react";
 import { resetPassword } from "@/lib/api/auth";
 import { Button } from "@/components/provider/ui/button";
 import { Input } from "@/components/provider/ui/input";
@@ -19,6 +19,7 @@ export function ResetPasswordForm({ initialEmail = "", initialToken = "" }: Rese
   const [token, setToken] = useState(initialToken);
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -155,14 +156,23 @@ export function ResetPasswordForm({ initialEmail = "", initialToken = "" }: Rese
         </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[#4B236A] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <Input
             id="reset-password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
             className={cn(
-              "pl-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
+              "pl-10 pr-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
               "focus:border-[#4B236A] focus:ring-2 focus:ring-[#4B236A]/20"
             )}
           />
@@ -178,14 +188,23 @@ export function ResetPasswordForm({ initialEmail = "", initialToken = "" }: Rese
         </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[#4B236A] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <Input
             id="reset-password-confirmation"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={passwordConfirmation}
             onChange={(e) => setPasswordConfirmation(e.target.value)}
             disabled={loading}
             className={cn(
-              "pl-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
+              "pl-10 pr-10 h-[50px] rounded-[14px] border-[#E0E0E0] placeholder-gray-400",
               "focus:border-[#4B236A] focus:ring-2 focus:ring-[#4B236A]/20"
             )}
           />
