@@ -229,6 +229,20 @@ export function ProviderDatosBasicosTab({
             placeholder="Ej: Calle 10 # 40-20"
           />
         </div>
+
+        {/* Obligado a facturar electrónicamente (solo lectura: lo declara el aliado) */}
+        <div>
+          <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            Obligado a facturar electrónicamente
+          </label>
+          <p className="w-full h-[50px] px-4 flex items-center border border-[#E0E0E0] rounded-[14px] bg-[#F7F7F7] text-sm text-[#1A1A1A]">
+            {formData.obligadoFacturarElectronicamente === true
+              ? 'Sí'
+              : formData.obligadoFacturarElectronicamente === false
+                ? 'No'
+                : 'Sin información registrada'}
+          </p>
+        </div>
       </div>
 
       {/* Observaciones del proveedor (solo lectura — las diligencia el aliado) */}

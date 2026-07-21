@@ -42,8 +42,8 @@ export async function getSessionOrRedirect(requiredRole: Role, redirectTo?: stri
   }
   
   if (session.role !== requiredRole) {
-    // Dummy: si roles no coinciden, redirige a home. Ajustar a página de 403 si se requiere.
-    return redirect("/");
+    // Rol incorrecto: llevar al login del módulo solicitado en vez de la landing.
+    return redirect(buildLoginUrl(requiredRole));
   }
 
   return session;

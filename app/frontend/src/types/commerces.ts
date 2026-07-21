@@ -214,6 +214,7 @@ export interface Proveedor {
   // Datos secundarios
   verificado: CommerceVerificationStatus; // is_verified
   descripcion?: string;
+  obligadoFacturarElectronicamente?: boolean | null;
 
   // Relaciones
   documentos: DocumentoProveedor[];

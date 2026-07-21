@@ -85,6 +85,7 @@ export const commerceToProveedor = (commerce: CommerceFromAPI): Proveedor => {
     // Datos secundarios
     verificado: normalizedVerificationStatus,
     descripcion: commerce.description,
+    obligadoFacturarElectronicamente: commerce.electronic_invoicing_required ?? null,
 
     // Relaciones
     documentos: mapearCommerceDocumentsADocumentos(commerce.documents),
