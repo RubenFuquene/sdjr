@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { login } from "@/lib/api/index";
 import type { SessionData } from "@/types/auth";
 import { persistSession } from "@/lib/session";
@@ -24,6 +25,7 @@ type LoginFormProps = {
 export function LoginForm({ onSubmit, labels }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -78,7 +80,7 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
       <label className="block">
         <span className="block text-[var(--color-text)] mb-2">{labels.emailLabel}</span>
         <div className="relative">
-          <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-brand)]" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-brand)]" />
           <input
             required
             type="email"
@@ -92,22 +94,34 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
         </div>
       </label>
 
-      <label className="block">
-        <span className="block text-[var(--color-text)] mb-2">{labels.passwordLabel}</span>
+      <div className="block">
+        <label htmlFor="admin-login-password" className="block text-[var(--color-text)] mb-2">
+          {labels.passwordLabel}
+        </label>
         <div className="relative">
-          <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-brand)]" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-brand)]" />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            disabled={loading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-[var(--color-brand)] disabled:opacity-50"
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
           <input
+            id="admin-login-password"
             required
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={labels.passwordPlaceholder}
-            className="w-full h-[50px] pl-11 pr-4 border border-[var(--color-border)] rounded-[14px] text-[#1A1A1A] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
+            className="w-full h-[50px] pl-11 pr-10 border border-[var(--color-border)] rounded-[14px] text-[#1A1A1A] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
           />
         </div>
-      </label>
+      </div>
 
       <div className="text-right">
         <Link
@@ -132,43 +146,5 @@ export function LoginForm({ onSubmit, labels }: LoginFormProps) {
         {loading ? `${labels.submit}...` : labels.submit}
       </button>
     </form>
-  );
-}
-
-function MailIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M4.75 5.75h14.5a1 1 0 0 1 1 1v10.5a1 1 0 0 1-1 1H4.75a1 1 0 0 1-1-1V6.75a1 1 0 0 1 1-1Z" />
-      <path d="m4 7 8 5 8-5" />
-    </svg>
-  );
-}
-
-function LockIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect x="5.5" y="10.5" width="13" height="9" rx="2" />
-      <path d="M9 10.5V7.75a3 3 0 0 1 6 0v2.75" />
-    </svg>
   );
 }

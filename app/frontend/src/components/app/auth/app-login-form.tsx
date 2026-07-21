@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 import { useAppAuthForm } from "@/hooks/app/use-app-auth-form";
 import { Button } from "@/components/app/ui/button";
@@ -50,11 +50,12 @@ export default function AppLoginForm({ onForgotPassword }: AppLoginFormProps) {
       </div>
 
       <div className="relative">
+        <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7A2E9A]" />
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
           disabled={loading}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A2E9A]"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A2E9A] disabled:opacity-50"
           aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
         >
           {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -64,7 +65,7 @@ export default function AppLoginForm({ onForgotPassword }: AppLoginFormProps) {
           placeholder="Contraseña"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="h-12 rounded-xl border-[#E6E6E6] bg-white pl-10 focus:border-[#5A1E6B] focus:ring-[#5A1E6B]"
+          className="h-12 rounded-xl border-[#E6E6E6] bg-white pl-10 pr-10 focus:border-[#5A1E6B] focus:ring-[#5A1E6B]"
           aria-label="Contraseña"
           autoComplete="current-password"
           required
