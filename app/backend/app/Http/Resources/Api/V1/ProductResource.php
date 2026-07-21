@@ -14,7 +14,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  *   @OA\Property(property="id", type="integer"),
  *   @OA\Property(property="commerce_id", type="integer"),
+ *   @OA\Property(property="commerce_name", type="string", nullable=true, description="Nombre del comercio propietario (solo si la relacion commerce esta cargada)"),
  *   @OA\Property(property="product_category_id", type="integer"),
+ *   @OA\Property(property="category", type="string", nullable=true, description="Nombre de la categoria (solo si la relacion category esta cargada)"),
  *   @OA\Property(property="title", type="string"),
  *   @OA\Property(property="description", type="string", nullable=true),
  *   @OA\Property(property="product_type", type="string", enum={"single","package"}),
@@ -59,7 +61,9 @@ class ProductResource extends JsonResource
         return [
             'id' => $this->id,
             'commerce_id' => $this->commerce_id,
+            'commerce_name' => $this->whenLoaded('commerce', fn () => $this->commerce?->name),
             'product_category_id' => $this->product_category_id,
+            'category' => $this->whenLoaded('category', fn () => $this->category?->name),
             'title' => $this->title,
             'description' => $this->description,
             'product_type' => $this->product_type,

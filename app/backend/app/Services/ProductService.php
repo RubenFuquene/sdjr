@@ -145,7 +145,19 @@ class ProductService
      */
     public function show(int $id): Product
     {
-        return Product::findOrFail($id);
+        return Product::with(['category', 'commerce'])->findOrFail($id);
+    }
+
+    /**
+     * Mostrar un producto para consumo público (app cliente).
+     * A diferencia de show(), solo expone productos activos: un producto
+     * inactivo/borrador no debe ser visible por id aunque se conozca el id.
+     */
+    public function showPublic(int $id): Product
+    {
+        return Product::with(['category', 'commerce', 'photos'])
+            ->where('status', Constant::STATUS_ACTIVE)
+            ->findOrFail($id);
     }
 
     /**

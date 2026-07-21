@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BankController;
+use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\CityController;
 use App\Http\Controllers\Api\V1\CommerceBasicDataController;
 use App\Http\Controllers\Api\V1\CommerceBranchController;
@@ -49,6 +50,15 @@ Route::prefix('v1')->group(function () {
     Route::prefix('nearby')->name('nearby.')->middleware('throttle:public-read')->group(function () {
         Route::get('branches', [NearbyController::class, 'branches']);
         Route::get('products', [NearbyController::class, 'products']);
+    });
+
+    // Catalog detail by id (público, throttle:public-read) — solo items activos.
+    // Distinto de nearby (búsqueda geográfica) y de products/commerce-branches
+    // (apiResource protegidos con permisos provider.*): esto es lectura pública
+    // puntual por id para la app cliente.
+    Route::prefix('catalog')->name('catalog.')->middleware('throttle:public-read')->group(function () {
+        Route::get('products/{id}', [CatalogController::class, 'product']);
+        Route::get('commerce-branches/{id}', [CatalogController::class, 'branch']);
     });
 
     // Protected routes (throttle:authenticated)

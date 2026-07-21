@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Constant;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
 use App\Models\CommerceBranchPhoto;
@@ -166,7 +167,19 @@ class CommerceBranchService
      */
     public function show(int $id): CommerceBranch
     {
-        return CommerceBranch::with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos'])->findOrFail($id);
+        return CommerceBranch::with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos', 'commerce'])->findOrFail($id);
+    }
+
+    /**
+     * Mostrar una sucursal para consumo público (app cliente).
+     * A diferencia de show(), solo expone sucursales activas: una sucursal
+     * inactiva no debe ser visible por id aunque se conozca el id.
+     */
+    public function showPublic(int $id): CommerceBranch
+    {
+        return CommerceBranch::with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos', 'commerce'])
+            ->where('status', Constant::STATUS_ACTIVE)
+            ->findOrFail($id);
     }
 
     /**

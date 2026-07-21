@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-
 /**
  * @OA\Schema(
  *   schema="NearbyProductResource",
@@ -21,7 +19,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="nearest_branch", ref="#/components/schemas/NearbyBranchResource", description="Sucursal más cercana con stock disponible"),
  * )
  */
-class NearbyProductResource extends JsonResource
+/**
+ * Extiende ProductResource (no JsonResource) para heredar la serialización
+ * real del producto (category, commerce_name, photos, etc.) en vez de volcar
+ * el modelo Eloquent crudo. Antes de este fix, `parent::toArray()` resolvía
+ * al JsonResource por defecto y devolvía `category`/`commerce` como modelos
+ * anidados sin filtrar (incluyendo deleted_at y otros campos internos).
+ */
+class NearbyProductResource extends ProductResource
 {
     /**
      * Transform the resource into an array.
