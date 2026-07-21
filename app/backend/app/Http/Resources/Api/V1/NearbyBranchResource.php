@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-
 /**
  * @OA\Schema(
  *   schema="NearbyBranchResource",
@@ -21,7 +19,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="distance_km", type="number", format="float", example=2.35, description="Distancia en kilómetros desde la ubicación consultada"),
  * )
  */
-class NearbyBranchResource extends JsonResource
+/**
+ * Extiende CommerceBranchResource (no JsonResource) para heredar la
+ * serialización real de la sucursal (commerce_name, hours, department/city/
+ * neighborhood por nombre, photos) en vez de volcar el modelo Eloquent crudo.
+ */
+class NearbyBranchResource extends CommerceBranchResource
 {
     /**
      * Transform the resource into an array.

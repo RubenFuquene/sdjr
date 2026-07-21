@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="commerce_id", type="integer", example=5),
+ *     @OA\Property(property="commerce_name", type="string", nullable=true, example="Panaderia El Trigal", description="Nombre del proveedor propietario (solo si la relacion commerce esta cargada)"),
  *     @OA\Property(property="name", type="string", example="Sucursal Norte"),
  *     @OA\Property(property="address", type="string", example="Calle 123 #45-67"),
  *     @OA\Property(property="department", type="string", example="Cundinamarca"),
@@ -39,6 +40,7 @@ class CommerceBranchResource extends JsonResource
         return [
             'id' => $this->id,
             'commerce_id' => $this->commerce_id,
+            'commerce_name' => $this->whenLoaded('commerce', fn () => $this->commerce?->name),
             'photos' => $this->whenLoaded('commerceBranchPhotos', function () {
                 return $this->commerceBranchPhotos->map(function ($photo) {
                     return new DocumentUploadResource($photo, ['commerce_branch_id' => $this->id]);

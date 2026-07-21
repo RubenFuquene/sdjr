@@ -1,30 +1,62 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { ArrowLeft, Clock, Info, MapPin, Star } from "lucide-react";
-import { getStoreById } from "@/lib/app/mock-catalog";
+import { AlertCircle, ArrowLeft, Clock, MapPin } from "lucide-react";
+import { ApiError } from "@/lib/api/client";
+import { getBranchDetail } from "@/lib/api/app-catalog";
+import { mapBranchDetailToView, type BranchDetailView } from "@/types/app-catalog.adapters";
 
 type StoreDetailPageProps = {
   params: Promise<{ storeId: string }>;
 };
 
-function formatPrice(value: number): string {
-  return `$${value.toLocaleString("es-CO")}`;
+function NotFoundState() {
+  return (
+    <section className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-4 text-center">
+      <AlertCircle className="h-8 w-8 text-[var(--color-app-text-secondary-purple)]" />
+      <h1 className="text-lg text-[var(--color-app-text-dark)]">Tienda no encontrada</h1>
+      <p className="text-sm text-[var(--color-app-text-secondary-purple)]">
+        Puede que ya no esté disponible o el enlace sea incorrecto.
+      </p>
+      <Link
+        href="/app/discover"
+        className="mt-2 inline-flex h-9 items-center rounded-xl border border-[var(--color-app-ui-divider)] px-3 text-xs text-[var(--color-app-text-primary-purple)] transition hover:bg-[var(--color-app-ui-background-soft)]"
+      >
+        Volver a Descubre
+      </Link>
+    </section>
+  );
+}
+
+function ErrorState() {
+  return (
+    <section className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-4 text-center">
+      <AlertCircle className="h-8 w-8 text-[var(--color-app-text-secondary-purple)]" />
+      <p className="text-sm text-[var(--color-app-text-secondary-purple)]">
+        No se pudo cargar la tienda en este momento. Intenta de nuevo.
+      </p>
+    </section>
+  );
 }
 
 export default async function StoreDetailPage({ params }: StoreDetailPageProps) {
   const { storeId } = await params;
-  const parsedStoreId = Number.parseInt(storeId, 10);
+  const branchId = Number.parseInt(storeId, 10);
 
-  if (Number.isNaN(parsedStoreId)) {
-    notFound();
+  if (!Number.isInteger(branchId) || branchId <= 0) {
+    return <NotFoundState />;
   }
 
-  const store = getStoreById(parsedStoreId);
-  if (!store) {
-    notFound();
-  }
+  let store: BranchDetailView;
 
-  const savings = store.originalPrice - store.price;
+  try {
+    const response = await getBranchDetail(branchId);
+    store = mapBranchDetailToView(response.data);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return <NotFoundState />;
+    }
+
+    return <ErrorState />;
+  }
 
   return (
     <section className="pb-6">
@@ -36,18 +68,13 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-
-        <div className="absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs text-[var(--color-app-text-dark)]">
-          <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-          <span>{store.rating}</span>
-          <span className="text-[var(--color-app-text-secondary-purple)]">({store.reviews})</span>
-        </div>
       </div>
 
       <div className="space-y-4 px-4 pt-4">
         <header className="app-page-header p-4">
-          <h1 className="text-xl text-[var(--color-app-text-dark)]">{store.name}</h1>
-          <p className="text-sm text-[var(--color-app-text-secondary-purple)]">{store.category}</p>
+          {/* Nombre real del proveedor (SCRUM-289) como encabezado principal */}
+          <h1 className="text-xl text-[var(--color-app-text-dark)]">{store.commerceName}</h1>
+          <p className="text-sm text-[var(--color-app-text-secondary-purple)]">{store.branchName}</p>
         </header>
 
         <div className="app-surface p-4">
@@ -58,45 +85,27 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
             </div>
             <div className="flex items-start gap-2">
               <Clock className="mt-0.5 h-4 w-4 text-[var(--color-app-text-primary-purple)]" />
-              <span>{store.pickupTime}</span>
-            </div>
-          </div>
-
-          <div className="mt-4 rounded-xl bg-[var(--color-app-tomatillo-soft)] p-3 text-sm text-[var(--color-app-text-primary-purple)]">
-            <div className="flex items-start gap-2">
-              <Info className="mt-0.5 h-4 w-4" />
-              <p>
-                Recoge antes del cierre. Quedan <strong>{store.available}</strong> bolsas disponibles.
-              </p>
+              <span>{store.scheduleLabel}</span>
             </div>
           </div>
         </div>
 
-        <div className="app-surface p-4">
-          <h2 className="text-base text-[var(--color-app-text-dark)]">Que incluye</h2>
-          <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">{store.description}</p>
-        </div>
+        {/*
+          Sin sección de rating/reviews: no existe modelo de reseñas aún
+          (SCRUM-350, post-MVP). Se omite en vez de fabricar un valor.
+        */}
 
         <div className="app-surface p-4">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-sm text-[var(--color-app-text-secondary-purple)]">Precio</p>
-              <div className="mt-1 flex items-end gap-2">
-                <p className="text-2xl text-[var(--color-app-text-primary-purple)]">{formatPrice(store.price)}</p>
-                <p className="text-sm text-[var(--color-app-text-secondary-purple)] line-through">
-                  {formatPrice(store.originalPrice)}
-                </p>
-              </div>
-              <p className="text-xs text-[var(--color-app-status-success)]">Ahorras {formatPrice(savings)}</p>
-            </div>
-
-            <Link
-              href={`/app/product/${store.id}`}
-              className="app-btn-primary"
-            >
-              Rescatar ahora
-            </Link>
-          </div>
+          {/*
+            No enlaza a un producto específico: el id de esta página es de
+            sucursal, no de producto (namespaces distintos en datos reales,
+            a diferencia del mock donde coincidían). Listar los productos
+            de esta sucursal es una funcionalidad nueva, fuera de alcance
+            de esta fase (discover no filtra por sucursal hoy).
+          */}
+          <Link href="/app/discover" className="app-btn-primary flex items-center justify-center">
+            Ver más cerca de ti
+          </Link>
         </div>
       </div>
     </section>

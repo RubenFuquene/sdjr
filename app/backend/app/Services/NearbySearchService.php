@@ -21,7 +21,7 @@ class NearbySearchService
         return CommerceBranch::query()
             ->nearby($lat, $lng, $radius)
             ->where('status', Constant::STATUS_ACTIVE)
-            ->with(['commerce', 'commerceBranchHours', 'commerceBranchPhotos'])
+            ->with(['commerce', 'commerceBranchHours', 'commerceBranchPhotos', 'department', 'city', 'neighborhood'])
             ->paginate($perPage);
     }
 
@@ -57,13 +57,16 @@ class NearbySearchService
             ->having('nearest_branch_distance_km', '<=', $radius)
             ->orderBy('nearest_branch_distance_km');
 
-        return $query->with(['photos', 'category', 'commerceBranches' => function ($q) use ($lat, $lng, $radius) {
+        return $query->with(['photos', 'category', 'commerce', 'commerceBranches' => function ($q) use ($lat, $lng, $radius) {
             // SQLite no soporta HAVING en subqueries sin agregación, así que usamos whereRaw
             $q->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->whereRaw('6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude))) <= ?', [
                     $lat, $lng, $lat, $radius,
-                ]);
+                ])
+                // Necesario para que NearbyBranchResource (via CommerceBranchResource)
+                // sirva commerce_name y horarios de recogida sin N+1 por producto.
+                ->with(['commerce', 'commerceBranchHours', 'department', 'city', 'neighborhood']);
         }])->paginate($perPage);
     }
 }

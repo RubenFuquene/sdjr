@@ -1,5 +1,16 @@
 import { ApiError, fetchWithErrorHandling } from "./client";
-import type { NearbyProductsParams, NearbyProductsResponse } from "@/types/app-catalog";
+import type {
+  BranchDetailResponse,
+  NearbyProductsParams,
+  NearbyProductsResponse,
+  ProductDetailResponse,
+} from "@/types/app-catalog";
+
+function ensureValidId(id: number, label: string): void {
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new ApiError(`${label} inválido.`, 422);
+  }
+}
 
 function ensureValidCoordinates(latitude: number, longitude: number): void {
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -53,4 +64,28 @@ export async function getNearbyProducts(
       method: "GET",
     }
   );
+}
+
+/**
+ * GET /api/v1/catalog/products/{id}
+ * Detalle público de un producto activo. 404 si no existe o está inactivo.
+ */
+export async function getProductDetail(id: number): Promise<ProductDetailResponse> {
+  ensureValidId(id, "Id de producto");
+
+  return fetchWithErrorHandling<ProductDetailResponse>(`/api/v1/catalog/products/${id}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * GET /api/v1/catalog/commerce-branches/{id}
+ * Detalle público de una sucursal/tienda activa. 404 si no existe o está inactiva.
+ */
+export async function getBranchDetail(id: number): Promise<BranchDetailResponse> {
+  ensureValidId(id, "Id de sucursal");
+
+  return fetchWithErrorHandling<BranchDetailResponse>(`/api/v1/catalog/commerce-branches/${id}`, {
+    method: "GET",
+  });
 }

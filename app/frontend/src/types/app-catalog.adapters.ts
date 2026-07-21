@@ -1,11 +1,38 @@
-import type { AppStoreCatalogItem } from "@/lib/app/mock-catalog";
-import type { NearbyProduct, NearbyProductsResponse } from "./app-catalog";
+import type { BranchDetail, NearbyBranch, NearbyProduct, NearbyProductsResponse, ProductDetail } from "./app-catalog";
 
-export interface DiscoverNearbyCard extends AppStoreCatalogItem {
+export interface DiscoverNearbyCard {
   productId: number;
   branchId: number | null;
+  name: string;
+  category: string;
+  address: string;
+  price: number;
+  originalPrice: number;
+  available: number;
   distanceKm: number;
   imageUrl?: string | null;
+  /** Horario de recogida de hoy en la sucursal asignada, o null si no hay dato real. */
+  pickupSchedule: string | null;
+}
+
+/**
+ * Resuelve el horario de recogida de HOY para la sucursal asignada al producto.
+ * day_of_week: 0=Domingo, 6=Sábado (mismo criterio que Date.getDay()).
+ * Sin dato real → null (la UI decide el estado neutro, nunca se fabrica un horario).
+ */
+function getTodayPickupSchedule(branch: NearbyBranch | null): string | null {
+  if (!branch?.hours || branch.hours.length === 0) {
+    return null;
+  }
+
+  const todayIndex = new Date().getDay();
+  const todayHours = branch.hours.find((hour) => hour.day_of_week === todayIndex);
+
+  if (!todayHours) {
+    return null;
+  }
+
+  return `Hoy ${todayHours.open_time.slice(0, 5)} - ${todayHours.close_time.slice(0, 5)}`;
 }
 
 export interface DiscoverMapPin {
@@ -51,8 +78,7 @@ function isValidCoordinates(lat: number, lng: number): boolean {
 }
 
 function getProductCategoryLabel(product: NearbyProduct): string {
-  const categoryId = toNumber(product.product_category_id ?? product.category_id, 0);
-  return categoryId > 0 ? `Categoria ${categoryId}` : "Sin categoria";
+  return toText(product.category, "Sin categoría");
 }
 
 function getProductPrice(product: NearbyProduct): number {
@@ -123,23 +149,17 @@ export function mapNearbyProductToDiscoverCard(product: NearbyProduct): Discover
       : displayPrice;
 
   return {
-    id: nearestBranch?.id ?? product.id,
-    name: toText(nearestBranch?.commerce_name ?? nearestBranch?.name ?? product.name ?? product.title, "Comercio cercano"),
-    category: product.category_id ? `Categoria ${product.category_id}` : "Sin categoria",
+    productId: product.id,
+    branchId: nearestBranch?.id ?? null,
+    name: toText(nearestBranch?.commerce_name ?? product.commerce_name ?? nearestBranch?.name ?? product.name ?? product.title, "Comercio cercano"),
+    category: getProductCategoryLabel(product),
     address: toText(nearestBranch?.address, "Ubicacion no disponible"),
-    rating: 0,
-    reviews: 0,
     price: displayPrice,
     originalPrice,
     available: toNumber(product.quantity_available, 1),
-    pickupTime: "Consultar con el comercio",
-    deliveryTime: "Consultar disponibilidad",
-    deliveryCost: 0,
-    description: toText(product.description, "Producto cercano segun tu ubicacion."),
-    productId: product.id,
-    branchId: nearestBranch?.id ?? null,
     distanceKm,
     imageUrl: getProductImageUrl(product),
+    pickupSchedule: getTodayPickupSchedule(nearestBranch),
   };
 }
 
@@ -206,4 +226,73 @@ export function mapNearbyProductsToMapPins(
   }
 
   return Array.from(pinsByBranch.values()).sort((a, b) => a.distanceKm - b.distanceKm);
+}
+
+// ============================================
+// Detalle de producto (GET /catalog/products/{id})
+// ============================================
+
+export interface ProductDetailView {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  commerceName: string;
+  price: number;
+  originalPrice: number;
+  quantityAvailable: number;
+  photoUrl: string | null;
+}
+
+/**
+ * Degradación honesta: ante dato ausente se muestra un estado neutro real
+ * ("Sin categoría", "Sin descripción disponible."), nunca un valor del prototipo.
+ */
+export function mapProductDetailToView(detail: ProductDetail): ProductDetailView {
+  const price = detail.discounted_price ?? detail.original_price;
+
+  return {
+    id: detail.id,
+    title: toText(detail.title, "Producto"),
+    category: toText(detail.category, "Sin categoría"),
+    description: toText(detail.description, "Sin descripción disponible."),
+    commerceName: toText(detail.commerce_name, "Proveedor"),
+    price: toNumber(price),
+    originalPrice: toNumber(detail.original_price, price),
+    quantityAvailable: toNumber(detail.quantity_available, 0),
+    photoUrl: detail.photos?.[0]?.presigned_url ?? null,
+  };
+}
+
+// ============================================
+// Detalle de tienda/sucursal (GET /catalog/commerce-branches/{id})
+// ============================================
+
+export interface BranchDetailView {
+  id: number;
+  commerceName: string;
+  branchName: string;
+  address: string;
+  scheduleLabel: string;
+  photoUrl: string | null;
+}
+
+/**
+ * Sin rating/reviews: no existe modelo de reseñas aún (SCRUM-350, post-MVP).
+ * Se omite la sección en vez de fabricar un valor, siguiendo la decisión
+ * de degradación honesta acordada para esta fase.
+ */
+export function mapBranchDetailToView(detail: BranchDetail): BranchDetailView {
+  const hasHours = Array.isArray(detail.hours) && detail.hours.length > 0;
+
+  return {
+    id: detail.id,
+    commerceName: toText(detail.commerce_name, "Proveedor"),
+    branchName: toText(detail.name, "Sucursal"),
+    address: toText(detail.address, "Ubicación no disponible"),
+    scheduleLabel: hasHours
+      ? `${detail.hours![0].open_time} - ${detail.hours![0].close_time}`
+      : "Consultar con el comercio",
+    photoUrl: detail.photos?.[0]?.presigned_url ?? null,
+  };
 }

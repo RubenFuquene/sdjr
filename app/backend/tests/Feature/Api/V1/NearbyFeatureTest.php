@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Api\V1;
 
 use App\Constants\Constant;
+use App\Models\Commerce;
 use App\Models\CommerceBranch;
+use App\Models\CommerceBranchHour;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -114,6 +116,57 @@ class NearbyFeatureTest extends TestCase
     {
         $response = $this->getJson('/api/v1/nearby/branches?latitude=200&longitude=10&radius=10');
         $response->assertStatus(422);
+    }
+
+    public function test_product_category_is_a_flat_name_not_a_nested_model()
+    {
+        // Regresión: NearbyProductResource extendía JsonResource en vez de
+        // ProductResource, así que category llegaba como el modelo crudo
+        // ({"id":..,"name":..,"deleted_at":..}) en vez del nombre plano.
+        $commerce = Commerce::factory()->create(['name' => 'Panaderia El Trigal']);
+        $category = ProductCategory::factory()->create(['name' => 'Panaderia']);
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id, 'latitude' => 10, 'longitude' => 10]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+            'status' => Constant::STATUS_ACTIVE,
+            'quantity_available' => 5,
+            'expires_at' => now()->addDay(),
+        ]);
+        $product->commerceBranches()->attach($branch->id);
+
+        $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
+
+        $response->assertOk();
+        $response->assertJsonFragment(['category' => 'Panaderia', 'commerce_name' => 'Panaderia el trigal']);
+    }
+
+    public function test_nearest_branch_includes_commerce_name_and_pickup_hours()
+    {
+        $commerce = Commerce::factory()->create(['name' => 'Cafe Amor Perfecto']);
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id, 'latitude' => 10, 'longitude' => 10]);
+        CommerceBranchHour::factory()->create([
+            'commerce_branch_id' => $branch->id,
+            'day_of_week' => 1,
+            'open_time' => '08:00:00',
+            'close_time' => '18:00:00',
+        ]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'status' => Constant::STATUS_ACTIVE,
+            'quantity_available' => 5,
+            'expires_at' => now()->addDay(),
+        ]);
+        $product->commerceBranches()->attach($branch->id);
+
+        $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
+
+        $response->assertOk();
+        $data = $response->json('data.0');
+        $this->assertSame('Cafe amor perfecto', $data['nearest_branch']['commerce_name']);
+        $this->assertNotEmpty($data['nearest_branch']['hours']);
+        $this->assertSame('08:00:00', $data['nearest_branch']['hours'][0]['open_time']);
+        $this->assertSame('18:00:00', $data['nearest_branch']['hours'][0]['close_time']);
     }
 
     public function test_pagination_works()

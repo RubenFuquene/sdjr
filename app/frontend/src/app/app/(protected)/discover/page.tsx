@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bell, Clock3, MapPin, Star } from "lucide-react";
+import { Bell, Clock3, MapPin } from "lucide-react";
 import { LocationStatusBanner } from "@/components/shared/location-status-banner";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { getNearbyProducts } from "@/lib/api/app-catalog";
@@ -117,7 +117,6 @@ export default function AppDiscoverPage() {
   };
 
   const hasMorePages = currentPage < lastPage;
-  const DUMMY_SCHEDULE_LABEL = "Horario referencial (dummy): Hoy 18:00 - 20:00";
 
   const getDiscountPercentage = (price: number, originalPrice: number): number => {
     if (originalPrice <= 0 || originalPrice <= price) {
@@ -126,28 +125,10 @@ export default function AppDiscoverPage() {
 
     return Math.round(((originalPrice - price) / originalPrice) * 100);
   };
-  
-  const buildProductHref = (card: DiscoverNearbyCard): string => {
-    const params = new URLSearchParams({
-      source: "discover",
-      name: card.name,
-      category: card.category,
-      address: card.address,
-      price: String(card.price),
-      originalPrice: String(card.originalPrice),
-      available: String(card.available),
-      pickupTime: DUMMY_SCHEDULE_LABEL,
-      deliveryTime: DUMMY_SCHEDULE_LABEL,
-      deliveryCost: String(card.deliveryCost),
-      description: card.description,
-    });
 
-    if (card.imageUrl) {
-      params.set("imageUrl", card.imageUrl);
-    }
-
-    return `/app/product/${card.productId}?${params.toString()}`;
-  };
+  // El detalle de producto obtiene sus propios datos por id (GET /catalog/products/{id});
+  // ya no se transportan datos por query params.
+  const buildProductHref = (card: DiscoverNearbyCard): string => `/app/product/${card.productId}`;
 
   const handleLoadMore = async () => {
     if (!location || state !== "ready" || isLoadingMore || !hasMorePages) {
@@ -371,15 +352,10 @@ export default function AppDiscoverPage() {
                     </div>
 
                     <div className="p-4">
-                      <div className="mb-2 flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <h3 className="truncate text-base text-[var(--color-app-text-dark)]">{card.name}</h3>
-                          <p className="truncate text-sm text-[var(--color-app-text-secondary-purple)]">{card.category}</p>
-                        </div>
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[var(--color-app-tomatillo-soft)] px-2 py-1 text-sm text-[var(--color-app-text-dark)]">
-                          <Star className="h-3.5 w-3.5 fill-[#95af51] text-[#95af51]" />
-                          {card.rating.toFixed(1)}
-                        </span>
+                      {/* Sin badge de rating: no existe modelo de reseñas aún (SCRUM-350, post-MVP) */}
+                      <div className="mb-2 min-w-0">
+                        <h3 className="truncate text-base text-[var(--color-app-text-dark)]">{card.name}</h3>
+                        <p className="truncate text-sm text-[var(--color-app-text-secondary-purple)]">{card.category}</p>
                       </div>
 
                       <p className="truncate text-xs text-[var(--color-app-text-secondary-purple)]">{card.address}</p>
@@ -398,11 +374,12 @@ export default function AppDiscoverPage() {
                           <p className="text-sm text-[var(--color-app-text-primary-purple)]">
                             {card.available} {card.available === 1 ? "disponible" : "disponibles"}
                           </p>
-                          <p className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-app-text-secondary-purple)]">
-                            <Clock3 className="h-3.5 w-3.5" />
-                            Hoy 18:00 - 20:00
-                            Horario referencial (dummy)
-                          </p>
+                          {card.pickupSchedule && (
+                            <p className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-app-text-secondary-purple)]">
+                              <Clock3 className="h-3.5 w-3.5" />
+                              {card.pickupSchedule}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
