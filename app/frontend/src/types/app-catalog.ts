@@ -98,7 +98,7 @@ export interface BranchDetail {
   phone?: string | null;
   email?: string | null;
   is_active?: boolean | null;
-  hours?: Array<{ day_of_week: string; open_time: string; close_time: string; note?: string | null }>;
+  hours?: NearbyBranchHour[];
   photos?: Array<{ id: number; presigned_url?: string | null; file_path?: string }>;
   created_at?: string;
   updated_at?: string;

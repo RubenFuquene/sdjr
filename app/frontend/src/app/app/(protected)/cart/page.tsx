@@ -1,14 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowLeft, CheckCircle2, CreditCard, FlaskConical, Store } from "lucide-react";
 import { ApiError } from "@/lib/api/client";
-import { getProductDetail } from "@/lib/api/app-catalog";
+import { getBranchDetail, getProductDetail } from "@/lib/api/app-catalog";
 import { createOrder, isInsufficientStockError } from "@/lib/api/app-orders";
 import { payOrder } from "@/lib/api/app-payments";
-import { mapProductDetailToView, type ProductDetailView } from "@/types/app-catalog.adapters";
+import { getTodayPickupSchedule, mapProductDetailToView, type ProductDetailView } from "@/types/app-catalog.adapters";
+import type { BranchDetail } from "@/types/app-catalog";
 import type { AppOrder } from "@/types/app-orders";
 import type { AppTransaction } from "@/types/app-payments";
 
@@ -57,10 +59,14 @@ export default function AppCartPage() {
   const searchParams = useSearchParams();
   const productId = parsePositiveInt(searchParams.get("productId"));
   const branchId = parsePositiveInt(searchParams.get("branchId"));
+  // qty es un id suelto que viaja desde el detalle de producto (no dato de
+  // negocio duplicado): solo fija el valor inicial, sigue editable aquí.
+  const qtyParam = parsePositiveInt(searchParams.get("qty"));
 
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [product, setProduct] = useState<ProductDetailView | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [branch, setBranch] = useState<BranchDetail | null>(null);
+  const [quantity, setQuantity] = useState(qtyParam ?? 1);
   const [selectedPaymentId, setSelectedPaymentId] = useState<SimulatedOptionId>("approve");
   const [orderState, setOrderState] = useState<OrderState>("idle");
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -82,28 +88,32 @@ export default function AppCartPage() {
     async function loadProduct() {
       setLoadState("loading");
 
-      try {
-        const response = await getProductDetail(productId!);
+      // Producto y sucursal en paralelo: la sucursal es informativa (horario
+      // de recogida) y su fallo no debe bloquear el producto.
+      const [productResult, branchResult] = await Promise.allSettled([
+        getProductDetail(productId!),
+        getBranchDetail(branchId!),
+      ]);
 
-        if (cancelled) {
-          return;
-        }
+      if (cancelled) {
+        return;
+      }
 
-        const view = mapProductDetailToView(response.data);
-        setProduct(view);
-        setQuantity((prev) => Math.min(Math.max(prev, 1), Math.max(view.quantityAvailable, 1)));
-        setLoadState("loaded");
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-
+      if (productResult.status === "rejected") {
+        const error = productResult.reason;
         if (error instanceof ApiError && error.status === 404) {
           setLoadState("not-found");
         } else {
           setLoadState("error");
         }
+        return;
       }
+
+      const view = mapProductDetailToView(productResult.value.data);
+      setProduct(view);
+      setQuantity((prev) => Math.min(Math.max(prev, 1), Math.max(view.quantityAvailable, 1)));
+      setBranch(branchResult.status === "fulfilled" ? branchResult.value.data : null);
+      setLoadState("loaded");
     }
 
     void loadProduct();
@@ -280,6 +290,17 @@ export default function AppCartPage() {
           </dl>
         </div>
 
+        {branch && (
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--color-app-tomatillo-soft)] p-4">
+            <p className="text-center text-sm text-[var(--color-app-text-dark)]">
+              Recoge en: <span className="font-semibold">{branch.commerce_name ?? branch.name}</span>
+            </p>
+            <p className="mt-1 text-center text-sm text-[var(--color-app-text-primary-purple)]">
+              {getTodayPickupSchedule(branch.hours) ?? "Consultar horario con el comercio"}
+            </p>
+          </div>
+        )}
+
         <Link href="/app/discover" className="app-btn-primary w-full max-w-sm">
           Volver a Descubre
         </Link>
@@ -315,8 +336,17 @@ export default function AppCartPage() {
       <div className="mt-4 space-y-4">
         <article className="app-surface p-4">
           <h2 className="text-base text-[var(--color-app-text-dark)]">Resumen</h2>
-          <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">{product.title}</p>
-          <p className="text-sm text-[var(--color-app-text-secondary-purple)]">{product.category}</p>
+          <div className="mt-2 flex gap-3">
+            <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-[var(--color-app-tomatillo-soft)] to-[var(--color-app-ui-background-soft)]">
+              {product.photoUrl && (
+                <Image src={product.photoUrl} alt={product.title} fill unoptimized className="object-cover" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm text-[var(--color-app-text-secondary-purple)]">{product.title}</p>
+              <p className="text-sm text-[var(--color-app-text-secondary-purple)]">{product.category}</p>
+            </div>
+          </div>
 
           <div className="mt-3 flex items-center justify-between">
             <span className="text-sm text-[var(--color-app-text-secondary-purple)]">Cantidad</span>
@@ -348,7 +378,14 @@ export default function AppCartPage() {
           <h2 className="text-base text-[var(--color-app-text-dark)]">Entrega</h2>
           <div className="mt-3 flex items-start gap-2 rounded-xl border border-[var(--color-app-ui-divider)] p-3">
             <Store className="mt-0.5 h-4 w-4 text-[var(--color-app-text-primary-purple)]" />
-            <p className="text-sm text-[var(--color-app-text-dark)]">Recoger en sucursal</p>
+            <div>
+              <p className="text-sm text-[var(--color-app-text-dark)]">
+                Recoger en {branch?.name ?? "sucursal"}
+              </p>
+              <p className="mt-1 text-xs text-[var(--color-app-text-secondary-purple)]">
+                {getTodayPickupSchedule(branch?.hours) ?? "Consultar horario con el comercio"}
+              </p>
+            </div>
           </div>
         </article>
 

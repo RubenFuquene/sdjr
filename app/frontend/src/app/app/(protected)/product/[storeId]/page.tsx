@@ -1,32 +1,56 @@
+import Image from "next/image";
 import Link from "next/link";
-import { AlertCircle, ArrowLeft, Plus } from "lucide-react";
+import { AlertCircle, ArrowLeft, Clock3, Info, MapPin, Store } from "lucide-react";
 import { ApiError } from "@/lib/api/client";
-import { getProductDetail } from "@/lib/api/app-catalog";
-import { mapProductDetailToView, type ProductDetailView } from "@/types/app-catalog.adapters";
+import { getBranchDetail, getProductDetail } from "@/lib/api/app-catalog";
+import { getTodayPickupSchedule, mapProductDetailToView } from "@/types/app-catalog.adapters";
+import type { BranchDetail } from "@/types/app-catalog";
+import { ProductPurchasePanel } from "@/components/app/product/product-purchase-panel";
 
 type ProductDetailPageProps = {
   params: Promise<{ storeId: string }>;
   searchParams: Promise<{ branchId?: string }>;
 };
 
+const URGENT_STOCK_THRESHOLD = 3;
+
 function formatPrice(value: number): string {
   return `$${value.toLocaleString("es-CO")}`;
 }
 
 /**
- * Solo se pasa el id de producto y, si se conoce, el de sucursal — no datos
- * de negocio duplicados. El carrito hace su propio fetch con getProductDetail.
- * branchId es necesario porque un producto puede venderse en varias sucursales
- * y la orden requiere una específica (StoreOrderRequest exige commerce_branch_id).
+ * Etiqueta de cierre de la oferta (CA-01 de SCRUM-158), calculada al momento
+ * del render del server component. Degradación honesta: sin expires_at no se
+ * muestra nada (no se fabrica un horario).
  */
-function buildCartHref(productId: number, branchId: number | null): string {
-  const params = new URLSearchParams({ productId: String(productId) });
-
-  if (branchId) {
-    params.set("branchId", String(branchId));
+function buildExpiryLabel(expiresAt: string | null): string | null {
+  if (!expiresAt) {
+    return null;
   }
 
-  return `/app/cart?${params.toString()}`;
+  const expiry = new Date(expiresAt);
+  if (Number.isNaN(expiry.getTime())) {
+    return null;
+  }
+
+  const remainingMs = expiry.getTime() - Date.now();
+  if (remainingMs <= 0) {
+    return "Oferta finalizada";
+  }
+
+  const totalMinutes = Math.floor(remainingMs / 60_000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours >= 48) {
+    return `Termina el ${expiry.toLocaleDateString("es-CO", { day: "numeric", month: "short" })}`;
+  }
+
+  if (hours >= 1) {
+    return `Termina en ${hours}h ${minutes}min`;
+  }
+
+  return `Termina en ${minutes}min`;
 }
 
 function NotFoundState() {
@@ -69,12 +93,16 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
     return <NotFoundState />;
   }
 
-  let product: ProductDetailView;
+  // Producto y sucursal se piden en paralelo: la sucursal es informativa
+  // (sección de recogida) y su fallo no debe bloquear ni retrasar el
+  // producto, que es el dato principal de la página.
+  const [productResult, branchResult] = await Promise.allSettled([
+    getProductDetail(productId),
+    branchId ? getBranchDetail(branchId) : Promise.resolve(null),
+  ]);
 
-  try {
-    const response = await getProductDetail(productId);
-    product = mapProductDetailToView(response.data);
-  } catch (error) {
+  if (productResult.status === "rejected") {
+    const error = productResult.reason;
     if (error instanceof ApiError && error.status === 404) {
       return <NotFoundState />;
     }
@@ -82,14 +110,36 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
     return <ErrorState />;
   }
 
+  const product = mapProductDetailToView(productResult.value.data);
+
+  // Degradación honesta: sin branchId, o si la sucursal falla/no existe, la
+  // sección de recogida simplemente se omite — nunca se fabrica un horario
+  // o dirección.
+  const branch: BranchDetail | null =
+    branchResult.status === "fulfilled" && branchResult.value ? branchResult.value.data : null;
+
   const discount =
     product.originalPrice > product.price
       ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
       : 0;
+  const expiryLabel = buildExpiryLabel(product.expiresAt);
+  const isUrgentStock = product.quantityAvailable > 0 && product.quantityAvailable <= URGENT_STOCK_THRESHOLD;
+  const pickupSchedule = getTodayPickupSchedule(branch?.hours);
 
   return (
     <section className="pb-6">
-      <div className="relative h-56 bg-gradient-to-br from-[var(--color-app-tomatillo-soft)] via-white to-[var(--color-app-ui-background-soft)] px-4 pt-4">
+      <div className="relative h-56 overflow-hidden bg-gradient-to-br from-[var(--color-app-tomatillo-soft)] via-white to-[var(--color-app-ui-background-soft)] px-4 pt-4">
+        {product.photoUrl && (
+          <Image
+            src={product.photoUrl}
+            alt={product.title}
+            fill
+            unoptimized
+            className="object-cover"
+            priority
+          />
+        )}
+
         <Link
           href="/app/discover"
           className="app-btn-icon app-header-back-button bg-white/90 text-[var(--color-app-text-dark)] shadow-[var(--app-shadow-button)]"
@@ -104,8 +154,22 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
           </div>
         )}
 
-        <div className="absolute bottom-4 left-4 rounded-full bg-white px-3 py-1 text-xs text-[var(--color-app-text-secondary-purple)]">
-          Quedan {product.quantityAvailable} disponibles
+        <div className="absolute bottom-4 left-4 flex flex-col items-start gap-2">
+          {expiryLabel && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs text-[var(--color-app-text-dark)]">
+              <Clock3 className="h-3.5 w-3.5 text-[var(--color-app-tomatillo-medium)]" aria-hidden="true" />
+              {expiryLabel}
+            </span>
+          )}
+          <span
+            className={`rounded-full px-3 py-1 text-xs ${
+              isUrgentStock
+                ? "bg-red-600 text-white"
+                : "bg-white text-[var(--color-app-text-secondary-purple)]"
+            }`}
+          >
+            {isUrgentStock ? `Solo quedan ${product.quantityAvailable}` : `Quedan ${product.quantityAvailable} disponibles`}
+          </span>
         </div>
       </div>
 
@@ -134,19 +198,38 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
           <p className="mt-2 text-sm text-[var(--color-app-text-secondary-purple)]">{product.description}</p>
         </div>
 
-        <div className="app-surface p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm text-[var(--color-app-text-secondary-purple)]">Total estimado</p>
-              <p className="text-2xl text-[var(--color-app-text-dark)]">{formatPrice(product.price)}</p>
+        {branch && (
+          <div className="app-surface p-4">
+            <h2 className="text-base text-[var(--color-app-text-dark)]">Recoger en tienda</h2>
+            <div className="mt-3 flex items-start gap-3">
+              <Store className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-app-text-primary-purple)]" />
+              <div className="text-sm text-[var(--color-app-text-secondary-purple)]">
+                <p className="text-[var(--color-app-text-dark)]">{branch.name}</p>
+                {branch.address && (
+                  <p className="mt-0.5 flex items-start gap-1">
+                    <MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+                    {branch.address}
+                  </p>
+                )}
+                <p className="mt-1">{pickupSchedule ?? "Consultar con el comercio"}</p>
+              </div>
             </div>
-
-            <Link href={buildCartHref(product.id, branchId)} className="app-btn-primary gap-2">
-              <Plus className="h-4 w-4" />
-              Agregar al carrito
-            </Link>
           </div>
+        )}
+
+        <div className="app-surface-outlined flex gap-3 p-4">
+          <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--color-app-text-primary-purple)]" aria-hidden="true" />
+          <p className="text-sm text-[var(--color-app-text-dark)]">
+            Esta es una bolsa sorpresa. El contenido puede variar según disponibilidad del comercio.
+          </p>
         </div>
+
+        <ProductPurchasePanel
+          productId={product.id}
+          branchId={branchId}
+          price={product.price}
+          maxQuantity={product.quantityAvailable}
+        />
       </div>
     </section>
   );
