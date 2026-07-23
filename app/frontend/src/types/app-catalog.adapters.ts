@@ -1,4 +1,10 @@
-import type { BranchDetail, NearbyBranch, NearbyProduct, NearbyProductsResponse, ProductDetail } from "./app-catalog";
+import type {
+  BranchDetail,
+  NearbyBranchHour,
+  NearbyProduct,
+  NearbyProductsResponse,
+  ProductDetail,
+} from "./app-catalog";
 
 export interface DiscoverNearbyCard {
   productId: number;
@@ -16,17 +22,20 @@ export interface DiscoverNearbyCard {
 }
 
 /**
- * Resuelve el horario de recogida de HOY para la sucursal asignada al producto.
+ * Resuelve el horario de recogida de HOY a partir de los horarios de una
+ * sucursal (NearbyBranch.hours o BranchDetail.hours — mismo shape).
  * day_of_week: 0=Domingo, 6=Sábado (mismo criterio que Date.getDay()).
  * Sin dato real → null (la UI decide el estado neutro, nunca se fabrica un horario).
+ * Reutilizada en discover, detalle de producto, carrito y pantalla de éxito
+ * — una sola fuente para esta lógica.
  */
-function getTodayPickupSchedule(branch: NearbyBranch | null): string | null {
-  if (!branch?.hours || branch.hours.length === 0) {
+export function getTodayPickupSchedule(hours: NearbyBranchHour[] | undefined | null): string | null {
+  if (!hours || hours.length === 0) {
     return null;
   }
 
   const todayIndex = new Date().getDay();
-  const todayHours = branch.hours.find((hour) => hour.day_of_week === todayIndex);
+  const todayHours = hours.find((hour) => hour.day_of_week === todayIndex);
 
   if (!todayHours) {
     return null;
@@ -159,7 +168,7 @@ export function mapNearbyProductToDiscoverCard(product: NearbyProduct): Discover
     available: toNumber(product.quantity_available, 1),
     distanceKm,
     imageUrl: getProductImageUrl(product),
-    pickupSchedule: getTodayPickupSchedule(nearestBranch),
+    pickupSchedule: getTodayPickupSchedule(nearestBranch?.hours),
   };
 }
 
@@ -242,6 +251,8 @@ export interface ProductDetailView {
   originalPrice: number;
   quantityAvailable: number;
   photoUrl: string | null;
+  /** ISO 8601 o null. Cierre de la oferta (products.expires_at); la vista decide el formato. */
+  expiresAt: string | null;
 }
 
 /**
@@ -261,6 +272,7 @@ export function mapProductDetailToView(detail: ProductDetail): ProductDetailView
     originalPrice: toNumber(detail.original_price, price),
     quantityAvailable: toNumber(detail.quantity_available, 0),
     photoUrl: detail.photos?.[0]?.presigned_url ?? null,
+    expiresAt: detail.expires_at ?? null,
   };
 }
 
