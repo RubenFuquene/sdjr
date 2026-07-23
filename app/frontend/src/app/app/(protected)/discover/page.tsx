@@ -127,8 +127,12 @@ export default function AppDiscoverPage() {
   };
 
   // El detalle de producto obtiene sus propios datos por id (GET /catalog/products/{id});
-  // ya no se transportan datos por query params.
-  const buildProductHref = (card: DiscoverNearbyCard): string => `/app/product/${card.productId}`;
+  // ya no se transportan datos de negocio por query params. branchId es la
+  // excepción: es solo un identificador (no datos duplicados) necesario para
+  // crear la orden en el carrito, ya que un producto puede vender en varias
+  // sucursales y el pedido requiere una específica.
+  const buildProductHref = (card: DiscoverNearbyCard): string =>
+    card.branchId ? `/app/product/${card.productId}?branchId=${card.branchId}` : `/app/product/${card.productId}`;
 
   const handleLoadMore = async () => {
     if (!location || state !== "ready" || isLoadingMore || !hasMorePages) {
