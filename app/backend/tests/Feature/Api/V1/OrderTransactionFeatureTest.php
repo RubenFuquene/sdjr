@@ -179,6 +179,56 @@ class OrderTransactionFeatureTest extends TestCase
         $this->assertNotEmpty(Transaction::where('order_id', $order->id)->first()->payload);
     }
 
+    public function test_paying_two_orders_for_the_same_product_decrements_stock_correctly(): void
+    {
+        // Regresion de un bug de concurrencia real: dismissProductConfirmedStock
+        // leia y escribia Product sin lockForUpdate, asi que dos confirmaciones
+        // sobre el mismo producto podian pisarse el descuento (lost update).
+        // Sqlite :memory: (el motor de esta suite) no permite simular la
+        // condicion de carrera real entre conexiones concurrentes; esta prueba
+        // solo cubre que el delta se aplica correctamente orden a orden, no que
+        // el lock resuelva la carrera en si (eso depende del motor real en prod).
+        $user = $this->customer();
+        $branch = CommerceBranch::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $branch->commerce_id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        $orderA = Order::factory()->create([
+            'user_id' => $user->id,
+            'commerce_branch_id' => $branch->id,
+            'total_price' => 6000,
+            'status' => Constant::ORDER_STATUS_PENDING,
+        ]);
+        OrderItem::factory()->create([
+            'order_id' => $orderA->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'unit_price' => 3000,
+        ]);
+
+        $orderB = Order::factory()->create([
+            'user_id' => $user->id,
+            'commerce_branch_id' => $branch->id,
+            'total_price' => 9000,
+            'status' => Constant::ORDER_STATUS_PENDING,
+        ]);
+        OrderItem::factory()->create([
+            'order_id' => $orderB->id,
+            'product_id' => $product->id,
+            'quantity' => 3,
+            'unit_price' => 3000,
+        ]);
+
+        $this->postJson("/api/v1/orders/{$orderA->id}/transactions", [])->assertCreated();
+        $this->postJson("/api/v1/orders/{$orderB->id}/transactions", [])->assertCreated();
+
+        $this->assertSame(5, $product->fresh()->quantity_total);
+        $this->assertSame(5, $product->fresh()->quantity_available);
+    }
+
     public function test_gateway_is_swappable_via_config_without_touching_domain(): void
     {
         // Gateway alterno inline: siempre rechaza con una firma reconocible.
