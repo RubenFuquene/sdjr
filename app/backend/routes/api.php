@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\ProductCategoryController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SupportStatusController;
+use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -190,6 +191,7 @@ Route::prefix('v1')->group(function () {
 
         // Orders - CRUD completo
         Route::apiResource('orders', OrderController::class);
+        Route::post('orders/{id}/transactions', [TransactionController::class, 'store']);
         Route::patch('orders/{id}/status', [OrderController::class, 'patchStatus']);
         Route::get('my-orders', [OrderController::class, 'myOrders']);
         Route::get('commerce-branches/{branchId}/orders', [OrderController::class, 'commerceBranchOrders']);

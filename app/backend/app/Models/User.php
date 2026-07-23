@@ -137,6 +137,26 @@ class User extends Authenticatable
     }
 
     /**
+     * Transacciones de pago del usuario (cargos como comprador).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Métodos de pago tokenizados del usuario.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function paymentMethods()
+    {
+        return $this->hasMany(PaymentMethod::class);
+    }
+
+    /**
      * Get commerce branches where this user is assigned as branch_leader.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
