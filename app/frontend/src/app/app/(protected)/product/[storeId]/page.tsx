@@ -6,23 +6,25 @@ import { mapProductDetailToView, type ProductDetailView } from "@/types/app-cata
 
 type ProductDetailPageProps = {
   params: Promise<{ storeId: string }>;
+  searchParams: Promise<{ branchId?: string }>;
 };
 
 function formatPrice(value: number): string {
   return `$${value.toLocaleString("es-CO")}`;
 }
 
-function buildCartHref(product: ProductDetailView): string {
-  const params = new URLSearchParams({
-    source: "product-detail",
-    productId: String(product.id),
-    name: product.title,
-    category: product.category,
-    price: String(product.price),
-    originalPrice: String(product.originalPrice),
-    available: String(product.quantityAvailable),
-    description: product.description,
-  });
+/**
+ * Solo se pasa el id de producto y, si se conoce, el de sucursal — no datos
+ * de negocio duplicados. El carrito hace su propio fetch con getProductDetail.
+ * branchId es necesario porque un producto puede venderse en varias sucursales
+ * y la orden requiere una específica (StoreOrderRequest exige commerce_branch_id).
+ */
+function buildCartHref(productId: number, branchId: number | null): string {
+  const params = new URLSearchParams({ productId: String(productId) });
+
+  if (branchId) {
+    params.set("branchId", String(branchId));
+  }
 
   return `/app/cart?${params.toString()}`;
 }
@@ -56,9 +58,12 @@ function ErrorState() {
   );
 }
 
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+export default async function ProductDetailPage({ params, searchParams }: ProductDetailPageProps) {
   const { storeId } = await params;
+  const { branchId: branchIdRaw } = await searchParams;
   const productId = Number.parseInt(storeId, 10);
+  const parsedBranchId = branchIdRaw ? Number.parseInt(branchIdRaw, 10) : NaN;
+  const branchId = Number.isInteger(parsedBranchId) && parsedBranchId > 0 ? parsedBranchId : null;
 
   if (!Number.isInteger(productId) || productId <= 0) {
     return <NotFoundState />;
@@ -136,7 +141,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <p className="text-2xl text-[var(--color-app-text-dark)]">{formatPrice(product.price)}</p>
             </div>
 
-            <Link href={buildCartHref(product)} className="app-btn-primary gap-2">
+            <Link href={buildCartHref(product.id, branchId)} className="app-btn-primary gap-2">
               <Plus className="h-4 w-4" />
               Agregar al carrito
             </Link>

@@ -134,6 +134,7 @@ class RolePermissionSeeder extends Seeder
 
             // Permisos para Órdenes (Orders):
             ['name' => 'customer.orders.create', 'guard_name' => $guardName, 'description' => 'Crear órdenes como cliente', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'customer.orders.pay', 'guard_name' => $guardName, 'description' => 'Pagar órdenes propias como cliente', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'customer.orders.show', 'guard_name' => $guardName, 'description' => 'Ver órdenes propias como cliente', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'customer.orders.index', 'guard_name' => $guardName, 'description' => 'Listar órdenes propias como cliente', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.orders.index', 'guard_name' => $guardName, 'description' => 'Listar órdenes de sucursales como proveedor', 'created_at' => now(), 'updated_at' => now()],
@@ -447,6 +448,7 @@ class RolePermissionSeeder extends Seeder
         $userPermissions = [
 
             'customer.orders.create',
+            'customer.orders.pay',
             'customer.commerce-branches.my-favorites',
         ];
 
