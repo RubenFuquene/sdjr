@@ -128,6 +128,63 @@ class ProductFeatureTest extends TestCase
         $this->assertDatabaseHas('products', ['id' => $product->id, 'title' => 'Té Verde']);
     }
 
+    /**
+     * Regresión SCRUM-303/306: editar un producto sin enviar commerce_branch_ids
+     * (ej. solo cambiar el precio) borraba la sucursal asignada. La clave ausente
+     * ahora significa "no tocar la relación", no "vaciarla".
+     */
+    public function test_update_without_branch_key_keeps_existing_branch()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product->commerceBranches()->attach($commerceBranch->id);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'original_price' => 999,
+            ],
+        ];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'product_id' => $product->id,
+            'commerce_branch_id' => $commerceBranch->id,
+        ]);
+    }
+
+    /**
+     * commerce_branch_ids: [] explícito sigue siendo la forma de "quitar sucursal"
+     * a propósito — distinto de omitir la clave por completo.
+     */
+    public function test_update_with_empty_branch_array_clears_branch()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product->commerceBranches()->attach($commerceBranch->id);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+            ],
+            'commerce_branch_ids' => [],
+        ];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertOk();
+        $this->assertDatabaseMissing('product_commerce_branch', [
+            'product_id' => $product->id,
+            'commerce_branch_id' => $commerceBranch->id,
+        ]);
+    }
+
     public function test_patch_status_updates_product_status()
     {
         $this->actingAsAdmin();
@@ -461,6 +518,44 @@ class ProductFeatureTest extends TestCase
         $response->assertOk();
 
         $this->assertEquals(5, $package->fresh()->packageItems()->first()->pivot->quantity);
+    }
+
+    /**
+     * Regresión SCRUM-306: editar un pack sin enviar package_items (ej. solo
+     * cambiar el precio) borraba los items asignados.
+     */
+    public function test_update_package_items_without_key_keeps_existing_items()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 2,
+            'quantity_available' => 2,
+        ]);
+        $product = Product::factory()->create([
+            'commerce_id' => $package->commerce_id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        $package->packageItems()->attach($product->id, ['quantity' => 2]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $package->commerce_id,
+            ],
+        ];
+
+        $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('product_package_items', [
+            'product_package_id' => $package->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+        ]);
     }
 
     public function test_store_package_items_prevents_duplicate_products()

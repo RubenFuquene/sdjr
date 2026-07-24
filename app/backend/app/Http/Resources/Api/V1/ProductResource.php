@@ -28,6 +28,18 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
  *   @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
  *   @OA\Property(
+ *     property="commerce_branches",
+ *     type="array",
+ *     description="Sucursales asignadas al producto (solo si la relacion commerceBranches esta cargada)",
+ *
+ *     @OA\Items(
+ *       type="object",
+ *
+ *       @OA\Property(property="id", type="integer"),
+ *       @OA\Property(property="name", type="string")
+ *     )
+ *   ),
+ *   @OA\Property(
  *     property="package_items",
  *     type="array",
  *     description="Products included in this package (only when loaded)",
@@ -80,6 +92,12 @@ class ProductResource extends JsonResource
                 return $this->photos->map(function ($photo) {
                     return new DocumentUploadResource($photo, ['product_id' => $this->id]);
                 });
+            }),
+            'commerce_branches' => $this->whenLoaded('commerceBranches', function () {
+                return $this->commerceBranches->map(fn ($branch) => [
+                    'id' => $branch->id,
+                    'name' => $branch->name,
+                ]);
             }),
             'package_items' => $this->whenLoaded('packageItems', function () {
                 return $this->packageItems->map(function ($item) {

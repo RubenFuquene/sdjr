@@ -28,6 +28,11 @@ export interface ProductPhotoFromAPI {
   updated_at?: string;
 }
 
+export interface ProductCommerceBranchFromAPI {
+  id: number;
+  name: string;
+}
+
 export interface ProductFromAPI {
   id: number;
   commerce_id: number;
@@ -42,6 +47,8 @@ export interface ProductFromAPI {
   available_for_packaging?: number;
   expires_at: string | null;
   photos?: ProductPhotoFromAPI[];
+  /** Solo presente si el backend cargó la relación (whenLoaded); ausente en algunos listados. */
+  commerce_branches?: ProductCommerceBranchFromAPI[];
   status: string;
   created_at: string;
   updated_at: string;

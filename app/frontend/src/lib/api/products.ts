@@ -72,7 +72,7 @@ export interface UpdateProductPayload {
     expires_at?: string | null;
     status?: string;
   };
-  commerce_branches?: number[];
+  commerce_branch_ids?: number[];
   package_items?: Array<{
     product_id: number;
     quantity: number;
@@ -255,11 +255,6 @@ export function mapProductFormToCreatePayload(input: ProductFormInput): CreatePr
   };
 }
 
-/**
- * Contrato transitorio backend:
- * - create usa `commerce_branch_ids`
- * - update usa `commerce_branches`
- */
 export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdateProductPayload {
   const quantityAvailable = toInteger(input.quantityAvailable);
   const quantityTotal = toInteger(input.quantityTotal ?? quantityAvailable, quantityAvailable);
@@ -281,7 +276,7 @@ export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdatePr
       expires_at: input.expiresAt ?? null,
       status: input.status ?? "1",
     },
-    commerce_branches: normalizeBranchAsArray(input.branchId),
+    commerce_branch_ids: normalizeBranchAsArray(input.branchId),
     package_items: normalizePackageItems(input),
     photos: normalizePhotos(input),
   };
@@ -330,11 +325,15 @@ export async function getProductById(
 export async function getPackageItemsByProductId(
   productPackageId: number
 ): Promise<ApiSuccess<PackageItemFromAPI[]>> {
-  const response = await fetchWithErrorHandling<ApiSuccess<unknown>>(
-    `/api/v1/products/commerce/package-items/${productPackageId}`
-  );
+  const response = await fetchWithErrorHandling<
+    ApiSuccess<{ package_items?: unknown }>
+  >(`/api/v1/products/commerce/package-items/${productPackageId}`);
 
-  const packageItems = extractCollectionData<PackageItemFromAPI>(response.data);
+  // Este endpoint devuelve el producto (pack) completo con los items
+  // anidados en `data.package_items`, no una colección plana en `data`.
+  const packageItems = extractCollectionData<PackageItemFromAPI>(
+    response.data?.package_items
+  );
 
   return {
     ...response,

@@ -97,8 +97,7 @@ export function useProductFormState({
       quantityAvailable:
         localErrors.quantityAvailable ??
         translateQuantityAvailableError(fieldErrors["product.quantity_available"]),
-      branchId:
-        localErrors.branchId ?? fieldErrors["commerce_branch_ids.0"] ?? fieldErrors["commerce_branches.0"],
+      branchId: localErrors.branchId ?? fieldErrors["commerce_branch_ids.0"],
       packageItems: localErrors.packageItems ?? packageItemsFieldError,
     };
   }, [fieldErrors, localErrors]);

@@ -82,7 +82,11 @@ export function ProductsPageClient() {
     discountedPrice: product.discounted_price,
     quantityAvailable: product.quantity_available,
     quantityTotal: product.quantity_total,
-    branchId: null,
+    // El formulario solo soporta una sucursal por producto; se toma la primera
+    // asignada. Antes quedaba siempre en null (SCRUM-303/306): el formulario
+    // de edición arrancaba sin sucursal seleccionada sin importar cuál tuviera
+    // el producto realmente.
+    branchId: product.commerce_branches?.[0]?.id ?? null,
     packageItems: [],
   });
 

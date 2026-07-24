@@ -95,6 +95,11 @@ class UpdateProductRequest extends FormRequest
             'product.expires_at' => ['nullable', 'date'],
             'product.status' => ['sometimes', 'string', 'max:1'],
 
+            // La regla del array padre es necesaria además de la de sus elementos:
+            // sin ella, Laravel omite la clave por completo de validated() cuando
+            // el array viene vacío, y no hay forma de distinguir "ausente" (no
+            // tocar la relación) de "presente y vacío a propósito" (limpiarla).
+            'commerce_branch_ids' => ['sometimes', 'array'],
             'commerce_branch_ids.*' => ['sometimes', 'integer', 'exists:commerce_branches,id'],
 
             // Fotos

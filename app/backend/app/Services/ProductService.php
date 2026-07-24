@@ -128,9 +128,18 @@ class ProductService
 
     /**
      * Store commerce branches for a product.
+     *
+     * $branchIds === null significa que la clave vino ausente del payload:
+     * no se toca la relación existente (comportamiento de update parcial).
+     * $branchIds === [] significa que vino presente pero vacía a propósito:
+     * sí se limpia la relación (comportamiento de "quitar sucursal").
      */
-    protected function storeCommerceBranches(Product $product, array $branchIds): void
+    protected function storeCommerceBranches(Product $product, ?array $branchIds): void
     {
+        if ($branchIds === null) {
+            return;
+        }
+
         $product->commerceBranches()->detach();
 
         if (! empty($branchIds)) {
@@ -145,7 +154,7 @@ class ProductService
      */
     public function show(int $id): Product
     {
-        return Product::with(['category', 'commerce'])->findOrFail($id);
+        return Product::with(['category', 'commerce', 'commerceBranches'])->findOrFail($id);
     }
 
     /**
@@ -174,8 +183,9 @@ class ProductService
                 $product = Product::findOrFail($id);
                 $product->update($data['product']);
 
-                // Commerce Branches
-                $this->storeCommerceBranches($product, $data['commerce_branch_ids'] ?? []);
+                // Commerce Branches: null = clave ausente del payload, no tocar la
+                // relacion existente. [] = clave presente y vacia, limpiar a proposito.
+                $this->storeCommerceBranches($product, $data['commerce_branch_ids'] ?? null);
 
                 // Photos
                 $this->storePhotos($product->id, $data['photos'] ?? []);
@@ -322,12 +332,19 @@ class ProductService
         try {
             $items['product']['product_type'] = Constant::PRODUCT_TYPE_PACKAGE;
             $productPackage = $this->update($product_package_id, $items);
-            $productPackage->packageItems()->detach();
-            if (! empty($items['package_items'])) {
-                $itemsWithQuantity = collect($items['package_items'])->mapWithKeys(function ($item) {
-                    return [$item['product_id'] => ['quantity' => $item['quantity']]];
-                })->toArray();
-                $productPackage->packageItems()->attach($itemsWithQuantity);
+
+            // package_items ausente del payload: no tocar los items existentes
+            // (confirmado como bug real: editar un pack sin enviar esta clave
+            // borraba todos sus productos). Presente y vacío sí limpia a propósito.
+            if (array_key_exists('package_items', $items)) {
+                $productPackage->packageItems()->detach();
+
+                if (! empty($items['package_items'])) {
+                    $itemsWithQuantity = collect($items['package_items'])->mapWithKeys(function ($item) {
+                        return [$item['product_id'] => ['quantity' => $item['quantity']]];
+                    })->toArray();
+                    $productPackage->packageItems()->attach($itemsWithQuantity);
+                }
             }
 
             return $productPackage->load(['packageItems', 'packageItems.photos']);
@@ -401,15 +418,22 @@ class ProductService
                 return true;
             }
 
-            $commerceBranch = CommerceBranch::query()
-                ->whereIn('id', $data['commerce_branch_ids'] ?? [])
-                ->whereHas('commerce', function ($query) use ($user) {
-                    $query->where('owner_user_id', $user->id);
-                })
-                ->exists();
+            // commerce_branch_ids es opcional (sometimes) en update: si no viene en el
+            // payload, no es evidencia de nada y no debe bloquear la autorización — solo
+            // se valida ownership de las sucursales que el cliente sí esté enviando.
+            $branchIds = $data['commerce_branch_ids'] ?? [];
 
-            if (! $commerceBranch) {
-                return false;
+            if (! empty($branchIds)) {
+                $ownedBranchesCount = CommerceBranch::query()
+                    ->whereIn('id', $branchIds)
+                    ->whereHas('commerce', function ($query) use ($user) {
+                        $query->where('owner_user_id', $user->id);
+                    })
+                    ->count();
+
+                if ($ownedBranchesCount !== count(array_unique($branchIds))) {
+                    return false;
+                }
             }
 
             return Commerce::query()
