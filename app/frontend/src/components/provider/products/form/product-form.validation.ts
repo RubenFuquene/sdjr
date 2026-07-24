@@ -42,11 +42,19 @@ export function validateProductForm(
   }
 
   const parsedDiscountPrice = parseDecimal(input.discountedPrice);
-  if (input.discountedPrice && (parsedDiscountPrice === null || parsedDiscountPrice < 0)) {
+
+  if (input.productType !== "package") {
+    if (!input.discountedPrice) {
+      nextErrors.discountedPrice = "El precio con descuento es obligatorio.";
+    } else if (parsedDiscountPrice === null || parsedDiscountPrice <= 0) {
+      nextErrors.discountedPrice = "Ingresa un descuento válido, mayor a 0.";
+    }
+  } else if (input.discountedPrice && (parsedDiscountPrice === null || parsedDiscountPrice < 0)) {
     nextErrors.discountedPrice = "Ingresa un descuento válido.";
   }
 
   if (
+    !nextErrors.discountedPrice &&
     parsedOriginalPrice !== null &&
     parsedDiscountPrice !== null &&
     parsedDiscountPrice > parsedOriginalPrice

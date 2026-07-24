@@ -84,6 +84,189 @@ class ProductFeatureTest extends TestCase
         $this->assertDatabaseHas('products', ['title' => 'Café Premium']);
     }
 
+    private function buildSingleProductPayload(array $commerceBranchIds, array $productOverrides = []): array
+    {
+        return [
+            'product' => array_merge([
+                'commerce_id' => 1,
+                'product_category_id' => 1,
+                'title' => 'Producto Individual',
+                'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+                'original_price' => 100.00,
+                'discounted_price' => 80.00,
+                'quantity_total' => 10,
+                'quantity_available' => 10,
+            ], $productOverrides),
+            'commerce_branch_ids' => $commerceBranchIds,
+        ];
+    }
+
+    /**
+     * SCRUM-335: el descuento es obligatorio para productos individuales.
+     */
+    public function test_store_single_product_requires_discounted_price()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = $this->buildSingleProductPayload([$commerceBranch->id], [
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+        ]);
+        unset($payload['product']['discounted_price']);
+
+        $response = $this->postJson('/api/v1/products', $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: el descuento no puede superar el precio original.
+     */
+    public function test_store_single_product_rejects_discounted_price_over_original()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = $this->buildSingleProductPayload([$commerceBranch->id], [
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+            'original_price' => 100.00,
+            'discounted_price' => 150.00,
+        ]);
+
+        $response = $this->postJson('/api/v1/products', $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: el descuento debe ser mayor a 0, no basta con estar diligenciado.
+     */
+    public function test_store_single_product_rejects_zero_discounted_price()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = $this->buildSingleProductPayload([$commerceBranch->id], [
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+            'discounted_price' => 0,
+        ]);
+
+        $response = $this->postJson('/api/v1/products', $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: los packs no exigen descuento propio.
+     */
+    public function test_store_package_does_not_require_discounted_price()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $singleProduct = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'quantity_total' => 10,
+            'quantity_available' => 10,
+        ]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Pack sin descuento',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 50.00,
+                'quantity_total' => 3,
+                'quantity_available' => 3,
+            ],
+            'commerce_branch_ids' => [$commerceBranch->id],
+            'package_items' => [
+                ['product_id' => $singleProduct->id, 'quantity' => 1],
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+
+        $response->assertOk();
+    }
+
+    /**
+     * SCRUM-335: editar un producto individual sin tocar el descuento, cuando ya
+     * tiene uno válido guardado, no debe forzar su reenvío.
+     */
+    public function test_update_single_product_without_discount_key_keeps_existing_discount()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
+
+        $payload = ['product' => ['commerce_id' => $commerce->id, 'title' => 'Nuevo titulo']];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertOk();
+    }
+
+    /**
+     * SCRUM-335: un producto legacy con descuento null queda bloqueado en su
+     * próxima edición hasta que se complete el campo (comportamiento acordado).
+     */
+    public function test_update_single_product_with_legacy_null_discount_requires_it()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+            'original_price' => 100,
+            'discounted_price' => null,
+        ]);
+
+        $payload = ['product' => ['commerce_id' => $commerce->id, 'title' => 'Nuevo titulo']];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: el descuento efectivo (payload o BD) no puede superar el
+     * precio original efectivo al editar.
+     */
+    public function test_update_single_product_rejects_discounted_price_over_original()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
+
+        $payload = ['product' => ['commerce_id' => $commerce->id, 'discounted_price' => 150]];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
     public function test_show_returns_product()
     {
         $this->actingAsAdmin();
@@ -109,6 +292,8 @@ class ProductFeatureTest extends TestCase
         $product = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_category_id' => $category->id,
+            'original_price' => 100,
+            'discounted_price' => 80,
         ]);
         $commerce_branch = CommerceBranch::factory()->create([
             'commerce_id' => $commerce->id,
@@ -138,7 +323,11 @@ class ProductFeatureTest extends TestCase
         $user = $this->actingAsAdmin();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
-        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
         $product->commerceBranches()->attach($commerceBranch->id);
 
         $payload = [
@@ -166,7 +355,11 @@ class ProductFeatureTest extends TestCase
         $user = $this->actingAsAdmin();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
-        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
         $product->commerceBranches()->attach($commerceBranch->id);
 
         $payload = [

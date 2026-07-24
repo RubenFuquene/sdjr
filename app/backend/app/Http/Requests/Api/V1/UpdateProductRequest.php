@@ -26,7 +26,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="description", type="string", maxLength=255, nullable=true, example="Café de origen especial", description="Product description"),
  *     @OA\Property(property="product_type", type="string", enum={"single","package"}, example="single", description="Type of product (single/package)"),
  *     @OA\Property(property="original_price", type="number", format="float", example=100.00, description="Original price"),
- *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price"),
+ *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price. Required and must be > 0 and <= original_price when the product (new or existing) is of type 'single'; optional for 'package'."),
  *     @OA\Property(property="quantity_total", type="integer", example=50, description="Total quantity"),
  *     @OA\Property(property="quantity_available", type="integer", example=50, description="Available quantity"),
  *     @OA\Property(property="expires_at", type="string", format="date-time", nullable=true, example="2026-12-31T23:59:59", description="Expiration date"),
@@ -89,7 +89,11 @@ class UpdateProductRequest extends FormRequest
             'product.description' => ['nullable', 'string', 'max:255'],
             'product.product_type' => ['sometimes', 'string', 'in:single,package'],
             'product.original_price' => ['sometimes', 'numeric', 'min:0'],
-            'product.discounted_price' => ['nullable', 'numeric', 'min:0'],
+            // SCRUM-335: la obligatoriedad (solo para product_type=single) y la
+            // comparación con original_price se validan en withValidator(), no aquí,
+            // porque en edición ambos valores pueden venir de la BD (campo no
+            // enviado) en vez del payload — ver validateDiscountedPrice().
+            'product.discounted_price' => ['nullable', 'numeric', 'min:0.01'],
             'product.quantity_total' => ['sometimes', 'integer', 'min:0'],
             'product.quantity_available' => ['sometimes', 'integer', 'min:0'],
             'product.expires_at' => ['nullable', 'date'],
@@ -117,16 +121,18 @@ class UpdateProductRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            // TODO: For product_type=single, only the basic rules() (types/ranges/existence) are
-            // enforced. No cross-field business validation is performed (e.g. discounted_price <
-            // original_price, quantity_available <= quantity_total). Analyze in a future task.
-            if (! $this->has('package_items')) {
-                return;
-            }
-
             $routeParameters = $this->route()?->parameters() ?? [];
             $currentPackageId = $routeParameters !== [] ? (int) reset($routeParameters) : null;
             $existingPackage = $currentPackageId ? Product::find($currentPackageId) : null;
+
+            $this->validateDiscountedPrice($validator, $existingPackage);
+
+            // TODO: For product_type=single, quantity_available <= quantity_total is not
+            // enforced. Analyze in a future task (discounted_price <= original_price is
+            // already covered by validateDiscountedPrice() above, SCRUM-335).
+            if (! $this->has('package_items')) {
+                return;
+            }
 
             $packageItems = collect();
 
@@ -178,5 +184,44 @@ class UpdateProductRequest extends FormRequest
                 );
             }
         });
+    }
+
+    /**
+     * SCRUM-335: discounted_price es obligatorio (y debe ser <= original_price) solo
+     * para productos individuales. En edición el payload puede omitir cualquiera de
+     * los dos campos (ediciones parciales), así que se resuelve el valor efectivo
+     * combinando lo enviado con el producto existente en BD antes de validar —
+     * de lo contrario, cualquier edición que no toque el descuento fallaría aunque
+     * el producto ya tenga uno válido guardado.
+     */
+    private function validateDiscountedPrice(Validator $validator, ?Product $existingProduct): void
+    {
+        $productType = $this->input('product.product_type', $existingProduct?->product_type);
+
+        if ($productType !== Constant::PRODUCT_TYPE_SINGLE) {
+            return;
+        }
+
+        $discountedPrice = $this->has('product.discounted_price')
+            ? $this->input('product.discounted_price')
+            : $existingProduct?->discounted_price;
+
+        if ($discountedPrice === null || $discountedPrice === '') {
+            $validator->errors()->add(
+                'product.discounted_price',
+                'The discounted_price field is required for single products.'
+            );
+
+            return;
+        }
+
+        $originalPrice = $this->input('product.original_price', $existingProduct?->original_price);
+
+        if ($originalPrice !== null && (float) $discountedPrice > (float) $originalPrice) {
+            $validator->errors()->add(
+                'product.discounted_price',
+                'The discounted_price field must be less than or equal to original_price.'
+            );
+        }
     }
 }

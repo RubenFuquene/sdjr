@@ -206,6 +206,7 @@ export function ProductForm({
         <InputField
           id="product-discounted-price"
           label="Precio con Descuento"
+          required={productType !== "package"}
           type="number"
           min="0"
           step="0.01"
@@ -213,7 +214,7 @@ export function ProductForm({
           onChange={(event) => setDiscountedPrice(event.target.value)}
           disabled={submitting}
           error={mergedErrors.discountedPrice}
-          placeholder="Opcional"
+          placeholder={productType === "package" ? "Opcional" : "0"}
         />
       </div>
 

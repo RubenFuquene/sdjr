@@ -11,6 +11,7 @@ use App\Services\PackageAvailabilityCalculator;
 use App\Services\ProductService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Schema(
@@ -27,7 +28,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="description", type="string", maxLength=255, nullable=true, example="Café de origen especial", description="Product description"),
  *     @OA\Property(property="product_type", type="string", enum={"single","package"}, example="single", description="Type of product (single/package)"),
  *     @OA\Property(property="original_price", type="number", format="float", example=100.00, description="Original price"),
- *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price"),
+ *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price. Required and must be > 0 and <= original_price when product_type is 'single'; optional for 'package'."),
  *     @OA\Property(property="quantity_total", type="integer", example=50, description="Total quantity"),
  *     @OA\Property(property="quantity_available", type="integer", example=50, description="Available quantity"),
  *     @OA\Property(property="expires_at", type="string", format="date-time", nullable=true, example="2026-12-31T23:59:59", description="Expiration date"),
@@ -92,7 +93,15 @@ class StoreProductRequest extends FormRequest
             'product.description' => ['nullable', 'string', 'max:255'],
             'product.product_type' => ['required', 'string', 'in:'.Constant::PRODUCT_TYPE_SINGLE.','.Constant::PRODUCT_TYPE_PACKAGE],
             'product.original_price' => ['required', 'numeric', 'min:0'],
-            'product.discounted_price' => ['nullable', 'numeric', 'min:0'],
+            // SCRUM-335: obligatorio solo para productos individuales; los packs
+            // mantienen el descuento opcional.
+            'product.discounted_price' => [
+                'nullable',
+                Rule::requiredIf(fn () => $this->input('product.product_type') === Constant::PRODUCT_TYPE_SINGLE),
+                'numeric',
+                'min:0.01',
+                'lte:product.original_price',
+            ],
             'product.quantity_total' => ['required', 'integer', 'min:0'],
             'product.quantity_available' => ['required', 'integer', 'min:0'],
             'product.expires_at' => ['nullable', 'date'],
