@@ -173,6 +173,7 @@ Route::prefix('v1')->group(function () {
         // Product Management routes
         Route::apiResource('products', ProductController::class);
         Route::patch('products/{id}/status', [ProductController::class, 'patchStatus']);
+        Route::patch('products/{id}/branches/{branchId}', [ProductController::class, 'patchBranchPublication']);
 
         Route::prefix('products/commerce')->group(function () {
             Route::get('{commerce_id}', [ProductController::class, 'byCommerce']);

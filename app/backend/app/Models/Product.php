@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Constants\Constant;
 use App\Models\Traits\SanitizesTextAttributes;
 use App\Services\PackageAvailabilityCalculator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,8 +21,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $description
  * @property float $original_price
  * @property float|null $discounted_price
- * @property int $quantity_total
- * @property int $quantity_available
+ * @property int $quantity_total Vigente solo para product_type=package (SCRUM-277 Fase 1). Para
+ *                               product_type=single el stock vive en commerceBranches()->pivot; esta columna queda vestigial
+ *                               hasta que la Fase 2 migre también los packs.
+ * @property int $quantity_available Misma nota que quantity_total.
  * @property string|null $expires_at
  * @property string $product_type
  * @property string $status
@@ -82,19 +83,6 @@ class Product extends Model
     }
 
     /**
-     * Get the available quantity, considering pending orders.
-     */
-    public function getQuantityAvailableAttribute(): int
-    {
-        // Suma la cantidad solicitada en órdenes abiertas
-        $reservedQuantity = (int) OrderItem::whereHas('order', function ($query) {
-            $query->whereIn('status', [Constant::ORDER_STATUS_PENDING, Constant::ORDER_STATUS_PREPARING, Constant::ORDER_STATUS_READY]);
-        })->where('product_id', $this->id)->sum('quantity');
-
-        return (int) $this->attributes['quantity_available'] - intval($reservedQuantity);
-    }
-
-    /**
      * Get the stock of this product still available to be committed to packages,
      * after subtracting the stock already committed by packages that include it.
      */
@@ -124,13 +112,17 @@ class Product extends Model
     }
 
     /**
-     * The commerce branches that belong to the product.
+     * The commerce branches that belong to the product, with per-branch
+     * inventory and publication state (SCRUM-277 Fase 1).
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function commerceBranches()
     {
-        return $this->belongsToMany(CommerceBranch::class, 'product_commerce_branch', 'product_id', 'commerce_branch_id');
+        return $this->belongsToMany(CommerceBranch::class, 'product_commerce_branch', 'product_id', 'commerce_branch_id')
+            ->using(ProductCommerceBranch::class)
+            ->withPivot(['id', 'quantity_available', 'is_published'])
+            ->withTimestamps();
     }
 
     /**

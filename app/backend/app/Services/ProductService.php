@@ -9,6 +9,7 @@ use App\Models\Commerce;
 use App\Models\CommerceBranch;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductCommerceBranch;
 use App\Models\ProductPhoto;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -29,8 +30,9 @@ class ProductService
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct(
+        private readonly BranchAvailabilityCalculator $branchAvailabilityCalculator
+    ) {
         $this->documentUploadService = new DocumentUploadService;
     }
 
@@ -79,7 +81,7 @@ class ProductService
                 $product = Product::create($data['product']);
 
                 // Commerce Branches
-                $this->storeCommerceBranches($product, $data['commerce_branch_ids'] ?? []);
+                $this->storeCommerceBranches($product, $data['commerce_branches'] ?? []);
 
                 // Photos
                 $this->storePhotos($product->id, $data['photos'] ?? []);
@@ -127,24 +129,58 @@ class ProductService
     }
 
     /**
-     * Store commerce branches for a product.
+     * Store commerce branches for a product, with their per-branch inventory
+     * and publication state (SCRUM-277 Fase 1).
      *
-     * $branchIds === null significa que la clave vino ausente del payload:
+     * $branches === null significa que la clave vino ausente del payload:
      * no se toca la relación existente (comportamiento de update parcial).
-     * $branchIds === [] significa que vino presente pero vacía a propósito:
-     * sí se limpia la relación (comportamiento de "quitar sucursal").
+     * $branches === [] significa que vino presente pero vacía a propósito:
+     * sí se limpia la relación (comportamiento de "quitar todas las sedes").
+     * Cuando la clave sí viene, representa el estado deseado COMPLETO de la
+     * asignación — no un delta — así que sync() puede reemplazarla sin más.
+     *
+     * Un detach()+attach() ciego destruiría en cada edición el inventario y
+     * la publicación de las sedes que no cambian — el mismo patrón que ya
+     * causó SCRUM-303/306. sync() con payload de pivote resuelve exactamente
+     * eso: solo suelta las sedes ausentes y solo agrega/actualiza las que
+     * vienen en el payload, dejando registrado únicamente lo que el cliente
+     * pidió explícitamente.
+     *
+     * @param  array<int, array{commerce_branch_id: int, quantity_available: int, is_published?: bool}>|null  $branches
      */
-    protected function storeCommerceBranches(Product $product, ?array $branchIds): void
+    protected function storeCommerceBranches(Product $product, ?array $branches): void
     {
-        if ($branchIds === null) {
+        if ($branches === null) {
             return;
         }
 
-        $product->commerceBranches()->detach();
+        $syncPayload = collect($branches)->mapWithKeys(fn (array $branch) => [
+            $branch['commerce_branch_id'] => [
+                'quantity_available' => $branch['quantity_available'],
+                'is_published' => $branch['is_published'] ?? false,
+            ],
+        ])->all();
 
-        if (! empty($branchIds)) {
-            $product->commerceBranches()->attach($branchIds);
-        }
+        $product->commerceBranches()->sync($syncPayload);
+    }
+
+    /**
+     * Publish or unpublish a product in a single branch, without touching
+     * its assignment to any other branch (SCRUM-277 Fase 1, Tarea 3.2).
+     *
+     * @throws ModelNotFoundException si el producto no tiene esa sede asignada
+     */
+    public function updateBranchPublication(int $productId, int $branchId, bool $isPublished): Product
+    {
+        $pivot = ProductCommerceBranch::query()
+            ->where('product_id', $productId)
+            ->where('commerce_branch_id', $branchId)
+            ->firstOrFail();
+
+        $pivot->is_published = $isPublished;
+        $pivot->save();
+
+        return Product::with(['category', 'commerce', 'commerceBranches'])->findOrFail($productId);
     }
 
     /**
@@ -164,7 +200,19 @@ class ProductService
      */
     public function showPublic(int $id): Product
     {
-        return Product::with(['category', 'commerce', 'photos'])
+        // SCRUM-277 Fase 1: el detalle público necesita el stock real por sede
+        // (ProductResource.commerce_branches[]) — sin esto, la página de detalle
+        // y el carrito de la app móvil leerían quantity_available a nivel de
+        // producto, vestigial para single (siempre 0), y limitarían la compra
+        // a 0/1 unidades sin importar el stock real de la sede.
+        // Solo sedes publicadas: un cliente nunca debe ver el inventario de una
+        // sede que el aliado no ha hecho visible.
+        return Product::with([
+            'category',
+            'commerce',
+            'photos',
+            'commerceBranches' => fn ($query) => $query->wherePivot('is_published', true),
+        ])
             ->where('status', Constant::STATUS_ACTIVE)
             ->findOrFail($id);
     }
@@ -185,7 +233,7 @@ class ProductService
 
                 // Commerce Branches: null = clave ausente del payload, no tocar la
                 // relacion existente. [] = clave presente y vacia, limpiar a proposito.
-                $this->storeCommerceBranches($product, $data['commerce_branch_ids'] ?? null);
+                $this->storeCommerceBranches($product, $data['commerce_branches'] ?? null);
 
                 // Photos
                 $this->storePhotos($product->id, $data['photos'] ?? []);
@@ -243,7 +291,11 @@ class ProductService
     public function getByCommerce(int $commerce_id)
     {
         try {
-            return Product::with(['photos', 'packageItems', 'packageItems.photos', 'package'])
+            // commerceBranches: sin esto, el listado del proveedor no traía el
+            // inventario/publicación por sede (SCRUM-277) ni la sede de cada
+            // producto individual — necesario para filtrar candidatos a pack
+            // por sede (SCRUM-323).
+            return Product::with(['photos', 'packageItems', 'packageItems.photos', 'package', 'commerceBranches'])
                 ->where('commerce_id', $commerce_id)
                 ->get();
         } catch (ModelNotFoundException $e) {
@@ -356,13 +408,21 @@ class ProductService
     }
 
     /**
-     * Dismiss confirmed stock for an order, reducing the total and available quantity of each product in the order.
-     * This method is called when an order is confirmed, ensuring that the stock levels are updated accordingly.
+     * Dismiss confirmed stock for an order, reducing the stock committed by
+     * each product in the order once it transitions out of the "active"
+     * (reserved) states.
      *
-     * Se bloquea cada producto con lockForUpdate dentro de una transacción propia:
-     * dos confirmaciones concurrentes sobre el mismo producto (dos órdenes distintas)
-     * deben serializarse aquí, o de lo contrario ambas leerían el mismo quantity_total
-     * antes de restar y se perdería una de las dos actualizaciones (sobreventa).
+     * Se bloquea cada fila afectada con lockForUpdate dentro de una
+     * transacción propia: dos confirmaciones concurrentes sobre el mismo
+     * producto/sede (dos órdenes distintas) deben serializarse aquí, o de lo
+     * contrario ambas leerían el mismo valor antes de restar y se perdería
+     * una de las dos actualizaciones (sobreventa).
+     *
+     * SCRUM-277 Fase 1: para product_type=single el stock vive por sede en
+     * product_commerce_branch, así que el descuento se aplica sobre la fila
+     * de la sede de la orden (order.commerce_branch_id), no sobre products.
+     * Los packs (product_type=package) conservan el comportamiento global
+     * anterior hasta que la Fase 2 migre también su disponibilidad por sede.
      */
     public function dismissProductConfirmedStock(Order $order): void
     {
@@ -370,11 +430,20 @@ class ProductService
             DB::transaction(function () use ($order) {
                 foreach ($order->items as $item) {
                     $product = Product::query()->lockForUpdate()->find($item->product_id);
-                    if ($product) {
+
+                    if (! $product) {
+                        continue;
+                    }
+
+                    if ($product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
                         ($product->quantity_total - $item->quantity) < 0 ? $product->quantity_total = 0 : $product->quantity_total -= $item->quantity;
                         $product->quantity_available = $product->quantity_total; // Asumiendo que quantity_available refleja el stock actual disponible
                         $product->save();
+
+                        continue;
                     }
+
+                    $this->dismissBranchConfirmedStock($product->id, $order->commerce_branch_id, $item->quantity);
                 }
             });
         } catch (Exception $e) {
@@ -384,13 +453,56 @@ class ProductService
     }
 
     /**
-     * Validar la disponibilidad de los productos en los items de la orden
+     * Descuenta, bajo bloqueo, el stock comprometido de un producto
+     * individual en la sede donde se confirmó la orden.
      */
-    public function validateProductAvailability(array $items): bool
+    private function dismissBranchConfirmedStock(int $productId, int $commerceBranchId, int $quantity): void
+    {
+        $pivot = ProductCommerceBranch::query()
+            ->lockForUpdate()
+            ->where('product_id', $productId)
+            ->where('commerce_branch_id', $commerceBranchId)
+            ->first();
+
+        if (! $pivot) {
+            return;
+        }
+
+        $pivot->quantity_available = max(0, $pivot->quantity_available - $quantity);
+        $pivot->save();
+    }
+
+    /**
+     * Validar la disponibilidad de los productos en los items de la orden.
+     *
+     * SCRUM-277 Fase 1: para product_type=single la disponibilidad se valida
+     * contra la sede donde se está creando la orden (el pivote producto-sede),
+     * no contra un total global. Los packs conservan la validación global
+     * anterior hasta que la Fase 2 migre también su disponibilidad por sede.
+     */
+    public function validateProductAvailability(array $items, int $commerceBranchId): bool
     {
         foreach ($items as $item) {
             $product = Product::find($item['product_id']);
-            if (! $product || $product->quantity_available < $item['quantity']) {
+
+            if (! $product) {
+                return false;
+            }
+
+            if ($product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
+                if ($product->quantity_available < $item['quantity']) {
+                    return false;
+                }
+
+                continue;
+            }
+
+            $pivot = ProductCommerceBranch::query()
+                ->where('product_id', $product->id)
+                ->where('commerce_branch_id', $commerceBranchId)
+                ->first();
+
+            if (! $pivot || $this->branchAvailabilityCalculator->availableFor($pivot) < $item['quantity']) {
                 return false;
             }
         }
@@ -418,10 +530,10 @@ class ProductService
                 return true;
             }
 
-            // commerce_branch_ids es opcional (sometimes) en update: si no viene en el
+            // commerce_branches es opcional (sometimes) en update: si no viene en el
             // payload, no es evidencia de nada y no debe bloquear la autorización — solo
             // se valida ownership de las sucursales que el cliente sí esté enviando.
-            $branchIds = $data['commerce_branch_ids'] ?? [];
+            $branchIds = collect($data['commerce_branches'] ?? [])->pluck('commerce_branch_id')->all();
 
             if (! empty($branchIds)) {
                 $ownedBranchesCount = CommerceBranch::query()

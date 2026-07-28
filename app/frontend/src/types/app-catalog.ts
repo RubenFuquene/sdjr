@@ -26,6 +26,19 @@ export interface NearbyBranch {
   distance_km?: number | null;
   commerce_name?: string | null;
   hours?: NearbyBranchHour[];
+  /**
+   * Stock del producto consultado en ESTA sede (SCRUM-277). Ausente cuando el
+   * recurso se sirve sin contexto de producto (ej. /nearby/branches).
+   */
+  quantity_available?: number | null;
+}
+
+/** Sede donde un producto está asignado, con su inventario (ProductResource.commerce_branches[]). SCRUM-277. */
+export interface ProductDetailBranch {
+  id: number;
+  name: string;
+  quantity_available?: number | null;
+  is_published?: boolean;
 }
 
 export interface NearbyProduct {
@@ -64,7 +77,9 @@ export interface ProductDetail {
   product_type: "single" | "package";
   original_price: number;
   discounted_price: number | null;
+  /** Vestigial para product_type=single (el stock real vive en commerce_branches[]). SCRUM-277. */
   quantity_total: number;
+  /** Vestigial para product_type=single. Usar commerce_branches[] para el stock real por sede. SCRUM-277. */
   quantity_available: number;
   available_for_packaging?: number | null;
   expires_at?: string | null;
@@ -72,6 +87,8 @@ export interface ProductDetail {
   status: string;
   created_at?: string;
   updated_at?: string;
+  /** Sedes donde el producto está publicado, con su stock real por sede. SCRUM-277. */
+  commerce_branches?: ProductDetailBranch[];
 }
 
 export interface ProductDetailResponse {

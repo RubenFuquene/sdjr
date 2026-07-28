@@ -133,7 +133,7 @@ class OrderController extends Controller
             $data = $request->validated();
 
             // Validar la disponibilidad del/ los productos antes de continuar
-            if (! $this->productService->validateProductAvailability($data['items'])) {
+            if (! $this->productService->validateProductAvailability($data['items'], $data['commerce_branch_id'])) {
                 return $this->errorResponse('One or more products are not available in the requested quantity', Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 

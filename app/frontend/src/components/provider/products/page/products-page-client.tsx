@@ -82,11 +82,19 @@ export function ProductsPageClient() {
     discountedPrice: product.discounted_price,
     quantityAvailable: product.quantity_available,
     quantityTotal: product.quantity_total,
-    // El formulario solo soporta una sucursal por producto; se toma la primera
-    // asignada. Antes quedaba siempre en null (SCRUM-303/306): el formulario
-    // de edición arrancaba sin sucursal seleccionada sin importar cuál tuviera
-    // el producto realmente.
+    // Packs conservan una sola sede (comportamiento anterior, sin cambios).
+    // Antes quedaba siempre en null (SCRUM-303/306): el formulario de edición
+    // arrancaba sin sucursal seleccionada sin importar cuál tuviera el
+    // producto realmente.
     branchId: product.commerce_branches?.[0]?.id ?? null,
+    // SCRUM-277 Fase 1: para individuales, reconstruye la asignación
+    // multi-sede completa. Antes (branchId?.[0]) descartaba silenciosamente
+    // cualquier sede además de la primera al editar.
+    branches: (product.commerce_branches ?? []).map((branch) => ({
+      branchId: branch.id,
+      quantityAvailable: branch.quantity_available ?? 0,
+      isPublished: branch.is_published ?? false,
+    })),
     packageItems: [],
   });
 

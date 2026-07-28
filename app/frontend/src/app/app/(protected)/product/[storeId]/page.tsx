@@ -110,7 +110,7 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
     return <ErrorState />;
   }
 
-  const product = mapProductDetailToView(productResult.value.data);
+  const product = mapProductDetailToView(productResult.value.data, branchId);
 
   // Degradación honesta: sin branchId, o si la sucursal falla/no existe, la
   // sección de recogida simplemente se omite — nunca se fabrica un horario

@@ -17,6 +17,7 @@ namespace App\Http\Resources\Api\V1;
  *   @OA\Property(property="latitude", type="number", format="float", example=19.4326, description="Latitud de la sucursal"),
  *   @OA\Property(property="longitude", type="number", format="float", example=-99.1332, description="Longitud de la sucursal"),
  *   @OA\Property(property="distance_km", type="number", format="float", example=2.35, description="Distancia en kilómetros desde la ubicación consultada"),
+ *   @OA\Property(property="quantity_available", type="integer", nullable=true, description="Stock del producto consultado en ESTA sede (SCRUM-277). Ausente si el recurso se sirve fuera de un contexto de producto (ej. /nearby/branches)."),
  * )
  */
 /**
@@ -36,6 +37,14 @@ class NearbyBranchResource extends CommerceBranchResource
     {
         return array_merge(parent::toArray($request), [
             'distance_km' => round($this->distance_km ?? 0, 2),
+            // SCRUM-277 Fase 1: cuando este resource se sirve como "nearest_branch"
+            // de un producto (NearbyProductResource), el modelo trae el pivote
+            // producto-sede cargado — es el stock real que el cliente debe ver y
+            // el que limita cuánto puede comprar. products.quantity_available (a
+            // nivel de producto) quedó vestigial para single; leer de ahí mostraría
+            // 0 siempre. Ausente (no `?? 0`) cuando no hay contexto de producto,
+            // para no fabricar un número donde no aplica.
+            'quantity_available' => $this->pivot->quantity_available ?? null,
         ]);
     }
 }

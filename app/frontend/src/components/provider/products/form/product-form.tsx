@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import type {
+  ProductBranchAssignment,
   ProductFromAPI,
   ProviderProductFormFieldErrors,
   ProviderProductFormInput,
@@ -11,6 +12,7 @@ import { useProductCategories } from "@/hooks/index";
 import type { ProductBranchOption } from "./product-form-modal";
 import { ProductTypeToggle } from "./product-type-toggle";
 import { ProductPackItemsSelector } from "./product-pack-items-selector";
+import { ProductBranchAssignmentSelector } from "./product-branch-assignment-selector";
 import { useProductFormState } from "./use-product-form-state";
 
 export type ProductFormMode = "create" | "edit";
@@ -26,7 +28,10 @@ export interface ProductFormInitialData {
   discountedPrice?: number | null;
   quantityAvailable?: number;
   quantityTotal?: number;
+  /** Solo usado para product_type=package (comportamiento anterior). */
   branchId?: number | null;
+  /** Solo usado para product_type=single. SCRUM-277 Fase 1. */
+  branches?: ProductBranchAssignment[];
   packageItems?: Array<{ productId: number; quantity: number }>;
 }
 
@@ -58,15 +63,27 @@ export function ProductForm({
   const { categories, categoriesLoading, categoriesError } = useProductCategories();
 
   const packItemOptions = useMemo(() => {
+    // SCRUM-277 Fase 1: product.quantity_available quedó vestigial para
+    // product_type=single (el stock real vive por sede). available_for_packaging
+    // ya lo resuelve correctamente sumando el disponible de todas las sedes del
+    // producto (PackageAvailabilityCalculator); "cargado" se recalcula aquí
+    // sumando commerce_branches[] en vez de leer la columna vieja.
     return availableSingleProducts
-      .filter((product) => product.quantity_available > 0)
-      .map((product) => ({
-        id: product.id,
-        title: product.title,
-        originalPrice: product.original_price,
-        quantityAvailable: product.quantity_available,
-        availableForPackaging: product.available_for_packaging ?? product.quantity_available,
-      }));
+      .filter((product) => (product.available_for_packaging ?? 0) > 0)
+      .map((product) => {
+        const totalLoadedAcrossBranches = (product.commerce_branches ?? []).reduce(
+          (sum, branch) => sum + (branch.quantity_available ?? 0),
+          0
+        );
+
+        return {
+          id: product.id,
+          title: product.title,
+          originalPrice: product.original_price,
+          quantityAvailable: totalLoadedAcrossBranches,
+          availableForPackaging: product.available_for_packaging ?? 0,
+        };
+      });
   }, [availableSingleProducts]);
 
   const {
@@ -86,6 +103,11 @@ export function ProductForm({
     setDescription,
     branchId,
     setBranchId,
+    branches,
+    totalQuantityAcrossBranches,
+    handleToggleBranch,
+    handleBranchQuantityChange,
+    handleBranchPublishedChange,
     packageItems,
     maxPacks,
     mergedErrors,
@@ -146,7 +168,7 @@ export function ProductForm({
         placeholder="Ej: Hamburguesa Especial"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={`grid grid-cols-1 gap-4${productType === "package" ? " md:grid-cols-2" : ""}`}>
         <div className="space-y-2">
           <SelectField
             id="product-category"
@@ -167,20 +189,27 @@ export function ProductForm({
           ) : null}
         </div>
 
-        <SelectField
-          id="product-branch"
-          label="Sucursal"
-          required
-          value={branchId}
-          onValueChange={setBranchId}
-          disabled={submitting || branchOptions.length === 0}
-          error={mergedErrors.branchId}
-          helperText={
-            branchOptions.length === 0 ? "No hay sucursales disponibles para seleccionar." : undefined
-          }
-          placeholder="Selecciona una sucursal"
-          options={branchSelectOptions}
-        />
+        {/* SCRUM-277 Fase 1: los packs conservan una sola sede (comportamiento
+            anterior); los productos individuales usan la asignación multi-sede
+            más abajo. */}
+        {productType === "package" ? (
+          <SelectField
+            id="product-branch"
+            label="Sucursal"
+            required
+            value={branchId}
+            onValueChange={setBranchId}
+            disabled={submitting || branchOptions.length === 0}
+            error={mergedErrors.branchId}
+            helperText={
+              branchOptions.length === 0
+                ? "No hay sucursales disponibles para seleccionar."
+                : undefined
+            }
+            placeholder="Selecciona una sucursal"
+            options={branchSelectOptions}
+          />
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,31 +247,49 @@ export function ProductForm({
         />
       </div>
 
-      <InputField
-        id="product-quantity"
-        label="Cantidad Disponible"
-        required
-        type="number"
-        min="0"
-        step="1"
-        value={quantityAvailable}
-        onChange={(event) => setQuantityAvailable(event.target.value)}
-        disabled={submitting}
-        error={mergedErrors.quantityAvailable}
-        helperText={
-          productType === "package" && maxPacks !== undefined ? (
-            <span id="product-quantity-max-packs-hint">
-              Máximo de packs disponibles: {maxPacks}
+      {productType === "package" ? (
+        <InputField
+          id="product-quantity"
+          label="Cantidad Disponible"
+          required
+          type="number"
+          min="0"
+          step="1"
+          value={quantityAvailable}
+          onChange={(event) => setQuantityAvailable(event.target.value)}
+          disabled={submitting}
+          error={mergedErrors.quantityAvailable}
+          helperText={
+            maxPacks !== undefined ? (
+              <span id="product-quantity-max-packs-hint">
+                Máximo de packs disponibles: {maxPacks}
+              </span>
+            ) : undefined
+          }
+          describedBy={maxPacks !== undefined ? "product-quantity-max-packs-hint" : undefined}
+          placeholder="0"
+        />
+      ) : (
+        <div className="space-y-3">
+          <ProductBranchAssignmentSelector
+            options={branchOptions}
+            selectedItems={branches}
+            disabled={submitting}
+            error={mergedErrors.branches}
+            onToggle={handleToggleBranch}
+            onQuantityChange={handleBranchQuantityChange}
+            onPublishedChange={handleBranchPublishedChange}
+          />
+          {/* Tarea 4.2: total siempre derivado, nunca editable directamente —
+              refuerza que la sede es la fuente de verdad del inventario. */}
+          <p className="text-sm text-[#6A6A6A]">
+            Total en todas las sedes:{" "}
+            <span className="font-medium text-[#1A1A1A]">
+              {totalQuantityAcrossBranches} unidades
             </span>
-          ) : undefined
-        }
-        describedBy={
-          productType === "package" && maxPacks !== undefined
-            ? "product-quantity-max-packs-hint"
-            : undefined
-        }
-        placeholder="0"
-      />
+          </p>
+        </div>
+      )}
 
       <FormField id="product-description" label="Descripción">
         <Textarea

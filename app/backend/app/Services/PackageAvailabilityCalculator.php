@@ -19,6 +19,10 @@ use Illuminate\Support\Collection;
  */
 class PackageAvailabilityCalculator
 {
+    public function __construct(
+        private readonly BranchAvailabilityCalculator $branchAvailabilityCalculator
+    ) {}
+
     /**
      * Get the stock of a single product that is still available to be
      * committed to packages, after subtracting the stock already
@@ -29,7 +33,7 @@ class PackageAvailabilityCalculator
      */
     public function availableForPackaging(Product $product, ?int $excludePackageId = null): int
     {
-        $product->loadMissing('package');
+        $product->loadMissing('package', 'commerceBranches');
 
         $packages = $product->package
             ->when(
@@ -50,7 +54,17 @@ class PackageAvailabilityCalculator
             return $effectiveQuantityAvailable * (int) $package->pivot->quantity;
         });
 
-        return max(0, $product->quantity_available - $committedStock);
+        // SCRUM-277 Fase 1: el stock de un producto single ya no vive en una sola
+        // columna global (products.quantity_available), sino por sede en el pivote.
+        // Los packs, sin embargo, conservan su comportamiento actual (Fase 2 los
+        // migra por completo): se preserva la noción de "un número global de
+        // disponibilidad" sumando la disponibilidad de todas las sedes del
+        // producto, en vez de leer una columna que ya no es la fuente de verdad.
+        $totalAvailableAcrossBranches = $this->branchAvailabilityCalculator
+            ->availableForMany($product->commerceBranches->pluck('pivot'))
+            ->sum();
+
+        return max(0, $totalAvailableAcrossBranches - $committedStock);
     }
 
     /**

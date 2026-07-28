@@ -12,6 +12,7 @@ use App\Http\Requests\Api\V1\PatchProductStatusRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
 use App\Http\Requests\Api\V1\ShowProductRequest;
 use App\Http\Requests\Api\V1\StoreProductRequest;
+use App\Http\Requests\Api\V1\UpdateProductBranchPublicationRequest;
 use App\Http\Requests\Api\V1\UpdateProductRequest;
 use App\Http\Resources\Api\V1\DocumentUploadResource;
 use App\Http\Resources\Api\V1\ProductResource;
@@ -235,6 +236,44 @@ class ProductController extends Controller
             return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return $this->errorResponse('Error updating product status', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @OA\Patch(
+     *   path="/api/v1/products/{id}/branches/{branchId}",
+     *   operationId="patchProductBranchPublication",
+     *   tags={"Products"},
+     *   summary="Publish or unpublish a product in a specific branch",
+     *   description="Toggles product visibility to customers for a single branch, without resending the full product payload (SCRUM-277 Fase 1)",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="branchId", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *   @OA\RequestBody(
+     *     required=true,
+     *
+     *     @OA\JsonContent(ref="#/components/schemas/UpdateProductBranchPublicationRequest")
+     *   ),
+     *
+     *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/ProductResource")),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden"),
+     *   @OA\Response(response=404, description="Product or branch assignment not found"),
+     *   @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function patchBranchPublication(UpdateProductBranchPublicationRequest $request, int $id, int $branchId): JsonResponse
+    {
+        try {
+            $product = $this->productService->updateBranchPublication($id, $branchId, $request->boolean('is_published'));
+
+            return $this->successResponse(new ProductResource($product), 'Product branch publication updated successfully', Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Product or branch assignment not found', Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return $this->errorResponse('Error updating product branch publication', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

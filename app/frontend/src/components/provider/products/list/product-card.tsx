@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Copy, Edit, Image as ImageIcon, Package, Trash2 } from "lucide-react";
 import type { ProductFromAPI } from "@/types/products";
+import { ProductBranchPublicationList } from "./product-branch-publication-list";
 
 interface ProductCardProps {
   product: ProductFromAPI;
@@ -100,12 +101,22 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
         </div>
 
         <div className="space-y-2 text-sm text-[#6A6A6A]">
-          <div className="flex items-center justify-between gap-2">
-            <span>Disponible:</span>
-            <span className={product.quantity_available > 0 ? "text-green-600" : "text-red-600"}>
-              {product.quantity_available} unidades
-            </span>
-          </div>
+          {product.product_type === "package" ? (
+            <div className="flex items-center justify-between gap-2">
+              <span>Disponible:</span>
+              <span className={product.quantity_available > 0 ? "text-green-600" : "text-red-600"}>
+                {product.quantity_available} unidades
+              </span>
+            </div>
+          ) : (
+            // SCRUM-277 Fase 1: product.quantity_available quedó vestigial para
+            // individuales (el stock vive por sede) — se reemplaza por el
+            // estado de publicación por sede, con su propio control.
+            <ProductBranchPublicationList
+              productId={product.id}
+              branches={product.commerce_branches ?? []}
+            />
+          )}
 
           <div className="flex items-center justify-between gap-2">
             <span>Tipo:</span>

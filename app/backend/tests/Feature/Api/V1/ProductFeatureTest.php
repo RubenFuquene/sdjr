@@ -71,17 +71,21 @@ class ProductFeatureTest extends TestCase
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,
                 'original_price' => 100.00,
                 'discounted_price' => 80.00,
-                'quantity_total' => 50,
-                'quantity_available' => 50,
                 'expires_at' => now()->addMonth()->toDateTimeString(),
             ],
-            'commerce_branch_ids' => [
-                $commerce_branch->id,
+            // SCRUM-277 Fase 1: single ya no lleva quantity_total/quantity_available
+            // a nivel de producto — el stock viaja por sede.
+            'commerce_branches' => [
+                ['commerce_branch_id' => $commerce_branch->id, 'quantity_available' => 50],
             ],
         ];
         $response = $this->postJson('/api/v1/products/commerce', $payload);
         $response->assertCreated()->assertJsonFragment(['title' => 'Café Premium']);
         $this->assertDatabaseHas('products', ['title' => 'Café Premium']);
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'commerce_branch_id' => $commerce_branch->id,
+            'quantity_available' => 50,
+        ]);
     }
 
     private function buildSingleProductPayload(array $commerceBranchIds, array $productOverrides = []): array
@@ -94,10 +98,13 @@ class ProductFeatureTest extends TestCase
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,
                 'original_price' => 100.00,
                 'discounted_price' => 80.00,
-                'quantity_total' => 10,
-                'quantity_available' => 10,
             ], $productOverrides),
-            'commerce_branch_ids' => $commerceBranchIds,
+            // SCRUM-277 Fase 1: single ya no lleva quantity_total/quantity_available
+            // a nivel de producto — el stock viaja por sede.
+            'commerce_branches' => array_map(
+                fn (int $branchId) => ['commerce_branch_id' => $branchId, 'quantity_available' => 10],
+                $commerceBranchIds
+            ),
         ];
     }
 
@@ -174,10 +181,10 @@ class ProductFeatureTest extends TestCase
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $category = ProductCategory::factory()->create();
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
-        $singleProduct = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $singleProduct = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $singleProduct->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $payload = [
@@ -190,7 +197,9 @@ class ProductFeatureTest extends TestCase
                 'quantity_total' => 3,
                 'quantity_available' => 3,
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [
+                ['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 3],
+            ],
             'package_items' => [
                 ['product_id' => $singleProduct->id, 'quantity' => 1],
             ],
@@ -304,17 +313,22 @@ class ProductFeatureTest extends TestCase
                 'title' => 'Té Verde',
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,
             ],
-            'commerce_branch_ids' => [
-                $commerce_branch->id,
+            'commerce_branches' => [
+                ['commerce_branch_id' => $commerce_branch->id, 'quantity_available' => 15],
             ],
         ];
         $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
         $response->assertOk()->assertJsonFragment(['title' => 'Té Verde']);
         $this->assertDatabaseHas('products', ['id' => $product->id, 'title' => 'Té Verde']);
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'product_id' => $product->id,
+            'commerce_branch_id' => $commerce_branch->id,
+            'quantity_available' => 15,
+        ]);
     }
 
     /**
-     * Regresión SCRUM-303/306: editar un producto sin enviar commerce_branch_ids
+     * Regresión SCRUM-303/306: editar un producto sin enviar commerce_branches
      * (ej. solo cambiar el precio) borraba la sucursal asignada. La clave ausente
      * ahora significa "no tocar la relación", no "vaciarla".
      */
@@ -347,7 +361,7 @@ class ProductFeatureTest extends TestCase
     }
 
     /**
-     * commerce_branch_ids: [] explícito sigue siendo la forma de "quitar sucursal"
+     * commerce_branches: [] explícito sigue siendo la forma de "quitar sucursal"
      * a propósito — distinto de omitir la clave por completo.
      */
     public function test_update_with_empty_branch_array_clears_branch()
@@ -366,7 +380,7 @@ class ProductFeatureTest extends TestCase
             'product' => [
                 'commerce_id' => $commerce->id,
             ],
-            'commerce_branch_ids' => [],
+            'commerce_branches' => [],
         ];
 
         $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
@@ -612,7 +626,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id], // Missing quantity
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -641,7 +655,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 0],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -670,7 +684,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => -5],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -689,10 +703,12 @@ class ProductFeatureTest extends TestCase
             'quantity_total' => 2,
             'quantity_available' => 2,
         ]);
-        $product = Product::factory()->create([
-            'commerce_id' => $package->commerce_id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $package->commerce_id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede —
+        // availableForPackaging() lo suma desde aquí, no de una columna del producto.
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $package->packageItems()->attach($product->id, ['quantity' => 2]);
@@ -704,7 +720,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -773,7 +789,7 @@ class ProductFeatureTest extends TestCase
                 ['product_id' => $product->id, 'quantity' => 2],
                 ['product_id' => $product->id, 'quantity' => 3], // Duplicate
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -807,7 +823,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 10], // Excede las 5 disponibles
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -840,7 +856,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 7], // Excede las 3 disponibles
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -854,10 +870,11 @@ class ProductFeatureTest extends TestCase
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $category = ProductCategory::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $payload = [
@@ -873,7 +890,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -886,10 +903,10 @@ class ProductFeatureTest extends TestCase
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $category = ProductCategory::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $payload = [
@@ -905,7 +922,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -942,7 +959,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $existingPackage->id, 'quantity' => 1],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -955,10 +972,11 @@ class ProductFeatureTest extends TestCase
         $user = $this->actingAsAdmin();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
@@ -978,7 +996,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -993,10 +1011,10 @@ class ProductFeatureTest extends TestCase
         $user = $this->actingAsAdmin();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
@@ -1016,7 +1034,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -1035,10 +1053,11 @@ class ProductFeatureTest extends TestCase
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $category = ProductCategory::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         // Pack A already commits 2 packs * 3 units = 6 units, leaving a remainder of 4.
@@ -1062,7 +1081,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         // Remainder = 4 units, requested item quantity = 2 -> max packs = floor(4 / 2) = 2.
@@ -1089,10 +1108,12 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($branch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $package = Product::factory()->create([
@@ -1116,10 +1137,14 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 100,
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede — sin
+        // esto, available_for_packaging quedaría en 0 y el test seguiría "en
+        // verde" (solo mide conteo de queries) sin ejercer un cálculo real.
+        $product->commerceBranches()->attach($branch->id, [
             'quantity_available' => 100,
+            'is_published' => true,
         ]);
 
         $packA = Product::factory()->create([

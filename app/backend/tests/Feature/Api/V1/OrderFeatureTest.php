@@ -47,6 +47,13 @@ class OrderFeatureTest extends TestCase
 
         $branch = CommerceBranch::factory()->create();
         $products = Product::factory()->count(2)->create(['commerce_id' => $branch->commerce_id]);
+        // SCRUM-277 Fase 1: el stock a validar vive por sede en el pivote, no
+        // en la columna del producto — sin esto, validateProductAvailability()
+        // rechaza la orden por falta de inventario en la sede.
+        $products->each(fn (Product $product) => $product->commerceBranches()->attach($branch->id, [
+            'quantity_available' => 10,
+            'is_published' => true,
+        ]));
 
         $body = [
             'commerce_branch_id' => $branch->id,
@@ -291,6 +298,13 @@ class OrderFeatureTest extends TestCase
 
         $branch = CommerceBranch::factory()->create();
         $products = Product::factory()->count(2)->create(['commerce_id' => $branch->commerce_id]);
+        // SCRUM-277 Fase 1: el stock a validar vive por sede en el pivote, no
+        // en la columna del producto — sin esto, validateProductAvailability()
+        // rechaza la orden por falta de inventario en la sede.
+        $products->each(fn (Product $product) => $product->commerceBranches()->attach($branch->id, [
+            'quantity_available' => 10,
+            'is_published' => true,
+        ]));
 
         $body = [
             'commerce_branch_id' => $branch->id,

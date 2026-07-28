@@ -11,6 +11,7 @@ use App\Models\CommerceBranch;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductCommerceBranch;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Payments\PaymentIntent;
@@ -46,10 +47,12 @@ class OrderTransactionFeatureTest extends TestCase
     private function pendingOrderFor(User $user, float $total = 16000): Order
     {
         $branch = CommerceBranch::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $branch->commerce_id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $branch->commerce_id]);
+        // SCRUM-277 Fase 1: el stock que dismissProductConfirmedStock() descuenta
+        // vive por sede en el pivote, no en products.quantity_total/available.
+        $product->commerceBranches()->attach($branch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $order = Order::factory()->create([
@@ -69,12 +72,20 @@ class OrderTransactionFeatureTest extends TestCase
         return $order;
     }
 
+    private function branchStock(int $productId, int $branchId): int
+    {
+        return (int) ProductCommerceBranch::query()
+            ->where('product_id', $productId)
+            ->where('commerce_branch_id', $branchId)
+            ->value('quantity_available');
+    }
+
     public function test_owner_pays_pending_order_and_it_gets_confirmed(): void
     {
         $user = $this->customer();
         $order = $this->pendingOrderFor($user);
         $product = $order->items()->first()->product;
-        $stockBefore = $product->quantity_total;
+        $stockBefore = $this->branchStock($product->id, $order->commerce_branch_id);
 
         $response = $this->postJson("/api/v1/orders/{$order->id}/transactions", []);
 
@@ -84,8 +95,9 @@ class OrderTransactionFeatureTest extends TestCase
         $response->assertJsonPath('data.currency', 'COP');
 
         $this->assertSame(Constant::ORDER_STATUS_CONFIRMED, $order->fresh()->status);
-        // El stock se descuenta UNA vez, via OrderService (comportamiento existente sobre quantity_total).
-        $this->assertSame($stockBefore - 2, $product->fresh()->quantity_total);
+        // SCRUM-277 Fase 1: el stock se descuenta UNA vez, sobre el pivote de
+        // la sede de la orden — no sobre products.quantity_total.
+        $this->assertSame($stockBefore - 2, $this->branchStock($product->id, $order->commerce_branch_id));
     }
 
     public function test_simulated_rejection_leaves_order_pending(): void
@@ -190,10 +202,10 @@ class OrderTransactionFeatureTest extends TestCase
         // el lock resuelva la carrera en si (eso depende del motor real en prod).
         $user = $this->customer();
         $branch = CommerceBranch::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $branch->commerce_id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $branch->commerce_id]);
+        $product->commerceBranches()->attach($branch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $orderA = Order::factory()->create([
@@ -225,8 +237,48 @@ class OrderTransactionFeatureTest extends TestCase
         $this->postJson("/api/v1/orders/{$orderA->id}/transactions", [])->assertCreated();
         $this->postJson("/api/v1/orders/{$orderB->id}/transactions", [])->assertCreated();
 
-        $this->assertSame(5, $product->fresh()->quantity_total);
-        $this->assertSame(5, $product->fresh()->quantity_available);
+        // SCRUM-277 Fase 1: el stock vive por sede en el pivote.
+        $this->assertSame(5, $this->branchStock($product->id, $branch->id));
+    }
+
+    /**
+     * SCRUM-277 Fase 1, Tarea 6.4 — no-regresión de SCRUM-160/161: confirmar
+     * el pago de una orden descuenta el stock de la sede de ESA orden, y dejar
+     * intacto el stock del mismo producto en cualquier otra sede donde
+     * también esté publicado.
+     */
+    public function test_paying_order_only_decrements_stock_of_the_orders_branch(): void
+    {
+        $user = $this->customer();
+        $branchA = CommerceBranch::factory()->create();
+        $branchB = CommerceBranch::factory()->create(['commerce_id' => $branchA->commerce_id]);
+        $product = Product::factory()->create(['commerce_id' => $branchA->commerce_id]);
+        $product->commerceBranches()->attach($branchA->id, [
+            'quantity_available' => 10,
+            'is_published' => true,
+        ]);
+        $product->commerceBranches()->attach($branchB->id, [
+            'quantity_available' => 10,
+            'is_published' => true,
+        ]);
+
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'commerce_branch_id' => $branchA->id,
+            'total_price' => 6000,
+            'status' => Constant::ORDER_STATUS_PENDING,
+        ]);
+        OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'quantity' => 4,
+            'unit_price' => 1500,
+        ]);
+
+        $this->postJson("/api/v1/orders/{$order->id}/transactions", [])->assertCreated();
+
+        $this->assertSame(6, $this->branchStock($product->id, $branchA->id));
+        $this->assertSame(10, $this->branchStock($product->id, $branchB->id));
     }
 
     public function test_gateway_is_swappable_via_config_without_touching_domain(): void
