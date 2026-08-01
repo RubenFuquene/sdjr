@@ -26,19 +26,26 @@ use Illuminate\Foundation\Http\FormRequest;
  *     @OA\Property(property="description", type="string", maxLength=255, nullable=true, example="Café de origen especial", description="Product description"),
  *     @OA\Property(property="product_type", type="string", enum={"single","package"}, example="single", description="Type of product (single/package)"),
  *     @OA\Property(property="original_price", type="number", format="float", example=100.00, description="Original price"),
- *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price"),
- *     @OA\Property(property="quantity_total", type="integer", example=50, description="Total quantity"),
- *     @OA\Property(property="quantity_available", type="integer", example=50, description="Available quantity"),
+ *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price. Required and must be > 0 and <= original_price when the product (new or existing) is of type 'single'; optional for 'package'."),
+ *     @OA\Property(property="quantity_total", type="integer", example=50, description="Only meaningful for product_type=package (how many packs can be sold). For 'single' the stock lives per branch in commerce_branches[].quantity_available (SCRUM-277)."),
+ *     @OA\Property(property="quantity_available", type="integer", example=50, description="Only meaningful for product_type=package. For 'single' the stock lives per branch in commerce_branches[].quantity_available (SCRUM-277)."),
  *     @OA\Property(property="expires_at", type="string", format="date-time", nullable=true, example="2026-12-31T23:59:59", description="Expiration date"),
  *     @OA\Property(property="status", type="string", maxLength=1, example="1", description="Status (1=Activo, 0=Inactivo)"),
  *   ),
  *   @OA\Property(
- *     property="commerce_branch_ids",
+ *     property="commerce_branches",
  *     type="array",
+ *     description="Sedes donde se asigna el producto, con su inventario y estado de publicación por sede (SCRUM-277). Ausente = no tocar la asignación existente; presente = reemplaza la asignación completa.",
  *
- *     @OA\Items(type="integer", example=1, description="ID of a commerce branch")
+ *     @OA\Items(
+ *       type="object",
+ *       required={"commerce_branch_id", "quantity_available"},
+ *
+ *       @OA\Property(property="commerce_branch_id", type="integer", example=1, description="ID of a commerce branch"),
+ *       @OA\Property(property="quantity_available", type="integer", minimum=0, example=20, description="Stock available for this product in this branch"),
+ *       @OA\Property(property="is_published", type="boolean", default=false, description="Whether the product is visible to customers in this branch. Requires quantity_available > 0.")
+ *     )
  *   ),
- *
  *   @OA\Property(
  *     property="package_items",
  *     type="array",
@@ -89,13 +96,24 @@ class UpdateProductRequest extends FormRequest
             'product.description' => ['nullable', 'string', 'max:255'],
             'product.product_type' => ['sometimes', 'string', 'in:single,package'],
             'product.original_price' => ['sometimes', 'numeric', 'min:0'],
-            'product.discounted_price' => ['nullable', 'numeric', 'min:0'],
+            // SCRUM-335: la obligatoriedad (solo para product_type=single) y la
+            // comparación con original_price se validan en withValidator(), no aquí,
+            // porque en edición ambos valores pueden venir de la BD (campo no
+            // enviado) en vez del payload — ver validateDiscountedPrice().
+            'product.discounted_price' => ['nullable', 'numeric', 'min:0.01'],
             'product.quantity_total' => ['sometimes', 'integer', 'min:0'],
             'product.quantity_available' => ['sometimes', 'integer', 'min:0'],
             'product.expires_at' => ['nullable', 'date'],
             'product.status' => ['sometimes', 'string', 'max:1'],
 
-            'commerce_branch_ids.*' => ['sometimes', 'integer', 'exists:commerce_branches,id'],
+            // La regla del array padre es necesaria además de la de sus elementos:
+            // sin ella, Laravel omite la clave por completo de validated() cuando
+            // el array viene vacío, y no hay forma de distinguir "ausente" (no
+            // tocar la relación) de "presente y vacío a propósito" (limpiarla).
+            'commerce_branches' => ['sometimes', 'array'],
+            'commerce_branches.*.commerce_branch_id' => ['required', 'integer', 'exists:commerce_branches,id', 'distinct'],
+            'commerce_branches.*.quantity_available' => ['required', 'integer', 'min:0'],
+            'commerce_branches.*.is_published' => ['sometimes', 'boolean'],
 
             // Fotos
 
@@ -112,16 +130,19 @@ class UpdateProductRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            // TODO: For product_type=single, only the basic rules() (types/ranges/existence) are
-            // enforced. No cross-field business validation is performed (e.g. discounted_price <
-            // original_price, quantity_available <= quantity_total). Analyze in a future task.
-            if (! $this->has('package_items')) {
-                return;
-            }
-
             $routeParameters = $this->route()?->parameters() ?? [];
             $currentPackageId = $routeParameters !== [] ? (int) reset($routeParameters) : null;
             $existingPackage = $currentPackageId ? Product::find($currentPackageId) : null;
+
+            $this->validateDiscountedPrice($validator, $existingPackage);
+            $this->validateCommerceBranches($validator, $existingPackage);
+
+            // TODO: For product_type=single, quantity_available <= quantity_total is not
+            // enforced. Analyze in a future task (discounted_price <= original_price is
+            // already covered by validateDiscountedPrice() above, SCRUM-335).
+            if (! $this->has('package_items')) {
+                return;
+            }
 
             $packageItems = collect();
 
@@ -173,5 +194,83 @@ class UpdateProductRequest extends FormRequest
                 );
             }
         });
+    }
+
+    /**
+     * SCRUM-335: discounted_price es obligatorio (y debe ser <= original_price) solo
+     * para productos individuales. En edición el payload puede omitir cualquiera de
+     * los dos campos (ediciones parciales), así que se resuelve el valor efectivo
+     * combinando lo enviado con el producto existente en BD antes de validar —
+     * de lo contrario, cualquier edición que no toque el descuento fallaría aunque
+     * el producto ya tenga uno válido guardado.
+     */
+    private function validateDiscountedPrice(Validator $validator, ?Product $existingProduct): void
+    {
+        $productType = $this->input('product.product_type', $existingProduct?->product_type);
+
+        if ($productType !== Constant::PRODUCT_TYPE_SINGLE) {
+            return;
+        }
+
+        $discountedPrice = $this->has('product.discounted_price')
+            ? $this->input('product.discounted_price')
+            : $existingProduct?->discounted_price;
+
+        if ($discountedPrice === null || $discountedPrice === '') {
+            $validator->errors()->add(
+                'product.discounted_price',
+                'The discounted_price field is required for single products.'
+            );
+
+            return;
+        }
+
+        $originalPrice = $this->input('product.original_price', $existingProduct?->original_price);
+
+        if ($originalPrice !== null && (float) $discountedPrice > (float) $originalPrice) {
+            $validator->errors()->add(
+                'product.discounted_price',
+                'The discounted_price field must be less than or equal to original_price.'
+            );
+        }
+    }
+
+    /**
+     * SCRUM-277 Fase 1 (Tareas 3.4 y 3.8): no se puede publicar (is_published=true)
+     * una sede sin inventario cargado, y los packs no se pueden publicar en
+     * ninguna sede todavía — Opción A: bloqueados hasta que la Fase 2 les dé su
+     * propio cálculo de disponibilidad por sede. Hoy nada es publicable (el bug
+     * original de SCRUM-277), así que este bloqueo no quita funcionalidad
+     * existente a los packs.
+     *
+     * product_type se resuelve como valor efectivo (payload ?? BD): una edición
+     * que solo toca commerce_branches, sin reenviar product.product_type, debe
+     * seguir sabiendo si el producto existente es un pack.
+     */
+    private function validateCommerceBranches(Validator $validator, ?Product $existingProduct): void
+    {
+        $productType = $this->input('product.product_type', $existingProduct?->product_type);
+
+        foreach ($this->input('commerce_branches', []) as $index => $branch) {
+            if (! ($branch['is_published'] ?? false)) {
+                continue;
+            }
+
+            if ($productType === Constant::PRODUCT_TYPE_PACKAGE) {
+                $validator->errors()->add(
+                    "commerce_branches.{$index}.is_published",
+                    'Packages cannot be published yet.'
+                );
+
+                continue;
+            }
+
+            if ((int) ($branch['quantity_available'] ?? 0) === 0) {
+                $validator->errors()->add(
+                    "commerce_branches.{$index}.is_published",
+                    'Cannot publish a branch with zero available quantity.'
+                );
+            }
+        }
     }
 }

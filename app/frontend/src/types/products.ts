@@ -28,6 +28,21 @@ export interface ProductPhotoFromAPI {
   updated_at?: string;
 }
 
+export interface ProductCommerceBranchFromAPI {
+  id: number;
+  name: string;
+  /** Ausente en respuestas que no cargan el pivote (ej. package_items anidados). SCRUM-277. */
+  quantity_available?: number;
+  is_published?: boolean;
+}
+
+/** Asignación de un producto individual a una sede, con su inventario y publicación (SCRUM-277 Fase 1). */
+export interface ProductBranchAssignment {
+  branchId: number;
+  quantityAvailable: number;
+  isPublished: boolean;
+}
+
 export interface ProductFromAPI {
   id: number;
   commerce_id: number;
@@ -42,6 +57,8 @@ export interface ProductFromAPI {
   available_for_packaging?: number;
   expires_at: string | null;
   photos?: ProductPhotoFromAPI[];
+  /** Solo presente si el backend cargó la relación (whenLoaded); ausente en algunos listados. */
+  commerce_branches?: ProductCommerceBranchFromAPI[];
   status: string;
   created_at: string;
   updated_at: string;
@@ -64,11 +81,19 @@ export interface ProductFormInput {
   productType: ProductType;
   originalPrice: number;
   discountedPrice?: number | null;
+  /** Solo significativo para product_type=package (cuántos packs se pueden vender). SCRUM-277. */
   quantityTotal?: number;
-  quantityAvailable: number;
+  /** Solo significativo para product_type=package. Para 'single' el stock vive en branches[]. SCRUM-277. */
+  quantityAvailable?: number;
   expiresAt?: string | null;
   status?: string;
-  branchId?: number | null;
+  /**
+   * SCRUM-277 Fase 1: para product_type=single, la asignación multi-sede con
+   * inventario y publicación. Para product_type=package, conserva el
+   * comportamiento anterior — una sola sede, sin inventario por sede (los
+   * packs siguen usando quantityAvailable/quantityTotal a nivel de producto).
+   */
+  branches?: ProductBranchAssignment[];
   packageItems?: ProductPackageItemInput[];
   photos?: Array<{
     file_name: string;

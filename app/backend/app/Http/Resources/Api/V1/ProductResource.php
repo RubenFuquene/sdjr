@@ -22,11 +22,25 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="product_type", type="string", enum={"single","package"}),
  *   @OA\Property(property="original_price", type="number", format="float"),
  *   @OA\Property(property="discounted_price", type="number", format="float", nullable=true),
- *   @OA\Property(property="quantity_total", type="integer"),
- *   @OA\Property(property="quantity_available", type="integer"),
+ *   @OA\Property(property="quantity_total", type="integer", nullable=true, description="Solo significativo para product_type=package. Para 'single' es vestigial: el stock real vive por sede en commerce_branches[].quantity_available (SCRUM-277)."),
+ *   @OA\Property(property="quantity_available", type="integer", nullable=true, description="Solo significativo para product_type=package. Para 'single' es vestigial (SCRUM-277)."),
  *   @OA\Property(property="available_for_packaging", type="integer", nullable=true, description="Stock still available to be committed to packages (only present for product_type=single)"),
  *   @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
  *   @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
+ *   @OA\Property(
+ *     property="commerce_branches",
+ *     type="array",
+ *     description="Sucursales asignadas al producto, con su inventario y estado de publicación por sede (solo si la relacion commerceBranches esta cargada). SCRUM-277 Fase 1.",
+ *
+ *     @OA\Items(
+ *       type="object",
+ *
+ *       @OA\Property(property="id", type="integer"),
+ *       @OA\Property(property="name", type="string"),
+ *       @OA\Property(property="quantity_available", type="integer", nullable=true, description="Stock cargado en esta sede (null si la relacion se cargo sin pivote, ej. commerceBranches sin withPivot)"),
+ *       @OA\Property(property="is_published", type="boolean", nullable=true, description="Si el producto es visible a clientes en esta sede")
+ *     )
+ *   ),
  *   @OA\Property(
  *     property="package_items",
  *     type="array",
@@ -80,6 +94,14 @@ class ProductResource extends JsonResource
                 return $this->photos->map(function ($photo) {
                     return new DocumentUploadResource($photo, ['product_id' => $this->id]);
                 });
+            }),
+            'commerce_branches' => $this->whenLoaded('commerceBranches', function () {
+                return $this->commerceBranches->map(fn ($branch) => [
+                    'id' => $branch->id,
+                    'name' => $branch->name,
+                    'quantity_available' => $branch->pivot->quantity_available,
+                    'is_published' => (bool) $branch->pivot->is_published,
+                ]);
             }),
             'package_items' => $this->whenLoaded('packageItems', function () {
                 return $this->packageItems->map(function ($item) {

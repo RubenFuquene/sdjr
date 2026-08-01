@@ -165,7 +165,11 @@ export function mapNearbyProductToDiscoverCard(product: NearbyProduct): Discover
     address: toText(nearestBranch?.address, "Ubicacion no disponible"),
     price: displayPrice,
     originalPrice,
-    available: toNumber(product.quantity_available, 1),
+    // SCRUM-277 Fase 1: product.quantity_available quedó vestigial para
+    // single (siempre mostraba 0/1) — el stock real de la sede visible al
+    // cliente es el de nearest_branch, el mismo que decidió si el producto
+    // aparece aquí en primer lugar (NearbySearchService ya filtró por sede).
+    available: toNumber(nearestBranch?.quantity_available, 0),
     distanceKm,
     imageUrl: getProductImageUrl(product),
     pickupSchedule: getTodayPickupSchedule(nearestBranch?.hours),
@@ -256,10 +260,31 @@ export interface ProductDetailView {
 }
 
 /**
+ * SCRUM-277 Fase 1: detail.quantity_available quedó vestigial para
+ * product_type=single — el stock real vive por sede en commerce_branches[].
+ * Resuelve la cantidad de la sede que el cliente eligió (branchId, del
+ * contexto de navegación); sin sede resuelta se degrada a 0 (honesto) en vez
+ * de fabricar un número, siguiendo el mismo criterio de esta función.
+ */
+function resolveBranchQuantity(detail: ProductDetail, branchId?: number | null): number {
+  if (branchId) {
+    const matched = detail.commerce_branches?.find((branch) => branch.id === branchId);
+    if (matched) {
+      return toNumber(matched.quantity_available, 0);
+    }
+  }
+
+  return 0;
+}
+
+/**
  * Degradación honesta: ante dato ausente se muestra un estado neutro real
  * ("Sin categoría", "Sin descripción disponible."), nunca un valor del prototipo.
  */
-export function mapProductDetailToView(detail: ProductDetail): ProductDetailView {
+export function mapProductDetailToView(
+  detail: ProductDetail,
+  branchId?: number | null
+): ProductDetailView {
   const price = detail.discounted_price ?? detail.original_price;
 
   return {
@@ -270,7 +295,7 @@ export function mapProductDetailToView(detail: ProductDetail): ProductDetailView
     commerceName: toText(detail.commerce_name, "Proveedor"),
     price: toNumber(price),
     originalPrice: toNumber(detail.original_price, price),
-    quantityAvailable: toNumber(detail.quantity_available, 0),
+    quantityAvailable: resolveBranchQuantity(detail, branchId),
     photoUrl: detail.photos?.[0]?.presigned_url ?? null,
     expiresAt: detail.expires_at ?? null,
   };

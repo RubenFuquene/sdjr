@@ -109,7 +109,7 @@ export default function AppCartPage() {
         return;
       }
 
-      const view = mapProductDetailToView(productResult.value.data);
+      const view = mapProductDetailToView(productResult.value.data, branchId);
       setProduct(view);
       setQuantity((prev) => Math.min(Math.max(prev, 1), Math.max(view.quantityAvailable, 1)));
       setBranch(branchResult.status === "fulfilled" ? branchResult.value.data : null);

@@ -49,8 +49,6 @@ class ProductStoreTest extends TestCase
                 'product_type' => 'single',
                 'original_price' => 100.0,
                 'discounted_price' => 90.0,
-                'quantity_total' => 10,
-                'quantity_available' => 10,
                 'expires_at' => now()->addMonth()->toIso8601String(),
                 'status' => '1',
             ],
@@ -63,13 +61,21 @@ class ProductStoreTest extends TestCase
                     'metadata' => ['description' => 'Foto de prueba'],
                 ],
             ],
-            'commerce_branch_ids' => [$branch->id],
+            // SCRUM-277 Fase 1: para single, quantity_total/quantity_available a
+            // nivel de producto ya no aplican — el stock viaja por sede aquí.
+            'commerce_branches' => [
+                ['commerce_branch_id' => $branch->id, 'quantity_available' => 10],
+            ],
         ];
 
         $response = $this->postJson('/api/v1/products', $payload);
         $response->assertStatus(201)
             ->assertJsonFragment(['title' => 'Producto Test']);
         $this->assertDatabaseHas('products', ['title' => 'Producto Test']);
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'commerce_branch_id' => $branch->id,
+            'quantity_available' => 10,
+        ]);
     }
 
     public function test_store_product_validation_error(): void
@@ -87,7 +93,9 @@ class ProductStoreTest extends TestCase
                 'commerce_id' => $commerce->id,
                 'title' => '',
             ],
-            'commerce_branch_ids' => [$branch->id],
+            'commerce_branches' => [
+                ['commerce_branch_id' => $branch->id, 'quantity_available' => 10],
+            ],
         ];
         $response = $this->postJson('/api/v1/products', $payload);
         $response->assertStatus(422);

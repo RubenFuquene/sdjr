@@ -53,16 +53,18 @@ class NearbyFeatureTest extends TestCase
     {
         $branch = CommerceBranch::factory()->create(['latitude' => 10, 'longitude' => 10]);
         $product = Product::factory()->create(['status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()]);
-        $product->commerceBranches()->attach($branch->id);
+        $product->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
         $expired = Product::factory()->create(['status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->subDay()]);
-        $expired->commerceBranches()->attach($branch->id);
+        $expired->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
-        $noStock = Product::factory()->create(['status' => Constant::STATUS_ACTIVE, 'quantity_available' => 0, 'expires_at' => now()->addDay()]);
-        $noStock->commerceBranches()->attach($branch->id);
+        $noStock = Product::factory()->create(['status' => Constant::STATUS_ACTIVE, 'expires_at' => now()->addDay()]);
+        // SCRUM-277 Fase 1: el stock real es el de la sede, no la columna del
+        // producto (vestigial para single) — 0 aquí es lo que debe excluirlo.
+        $noStock->commerceBranches()->attach($branch->id, ['quantity_available' => 0, 'is_published' => true]);
 
         $inactive = Product::factory()->create(['status' => Constant::STATUS_INACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()]);
-        $inactive->commerceBranches()->attach($branch->id);
+        $inactive->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
         $response->assertOk();
@@ -76,7 +78,7 @@ class NearbyFeatureTest extends TestCase
     {
         $branch = CommerceBranch::factory()->create(['latitude' => 50, 'longitude' => 50]);
         $product = Product::factory()->create(['status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()]);
-        $product->commerceBranches()->attach($branch->id);
+        $product->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=5');
         $response->assertOk();
@@ -89,8 +91,8 @@ class NearbyFeatureTest extends TestCase
         $category2 = ProductCategory::factory()->create();
         $product1 = Product::factory()->create(['product_category_id' => $category1->id, 'status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()]);
         $product2 = Product::factory()->create(['product_category_id' => $category2->id, 'status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()]);
-        $product1->commerceBranches()->attach($branch->id);
-        $product2->commerceBranches()->attach($branch->id);
+        $product1->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
+        $product2->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10&category_id='.$category1->id);
         $response->assertOk();
@@ -103,8 +105,8 @@ class NearbyFeatureTest extends TestCase
         $branch = CommerceBranch::factory()->create(['latitude' => 10, 'longitude' => 10]);
         $cheap = Product::factory()->create(['discounted_price' => 10, 'status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()]);
         $expensive = Product::factory()->create(['discounted_price' => 1000, 'status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()]);
-        $cheap->commerceBranches()->attach($branch->id);
-        $expensive->commerceBranches()->attach($branch->id);
+        $cheap->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
+        $expensive->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10&max_price=100');
         $response->assertOk();
@@ -133,7 +135,7 @@ class NearbyFeatureTest extends TestCase
             'quantity_available' => 5,
             'expires_at' => now()->addDay(),
         ]);
-        $product->commerceBranches()->attach($branch->id);
+        $product->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
 
@@ -157,7 +159,7 @@ class NearbyFeatureTest extends TestCase
             'quantity_available' => 5,
             'expires_at' => now()->addDay(),
         ]);
-        $product->commerceBranches()->attach($branch->id);
+        $product->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
 
@@ -169,11 +171,37 @@ class NearbyFeatureTest extends TestCase
         $this->assertSame('18:00:00', $data['nearest_branch']['hours'][0]['close_time']);
     }
 
+    /**
+     * SCRUM-277 Fase 1: nearest_branch.quantity_available debe reflejar el
+     * stock real de esa sede, no la columna vestigial de products (bug
+     * detectado después de dar la Fase 1 por completa — la app móvil mostraba
+     * "0 disponibles" y el carrito no dejaba comprar más de 1 unidad sin
+     * importar el stock real).
+     */
+    public function test_nearest_branch_exposes_real_stock_of_that_branch(): void
+    {
+        $branch = CommerceBranch::factory()->create(['latitude' => 10, 'longitude' => 10]);
+        $product = Product::factory()->create([
+            'status' => Constant::STATUS_ACTIVE,
+            'expires_at' => now()->addDay(),
+        ]);
+        $product->commerceBranches()->attach($branch->id, [
+            'quantity_available' => 42,
+            'is_published' => true,
+        ]);
+
+        $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
+
+        $response->assertOk();
+        $data = $response->json('data.0');
+        $this->assertSame(42, $data['nearest_branch']['quantity_available']);
+    }
+
     public function test_pagination_works()
     {
         $branch = CommerceBranch::factory()->create(['latitude' => 10, 'longitude' => 10]);
         Product::factory(30)->create(['status' => Constant::STATUS_ACTIVE, 'quantity_available' => 5, 'expires_at' => now()->addDay()])->each(function ($product) use ($branch) {
-            $product->commerceBranches()->attach($branch->id);
+            $product->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
         });
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10&per_page=10');
         $response->assertOk();

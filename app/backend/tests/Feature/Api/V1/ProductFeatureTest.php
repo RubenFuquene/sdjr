@@ -71,17 +71,209 @@ class ProductFeatureTest extends TestCase
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,
                 'original_price' => 100.00,
                 'discounted_price' => 80.00,
-                'quantity_total' => 50,
-                'quantity_available' => 50,
                 'expires_at' => now()->addMonth()->toDateTimeString(),
             ],
-            'commerce_branch_ids' => [
-                $commerce_branch->id,
+            // SCRUM-277 Fase 1: single ya no lleva quantity_total/quantity_available
+            // a nivel de producto — el stock viaja por sede.
+            'commerce_branches' => [
+                ['commerce_branch_id' => $commerce_branch->id, 'quantity_available' => 50],
             ],
         ];
         $response = $this->postJson('/api/v1/products/commerce', $payload);
         $response->assertCreated()->assertJsonFragment(['title' => 'Café Premium']);
         $this->assertDatabaseHas('products', ['title' => 'Café Premium']);
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'commerce_branch_id' => $commerce_branch->id,
+            'quantity_available' => 50,
+        ]);
+    }
+
+    private function buildSingleProductPayload(array $commerceBranchIds, array $productOverrides = []): array
+    {
+        return [
+            'product' => array_merge([
+                'commerce_id' => 1,
+                'product_category_id' => 1,
+                'title' => 'Producto Individual',
+                'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+                'original_price' => 100.00,
+                'discounted_price' => 80.00,
+            ], $productOverrides),
+            // SCRUM-277 Fase 1: single ya no lleva quantity_total/quantity_available
+            // a nivel de producto — el stock viaja por sede.
+            'commerce_branches' => array_map(
+                fn (int $branchId) => ['commerce_branch_id' => $branchId, 'quantity_available' => 10],
+                $commerceBranchIds
+            ),
+        ];
+    }
+
+    /**
+     * SCRUM-335: el descuento es obligatorio para productos individuales.
+     */
+    public function test_store_single_product_requires_discounted_price()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = $this->buildSingleProductPayload([$commerceBranch->id], [
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+        ]);
+        unset($payload['product']['discounted_price']);
+
+        $response = $this->postJson('/api/v1/products', $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: el descuento no puede superar el precio original.
+     */
+    public function test_store_single_product_rejects_discounted_price_over_original()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = $this->buildSingleProductPayload([$commerceBranch->id], [
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+            'original_price' => 100.00,
+            'discounted_price' => 150.00,
+        ]);
+
+        $response = $this->postJson('/api/v1/products', $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: el descuento debe ser mayor a 0, no basta con estar diligenciado.
+     */
+    public function test_store_single_product_rejects_zero_discounted_price()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+
+        $payload = $this->buildSingleProductPayload([$commerceBranch->id], [
+            'commerce_id' => $commerce->id,
+            'product_category_id' => $category->id,
+            'discounted_price' => 0,
+        ]);
+
+        $response = $this->postJson('/api/v1/products', $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: los packs no exigen descuento propio.
+     */
+    public function test_store_package_does_not_require_discounted_price()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $category = ProductCategory::factory()->create();
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $singleProduct = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $singleProduct->commerceBranches()->attach($commerceBranch->id, [
+            'quantity_available' => 10,
+            'is_published' => true,
+        ]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Pack sin descuento',
+                'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+                'original_price' => 50.00,
+                'quantity_total' => 3,
+                'quantity_available' => 3,
+            ],
+            'commerce_branches' => [
+                ['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 3],
+            ],
+            'package_items' => [
+                ['product_id' => $singleProduct->id, 'quantity' => 1],
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
+
+        $response->assertOk();
+    }
+
+    /**
+     * SCRUM-335: editar un producto individual sin tocar el descuento, cuando ya
+     * tiene uno válido guardado, no debe forzar su reenvío.
+     */
+    public function test_update_single_product_without_discount_key_keeps_existing_discount()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
+
+        $payload = ['product' => ['commerce_id' => $commerce->id, 'title' => 'Nuevo titulo']];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertOk();
+    }
+
+    /**
+     * SCRUM-335: un producto legacy con descuento null queda bloqueado en su
+     * próxima edición hasta que se complete el campo (comportamiento acordado).
+     */
+    public function test_update_single_product_with_legacy_null_discount_requires_it()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+            'original_price' => 100,
+            'discounted_price' => null,
+        ]);
+
+        $payload = ['product' => ['commerce_id' => $commerce->id, 'title' => 'Nuevo titulo']];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
+    }
+
+    /**
+     * SCRUM-335: el descuento efectivo (payload o BD) no puede superar el
+     * precio original efectivo al editar.
+     */
+    public function test_update_single_product_rejects_discounted_price_over_original()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_SINGLE,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
+
+        $payload = ['product' => ['commerce_id' => $commerce->id, 'discounted_price' => 150]];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['product.discounted_price']);
     }
 
     public function test_show_returns_product()
@@ -109,6 +301,8 @@ class ProductFeatureTest extends TestCase
         $product = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_category_id' => $category->id,
+            'original_price' => 100,
+            'discounted_price' => 80,
         ]);
         $commerce_branch = CommerceBranch::factory()->create([
             'commerce_id' => $commerce->id,
@@ -119,13 +313,83 @@ class ProductFeatureTest extends TestCase
                 'title' => 'Té Verde',
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,
             ],
-            'commerce_branch_ids' => [
-                $commerce_branch->id,
+            'commerce_branches' => [
+                ['commerce_branch_id' => $commerce_branch->id, 'quantity_available' => 15],
             ],
         ];
         $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
         $response->assertOk()->assertJsonFragment(['title' => 'Té Verde']);
         $this->assertDatabaseHas('products', ['id' => $product->id, 'title' => 'Té Verde']);
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'product_id' => $product->id,
+            'commerce_branch_id' => $commerce_branch->id,
+            'quantity_available' => 15,
+        ]);
+    }
+
+    /**
+     * Regresión SCRUM-303/306: editar un producto sin enviar commerce_branches
+     * (ej. solo cambiar el precio) borraba la sucursal asignada. La clave ausente
+     * ahora significa "no tocar la relación", no "vaciarla".
+     */
+    public function test_update_without_branch_key_keeps_existing_branch()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
+        $product->commerceBranches()->attach($commerceBranch->id);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'original_price' => 999,
+            ],
+        ];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'product_id' => $product->id,
+            'commerce_branch_id' => $commerceBranch->id,
+        ]);
+    }
+
+    /**
+     * commerce_branches: [] explícito sigue siendo la forma de "quitar sucursal"
+     * a propósito — distinto de omitir la clave por completo.
+     */
+    public function test_update_with_empty_branch_array_clears_branch()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'original_price' => 100,
+            'discounted_price' => 80,
+        ]);
+        $product->commerceBranches()->attach($commerceBranch->id);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $commerce->id,
+            ],
+            'commerce_branches' => [],
+        ];
+
+        $response = $this->putJson('/api/v1/products/'.$product->id, $payload);
+
+        $response->assertOk();
+        $this->assertDatabaseMissing('product_commerce_branch', [
+            'product_id' => $product->id,
+            'commerce_branch_id' => $commerceBranch->id,
+        ]);
     }
 
     public function test_patch_status_updates_product_status()
@@ -362,7 +626,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id], // Missing quantity
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -391,7 +655,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 0],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -420,7 +684,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => -5],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -439,6 +703,46 @@ class ProductFeatureTest extends TestCase
             'quantity_total' => 2,
             'quantity_available' => 2,
         ]);
+        $product = Product::factory()->create(['commerce_id' => $package->commerce_id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede —
+        // availableForPackaging() lo suma desde aquí, no de una columna del producto.
+        $product->commerceBranches()->attach($commerceBranch->id, [
+            'quantity_available' => 10,
+            'is_published' => true,
+        ]);
+
+        $package->packageItems()->attach($product->id, ['quantity' => 2]);
+
+        $payload = [
+            'product' => [
+                'commerce_id' => $package->commerce_id,
+            ],
+            'package_items' => [
+                ['product_id' => $product->id, 'quantity' => 5],
+            ],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+        ];
+
+        $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
+        $response->assertOk();
+
+        $this->assertEquals(5, $package->fresh()->packageItems()->first()->pivot->quantity);
+    }
+
+    /**
+     * Regresión SCRUM-306: editar un pack sin enviar package_items (ej. solo
+     * cambiar el precio) borraba los items asignados.
+     */
+    public function test_update_package_items_without_key_keeps_existing_items()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $package = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
+            'quantity_total' => 2,
+            'quantity_available' => 2,
+        ]);
         $product = Product::factory()->create([
             'commerce_id' => $package->commerce_id,
             'quantity_total' => 10,
@@ -451,16 +755,16 @@ class ProductFeatureTest extends TestCase
             'product' => [
                 'commerce_id' => $package->commerce_id,
             ],
-            'package_items' => [
-                ['product_id' => $product->id, 'quantity' => 5],
-            ],
-            'commerce_branch_ids' => [$commerceBranch->id],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
-        $response->assertOk();
 
-        $this->assertEquals(5, $package->fresh()->packageItems()->first()->pivot->quantity);
+        $response->assertOk();
+        $this->assertDatabaseHas('product_package_items', [
+            'product_package_id' => $package->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+        ]);
     }
 
     public function test_store_package_items_prevents_duplicate_products()
@@ -485,7 +789,7 @@ class ProductFeatureTest extends TestCase
                 ['product_id' => $product->id, 'quantity' => 2],
                 ['product_id' => $product->id, 'quantity' => 3], // Duplicate
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -519,7 +823,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 10], // Excede las 5 disponibles
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -552,7 +856,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 7], // Excede las 3 disponibles
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -566,10 +870,11 @@ class ProductFeatureTest extends TestCase
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $category = ProductCategory::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $payload = [
@@ -585,7 +890,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -598,10 +903,10 @@ class ProductFeatureTest extends TestCase
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $category = ProductCategory::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $payload = [
@@ -617,7 +922,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -654,7 +959,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $existingPackage->id, 'quantity' => 1],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -667,10 +972,11 @@ class ProductFeatureTest extends TestCase
         $user = $this->actingAsAdmin();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
@@ -690,7 +996,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -705,10 +1011,10 @@ class ProductFeatureTest extends TestCase
         $user = $this->actingAsAdmin();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
@@ -728,7 +1034,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -747,10 +1053,11 @@ class ProductFeatureTest extends TestCase
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $category = ProductCategory::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         // Pack A already commits 2 packs * 3 units = 6 units, leaving a remainder of 4.
@@ -774,7 +1081,7 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branch_ids' => [$commerceBranch->id],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         // Remainder = 4 units, requested item quantity = 2 -> max packs = floor(4 / 2) = 2.
@@ -801,10 +1108,12 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
+        $product->commerceBranches()->attach($branch->id, [
             'quantity_available' => 10,
+            'is_published' => true,
         ]);
 
         $package = Product::factory()->create([
@@ -828,10 +1137,14 @@ class ProductFeatureTest extends TestCase
     {
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 100,
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        // SCRUM-277 Fase 1: el stock del componente single vive por sede — sin
+        // esto, available_for_packaging quedaría en 0 y el test seguiría "en
+        // verde" (solo mide conteo de queries) sin ejercer un cálculo real.
+        $product->commerceBranches()->attach($branch->id, [
             'quantity_available' => 100,
+            'is_published' => true,
         ]);
 
         $packA = Product::factory()->create([

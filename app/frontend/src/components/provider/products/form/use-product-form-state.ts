@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type {
+  ProductBranchAssignment,
   ProductType,
   ProviderProductFormFieldErrors,
   ProviderProductFormInput,
@@ -45,6 +46,7 @@ type ProductFormInitialData = {
   discountedPrice?: number | null;
   quantityAvailable?: number;
   branchId?: number | null;
+  branches?: ProductBranchAssignment[];
   packageItems?: Array<{ productId: number; quantity: number }>;
 };
 
@@ -76,15 +78,28 @@ export function useProductFormState({
   const [quantityAvailable, setQuantityAvailable] = useState(initialDraft.quantityAvailable);
   const [description, setDescription] = useState(initialDraft.description);
   const [branchId, setBranchId] = useState(initialDraft.branchId);
+  const [branches, setBranches] = useState<ProductBranchAssignment[]>(initialDraft.branches);
   const [packageItems, setPackageItems] = useState<Array<{ productId: number; quantity: number }>>(
     initialDraft.packageItems
   );
   const [localErrors, setLocalErrors] = useState<ProductFormValidationErrors>({});
 
+  // SCRUM-277 Fase 1: total agregado de todas las sedes, siempre derivado —
+  // nunca editable directamente, para reforzar que la sede es la fuente de
+  // verdad del inventario (Tarea 4.2).
+  const totalQuantityAcrossBranches = useMemo(
+    () => branches.reduce((sum, branch) => sum + branch.quantityAvailable, 0),
+    [branches]
+  );
+
   const mergedErrors = useMemo(() => {
     const packageItemsFieldError =
       Object.entries(fieldErrors).find(
         ([key]) => key === "package_items" || key.startsWith("package_items.")
+      )?.[1] ?? undefined;
+    const branchesFieldError =
+      Object.entries(fieldErrors).find(
+        ([key]) => key === "commerce_branches" || key.startsWith("commerce_branches.")
       )?.[1] ?? undefined;
 
     return {
@@ -97,8 +112,8 @@ export function useProductFormState({
       quantityAvailable:
         localErrors.quantityAvailable ??
         translateQuantityAvailableError(fieldErrors["product.quantity_available"]),
-      branchId:
-        localErrors.branchId ?? fieldErrors["commerce_branch_ids.0"] ?? fieldErrors["commerce_branches.0"],
+      branchId: localErrors.branchId ?? fieldErrors["commerce_branch_ids.0"],
+      branches: localErrors.branches ?? branchesFieldError,
       packageItems: localErrors.packageItems ?? packageItemsFieldError,
     };
   }, [fieldErrors, localErrors]);
@@ -165,6 +180,7 @@ export function useProductFormState({
       discountedPrice,
       quantityAvailable,
       branchId,
+      branches,
       productType,
       packageItems,
       maxPacks,
@@ -180,6 +196,53 @@ export function useProductFormState({
     if (nextType === "single") {
       setPackageItems([]);
     }
+  };
+
+  const handleToggleBranch = (branchId: number) => {
+    setBranches((previous) => {
+      const existing = previous.find((item) => item.branchId === branchId);
+
+      if (existing) {
+        return previous.filter((item) => item.branchId !== branchId);
+      }
+
+      return [...previous, { branchId, quantityAvailable: 0, isPublished: false }];
+    });
+
+    setLocalErrors((previous) => ({ ...previous, branches: undefined }));
+  };
+
+  const handleBranchQuantityChange = (branchId: number, quantity: number) => {
+    const normalizedQuantity = Math.max(0, quantity);
+
+    setBranches((previous) =>
+      previous.map((item) =>
+        item.branchId === branchId
+          ? {
+              ...item,
+              quantityAvailable: normalizedQuantity,
+              // No puede quedar publicada sin inventario: si la cantidad baja
+              // a 0, se despublica automáticamente en vez de dejar un estado
+              // inconsistente que el servidor rechazaría igual.
+              isPublished: normalizedQuantity > 0 ? item.isPublished : false,
+            }
+          : item
+      )
+    );
+
+    setLocalErrors((previous) => ({ ...previous, branches: undefined }));
+  };
+
+  const handleBranchPublishedChange = (branchId: number, isPublished: boolean) => {
+    setBranches((previous) =>
+      previous.map((item) =>
+        item.branchId === branchId && item.quantityAvailable > 0
+          ? { ...item, isPublished }
+          : item
+      )
+    );
+
+    setLocalErrors((previous) => ({ ...previous, branches: undefined }));
   };
 
   const handleTogglePackItem = (productId: number) => {
@@ -237,7 +300,13 @@ export function useProductFormState({
     const parsedDiscountedPrice = parseDecimal(discountedPrice);
     const parsedQuantityAvailable = parseInteger(quantityAvailable);
 
-    if (parsedOriginalPrice === null || parsedQuantityAvailable === null) {
+    // SCRUM-277 Fase 1: quantityAvailable (el campo global "Cantidad
+    // Disponible") solo aplica a packs; para single ya no se edita — el
+    // stock vive en branches[] y el total se deriva, no se parsea aquí.
+    if (
+      parsedOriginalPrice === null ||
+      (productType === "package" && parsedQuantityAvailable === null)
+    ) {
       return;
     }
 
@@ -250,9 +319,10 @@ export function useProductFormState({
         productType,
         originalPrice: parsedOriginalPrice,
         discountedPrice: parsedDiscountedPrice,
-        quantityAvailable: parsedQuantityAvailable,
+        quantityAvailable: parsedQuantityAvailable ?? 0,
         description,
         branchId,
+        branches,
         packageItems,
       })
     );
@@ -275,6 +345,11 @@ export function useProductFormState({
     setDescription,
     branchId,
     setBranchId,
+    branches,
+    totalQuantityAcrossBranches,
+    handleToggleBranch,
+    handleBranchQuantityChange,
+    handleBranchPublishedChange,
     packageItems,
     maxPacks,
     mergedErrors,

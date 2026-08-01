@@ -1,4 +1,4 @@
-import type { ProductType } from "@/types/products";
+import type { ProductBranchAssignment, ProductType } from "@/types/products";
 import type { ProviderProductFormInput } from "@/types/products";
 
 type ProductFormInitialLike = {
@@ -12,6 +12,7 @@ type ProductFormInitialLike = {
   quantityAvailable?: number;
   quantityTotal?: number;
   branchId?: number | null;
+  branches?: ProductBranchAssignment[];
   packageItems?: Array<{ productId: number; quantity: number }>;
 };
 
@@ -24,6 +25,7 @@ export type ProductFormDraft = {
   quantityAvailable: string;
   description: string;
   branchId: string;
+  branches: ProductBranchAssignment[];
   packageItems: Array<{ productId: number; quantity: number }>;
 };
 
@@ -68,6 +70,7 @@ export function mapInitialDataToDraft(initialData?: ProductFormInitialLike | nul
       initialData?.quantityAvailable !== undefined ? String(initialData.quantityAvailable) : "",
     description: initialData?.description ?? "",
     branchId: initialData?.branchId ? String(initialData.branchId) : "",
+    branches: initialData?.branches ?? [],
     packageItems: initialData?.packageItems ?? [],
   };
 }
@@ -83,6 +86,7 @@ type BuildSubmitInputParams = {
   quantityAvailable: number;
   description: string;
   branchId: string;
+  branches: ProductBranchAssignment[];
   packageItems: Array<{ productId: number; quantity: number }>;
 };
 
@@ -100,8 +104,19 @@ export function buildProductFormSubmitInput(
     quantityAvailable,
     description,
     branchId,
+    branches,
     packageItems,
   } = params;
+
+  // SCRUM-277 Fase 1: los packs conservan una sola sede (comportamiento
+  // anterior, sin inventario por sede propio todavía — Fase 2 lo migra); los
+  // individuales envían la asignación multi-sede completa.
+  const submittedBranches: ProductBranchAssignment[] =
+    productType === "package"
+      ? branchId
+        ? [{ branchId: Number(branchId), quantityAvailable: 0, isPublished: false }]
+        : []
+      : branches;
 
   return {
     commerceId,
@@ -113,7 +128,7 @@ export function buildProductFormSubmitInput(
     quantityAvailable,
     quantityTotal: quantityTotal ?? quantityAvailable,
     description: description.trim() ? description.trim() : null,
-    branchId: Number(branchId),
+    branches: submittedBranches,
     packageItems: productType === "package" ? packageItems : [],
     photos: [],
   };

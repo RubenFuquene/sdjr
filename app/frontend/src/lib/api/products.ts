@@ -6,6 +6,7 @@
 import { fetchWithErrorHandling } from "./client";
 import type { ApiSuccess } from "./types";
 import type {
+  ProductBranchAssignment,
   ProductCategoryFromAPI,
   ProductFormInput,
   ProductFromAPI,
@@ -36,6 +37,12 @@ export interface CreateProductPhotoInput {
   metadata?: Record<string, unknown>;
 }
 
+export interface CommerceBranchAssignmentPayload {
+  commerce_branch_id: number;
+  quantity_available: number;
+  is_published?: boolean;
+}
+
 export interface CreateProductPayload {
   product: {
     commerce_id: number;
@@ -45,12 +52,13 @@ export interface CreateProductPayload {
     product_type: ProductType;
     original_price: number;
     discounted_price?: number | null;
-    quantity_total: number;
-    quantity_available: number;
+    /** Solo se envía para product_type=package (SCRUM-277). */
+    quantity_total?: number;
+    quantity_available?: number;
     expires_at?: string | null;
     status: string;
   };
-  commerce_branch_ids?: number[];
+  commerce_branches?: CommerceBranchAssignmentPayload[];
   package_items?: Array<{
     product_id: number;
     quantity: number;
@@ -72,7 +80,7 @@ export interface UpdateProductPayload {
     expires_at?: string | null;
     status?: string;
   };
-  commerce_branches?: number[];
+  commerce_branches?: CommerceBranchAssignmentPayload[];
   package_items?: Array<{
     product_id: number;
     quantity: number;
@@ -218,20 +226,43 @@ function normalizePhotos(input: ProductFormInput): CreateProductPhotoInput[] | u
   return input.photos;
 }
 
-function normalizeBranchAsArray(branchId: number | null | undefined): number[] | undefined {
-  const normalized = toInteger(branchId);
-
-  if (normalized <= 0) {
-    return undefined;
+/**
+ * SCRUM-277 Fase 1: para product_type=package conserva quantity_total/
+ * quantity_available a nivel de producto (comportamiento anterior, sin
+ * cambios). Para 'single' esos campos ya no significan nada — se omiten del
+ * payload en vez de enviar un valor inventado, porque el backend tampoco los
+ * exige para ese tipo (StoreProductRequest los vuelve requiredIf(package)).
+ */
+function normalizeProductQuantities(
+  input: ProductFormInput
+): { quantity_total?: number; quantity_available?: number } {
+  if (input.productType !== "package") {
+    return {};
   }
 
-  return [normalized];
-}
-
-export function mapProductFormToCreatePayload(input: ProductFormInput): CreateProductPayload {
   const quantityAvailable = toInteger(input.quantityAvailable);
   const quantityTotal = toInteger(input.quantityTotal ?? quantityAvailable, quantityAvailable);
 
+  return { quantity_total: quantityTotal, quantity_available: quantityAvailable };
+}
+
+function normalizeBranches(
+  branches: ProductBranchAssignment[] | undefined
+): CommerceBranchAssignmentPayload[] | undefined {
+  if (!branches) {
+    return undefined;
+  }
+
+  return branches
+    .filter((branch) => toInteger(branch.branchId) > 0)
+    .map((branch) => ({
+      commerce_branch_id: toInteger(branch.branchId),
+      quantity_available: Math.max(0, toInteger(branch.quantityAvailable)),
+      is_published: branch.isPublished,
+    }));
+}
+
+export function mapProductFormToCreatePayload(input: ProductFormInput): CreateProductPayload {
   return {
     product: {
       commerce_id: toInteger(input.commerceId),
@@ -244,26 +275,17 @@ export function mapProductFormToCreatePayload(input: ProductFormInput): CreatePr
         input.discountedPrice === null || input.discountedPrice === undefined
           ? null
           : toNumber(input.discountedPrice),
-      quantity_total: quantityTotal,
-      quantity_available: quantityAvailable,
+      ...normalizeProductQuantities(input),
       expires_at: input.expiresAt ?? null,
       status: input.status ?? "1",
     },
-    commerce_branch_ids: normalizeBranchAsArray(input.branchId),
+    commerce_branches: normalizeBranches(input.branches),
     package_items: normalizePackageItems(input),
     photos: normalizePhotos(input),
   };
 }
 
-/**
- * Contrato transitorio backend:
- * - create usa `commerce_branch_ids`
- * - update usa `commerce_branches`
- */
 export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdateProductPayload {
-  const quantityAvailable = toInteger(input.quantityAvailable);
-  const quantityTotal = toInteger(input.quantityTotal ?? quantityAvailable, quantityAvailable);
-
   return {
     product: {
       commerce_id: toInteger(input.commerceId),
@@ -276,12 +298,11 @@ export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdatePr
         input.discountedPrice === null || input.discountedPrice === undefined
           ? null
           : toNumber(input.discountedPrice),
-      quantity_total: quantityTotal,
-      quantity_available: quantityAvailable,
+      ...normalizeProductQuantities(input),
       expires_at: input.expiresAt ?? null,
       status: input.status ?? "1",
     },
-    commerce_branches: normalizeBranchAsArray(input.branchId),
+    commerce_branches: normalizeBranches(input.branches),
     package_items: normalizePackageItems(input),
     photos: normalizePhotos(input),
   };
@@ -330,11 +351,15 @@ export async function getProductById(
 export async function getPackageItemsByProductId(
   productPackageId: number
 ): Promise<ApiSuccess<PackageItemFromAPI[]>> {
-  const response = await fetchWithErrorHandling<ApiSuccess<unknown>>(
-    `/api/v1/products/commerce/package-items/${productPackageId}`
-  );
+  const response = await fetchWithErrorHandling<
+    ApiSuccess<{ package_items?: unknown }>
+  >(`/api/v1/products/commerce/package-items/${productPackageId}`);
 
-  const packageItems = extractCollectionData<PackageItemFromAPI>(response.data);
+  // Este endpoint devuelve el producto (pack) completo con los items
+  // anidados en `data.package_items`, no una colección plana en `data`.
+  const packageItems = extractCollectionData<PackageItemFromAPI>(
+    response.data?.package_items
+  );
 
   return {
     ...response,
@@ -456,4 +481,28 @@ export async function deleteProduct(productId: number): Promise<void> {
   await fetchWithErrorHandling<void>(`/api/v1/products/${productId}`, {
     method: "DELETE",
   });
+}
+
+/**
+ * PATCH /api/v1/products/{id}/branches/{branchId}
+ * Publica o despublica un producto en una sola sede, sin reenviar el
+ * producto completo (SCRUM-277 Fase 1, Tarea 3.2/5.1).
+ */
+export async function updateProductBranchPublication(
+  productId: number,
+  branchId: number,
+  isPublished: boolean
+): Promise<ApiSuccess<ProductFromAPI>> {
+  const response = await fetchWithErrorHandling<ApiSuccess<ProductFromAPI>>(
+    `/api/v1/products/${productId}/branches/${branchId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ is_published: isPublished }),
+    }
+  );
+
+  return {
+    ...response,
+    data: normalizeProduct(response.data),
+  };
 }

@@ -1,4 +1,4 @@
-import type { ProductType } from "@/types/products";
+import type { ProductBranchAssignment, ProductType } from "@/types/products";
 import { parseDecimal, parseInteger } from "./product-form.utils";
 
 export interface ProductFormValidationErrors {
@@ -8,6 +8,7 @@ export interface ProductFormValidationErrors {
   discountedPrice?: string;
   quantityAvailable?: string;
   branchId?: string;
+  branches?: string;
   packageItems?: string;
 }
 
@@ -18,6 +19,7 @@ type ProductFormValidationInput = {
   discountedPrice: string;
   quantityAvailable: string;
   branchId: string;
+  branches: ProductBranchAssignment[];
   productType: ProductType;
   packageItems: Array<{ productId: number; quantity: number }>;
   maxPacks?: number;
@@ -42,11 +44,19 @@ export function validateProductForm(
   }
 
   const parsedDiscountPrice = parseDecimal(input.discountedPrice);
-  if (input.discountedPrice && (parsedDiscountPrice === null || parsedDiscountPrice < 0)) {
+
+  if (input.productType !== "package") {
+    if (!input.discountedPrice) {
+      nextErrors.discountedPrice = "El precio con descuento es obligatorio.";
+    } else if (parsedDiscountPrice === null || parsedDiscountPrice <= 0) {
+      nextErrors.discountedPrice = "Ingresa un descuento válido, mayor a 0.";
+    }
+  } else if (input.discountedPrice && (parsedDiscountPrice === null || parsedDiscountPrice < 0)) {
     nextErrors.discountedPrice = "Ingresa un descuento válido.";
   }
 
   if (
+    !nextErrors.discountedPrice &&
     parsedOriginalPrice !== null &&
     parsedDiscountPrice !== null &&
     parsedDiscountPrice > parsedOriginalPrice
@@ -54,13 +64,29 @@ export function validateProductForm(
     nextErrors.discountedPrice = "El descuento no puede ser mayor al precio original.";
   }
 
+  // SCRUM-277 Fase 1: los packs conservan cantidad global + una sola sede
+  // (comportamiento anterior, sin cambios); los productos individuales pasan
+  // a asignación multi-sede con inventario propio por sede — ver más abajo.
   const parsedQuantityAvailable = parseInteger(input.quantityAvailable);
-  if (parsedQuantityAvailable === null || parsedQuantityAvailable < 0) {
-    nextErrors.quantityAvailable = "Ingresa una cantidad disponible válida.";
-  }
 
-  if (!input.branchId) {
-    nextErrors.branchId = "Selecciona una sucursal.";
+  if (input.productType === "package") {
+    if (parsedQuantityAvailable === null || parsedQuantityAvailable < 0) {
+      nextErrors.quantityAvailable = "Ingresa una cantidad disponible válida.";
+    }
+
+    if (!input.branchId) {
+      nextErrors.branchId = "Selecciona una sucursal.";
+    }
+  } else {
+    if (input.branches.length === 0) {
+      nextErrors.branches = "Asigna al menos una sucursal.";
+    } else if (
+      input.branches.some((branch) => !Number.isInteger(branch.quantityAvailable) || branch.quantityAvailable < 0)
+    ) {
+      nextErrors.branches = "Cada sucursal debe tener una cantidad válida (entero, mayor o igual a 0).";
+    } else if (input.branches.some((branch) => branch.isPublished && branch.quantityAvailable === 0)) {
+      nextErrors.branches = "No puedes publicar una sucursal sin inventario cargado.";
+    }
   }
 
   if (input.productType === "package" && input.packageItems.length === 0) {

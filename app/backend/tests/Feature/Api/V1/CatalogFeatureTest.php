@@ -39,6 +39,40 @@ class CatalogFeatureTest extends TestCase
         ]);
     }
 
+    /**
+     * SCRUM-277 Fase 1: el detalle público debe exponer el stock real por
+     * sede — sin esto, el cliente ve 0 disponibles y el carrito no lo deja
+     * comprar más de 1 unidad sin importar el stock real (bug detectado
+     * después de dar la Fase 1 por completa, antes de cerrarla de verdad).
+     */
+    public function test_active_product_exposes_real_stock_per_published_branch(): void
+    {
+        $commerce = Commerce::factory()->create();
+        $publishedBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $unpublishedBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $product = Product::factory()->create([
+            'commerce_id' => $commerce->id,
+            'status' => Constant::STATUS_ACTIVE,
+        ]);
+        $product->commerceBranches()->attach($publishedBranch->id, [
+            'quantity_available' => 27,
+            'is_published' => true,
+        ]);
+        $product->commerceBranches()->attach($unpublishedBranch->id, [
+            'quantity_available' => 99,
+            'is_published' => false,
+        ]);
+
+        $response = $this->getJson("/api/v1/catalog/products/{$product->id}");
+
+        $response->assertOk();
+        $data = $response->json('data');
+
+        $this->assertCount(1, $data['commerce_branches'], 'Solo la sede publicada debe exponerse al cliente.');
+        $this->assertSame($publishedBranch->id, $data['commerce_branches'][0]['id']);
+        $this->assertSame(27, $data['commerce_branches'][0]['quantity_available']);
+    }
+
     public function test_inactive_product_is_not_visible_by_id()
     {
         $product = Product::factory()->create(['status' => Constant::STATUS_INACTIVE]);

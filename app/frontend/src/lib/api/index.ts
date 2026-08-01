@@ -84,10 +84,12 @@ export {
   updateProduct,
   updatePackageProduct,
   deleteProduct,
+  updateProductBranchPublication,
   mapProductFormToCreatePayload,
   mapProductFormToUpdatePayload,
 } from "./products";
 export type {
+  CommerceBranchAssignmentPayload,
   CreateProductPayload,
   CreateProductPhotoInput,
   GetProductCategoriesParams,
