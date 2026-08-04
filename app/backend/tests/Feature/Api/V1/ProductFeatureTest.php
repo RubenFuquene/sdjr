@@ -193,7 +193,7 @@ class ProductFeatureTest extends TestCase
                 'product_category_id' => $category->id,
                 'title' => 'Pack sin descuento',
                 'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-                'original_price' => 50.00,
+                'original_price' => $singleProduct->currentSalePrice(),
                 'quantity_total' => 3,
                 'quantity_available' => 3,
             ],
@@ -700,14 +700,16 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 2,
+        ]);
+        // SCRUM-361: el compromiso del pack vive por sede en el pivote, igual
+        // que el stock de sus componentes.
+        $package->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 2,
+            'is_published' => false,
         ]);
         $product = Product::factory()->create(['commerce_id' => $package->commerce_id]);
-        // SCRUM-277 Fase 1: el stock del componente single vive por sede —
-        // availableForPackaging() lo suma desde aquí, no de una columna del producto.
         $product->commerceBranches()->attach($commerceBranch->id, [
-            'quantity_available' => 10,
+            'quantity_available' => 30,
             'is_published' => true,
         ]);
 
@@ -716,11 +718,13 @@ class ProductFeatureTest extends TestCase
         $payload = [
             'product' => [
                 'commerce_id' => $package->commerce_id,
+                // El techo del pack sigue la nueva cantidad (5) del único componente.
+                'original_price' => $product->currentSalePrice() * 5,
             ],
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 2]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
@@ -740,13 +744,9 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 2,
-            'quantity_available' => 2,
         ]);
         $product = Product::factory()->create([
             'commerce_id' => $package->commerce_id,
-            'quantity_total' => 10,
-            'quantity_available' => 10,
         ]);
 
         $package->packageItems()->attach($product->id, ['quantity' => 2]);
@@ -797,17 +797,23 @@ class ProductFeatureTest extends TestCase
             ->assertJsonValidationErrors(['package_items.1.product_id']);
     }
 
+    /**
+     * SCRUM-361: "excede lo disponible" ya no es un error de
+     * package_items.*.quantity aislado — el componente no alcanza ni para
+     * un pack, así que el máximo por sede cae a 0 y el rechazo se expresa
+     * sobre commerce_branches.*.quantity_available (el compromiso pedido).
+     */
     public function test_store_package_items_rejects_quantity_exceeding_available()
     {
         $user = $this->actingAsAdmin();
         $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $commerceBranch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $category = ProductCategory::factory()->create();
-        // Producto con solo 5 unidades disponibles
-        $product = Product::factory()->create([
-            'commerce_id' => $commerce->id,
-            'quantity_total' => 10,
+        // Componente con solo 5 unidades disponibles en la sede.
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 5,
+            'is_published' => true,
         ]);
 
         $payload = [
@@ -817,18 +823,16 @@ class ProductFeatureTest extends TestCase
                 'title' => 'Test Package',
                 'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
                 'original_price' => 100,
-                'quantity_total' => 10,
-                'quantity_available' => 10,
             ],
             'package_items' => [
-                ['product_id' => $product->id, 'quantity' => 10], // Excede las 5 disponibles
+                ['product_id' => $product->id, 'quantity' => 10], // Excede las 5 disponibles: ni 1 pack cabe
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 1]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['package_items.0.quantity']);
+            ->assertJsonValidationErrors(['commerce_branches.0.quantity_available']);
     }
 
     public function test_update_package_items_rejects_quantity_exceeding_available()
@@ -840,11 +844,12 @@ class ProductFeatureTest extends TestCase
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
         ]);
-        // Producto con solo 3 unidades disponibles
-        $product = Product::factory()->create([
-            'commerce_id' => $package->commerce_id,
-            'quantity_total' => 10,
+        $package->commerceBranches()->attach($commerceBranch->id, ['quantity_available' => 1, 'is_published' => false]);
+        // Componente con solo 3 unidades disponibles.
+        $product = Product::factory()->create(['commerce_id' => $package->commerce_id]);
+        $product->commerceBranches()->attach($commerceBranch->id, [
             'quantity_available' => 3,
+            'is_published' => true,
         ]);
 
         $package->packageItems()->attach($product->id, ['quantity' => 2]);
@@ -856,12 +861,12 @@ class ProductFeatureTest extends TestCase
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 7], // Excede las 3 disponibles
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 1]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['package_items.0.quantity']);
+            ->assertJsonValidationErrors(['commerce_branches.0.quantity_available']);
     }
 
     public function test_store_package_items_within_max_packs_succeeds()
@@ -883,14 +888,13 @@ class ProductFeatureTest extends TestCase
                 'product_category_id' => $category->id,
                 'title' => 'Test Package',
                 'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-                'original_price' => 100,
-                'quantity_total' => 5,
-                'quantity_available' => 5, // max packs = floor(10 / 2) = 5
+                'original_price' => $product->currentSalePrice() * 2,
             ],
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+            // max packs en esta sede = floor(10 / 2) = 5
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 5]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
@@ -916,21 +920,20 @@ class ProductFeatureTest extends TestCase
                 'title' => 'Test Package',
                 'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
                 'original_price' => 100,
-                'quantity_total' => 6,
-                'quantity_available' => 6, // max packs = floor(10 / 2) = 5
             ],
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+            // max packs en esta sede = floor(10 / 2) = 5, se piden 6.
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 6]],
         ];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $payload);
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['product.quantity_available'])
+            ->assertJsonValidationErrors(['commerce_branches.0.quantity_available'])
             ->assertJsonFragment([
-                'product.quantity_available' => [
-                    'The requested quantity_available (6) exceeds the maximum packs available given current stock (max: 5).',
+                'commerce_branches.0.quantity_available' => [
+                    'The requested quantity_available (6) exceeds the maximum packs available in this branch given current stock (max: 5).',
                 ],
             ]);
     }
@@ -981,28 +984,30 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 5,
-            'quantity_available' => 5,
         ]);
+        $package->commerceBranches()->attach($commerceBranch->id, ['quantity_available' => 5, 'is_published' => false]);
         $package->packageItems()->attach($product->id, ['quantity' => 2]);
 
         $payload = [
             'product' => [
                 'commerce_id' => $commerce->id,
-                // own previous commitment (5 * 2 = 10) is excluded, so available stays 10.
-                // New max packs = floor(10 / 5) = 2.
-                'quantity_available' => 2,
+                // El techo del pack sigue la nueva cantidad (5) del componente.
+                'original_price' => $product->currentSalePrice() * 5,
             ],
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+            // el compromiso propio anterior (5 packs * 2 = 10) se excluye del
+            // cálculo, así que el stock disponible sigue en 10.
+            // Nuevo máximo = floor(10 / 5) = 2.
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 2]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
         $response->assertOk();
 
-        $this->assertEquals(2, $package->fresh()->quantity_available);
+        $branchPivot = $package->fresh()->commerceBranches()->first()->pivot;
+        $this->assertEquals(2, $branchPivot->quantity_available);
         $this->assertEquals(5, $package->fresh()->packageItems()->first()->pivot->quantity);
     }
 
@@ -1019,30 +1024,28 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 5,
-            'quantity_available' => 5,
         ]);
+        $package->commerceBranches()->attach($commerceBranch->id, ['quantity_available' => 5, 'is_published' => false]);
         $package->packageItems()->attach($product->id, ['quantity' => 2]);
 
         $payload = [
             'product' => [
                 'commerce_id' => $commerce->id,
-                // own previous commitment (5 * 2 = 10) is excluded, so available stays 10.
-                // New max packs = floor(10 / 5) = 2, but 3 is requested.
-                'quantity_available' => 3,
             ],
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 5],
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
+            // compromiso propio anterior excluido, disponible sigue en 10.
+            // Nuevo máximo = floor(10 / 5) = 2, pero se piden 3.
+            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 3]],
         ];
 
         $response = $this->putJson('/api/v1/products/commerce/package-items/'.$package->id, $payload);
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['product.quantity_available'])
+            ->assertJsonValidationErrors(['commerce_branches.0.quantity_available'])
             ->assertJsonFragment([
-                'product.quantity_available' => [
-                    'The requested quantity_available (3) exceeds the maximum packs available given current stock (max: 2).',
+                'commerce_branches.0.quantity_available' => [
+                    "The requested quantity_available (3) exceeds the maximum packs available in branch '{$commerceBranch->name}' given current stock (max: 2).",
                 ],
             ]);
     }
@@ -1064,9 +1067,8 @@ class ProductFeatureTest extends TestCase
         $packA = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 2,
-            'quantity_available' => 2,
         ]);
+        $packA->commerceBranches()->attach($commerceBranch->id, ['quantity_available' => 2, 'is_published' => false]);
         $packA->packageItems()->attach($product->id, ['quantity' => 3]);
 
         $basePayload = [
@@ -1075,42 +1077,45 @@ class ProductFeatureTest extends TestCase
                 'product_category_id' => $category->id,
                 'title' => 'Pack B',
                 'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-                'original_price' => 100,
-                'quantity_total' => 3,
+                'original_price' => $product->currentSalePrice() * 2,
             ],
             'package_items' => [
                 ['product_id' => $product->id, 'quantity' => 2],
             ],
-            'commerce_branches' => [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 10]],
         ];
 
         // Remainder = 4 units, requested item quantity = 2 -> max packs = floor(4 / 2) = 2.
         $exceedingPayload = $basePayload;
-        $exceedingPayload['product']['quantity_available'] = 3;
+        $exceedingPayload['commerce_branches'] = [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 3]];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $exceedingPayload);
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['product.quantity_available'])
+            ->assertJsonValidationErrors(['commerce_branches.0.quantity_available'])
             ->assertJsonFragment([
-                'product.quantity_available' => [
-                    'The requested quantity_available (3) exceeds the maximum packs available given current stock (max: 2).',
+                'commerce_branches.0.quantity_available' => [
+                    'The requested quantity_available (3) exceeds the maximum packs available in this branch given current stock (max: 2).',
                 ],
             ]);
 
         $withinRemainderPayload = $basePayload;
-        $withinRemainderPayload['product']['quantity_available'] = 2;
+        $withinRemainderPayload['commerce_branches'] = [['commerce_branch_id' => $commerceBranch->id, 'quantity_available' => 2]];
 
         $response = $this->postJson('/api/v1/products/commerce/package-items', $withinRemainderPayload);
         $response->assertOk();
     }
 
+    /**
+     * SCRUM-361: available_for_packaging pasó de un número global por
+     * producto a un valor por sede dentro de commerce_branches[] — se
+     * resuelve donde el panel del proveedor lo consume de verdad
+     * (getByCommerce, Tarea 6.2), no en show() de un producto individual.
+     */
     public function test_product_resource_exposes_available_for_packaging_for_single_products_only()
     {
         $this->actingAsAdmin();
         $commerce = Commerce::factory()->create();
         $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $product = Product::factory()->create(['commerce_id' => $commerce->id]);
-        // SCRUM-277 Fase 1: el stock del componente single vive por sede.
         $product->commerceBranches()->attach($branch->id, [
             'quantity_available' => 10,
             'is_published' => true,
@@ -1119,18 +1124,20 @@ class ProductFeatureTest extends TestCase
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 3,
-            'quantity_available' => 3,
         ]);
+        $package->commerceBranches()->attach($branch->id, ['quantity_available' => 3, 'is_published' => false]);
         $package->packageItems()->attach($product->id, ['quantity' => 2]);
 
-        // Single product: 10 - (3 packs * 2 units) = 4
-        $singleResponse = $this->getJson('/api/v1/products/'.$product->id);
-        $singleResponse->assertOk()->assertJsonPath('data.available_for_packaging', 4);
+        $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
+        $response->assertOk();
 
-        $packageResponse = $this->getJson('/api/v1/products/'.$package->id);
-        $packageResponse->assertOk();
-        $this->assertArrayNotHasKey('available_for_packaging', $packageResponse->json('data'));
+        $data = collect($response->json('data'));
+        $productData = $data->firstWhere('id', $product->id);
+        $packageData = $data->firstWhere('id', $package->id);
+
+        // Single: 10 - (3 packs * 2 unidades) = 4.
+        $this->assertSame(4, $productData['commerce_branches'][0]['available_for_packaging']);
+        $this->assertNull($packageData['commerce_branches'][0]['available_for_packaging']);
     }
 
     public function test_available_for_packaging_does_not_n_plus_one_per_associated_package()
@@ -1150,16 +1157,15 @@ class ProductFeatureTest extends TestCase
         $packA = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 1,
-            'quantity_available' => 1,
         ]);
+        $packA->commerceBranches()->attach($branch->id, ['quantity_available' => 1, 'is_published' => false]);
         $packA->packageItems()->attach($product->id, ['quantity' => 1]);
 
         // Warm up permission/model caches so they do not skew the query count comparison below.
-        $this->getJson('/api/v1/products/'.$product->id)->assertOk();
+        $this->getJson('/api/v1/products/commerce/'.$commerce->id)->assertOk();
 
         DB::enableQueryLog();
-        $this->getJson('/api/v1/products/'.$product->id)->assertOk();
+        $this->getJson('/api/v1/products/commerce/'.$commerce->id)->assertOk();
         $queryCountForOnePackage = count(DB::getQueryLog());
         DB::flushQueryLog();
         DB::disableQueryLog();
@@ -1167,20 +1173,18 @@ class ProductFeatureTest extends TestCase
         $packB = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 1,
-            'quantity_available' => 1,
         ]);
+        $packB->commerceBranches()->attach($branch->id, ['quantity_available' => 1, 'is_published' => false]);
         $packC = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
-            'quantity_total' => 1,
-            'quantity_available' => 1,
         ]);
+        $packC->commerceBranches()->attach($branch->id, ['quantity_available' => 1, 'is_published' => false]);
         $packB->packageItems()->attach($product->id, ['quantity' => 1]);
         $packC->packageItems()->attach($product->id, ['quantity' => 1]);
 
         DB::enableQueryLog();
-        $this->getJson('/api/v1/products/'.$product->id)->assertOk();
+        $this->getJson('/api/v1/products/commerce/'.$commerce->id)->assertOk();
         $queryCountForThreePackages = count(DB::getQueryLog());
         DB::disableQueryLog();
 

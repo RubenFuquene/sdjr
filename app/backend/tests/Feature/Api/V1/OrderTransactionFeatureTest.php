@@ -100,6 +100,46 @@ class OrderTransactionFeatureTest extends TestCase
         $this->assertSame($stockBefore - 2, $this->branchStock($product->id, $order->commerce_branch_id));
     }
 
+    /**
+     * SCRUM-361: dismissBranchConfirmedStock() despublica automáticamente al
+     * agotar el stock — sin esto, un producto vendido hasta 0 seguía
+     * figurando "publicado" en el panel del aliado aunque ya no fuera
+     * comprable (hallazgo real durante pruebas manuales de Fase 2).
+     */
+    public function test_paying_order_that_exhausts_stock_unpublishes_the_branch(): void
+    {
+        $user = $this->customer();
+        $branch = CommerceBranch::factory()->create();
+        $product = Product::factory()->create(['commerce_id' => $branch->commerce_id]);
+        $product->commerceBranches()->attach($branch->id, [
+            'quantity_available' => 2,
+            'is_published' => true,
+        ]);
+
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'commerce_branch_id' => $branch->id,
+            'total_price' => 16000,
+            'status' => Constant::ORDER_STATUS_PENDING,
+        ]);
+        OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'unit_price' => 8000,
+        ]);
+
+        $this->postJson("/api/v1/orders/{$order->id}/transactions", [])->assertCreated();
+
+        $pivot = ProductCommerceBranch::query()
+            ->where('product_id', $product->id)
+            ->where('commerce_branch_id', $branch->id)
+            ->firstOrFail();
+
+        $this->assertSame(0, (int) $pivot->quantity_available);
+        $this->assertFalse((bool) $pivot->is_published);
+    }
+
     public function test_simulated_rejection_leaves_order_pending(): void
     {
         $user = $this->customer();

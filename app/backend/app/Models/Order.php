@@ -40,7 +40,28 @@ class Order extends Model
         return $this->belongsTo(CommerceBranch::class);
     }
 
+    /**
+     * Líneas "padre" de la orden — lo que se vendió y factura. Excluye
+     * deliberadamente las líneas hijas de componente (SCRUM-366/367): son
+     * informativas, no dinero ni stock propios, y casi todo consumidor
+     * existente (descuento de stock, correo, disponibilidad) asume que cada
+     * fila de items() es una venta real. Si algún día un consumidor
+     * necesita ver también las hijas, debe pedirlas explícitamente vía
+     * allItems() — nunca aquí, para no reintroducir en silencio el doble
+     * descuento de stock que esto evita (ver PackagePriceProrationService).
+     */
     public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class)->whereNull('parent_package_id');
+    }
+
+    /**
+     * Todas las líneas de la orden, incluidas las hijas de componente.
+     * Uso previsto: pruebas del invariante contable y una futura vista de
+     * recibo desglosado — no reemplaza a items() en ningún consumidor
+     * existente.
+     */
+    public function allItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }

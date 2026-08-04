@@ -31,9 +31,18 @@ export interface ProductPhotoFromAPI {
 export interface ProductCommerceBranchFromAPI {
   id: number;
   name: string;
-  /** Ausente en respuestas que no cargan el pivote (ej. package_items anidados). SCRUM-277. */
+  /** Ausente en respuestas que no cargan el pivote (ej. package_items anidados). SCRUM-277.
+   * Para product_type=single: unidades disponibles en esta sede.
+   * Para product_type=package: packs comprometidos en esta sede (SCRUM-361). */
   quantity_available?: number;
   is_published?: boolean;
+  /** Solo packs: cuándo se ajustó solo el compromiso por falta de stock de un componente (SCRUM-361). */
+  auto_adjusted_at?: string | null;
+  /** Solo packs: cantidad comprometida antes del ajuste automático. */
+  auto_adjusted_from?: number | null;
+  /** Solo product_type=single, solo presente cuando el backend lo precalculó
+   * (listado del proveedor): stock libre para comprometer en packs en esta sede. */
+  available_for_packaging?: number | null;
 }
 
 /** Asignación de un producto individual a una sede, con su inventario y publicación (SCRUM-277 Fase 1). */
@@ -52,9 +61,6 @@ export interface ProductFromAPI {
   product_type: ProductType;
   original_price: number;
   discounted_price: number | null;
-  quantity_total: number;
-  quantity_available: number;
-  available_for_packaging?: number;
   expires_at: string | null;
   photos?: ProductPhotoFromAPI[];
   /** Solo presente si el backend cargó la relación (whenLoaded); ausente en algunos listados. */
@@ -81,17 +87,13 @@ export interface ProductFormInput {
   productType: ProductType;
   originalPrice: number;
   discountedPrice?: number | null;
-  /** Solo significativo para product_type=package (cuántos packs se pueden vender). SCRUM-277. */
-  quantityTotal?: number;
-  /** Solo significativo para product_type=package. Para 'single' el stock vive en branches[]. SCRUM-277. */
-  quantityAvailable?: number;
   expiresAt?: string | null;
   status?: string;
   /**
-   * SCRUM-277 Fase 1: para product_type=single, la asignación multi-sede con
-   * inventario y publicación. Para product_type=package, conserva el
-   * comportamiento anterior — una sola sede, sin inventario por sede (los
-   * packs siguen usando quantityAvailable/quantityTotal a nivel de producto).
+   * SCRUM-277/361: la asignación multi-sede con inventario y publicación,
+   * para ambos tipos de producto. Para product_type=single, quantityAvailable
+   * es stock físico; para product_type=package, es el compromiso de packs en
+   * esa sede — el mismo campo, dos lecturas según el tipo (SCRUM-361).
    */
   branches?: ProductBranchAssignment[];
   packageItems?: ProductPackageItemInput[];
@@ -102,6 +104,12 @@ export interface ProductFormInput {
     versioning_enabled?: string;
     metadata?: Record<string, unknown>;
   }>;
+  /**
+   * SCRUM-361, Tarea 3.3-3.4: confirma aplicar el ajuste automático a los
+   * packs afectados por bajar el stock de un componente. Sin esto, un
+   * cambio con impacto responde 409 en vez de aplicarse.
+   */
+  confirmPackageAdjustments?: boolean;
 }
 
 export type ProviderProductFormFieldErrors = Record<string, string>;
@@ -109,3 +117,12 @@ export type ProviderProductFormFieldErrors = Record<string, string>;
 export type ProviderProductFormInput = Omit<ProductFormInput, "commerceId"> & {
   commerceId?: number;
 };
+
+/** SCRUM-361, Tarea 3.3: detalle de un pack afectado por bajar el stock de un componente. */
+export interface AffectedPackage {
+  packageId: number;
+  packageTitle: string;
+  commerceBranchId: number;
+  currentQuantity: number;
+  adjustedQuantity: number;
+}

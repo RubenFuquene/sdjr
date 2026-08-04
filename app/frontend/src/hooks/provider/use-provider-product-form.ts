@@ -6,6 +6,7 @@ import {
   createProduct,
   createPackageProduct,
   deleteProduct,
+  dismissProductBranchAutoAdjustment,
   getMyCommerce,
   mapProductFormToCreatePayload,
   mapProductFormToUpdatePayload,
@@ -13,6 +14,7 @@ import {
   updatePackageProduct,
 } from "@/lib/api";
 import type {
+  AffectedPackage,
   ProductFromAPI,
   ProviderProductFormFieldErrors,
   ProviderProductFormInput,
@@ -24,10 +26,40 @@ interface UseProviderProductFormReturn {
   submitting: boolean;
   error: string | null;
   fieldErrors: ProviderProductFormFieldErrors;
+  /** SCRUM-361, Tarea 3.3: packs afectados por la última edición rechazada con 409. */
+  affectedPackages: AffectedPackage[] | null;
   createProduct: (input: ProviderProductFormInput) => Promise<ProductFromAPI | null>;
   updateProduct: (productId: number, input: ProviderProductFormInput) => Promise<ProductFromAPI | null>;
   deleteProduct: (productId: number) => Promise<boolean>;
+  dismissAutoAdjustment: (productId: number, branchId: number) => Promise<boolean>;
+  clearAffectedPackages: () => void;
   resetErrors: () => void;
+}
+
+function extractAffectedPackages(data: unknown): AffectedPackage[] | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  const errors = (data as { errors?: unknown }).errors;
+  if (!errors || typeof errors !== "object") {
+    return null;
+  }
+
+  const raw = (errors as { affected_packages?: unknown }).affected_packages;
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return null;
+  }
+
+  return raw
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .map((item) => ({
+      packageId: Number(item.package_id),
+      packageTitle: String(item.package_title ?? ""),
+      commerceBranchId: Number(item.commerce_branch_id),
+      currentQuantity: Number(item.current_quantity),
+      adjustedQuantity: Number(item.adjusted_quantity),
+    }));
 }
 
 function extractValidationErrors(data: unknown): ProviderProductFormFieldErrors {
@@ -79,6 +111,10 @@ function mapApiErrorToMessage(err: ApiError): string {
     return "Por favor valida los campos del formulario.";
   }
 
+  if (err.status === 409) {
+    return "Este cambio afecta packs existentes. Revisa el detalle para confirmar.";
+  }
+
   return err.message || "No pudimos procesar la solicitud de producto.";
 }
 
@@ -86,10 +122,16 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ProviderProductFormFieldErrors>({});
+  const [affectedPackages, setAffectedPackages] = useState<AffectedPackage[] | null>(null);
 
   const resetErrors = useCallback(() => {
     setError(null);
     setFieldErrors({});
+    setAffectedPackages(null);
+  }, []);
+
+  const clearAffectedPackages = useCallback(() => {
+    setAffectedPackages(null);
   }, []);
 
   const createProductAction = useCallback(
@@ -161,6 +203,10 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
             setFieldErrors(extractValidationErrors(err.data));
           }
 
+          if (err.status === 409) {
+            setAffectedPackages(extractAffectedPackages(err.data));
+          }
+
           setError(mapApiErrorToMessage(err));
           return null;
         }
@@ -172,6 +218,24 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
       }
     },
     [resetErrors]
+  );
+
+  const dismissAutoAdjustmentAction = useCallback(
+    async (productId: number, branchId: number): Promise<boolean> => {
+      try {
+        await dismissProductBranchAutoAdjustment(productId, branchId);
+        return true;
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setError(mapApiErrorToMessage(err));
+          return false;
+        }
+
+        setError("Error inesperado al descartar el aviso.");
+        return false;
+      }
+    },
+    []
   );
 
   const deleteProductAction = useCallback(
@@ -201,9 +265,12 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
     submitting,
     error,
     fieldErrors,
+    affectedPackages,
     createProduct: createProductAction,
     updateProduct: updateProductAction,
     deleteProduct: deleteProductAction,
+    dismissAutoAdjustment: dismissAutoAdjustmentAction,
+    clearAffectedPackages,
     resetErrors,
   };
 }

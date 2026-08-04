@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/admin/shared/confirmation-dialog";
+import { PackageAdjustmentConfirmationDialog } from "../shared";
 import { ApiError, getPackageItemsByProductId, getProductById } from "@/lib/api";
 import { useProviderBranches, useProviderProductForm, useProviderProducts } from "@/hooks/index";
-import type { ProductFromAPI } from "@/types/products";
+import type { ProductFromAPI, ProviderProductFormInput } from "@/types/products";
 import { ProductFormModal } from "../form";
 import type { ProductFormInitialData, ProductFormMode } from "../form";
 import { ProductsPageHeader } from "./products-page-header";
@@ -17,6 +18,12 @@ export function ProductsPageClient() {
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [editingInitialData, setEditingInitialData] = useState<ProductFormInitialData | null>(null);
   const [productPendingDeletion, setProductPendingDeletion] = useState<ProductFromAPI | null>(null);
+  // SCRUM-361, Tarea 3.3/6.4: la edición que disparó el 409, guardada para
+  // poder reenviarla con confirmPackageAdjustments=true si el aliado confirma.
+  const [pendingConfirmation, setPendingConfirmation] = useState<{
+    productId: number;
+    input: ProviderProductFormInput;
+  } | null>(null);
 
   const { products, loading, error, hasCommerce, hasProducts, commerceId, refresh } = useProviderProducts();
   const { branches } = useProviderBranches();
@@ -24,9 +31,11 @@ export function ProductsPageClient() {
     submitting,
     error: formError,
     fieldErrors,
+    affectedPackages,
     createProduct,
     updateProduct,
     deleteProduct,
+    clearAffectedPackages,
     resetErrors,
   } =
     useProviderProductForm();
@@ -34,6 +43,11 @@ export function ProductsPageClient() {
   const branchOptions = useMemo(
     () => branches.map((branch) => ({ id: branch.id, name: branch.name })),
     [branches]
+  );
+
+  const branchNameById = useMemo(
+    () => new Map(branchOptions.map((branch) => [branch.id, branch.name])),
+    [branchOptions]
   );
 
   const availableSingleProducts = useMemo(
@@ -80,16 +94,9 @@ export function ProductsPageClient() {
     productCategoryId: product.product_category_id,
     originalPrice: product.original_price,
     discountedPrice: product.discounted_price,
-    quantityAvailable: product.quantity_available,
-    quantityTotal: product.quantity_total,
-    // Packs conservan una sola sede (comportamiento anterior, sin cambios).
-    // Antes quedaba siempre en null (SCRUM-303/306): el formulario de edición
-    // arrancaba sin sucursal seleccionada sin importar cuál tuviera el
-    // producto realmente.
-    branchId: product.commerce_branches?.[0]?.id ?? null,
-    // SCRUM-277 Fase 1: para individuales, reconstruye la asignación
-    // multi-sede completa. Antes (branchId?.[0]) descartaba silenciosamente
-    // cualquier sede además de la primera al editar.
+    // SCRUM-361: ambos tipos reconstruyen la asignación multi-sede completa
+    // desde commerce_branches[] — para packs, quantityAvailable es el
+    // compromiso comprometido en esa sede, no stock físico.
     branches: (product.commerce_branches ?? []).map((branch) => ({
       branchId: branch.id,
       quantityAvailable: branch.quantity_available ?? 0,
@@ -166,14 +173,18 @@ export function ProductsPageClient() {
     }
   };
 
-  const handleSubmitProductForm = async (input: Parameters<typeof createProduct>[0]) => {
+  const handleSubmitProductForm = async (input: ProviderProductFormInput) => {
     if (modalMode === "edit" && editingProductId) {
       const updated = await updateProduct(editingProductId, input);
 
       if (!updated) {
+        // Si fue un 409, useProviderProductForm ya dejó affectedPackages
+        // poblado — guardamos la edición para poder reenviarla si confirma.
+        setPendingConfirmation({ productId: editingProductId, input });
         return;
       }
 
+      setPendingConfirmation(null);
       await refresh();
       closeModal();
       toast.success("Producto actualizado correctamente");
@@ -189,6 +200,31 @@ export function ProductsPageClient() {
     await refresh();
     closeModal();
     toast.success(input.productType === "package" ? "Pack creado correctamente" : "Producto creado correctamente");
+  };
+
+  const handleConfirmPackageAdjustment = async () => {
+    if (!pendingConfirmation) {
+      return;
+    }
+
+    const updated = await updateProduct(pendingConfirmation.productId, {
+      ...pendingConfirmation.input,
+      confirmPackageAdjustments: true,
+    });
+
+    if (!updated) {
+      return;
+    }
+
+    setPendingConfirmation(null);
+    await refresh();
+    closeModal();
+    toast.success("Producto actualizado y packs ajustados correctamente");
+  };
+
+  const handleCancelPackageAdjustment = () => {
+    setPendingConfirmation(null);
+    clearAffectedPackages();
   };
 
   const handleDeleteProduct = (product: ProductFromAPI) => {
@@ -242,6 +278,15 @@ export function ProductsPageClient() {
         availableSingleProducts={availableSingleProducts}
         onClose={closeModal}
         onSubmit={handleSubmitProductForm}
+      />
+
+      <PackageAdjustmentConfirmationDialog
+        isOpen={Boolean(affectedPackages && affectedPackages.length > 0)}
+        affectedPackages={affectedPackages ?? []}
+        branchNameById={branchNameById}
+        isLoading={submitting}
+        onConfirm={handleConfirmPackageAdjustment}
+        onCancel={handleCancelPackageAdjustment}
       />
 
       <ConfirmationDialog

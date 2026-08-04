@@ -28,26 +28,26 @@ class NearbySearchService
     /**
      * Busca productos disponibles en sucursales cercanas a una ubicación.
      *
-     * SCRUM-277 Fase 1: el stock y la publicación viven por sede en el pivote
-     * product_commerce_branch, ya no en products.quantity_available/status
-     * global. El filtro de disponibilidad se mueve al join, restringido a la
-     * sede evaluada, y descuenta las reservas de órdenes `pending` (mismo
-     * criterio que BranchAvailabilityCalculator) — no basta con comparar la
-     * columna cruda: un producto con 5 cargadas y 5 reservadas por una orden
-     * pendiente mostraría falsamente 5 disponibles a un cliente nuevo.
+     * SCRUM-277/361: el stock (single) y el compromiso (package) viven por
+     * sede en el pivote product_commerce_branch, ya no en columnas globales
+     * de products. El filtro de disponibilidad se mueve al join, restringido
+     * a la sede evaluada, y descuenta las reservas de órdenes `pending`
+     * (mismo criterio que BranchAvailabilityCalculator) — no basta con
+     * comparar la columna cruda: un producto con 5 cargadas y 5 reservadas
+     * por una orden pendiente mostraría falsamente 5 disponibles a un
+     * cliente nuevo.
      *
-     * Restringido a product_type=single: los packs quedan fuera del
-     * descubrimiento durante la Fase 1 (Opción A — bloqueados hasta que la
-     * Fase 2 les dé su propio cálculo de disponibilidad por sede), de forma
-     * explícita aquí y no solo como efecto colateral de que nunca lleguen a
-     * tener is_published=true.
+     * Ambos tipos de producto entran aquí bajo las mismas tres compuertas:
+     * status activo, is_published en la sede, y quantity_available real > 0
+     * en esa sede (SCRUM-361, Tarea 5.2 — levanta el filtro product_type=single
+     * de la Fase 1, que mantenía los packs fuera del descubrimiento mientras
+     * no tenían su propio cálculo de disponibilidad por sede).
      */
     public function nearbyProducts(float $lat, float $lng, float $radius, array $filters = [], int $perPage = Constant::DEFAULT_PER_PAGE): LengthAwarePaginator
     {
         $now = Carbon::now();
         $query = Product::query()
             ->where('products.status', Constant::STATUS_ACTIVE)
-            ->where('products.product_type', Constant::PRODUCT_TYPE_SINGLE)
             ->where(function (Builder $q) use ($now) {
                 $q->whereNull('products.expires_at')->orWhere('products.expires_at', '>', $now);
             });
@@ -116,6 +116,7 @@ class NearbySearchService
             WHERE order_items.product_id = product_commerce_branch.product_id
               AND orders.commerce_branch_id = product_commerce_branch.commerce_branch_id
               AND orders.status = ?
+              AND order_items.parent_package_id IS NULL
         )';
     }
 }

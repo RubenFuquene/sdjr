@@ -17,6 +17,10 @@ use Throwable;
 
 class OrderService
 {
+    public function __construct(
+        private readonly PackagePriceProrationService $packagePriceProrationService
+    ) {}
+
     /**
      * Obtener listado filtrado de órdenes.
      */
@@ -50,7 +54,9 @@ class OrderService
             ]);
             $total = 0;
             foreach ($data['items'] as $item) {
-                $price = $item['unit_price'] ?? $this->getProductPrice((int) $item['product_id']);
+                $product = Product::find((int) $item['product_id']);
+                $price = $item['unit_price'] ?? ($product ? $product->currentSalePrice() : 0.0);
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
@@ -58,6 +64,22 @@ class OrderService
                     'unit_price' => $price,
                 ]);
                 $total += $price * $item['quantity'];
+
+                // SCRUM-366/367: explota la venta de un pack en líneas hijas
+                // de componente, al precio realmente cobrado por esta línea
+                // (no el techo recalculado) — el padre sigue siendo el único
+                // que suma al total y descuenta stock (Order::items()).
+                if ($product && $product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
+                    foreach ($this->packagePriceProrationService->prorate($product, (float) $price, (int) $item['quantity']) as $line) {
+                        OrderItem::create([
+                            'order_id' => $order->id,
+                            'product_id' => $line['product']->id,
+                            'parent_package_id' => $product->id,
+                            'quantity' => $line['quantity'],
+                            'unit_price' => $line['unit_price'],
+                        ]);
+                    }
+                }
             }
             $order->total_price = round($total, 2);
             $order->save();
@@ -126,14 +148,19 @@ class OrderService
                 throw new \DomainException('Invalid order status transition');
             }
 
-            // Si la orden es confirmada, se debe reducir el stock de los productos correspondientes (si se implementa stock)
-            // Extraer los productos de la orden y reducir su stock en consecuencia, asegurando que no se permita confirmar la orden si no hay suficiente stock disponible.
+            $order->status = $status;
+            $order->save();
+
+            // Si la orden es confirmada, se debe reducir el stock de los productos
+            // correspondientes. El status se guarda ANTES de descontar (no después,
+            // como estaba antes): SCRUM-361 introdujo consultas que cuentan reservas
+            // de órdenes en estado `pending` (PackageCommitmentSyncService, vía
+            // BranchAvailabilityCalculator) — si esta misma orden todavía figurara
+            // como `pending` en BD al calcular, su propia reserva se restaría dos
+            // veces (una por el descuento directo, otra por la cuenta de "pendientes").
             if ($status === Constant::ORDER_STATUS_CONFIRMED) {
                 app(ProductService::class)->dismissProductConfirmedStock($order);
             }
-
-            $order->status = $status;
-            $order->save();
 
             return $order->load('items');
         } catch (\DomainException $e) {
@@ -199,13 +226,13 @@ class OrderService
     }
 
     /**
-     * Obtener el precio actual del producto
-     * (Mock, debes ajustar si el modelo Product cambia o si usa "original_price")
+     * Precio de venta vigente de un producto (SCRUM-366): el mismo que la
+     * app le mostró al cliente antes de comprar, no el precio de lista.
      */
-    protected function getProductPrice(int $productId): float
+    protected function currentSalePrice(int $productId): float
     {
         $product = Product::find($productId);
 
-        return $product ? (float) ($product->original_price ?? $product->original_price) : 0.0;
+        return $product ? $product->currentSalePrice() : 0.0;
     }
 }

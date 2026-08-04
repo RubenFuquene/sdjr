@@ -21,7 +21,7 @@ class OrderItemFactory extends Factory
             'order_id' => Order::factory(),
             'product_id' => $product->id,
             'quantity' => $this->faker->numberBetween(1, 10),
-            'unit_price' => $product->original_price ?? $this->faker->randomFloat(2, 5, 500),
+            'unit_price' => $product->currentSalePrice(),
         ];
     }
 }

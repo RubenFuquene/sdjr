@@ -101,22 +101,14 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
         </div>
 
         <div className="space-y-2 text-sm text-[#6A6A6A]">
-          {product.product_type === "package" ? (
-            <div className="flex items-center justify-between gap-2">
-              <span>Disponible:</span>
-              <span className={product.quantity_available > 0 ? "text-green-600" : "text-red-600"}>
-                {product.quantity_available} unidades
-              </span>
-            </div>
-          ) : (
-            // SCRUM-277 Fase 1: product.quantity_available quedó vestigial para
-            // individuales (el stock vive por sede) — se reemplaza por el
-            // estado de publicación por sede, con su propio control.
-            <ProductBranchPublicationList
-              productId={product.id}
-              branches={product.commerce_branches ?? []}
-            />
-          )}
+          {/* SCRUM-361: ambos tipos de producto viven por sede en el pivote —
+              el mismo control de publicación por sede sirve para packs
+              (Tarea 6.6), donde "cantidad" es el compromiso de packs. */}
+          <ProductBranchPublicationList
+            productId={product.id}
+            branches={product.commerce_branches ?? []}
+            productType={product.product_type}
+          />
 
           <div className="flex items-center justify-between gap-2">
             <span>Tipo:</span>

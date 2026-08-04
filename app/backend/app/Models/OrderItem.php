@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *   @OA\Property(property="id", type="integer"),
  *   @OA\Property(property="order_id", type="integer"),
  *   @OA\Property(property="product_id", type="integer"),
+ *   @OA\Property(property="parent_package_id", type="integer", nullable=true, description="product_id del pack vendido, si esta línea es un componente suyo (SCRUM-366/367). Null en líneas normales."),
  *   @OA\Property(property="quantity", type="integer"),
  *   @OA\Property(property="unit_price", type="number", format="float"),
  *   @OA\Property(property="subtotal", type="number", format="float")
@@ -29,6 +30,7 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
+        'parent_package_id',
         'quantity',
         'unit_price',
     ];
@@ -37,6 +39,7 @@ class OrderItem extends Model
         'id' => 'integer',
         'order_id' => 'integer',
         'product_id' => 'integer',
+        'parent_package_id' => 'integer',
         'quantity' => 'integer',
         'unit_price' => 'float',
     ];

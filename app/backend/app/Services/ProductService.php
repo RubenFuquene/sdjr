@@ -31,7 +31,9 @@ class ProductService
      * Constructor
      */
     public function __construct(
-        private readonly BranchAvailabilityCalculator $branchAvailabilityCalculator
+        private readonly BranchAvailabilityCalculator $branchAvailabilityCalculator,
+        private readonly PackageCommitmentSyncService $packageCommitmentSyncService,
+        private readonly PackageAvailabilityCalculator $packageAvailabilityCalculator
     ) {
         $this->documentUploadService = new DocumentUploadService;
     }
@@ -146,6 +148,13 @@ class ProductService
      * vienen en el payload, dejando registrado únicamente lo que el cliente
      * pidió explícitamente.
      *
+     * Para packs, además, editar la asignación de una sede limpia su marca
+     * de ajuste automático en esa sede (SCRUM-361, Tarea 3.8): el aliado
+     * acaba de fijar la cantidad a mano, así que cualquier aviso sobre el
+     * valor anterior queda obsoleto. sync()->updateExistingPivot() solo
+     * toca las columnas que se le pasan, así que hay que incluirlas
+     * explícitamente aquí o quedarían con el valor viejo.
+     *
      * @param  array<int, array{commerce_branch_id: int, quantity_available: int, is_published?: bool}>|null  $branches
      */
     protected function storeCommerceBranches(Product $product, ?array $branches): void
@@ -154,11 +163,13 @@ class ProductService
             return;
         }
 
+        $isPackage = $product->product_type === Constant::PRODUCT_TYPE_PACKAGE;
+
         $syncPayload = collect($branches)->mapWithKeys(fn (array $branch) => [
-            $branch['commerce_branch_id'] => [
+            $branch['commerce_branch_id'] => array_merge([
                 'quantity_available' => $branch['quantity_available'],
                 'is_published' => $branch['is_published'] ?? false,
-            ],
+            ], $isPackage ? ['auto_adjusted_at' => null, 'auto_adjusted_from' => null] : []),
         ])->all();
 
         $product->commerceBranches()->sync($syncPayload);
@@ -179,6 +190,26 @@ class ProductService
 
         $pivot->is_published = $isPublished;
         $pivot->save();
+
+        return Product::with(['category', 'commerce', 'commerceBranches'])->findOrFail($productId);
+    }
+
+    /**
+     * Descarta el aviso de ajuste automático de un pack en una sede, sin
+     * tocar su cantidad comprometida (SCRUM-361, Tarea 3.8 — segundo camino
+     * de limpieza, para el aliado que ya está conforme con la cantidad
+     * nueva y solo quiere quitar el aviso de la tarjeta).
+     *
+     * @throws ModelNotFoundException si el producto no tiene esa sede asignada
+     */
+    public function dismissAutoAdjustment(int $productId, int $branchId): Product
+    {
+        $pivot = ProductCommerceBranch::query()
+            ->where('product_id', $productId)
+            ->where('commerce_branch_id', $branchId)
+            ->firstOrFail();
+
+        $this->packageCommitmentSyncService->clearAutomaticAdjustmentMark($pivot);
 
         return Product::with(['category', 'commerce', 'commerceBranches'])->findOrFail($productId);
     }
@@ -220,15 +251,36 @@ class ProductService
     /**
      * Update a product by ID.
      *
+     * SCRUM-361, Tarea 3 (disparador manual): si el producto es un
+     * individual y la edición baja el stock de una sede o le quita la
+     * asignación, eso puede dejar packs de esa sede sobre-comprometidos.
+     * Sin $confirmPackageAdjustments, PackageCommitmentSyncService lanza
+     * PackageAdjustmentConfirmationRequiredException con el detalle — al
+     * propagarse fuera de la transacción, todo lo ya aplicado en este
+     * update() se revierte (DB::transaction hace rollback automático ante
+     * cualquier excepción). El caller (controlador) la traduce a un 409.
+     *
      * @throws Exception
+     * @throws \App\Exceptions\PackageAdjustmentConfirmationRequiredException
      */
-    public function update(int $id, array $data): Product
+    public function update(int $id, array $data, bool $confirmPackageAdjustments = false): Product
     {
         try {
 
-            return DB::transaction(function () use ($data, $id) {
+            return DB::transaction(function () use ($data, $id, $confirmPackageAdjustments) {
 
                 $product = Product::findOrFail($id);
+
+                $isSingleWithBranchChanges = $product->product_type === Constant::PRODUCT_TYPE_SINGLE
+                    && array_key_exists('commerce_branches', $data)
+                    && $data['commerce_branches'] !== null;
+
+                $previousBranchQuantities = $isSingleWithBranchChanges
+                    ? $product->commerceBranches()->get()->mapWithKeys(
+                        fn ($branch) => [(int) $branch->id => (int) $branch->pivot->quantity_available]
+                    )
+                    : collect();
+
                 $product->update($data['product']);
 
                 // Commerce Branches: null = clave ausente del payload, no tocar la
@@ -238,6 +290,14 @@ class ProductService
                 // Photos
                 $this->storePhotos($product->id, $data['photos'] ?? []);
 
+                if ($isSingleWithBranchChanges) {
+                    $touchedBranchIds = $this->branchesWithReducedOrRemovedStock($previousBranchQuantities, $data['commerce_branches']);
+
+                    if ($touchedBranchIds->isNotEmpty()) {
+                        $this->packageCommitmentSyncService->syncAfterComponentEdit($product, $touchedBranchIds, $confirmPackageAdjustments);
+                    }
+                }
+
                 return $product->load(['photos', 'commerceBranches']);
 
             });
@@ -246,6 +306,39 @@ class ProductService
             Log::error('Error updating Product', ['error' => $e->getMessage()]);
             throw $e;
         }
+    }
+
+    /**
+     * Sedes donde el stock de un componente bajó o se le quitó la
+     * asignación por completo — las únicas que pueden dejar un pack
+     * sobre-comprometido (subir stock nunca reduce lo que un pack puede
+     * ofrecer).
+     *
+     * @param  \Illuminate\Support\Collection<int, int>  $previousQuantities  Cantidad anterior por commerce_branch_id.
+     * @param  array<int, array{commerce_branch_id: int, quantity_available: int}>  $newBranches
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    private function branchesWithReducedOrRemovedStock($previousQuantities, array $newBranches)
+    {
+        $newQuantities = collect($newBranches)->mapWithKeys(
+            fn (array $branch) => [(int) $branch['commerce_branch_id'] => (int) $branch['quantity_available']]
+        );
+
+        return $previousQuantities->keys()
+            ->merge($newQuantities->keys())
+            ->unique()
+            ->filter(function (int $branchId) use ($previousQuantities, $newQuantities) {
+                $old = $previousQuantities->get($branchId);
+
+                if ($old === null) {
+                    return false; // sede nueva: no había compromiso previo que proteger.
+                }
+
+                $new = $newQuantities->get($branchId); // null si la sede se removió del payload.
+
+                return $new === null || $new < $old;
+            })
+            ->values();
     }
 
     /**
@@ -295,12 +388,55 @@ class ProductService
             // inventario/publicación por sede (SCRUM-277) ni la sede de cada
             // producto individual — necesario para filtrar candidatos a pack
             // por sede (SCRUM-323).
-            return Product::with(['photos', 'packageItems', 'packageItems.photos', 'package', 'commerceBranches'])
+            $products = Product::with(['photos', 'packageItems', 'packageItems.photos', 'package', 'commerceBranches'])
                 ->where('commerce_id', $commerce_id)
                 ->get();
+
+            $this->attachAvailableForPackaging($products);
+
+            return $products;
         } catch (ModelNotFoundException $e) {
             Log::error('Error fetching products by commerce ID', ['error' => $e->getMessage()]);
             throw $e;
+        }
+    }
+
+    /**
+     * Adjunta, al pivote de cada sede de un producto individual, cuánto de
+     * su stock queda libre para comprometer en packs en esa sede — lo que
+     * la interfaz de armado de packs necesita para filtrar candidatos por
+     * sede (SCRUM-361, Tarea 6.2). Se agrupa por sede y se resuelve con
+     * PackageAvailabilityCalculator::availableForPackagingMany() (ya en
+     * lote) para no emitir una consulta por producto al listar el catálogo
+     * completo de un comercio.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Product>  $products
+     */
+    private function attachAvailableForPackaging($products): void
+    {
+        $singleProducts = $products->filter(
+            fn (Product $product) => $product->product_type === Constant::PRODUCT_TYPE_SINGLE
+        );
+
+        if ($singleProducts->isEmpty()) {
+            return;
+        }
+
+        $branchIds = $singleProducts
+            ->flatMap(fn (Product $product) => $product->commerceBranches->pluck('id'))
+            ->unique();
+
+        foreach ($branchIds as $branchId) {
+            $componentsAtBranch = $singleProducts->filter(
+                fn (Product $product) => $product->commerceBranches->contains('id', $branchId)
+            );
+
+            $availability = $this->packageAvailabilityCalculator->availableForPackagingMany($componentsAtBranch, $branchId);
+
+            foreach ($componentsAtBranch as $product) {
+                $branch = $product->commerceBranches->firstWhere('id', $branchId);
+                $branch->pivot->setAttribute('available_for_packaging', $availability->get($product->id, 0));
+            }
         }
     }
 
@@ -418,11 +554,23 @@ class ProductService
      * contrario ambas leerían el mismo valor antes de restar y se perdería
      * una de las dos actualizaciones (sobreventa).
      *
-     * SCRUM-277 Fase 1: para product_type=single el stock vive por sede en
-     * product_commerce_branch, así que el descuento se aplica sobre la fila
-     * de la sede de la orden (order.commerce_branch_id), no sobre products.
-     * Los packs (product_type=package) conservan el comportamiento global
-     * anterior hasta que la Fase 2 migre también su disponibilidad por sede.
+     * SCRUM-277/361: el stock de ambos tipos de producto vive por sede en
+     * product_commerce_branch. Vender un pack descuenta dos cosas en la sede
+     * de la orden: su propio compromiso (igual que un individual) y, además,
+     * el inventario de cada uno de sus componentes — esas unidades salieron
+     * físicamente de la tienda. No confundir con el compromiso (planificación,
+     * no mueve inventario): la venta sí lo mueve. Antes de esta fase, la rama
+     * de packs saltaba el descuento de componentes por completo (bug latente,
+     * inactivo mientras los packs no eran vendibles).
+     *
+     * SCRUM-361, Tarea 3.6-3.9 (disparador por compra): cada vez que el
+     * stock de un componente (single) baja aquí — por su propia venta o por
+     * ser componente de un pack vendido — se sincronizan en la misma
+     * transacción los packs de esa sede que queden sobre-comprometidos. Sin
+     * aliado a quien preguntar, el ajuste es silencioso y queda marcado
+     * (PackageCommitmentSyncService::syncAfterPurchase). Vender el propio
+     * pack no dispara sync sobre sí mismo: un pack no puede ser componente
+     * de otro pack (SCRUM-323 exige componentes "single").
      */
     public function dismissProductConfirmedStock(Order $order): void
     {
@@ -435,15 +583,13 @@ class ProductService
                         continue;
                     }
 
-                    if ($product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
-                        ($product->quantity_total - $item->quantity) < 0 ? $product->quantity_total = 0 : $product->quantity_total -= $item->quantity;
-                        $product->quantity_available = $product->quantity_total; // Asumiendo que quantity_available refleja el stock actual disponible
-                        $product->save();
-
-                        continue;
-                    }
-
                     $this->dismissBranchConfirmedStock($product->id, $order->commerce_branch_id, $item->quantity);
+
+                    if ($product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
+                        $this->dismissPackageComponentsStock($product, $order->commerce_branch_id, $item->quantity);
+                    } else {
+                        $this->packageCommitmentSyncService->syncAfterPurchase($product, $order->commerce_branch_id);
+                    }
                 }
             });
         } catch (Exception $e) {
@@ -453,8 +599,14 @@ class ProductService
     }
 
     /**
-     * Descuenta, bajo bloqueo, el stock comprometido de un producto
-     * individual en la sede donde se confirmó la orden.
+     * Descuenta, bajo bloqueo, el stock/compromiso de un producto (single o
+     * package) en la sede donde se confirmó la orden. Si la venta agota la
+     * fila (queda en 0), se despublica automáticamente — misma regla que ya
+     * impide publicar sin inventario/compromiso; sin este ajuste, un
+     * producto vendido hasta agotar su stock seguía figurando "publicado"
+     * en el panel del aliado aunque ya no fuera comprable en la práctica
+     * (la discovery lo oculta igual por quantity_available=0, pero el panel
+     * no reflejaba la realidad).
      */
     private function dismissBranchConfirmedStock(int $productId, int $commerceBranchId, int $quantity): void
     {
@@ -469,16 +621,43 @@ class ProductService
         }
 
         $pivot->quantity_available = max(0, $pivot->quantity_available - $quantity);
+
+        if ($pivot->quantity_available === 0) {
+            $pivot->is_published = false;
+        }
+
         $pivot->save();
+    }
+
+    /**
+     * Descuenta, en la misma sede de la orden, el inventario de cada
+     * componente del pack vendido (SCRUM-361, Tarea 5.4) y sincroniza los
+     * demás packs de esa sede que compartan ese componente (Tarea 3.6) —
+     * el propio pack vendido no se re-sincroniza a sí mismo aquí: su
+     * compromiso ya se descontó en lockstep, exactamente por la cantidad
+     * vendida, así que no debería aparecer sobre-comprometido (Tarea 5.4b).
+     */
+    private function dismissPackageComponentsStock(Product $package, int $commerceBranchId, int $packagesSold): void
+    {
+        $package->loadMissing('packageItems');
+
+        foreach ($package->packageItems as $component) {
+            $this->dismissBranchConfirmedStock(
+                $component->id,
+                $commerceBranchId,
+                (int) $component->pivot->quantity * $packagesSold
+            );
+
+            $this->packageCommitmentSyncService->syncAfterPurchase($component, $commerceBranchId);
+        }
     }
 
     /**
      * Validar la disponibilidad de los productos en los items de la orden.
      *
-     * SCRUM-277 Fase 1: para product_type=single la disponibilidad se valida
-     * contra la sede donde se está creando la orden (el pivote producto-sede),
-     * no contra un total global. Los packs conservan la validación global
-     * anterior hasta que la Fase 2 migre también su disponibilidad por sede.
+     * SCRUM-277/361: ambos tipos de producto validan contra la sede donde se
+     * está creando la orden — el pivote producto-sede es la única fuente de
+     * verdad, tanto para stock físico (single) como para compromiso (package).
      */
     public function validateProductAvailability(array $items, int $commerceBranchId): bool
     {
@@ -487,14 +666,6 @@ class ProductService
 
             if (! $product) {
                 return false;
-            }
-
-            if ($product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
-                if ($product->quantity_available < $item['quantity']) {
-                    return false;
-                }
-
-                continue;
             }
 
             $pivot = ProductCommerceBranch::query()

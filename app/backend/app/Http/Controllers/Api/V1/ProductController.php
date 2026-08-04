@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\PackageAdjustmentConfirmationRequiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteProductRequest;
 use App\Http\Requests\Api\V1\DestroyProductPhotoRequest;
+use App\Http\Requests\Api\V1\DismissProductBranchAutoAdjustmentRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\PatchProductStatusRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
@@ -184,15 +186,18 @@ class ProductController extends Controller
      *   @OA\Response(response=401, description="Unauthenticated"),
      *   @OA\Response(response=403, description="Forbidden"),
      *   @OA\Response(response=404, description="Not found"),
+     *   @OA\Response(response=409, description="Change affects existing packs — resend with confirm_package_adjustments=true to apply (SCRUM-361)"),
      *   @OA\Response(response=422, description="Validation error")
      * )
      */
     public function update(UpdateProductRequest $request, int $id): JsonResponse
     {
         try {
-            $product = $this->productService->update($id, $request->validated());
+            $product = $this->productService->update($id, $request->validated(), $request->boolean('confirm_package_adjustments'));
 
             return $this->successResponse(new ProductResource($product), 'Product updated successfully', Response::HTTP_OK);
+        } catch (PackageAdjustmentConfirmationRequiredException $e) {
+            return $this->errorResponse($e->getMessage(), Response::HTTP_CONFLICT, ['affected_packages' => $e->affectedPackages()]);
         } catch (Exception $e) {
             return $this->errorResponse('Error updating product', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -274,6 +279,40 @@ class ProductController extends Controller
             return $this->errorResponse('Product or branch assignment not found', Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return $this->errorResponse('Error updating product branch publication', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * SCRUM-361, Tarea 3.8: descarta el aviso de ajuste automático de un
+     * pack en una sede sin tocar su cantidad comprometida.
+     *
+     * @OA\Delete(
+     *   path="/api/v1/products/{id}/branches/{branchId}/auto-adjustment",
+     *   operationId="dismissProductBranchAutoAdjustment",
+     *   tags={"Products"},
+     *   summary="Dismiss a pack's automatic adjustment notice in a branch",
+     *   description="Clears auto_adjusted_at/auto_adjusted_from for this product-branch row without changing quantity_available (SCRUM-361)",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="branchId", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(ref="#/components/schemas/ProductResource")),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden"),
+     *   @OA\Response(response=404, description="Product or branch assignment not found")
+     * )
+     */
+    public function dismissAutoAdjustment(DismissProductBranchAutoAdjustmentRequest $request, int $id, int $branchId): JsonResponse
+    {
+        try {
+            $product = $this->productService->dismissAutoAdjustment($id, $branchId);
+
+            return $this->successResponse(new ProductResource($product), 'Auto-adjustment notice dismissed successfully', Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Product or branch assignment not found', Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return $this->errorResponse('Error dismissing auto-adjustment notice', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
