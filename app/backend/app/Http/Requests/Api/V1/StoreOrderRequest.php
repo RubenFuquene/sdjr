@@ -53,7 +53,14 @@ class StoreOrderRequest extends FormRequest
             'user_id' => 'nullable|integer|exists:users,id',
             'commerce_branch_id' => 'required|exists:commerce_branches,id',
             'items' => 'required|array|min:1|max:'.Constant::MAX_ORDER_ITEMS,
-            'items.*.product_id' => 'required|exists:products,id',
+            // SCRUM-366/367: distinct reemplaza la garantía que daba
+            // unique(order_id, product_id) en BD, retirada porque impedía
+            // comprar un pack junto con uno de sus propios componentes
+            // sueltos (dos filas legítimas con el mismo product_id: la
+            // suelta y la hija del pack) — esta regla solo protege líneas
+            // pedidas directamente por el cliente, no las hijas que genera
+            // el servidor al explotar un pack.
+            'items.*.product_id' => 'required|exists:products,id|distinct',
             'items.*.quantity' => 'required|integer|min:'.Constant::MIN_ORDER_QUANTITY,
         ];
     }

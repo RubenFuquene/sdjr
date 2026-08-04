@@ -29,7 +29,11 @@ export function FormField({
 
       {children}
 
-      {helperText ? <div className="text-sm text-[#6A6A6A]">{helperText}</div> : null}
+      {helperText ? (
+        <div id={`${id}-helper-text`} className="text-sm text-[#6A6A6A]">
+          {helperText}
+        </div>
+      ) : null}
 
       {error ? <p id={`${id}-error`} className="text-sm text-red-600">{error}</p> : null}
     </div>

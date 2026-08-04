@@ -15,6 +15,19 @@ interface ProductBranchAssignmentSelectorProps {
   onToggle: (branchId: number) => void;
   onQuantityChange: (branchId: number, quantity: number) => void;
   onPublishedChange: (branchId: number, isPublished: boolean) => void;
+  /** SCRUM-361, Tarea 6.1: "Sedes y compromiso" para packs, "Sedes y disponibilidad" para individuales. */
+  heading?: string;
+  /** SCRUM-361: "Cantidad" (individuales) o "Packs" (packs). */
+  quantityLabel?: string;
+  /** SCRUM-361, Tarea 6.1: máximo ofrecible por sede (packs), mostrado junto al campo de cantidad. */
+  maxHintByBranchId?: Map<number, number>;
+  /**
+   * Ajuste funcional 2026-08-03: los packs se ofrecen en una sola sede.
+   * En modo "single" se renderiza como radio (una sede a la vez, semántica
+   * nativa de radiogroup para lectores de pantalla); "multiple" (por
+   * defecto) conserva el checkbox de los individuales.
+   */
+  selectionMode?: "single" | "multiple";
 }
 
 export function ProductBranchAssignmentSelector({
@@ -25,12 +38,17 @@ export function ProductBranchAssignmentSelector({
   onToggle,
   onQuantityChange,
   onPublishedChange,
+  heading = "Sedes y disponibilidad *",
+  quantityLabel = "Cantidad",
+  maxHintByBranchId,
+  selectionMode = "multiple",
 }: ProductBranchAssignmentSelectorProps) {
   const selectedByBranchId = new Map(selectedItems.map((item) => [item.branchId, item]));
+  const isSingle = selectionMode === "single";
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-[#1A1A1A]">Sedes y disponibilidad *</p>
+      <p className="text-sm font-medium text-[#1A1A1A]">{heading}</p>
 
       {options.length === 0 ? (
         <div className="rounded-[14px] border border-[#E0E0E0] bg-[#F7F7F7] p-4">
@@ -40,6 +58,8 @@ export function ProductBranchAssignmentSelector({
         <div
           className="max-h-64 overflow-y-auto rounded-[14px] border border-[#E0E0E0] p-2 space-y-2"
           aria-live="polite"
+          role={isSingle ? "radiogroup" : undefined}
+          aria-label={isSingle ? heading : undefined}
         >
           {options.map((option) => {
             const selected = selectedByBranchId.get(option.id);
@@ -51,7 +71,8 @@ export function ProductBranchAssignmentSelector({
               >
                 <input
                   id={`branch-assign-${option.id}`}
-                  type="checkbox"
+                  type={isSingle ? "radio" : "checkbox"}
+                  name={isSingle ? "branch-assign-single" : undefined}
                   checked={Boolean(selected)}
                   disabled={disabled}
                   onChange={() => onToggle(option.id)}
@@ -71,12 +92,16 @@ export function ProductBranchAssignmentSelector({
                         htmlFor={`branch-assign-qty-${option.id}`}
                         className="text-xs text-[#6A6A6A]"
                       >
-                        Cantidad
+                        {quantityLabel}
+                        {maxHintByBranchId?.has(option.id)
+                          ? ` (máx: ${maxHintByBranchId.get(option.id)})`
+                          : null}
                       </label>
                       <input
                         id={`branch-assign-qty-${option.id}`}
                         type="number"
                         min={0}
+                        max={maxHintByBranchId?.get(option.id)}
                         value={selected.quantityAvailable}
                         disabled={disabled}
                         onChange={(event) => {
@@ -86,7 +111,13 @@ export function ProductBranchAssignmentSelector({
                             return;
                           }
 
-                          onQuantityChange(option.id, Math.max(0, Math.trunc(parsed)));
+                          const maxAllowed = maxHintByBranchId?.get(option.id);
+                          const clamped =
+                            maxAllowed !== undefined
+                              ? Math.min(Math.max(0, Math.trunc(parsed)), maxAllowed)
+                              : Math.max(0, Math.trunc(parsed));
+
+                          onQuantityChange(option.id, clamped);
                         }}
                         className="h-9 w-[92px] rounded-[10px] border border-[#E0E0E0] px-2 text-sm text-[#1A1A1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4B236A]/30 disabled:opacity-60 disabled:cursor-not-allowed"
                       />

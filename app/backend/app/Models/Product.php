@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\SanitizesTextAttributes;
-use App\Services\PackageAvailabilityCalculator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,10 +20,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $description
  * @property float $original_price
  * @property float|null $discounted_price
- * @property int $quantity_total Vigente solo para product_type=package (SCRUM-277 Fase 1). Para
- *                               product_type=single el stock vive en commerceBranches()->pivot; esta columna queda vestigial
- *                               hasta que la Fase 2 migre también los packs.
- * @property int $quantity_available Misma nota que quantity_total.
  * @property string|null $expires_at
  * @property string $product_type
  * @property string $status
@@ -41,8 +36,6 @@ class Product extends Model
         'product_type',
         'original_price',
         'discounted_price',
-        'quantity_total',
-        'quantity_available',
         'expires_at',
         'status',
     ];
@@ -56,8 +49,6 @@ class Product extends Model
         'product_type' => 'string',
         'original_price' => 'float',
         'discounted_price' => 'float',
-        'quantity_total' => 'integer',
-        'quantity_available' => 'integer',
         'expires_at' => 'datetime',
         'status' => 'string',
     ];
@@ -80,15 +71,6 @@ class Product extends Model
     public function setDescriptionAttribute($value): void
     {
         $this->attributes['description'] = $this->sanitizeText($value);
-    }
-
-    /**
-     * Get the stock of this product still available to be committed to packages,
-     * after subtracting the stock already committed by packages that include it.
-     */
-    public function getAvailableForPackagingAttribute(): int
-    {
-        return app(PackageAvailabilityCalculator::class)->availableForPackaging($this);
     }
 
     /**
@@ -121,7 +103,7 @@ class Product extends Model
     {
         return $this->belongsToMany(CommerceBranch::class, 'product_commerce_branch', 'product_id', 'commerce_branch_id')
             ->using(ProductCommerceBranch::class)
-            ->withPivot(['id', 'quantity_available', 'is_published'])
+            ->withPivot(['id', 'quantity_available', 'is_published', 'auto_adjusted_at', 'auto_adjusted_from'])
             ->withTimestamps();
     }
 
@@ -155,5 +137,17 @@ class Product extends Model
     public function photos()
     {
         return $this->hasMany(ProductPhoto::class, 'product_id');
+    }
+
+    /**
+     * Precio de venta vigente: el que la app le muestra al cliente.
+     *
+     * Punto único reutilizado por la creación de órdenes y por el
+     * prorrateo de packs (SCRUM-366) — antes cada consumidor resolvía el
+     * precio por su cuenta y terminaban divergiendo.
+     */
+    public function currentSalePrice(): float
+    {
+        return (float) ($this->discounted_price ?? $this->original_price);
     }
 }

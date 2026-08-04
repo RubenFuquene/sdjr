@@ -52,9 +52,6 @@ export interface CreateProductPayload {
     product_type: ProductType;
     original_price: number;
     discounted_price?: number | null;
-    /** Solo se envía para product_type=package (SCRUM-277). */
-    quantity_total?: number;
-    quantity_available?: number;
     expires_at?: string | null;
     status: string;
   };
@@ -75,8 +72,6 @@ export interface UpdateProductPayload {
     product_type?: ProductType;
     original_price?: number;
     discounted_price?: number | null;
-    quantity_total?: number;
-    quantity_available?: number;
     expires_at?: string | null;
     status?: string;
   };
@@ -86,6 +81,8 @@ export interface UpdateProductPayload {
     quantity: number;
   }>;
   photos?: CreateProductPhotoInput[];
+  /** SCRUM-361, Tarea 3.3-3.4: confirma el ajuste automático de packs afectados. */
+  confirm_package_adjustments?: boolean;
 }
 
 export interface PackageItemFromAPI extends ProductFromAPI {
@@ -163,13 +160,21 @@ function normalizeProduct(product: ProductFromAPI): ProductFromAPI {
       product.discounted_price === null || product.discounted_price === undefined
         ? null
         : toNumber(product.discounted_price),
-    quantity_total: toInteger(product.quantity_total),
-    quantity_available: toInteger(product.quantity_available),
-    available_for_packaging:
-      product.available_for_packaging === undefined
-        ? undefined
-        : toInteger(product.available_for_packaging),
     photos: product.photos ?? [],
+    commerce_branches: product.commerce_branches?.map((branch) => ({
+      ...branch,
+      id: toInteger(branch.id),
+      quantity_available:
+        branch.quantity_available === undefined ? undefined : toInteger(branch.quantity_available),
+      auto_adjusted_from:
+        branch.auto_adjusted_from === null || branch.auto_adjusted_from === undefined
+          ? null
+          : toInteger(branch.auto_adjusted_from),
+      available_for_packaging:
+        branch.available_for_packaging === null || branch.available_for_packaging === undefined
+          ? null
+          : toInteger(branch.available_for_packaging),
+    })),
   };
 }
 
@@ -226,26 +231,6 @@ function normalizePhotos(input: ProductFormInput): CreateProductPhotoInput[] | u
   return input.photos;
 }
 
-/**
- * SCRUM-277 Fase 1: para product_type=package conserva quantity_total/
- * quantity_available a nivel de producto (comportamiento anterior, sin
- * cambios). Para 'single' esos campos ya no significan nada — se omiten del
- * payload en vez de enviar un valor inventado, porque el backend tampoco los
- * exige para ese tipo (StoreProductRequest los vuelve requiredIf(package)).
- */
-function normalizeProductQuantities(
-  input: ProductFormInput
-): { quantity_total?: number; quantity_available?: number } {
-  if (input.productType !== "package") {
-    return {};
-  }
-
-  const quantityAvailable = toInteger(input.quantityAvailable);
-  const quantityTotal = toInteger(input.quantityTotal ?? quantityAvailable, quantityAvailable);
-
-  return { quantity_total: quantityTotal, quantity_available: quantityAvailable };
-}
-
 function normalizeBranches(
   branches: ProductBranchAssignment[] | undefined
 ): CommerceBranchAssignmentPayload[] | undefined {
@@ -275,7 +260,6 @@ export function mapProductFormToCreatePayload(input: ProductFormInput): CreatePr
         input.discountedPrice === null || input.discountedPrice === undefined
           ? null
           : toNumber(input.discountedPrice),
-      ...normalizeProductQuantities(input),
       expires_at: input.expiresAt ?? null,
       status: input.status ?? "1",
     },
@@ -298,13 +282,13 @@ export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdatePr
         input.discountedPrice === null || input.discountedPrice === undefined
           ? null
           : toNumber(input.discountedPrice),
-      ...normalizeProductQuantities(input),
       expires_at: input.expiresAt ?? null,
       status: input.status ?? "1",
     },
     commerce_branches: normalizeBranches(input.branches),
     package_items: normalizePackageItems(input),
     photos: normalizePhotos(input),
+    confirm_package_adjustments: input.confirmPackageAdjustments,
   };
 }
 
@@ -499,6 +483,26 @@ export async function updateProductBranchPublication(
       method: "PATCH",
       body: JSON.stringify({ is_published: isPublished }),
     }
+  );
+
+  return {
+    ...response,
+    data: normalizeProduct(response.data),
+  };
+}
+
+/**
+ * DELETE /api/v1/products/{id}/branches/{branchId}/auto-adjustment
+ * Descarta el aviso de ajuste automático de un pack en una sede, sin
+ * tocar su cantidad comprometida (SCRUM-361, Tarea 3.8/6.5).
+ */
+export async function dismissProductBranchAutoAdjustment(
+  productId: number,
+  branchId: number
+): Promise<ApiSuccess<ProductFromAPI>> {
+  const response = await fetchWithErrorHandling<ApiSuccess<ProductFromAPI>>(
+    `/api/v1/products/${productId}/branches/${branchId}/auto-adjustment`,
+    { method: "DELETE" }
   );
 
   return {

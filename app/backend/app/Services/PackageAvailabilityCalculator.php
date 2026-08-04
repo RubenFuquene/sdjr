@@ -7,15 +7,16 @@ namespace App\Services;
 use App\Constants\Constant;
 use App\Models\OrderItem;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
 /**
- * Service class for calculating package (pack) stock availability.
- *
- * Computes, in real time, how many units of a single product remain
- * available to be committed to packages, and how many packs a given
- * combination of items can support given current stock and existing
- * commitments from other packs.
+ * Servicio de disponibilidad de packs, resuelto por sede (SCRUM-361, Fase 2
+ * de SCRUM-277). El compromiso de un pack vive en su propio pivote
+ * producto-sede (product_commerce_branch.quantity_available): cuánto stock
+ * de un componente queda libre para packs, y cuántos packs se pueden
+ * ofrecer, se calculan siempre para una sede concreta — un pack en la sede
+ * B nunca consume stock de un componente en la sede A.
  */
 class PackageAvailabilityCalculator
 {
@@ -24,98 +25,151 @@ class PackageAvailabilityCalculator
     ) {}
 
     /**
-     * Get the stock of a single product that is still available to be
-     * committed to packages, after subtracting the stock already
-     * committed by packages that include it.
+     * Stock de un componente que queda libre para comprometer en packs, en
+     * una sede concreta.
      *
-     * @param  Product  $product  A product with product_type "single".
-     * @param  int|null  $excludePackageId  Exclude this package's own commitment from the calculation (used when editing a pack).
+     * @param  Product  $component  Un producto con product_type "single".
+     * @param  int  $branchId  La sede en la que se evalúa el compromiso.
+     * @param  int|null  $excludePackageId  Excluir el compromiso propio de este pack (al editarlo).
      */
-    public function availableForPackaging(Product $product, ?int $excludePackageId = null): int
+    public function availableForPackaging(Product $component, int $branchId, ?int $excludePackageId = null): int
     {
-        $product->loadMissing('package', 'commerceBranches');
-
-        $packages = $product->package
-            ->when(
-                $excludePackageId !== null,
-                fn (Collection $packages) => $packages->reject(
-                    fn (Product $package) => $package->id === $excludePackageId
-                )
-            );
-
-        // Resolve the active-order reservations for all involved packages with a single
-        // aggregate query, instead of relying on Product::quantity_available's per-model query.
-        $reservedQuantities = $this->reservedQuantitiesByProductId($packages->pluck('id'));
-
-        $committedStock = $packages->sum(function (Product $package) use ($reservedQuantities) {
-            $effectiveQuantityAvailable = (int) $package->getAttributes()['quantity_available']
-                - $reservedQuantities->get($package->id, 0);
-
-            return $effectiveQuantityAvailable * (int) $package->pivot->quantity;
-        });
-
-        // SCRUM-277 Fase 1: el stock de un producto single ya no vive en una sola
-        // columna global (products.quantity_available), sino por sede en el pivote.
-        // Los packs, sin embargo, conservan su comportamiento actual (Fase 2 los
-        // migra por completo): se preserva la noción de "un número global de
-        // disponibilidad" sumando la disponibilidad de todas las sedes del
-        // producto, en vez de leer una columna que ya no es la fuente de verdad.
-        $totalAvailableAcrossBranches = $this->branchAvailabilityCalculator
-            ->availableForMany($product->commerceBranches->pluck('pivot'))
-            ->sum();
-
-        return max(0, $totalAvailableAcrossBranches - $committedStock);
+        return $this->availableForPackagingMany(collect([$component]), $branchId, $excludePackageId)
+            ->get($component->id, 0);
     }
 
     /**
-     * Get the maximum number of packs that can be offered given the
-     * available stock of each component product.
+     * Igual que availableForPackaging(), pero para N componentes en una
+     * sola sede con un número fijo de consultas — nunca una por componente
+     * (Tarea 2.4).
      *
-     * @param  Collection<int, array{product: Product, quantity: int}>  $packageItems  Each entry pairs a component product with the quantity required per pack.
-     * @param  int|null  $excludePackageId  Exclude this package's own commitment from the calculation (used when editing a pack).
+     * @param  Collection<int, Product>  $components
+     * @return Collection<int, int> Disponibilidad indexada por product_id del componente.
      */
-    public function maxPackageQuantity(Collection $packageItems, ?int $excludePackageId = null): int
+    public function availableForPackagingMany(Collection $components, int $branchId, ?int $excludePackageId = null): Collection
+    {
+        if ($components->isEmpty()) {
+            return collect();
+        }
+
+        // loadMissing() sobre una Eloquent Collection resuelve la relación
+        // faltante de todos los componentes en una sola consulta — los
+        // objetos se comparten por referencia, así que también queda
+        // resuelta para $components aunque no sea una Eloquent Collection.
+        EloquentCollection::make($components->all())->loadMissing('commerceBranches');
+        $componentIds = $components->pluck('id');
+
+        // Todos los packs que incluyen al menos uno de estos componentes y
+        // están asignados a esta sede, con sus package_items y su pivote de
+        // sede precargados — una sola consulta, no una por componente.
+        $packagesAtBranch = Product::query()
+            ->where('product_type', Constant::PRODUCT_TYPE_PACKAGE)
+            // Sin calificar "id": dentro del closure de whereHas, Eloquent
+            // alía la tabla relacionada (laravel_reserved_0) — calificarla
+            // como "products.id" apuntaría a la tabla externa (el pack) en
+            // vez de a sus componentes, y el filtro nunca encontraría nada.
+            ->whereHas('packageItems', fn ($q) => $q->whereIn('id', $componentIds))
+            ->when($excludePackageId !== null, fn ($q) => $q->where('id', '!=', $excludePackageId))
+            ->with([
+                'packageItems' => fn ($q) => $q->whereIn('products.id', $componentIds),
+                'commerceBranches' => fn ($q) => $q->wherePivot('commerce_branch_id', $branchId),
+            ])
+            ->get()
+            ->filter(fn (Product $package) => $package->commerceBranches->isNotEmpty());
+
+        $reservedQuantities = $this->reservedQuantitiesByProductId($packagesAtBranch->pluck('id'), $branchId);
+
+        $committedByComponentId = [];
+
+        foreach ($packagesAtBranch as $package) {
+            $branchPivot = $package->commerceBranches->first()->pivot;
+            $effectiveCommitted = max(0, (int) $branchPivot->quantity_available - $reservedQuantities->get($package->id, 0));
+
+            foreach ($package->packageItems as $item) {
+                $committedByComponentId[$item->id] = ($committedByComponentId[$item->id] ?? 0)
+                    + $effectiveCommitted * (int) $item->pivot->quantity;
+            }
+        }
+
+        // Disponibilidad física de los componentes en la sede, también en
+        // lote (BranchAvailabilityCalculator::availableForMany ya lo hace).
+        $componentPivotsByComponentId = $components->mapWithKeys(
+            fn (Product $component) => [$component->id => $component->commerceBranches->firstWhere('id', $branchId)?->pivot]
+        )->filter();
+
+        $branchStockByPivotId = $this->branchAvailabilityCalculator->availableForMany($componentPivotsByComponentId->values());
+
+        return $components->mapWithKeys(function (Product $component) use ($componentPivotsByComponentId, $branchStockByPivotId, $committedByComponentId) {
+            $pivot = $componentPivotsByComponentId->get($component->id);
+            $branchStock = $pivot ? $branchStockByPivotId->get($pivot->id, 0) : 0;
+            $committed = $committedByComponentId[$component->id] ?? 0;
+
+            return [$component->id => max(0, $branchStock - $committed)];
+        });
+    }
+
+    /**
+     * Máximo de packs que se pueden ofrecer en una sede concreta, dado el
+     * stock disponible de cada componente en esa misma sede.
+     *
+     * @param  Collection<int, array{product: Product, quantity: int}>  $packageItems  Cada elemento pareja un componente con la cantidad requerida por pack.
+     * @param  int  $branchId  La sede en la que se evalúa la capacidad.
+     * @param  int|null  $excludePackageId  Excluir el compromiso propio de este pack (al editarlo).
+     */
+    public function maxPackageQuantity(Collection $packageItems, int $branchId, ?int $excludePackageId = null): int
     {
         if ($packageItems->isEmpty()) {
             return 0;
         }
 
+        $availabilityByComponentId = $this->availableForPackagingMany(
+            $packageItems->pluck('product'),
+            $branchId,
+            $excludePackageId
+        );
+
         return (int) $packageItems
-            ->map(function (array $item) use ($excludePackageId) {
+            ->map(function (array $item) use ($availabilityByComponentId) {
                 $quantity = (int) $item['quantity'];
 
                 if ($quantity <= 0) {
                     return 0;
                 }
 
-                return intdiv($this->availableForPackaging($item['product'], $excludePackageId), $quantity);
+                return intdiv($availabilityByComponentId->get($item['product']->id, 0), $quantity);
             })
             ->min();
     }
 
     /**
-     * Get the quantity reserved by active orders for each of the given product IDs,
-     * in a single aggregate query.
+     * Cantidad reservada por órdenes activas de cada pack, en una sede
+     * concreta, con una única consulta agregada. Solo cuenta órdenes en
+     * estado `pending` — el resto de estados vivos ya tuvieron su descuento
+     * físico aplicado al pasar por `confirmed` (dismissProductConfirmedStock),
+     * así que contarlos aquí los restaría dos veces (mismo criterio que
+     * BranchAvailabilityCalculator).
      *
      * @param  Collection<int, int>  $productIds
-     * @return Collection<int, int> Reserved quantity keyed by product ID.
+     * @return Collection<int, int> Cantidad reservada indexada por product_id.
      */
-    private function reservedQuantitiesByProductId(Collection $productIds): Collection
+    private function reservedQuantitiesByProductId(Collection $productIds, int $branchId): Collection
     {
         if ($productIds->isEmpty()) {
             return collect();
         }
 
-        return OrderItem::whereHas('order', function ($query) {
-            $query->whereIn('status', [
-                Constant::ORDER_STATUS_PENDING,
-                Constant::ORDER_STATUS_PREPARING,
-                Constant::ORDER_STATUS_READY,
-            ]);
-        })
-            ->whereIn('product_id', $productIds)
-            ->selectRaw('product_id, SUM(quantity) as total')
-            ->groupBy('product_id')
+        return OrderItem::query()
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.status', Constant::ORDER_STATUS_PENDING)
+            ->where('orders.commerce_branch_id', $branchId)
+            ->whereIn('order_items.product_id', $productIds)
+            // SCRUM-366/367: $productIds aquí son ids de PACK, y una línea
+            // hija nunca tiene el id del pack como su propio product_id, así
+            // que este filtro es defensivo — deja explícito que esta cuenta
+            // es solo de líneas padre, igual que BranchAvailabilityCalculator.
+            ->whereNull('order_items.parent_package_id')
+            ->selectRaw('order_items.product_id as product_id, SUM(order_items.quantity) as total')
+            ->groupBy('order_items.product_id')
             ->get()
             ->mapWithKeys(fn ($row) => [(int) $row->product_id => (int) $row->total]);
     }

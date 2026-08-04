@@ -11,7 +11,6 @@ import {
   buildProductFormSubmitInput,
   mapInitialDataToDraft,
   parseDecimal,
-  parseInteger,
 } from "./product-form.utils";
 import {
   type ProductFormValidationErrors,
@@ -19,7 +18,7 @@ import {
 } from "./product-form.validation";
 
 const MAX_PACKS_ERROR_PATTERN =
-  /^The requested quantity_available \((\d+)\) exceeds the maximum packs available given current stock \(max: (\d+)\)\.$/;
+  /^The requested quantity_available \((\d+)\) exceeds the maximum packs available in this branch given current stock \(max: (\d+)\)\.$/;
 
 function translateQuantityAvailableError(message?: string): string | undefined {
   if (!message) {
@@ -37,28 +36,37 @@ function translateQuantityAvailableError(message?: string): string | undefined {
 
 type ProductFormInitialData = {
   commerceId?: number;
-  quantityTotal?: number;
   title?: string;
   description?: string | null;
   productType?: "single" | "package";
   productCategoryId?: number;
   originalPrice?: number;
   discountedPrice?: number | null;
-  quantityAvailable?: number;
-  branchId?: number | null;
   branches?: ProductBranchAssignment[];
   packageItems?: Array<{ productId: number; quantity: number }>;
+};
+
+/** SCRUM-361, Tarea 6: disponibilidad de un componente candidato, por sede. */
+export type PackItemOptionBranch = {
+  branchId: number;
+  /** Stock crudo asignado en esa sede — "asignado con stock" (SCRUM-323), no capacidad recortada. */
+  quantityAvailable: number;
+  /** Stock libre para comprometer en packs en esa sede. */
+  availableForPackaging: number;
+};
+
+export type PackItemOption = {
+  id: number;
+  title: string;
+  originalPrice: number;
+  discountedPrice?: number | null;
+  branches: PackItemOptionBranch[];
 };
 
 type UseProductFormStateParams = {
   initialData?: ProductFormInitialData | null;
   fieldErrors: ProviderProductFormFieldErrors;
-  packItemOptions: Array<{
-    id: number;
-    originalPrice: number;
-    quantityAvailable: number;
-    availableForPackaging: number;
-  }>;
+  packItemOptions: PackItemOption[];
   onSubmit: (input: ProviderProductFormInput) => Promise<void>;
 };
 
@@ -75,18 +83,16 @@ export function useProductFormState({
   const [productCategoryId, setProductCategoryId] = useState(initialDraft.productCategoryId);
   const [originalPrice, setOriginalPrice] = useState(initialDraft.originalPrice);
   const [discountedPrice, setDiscountedPrice] = useState(initialDraft.discountedPrice);
-  const [quantityAvailable, setQuantityAvailable] = useState(initialDraft.quantityAvailable);
   const [description, setDescription] = useState(initialDraft.description);
-  const [branchId, setBranchId] = useState(initialDraft.branchId);
   const [branches, setBranches] = useState<ProductBranchAssignment[]>(initialDraft.branches);
   const [packageItems, setPackageItems] = useState<Array<{ productId: number; quantity: number }>>(
     initialDraft.packageItems
   );
   const [localErrors, setLocalErrors] = useState<ProductFormValidationErrors>({});
+  // SCRUM-361, Tarea 6.3: aviso de reconciliación al cambiar de sede — región
+  // viva para que se anuncie, no solo aparezca visualmente (wcag.md).
+  const [reconciliationNotice, setReconciliationNotice] = useState<string | null>(null);
 
-  // SCRUM-277 Fase 1: total agregado de todas las sedes, siempre derivado —
-  // nunca editable directamente, para reforzar que la sede es la fuente de
-  // verdad del inventario (Tarea 4.2).
   const totalQuantityAcrossBranches = useMemo(
     () => branches.reduce((sum, branch) => sum + branch.quantityAvailable, 0),
     [branches]
@@ -109,16 +115,36 @@ export function useProductFormState({
       originalPrice: localErrors.originalPrice ?? fieldErrors["product.original_price"],
       discountedPrice:
         localErrors.discountedPrice ?? fieldErrors["product.discounted_price"],
-      quantityAvailable:
-        localErrors.quantityAvailable ??
-        translateQuantityAvailableError(fieldErrors["product.quantity_available"]),
-      branchId: localErrors.branchId ?? fieldErrors["commerce_branch_ids.0"],
-      branches: localErrors.branches ?? branchesFieldError,
+      branches:
+        localErrors.branches ??
+        translateQuantityAvailableError(branchesFieldError),
       packageItems: localErrors.packageItems ?? packageItemsFieldError,
     };
   }, [fieldErrors, localErrors]);
 
+  // Ajuste 2026-08-04 (ticket derivado de SCRUM-361/323): el techo del pack
+  // suma los precios YA CON DESCUENTO de los componentes, no sus precios de
+  // lista — de lo contrario un pack sin descuento propio podía costar más
+  // que comprar las partes sueltas.
   const packOriginalPrice = useMemo(() => {
+    const optionsById = new Map(packItemOptions.map((option) => [option.id, option]));
+    const total = packageItems.reduce((accumulator, selected) => {
+      const option = optionsById.get(selected.productId);
+
+      if (!option) {
+        return accumulator;
+      }
+
+      return accumulator + (option.discountedPrice ?? option.originalPrice) * selected.quantity;
+    }, 0);
+    return Number(total.toFixed(2));
+  }, [packItemOptions, packageItems]);
+
+  // Ajuste 2026-08-04: referencia de cuánto costarían los componentes a
+  // precio de lista, sin ningún descuento — para que el aliado vea de un
+  // vistazo cuánto descuento ya traen los productos antes de packOriginalPrice
+  // (que es la suma CON descuento, el techo real del pack).
+  const packListPrice = useMemo(() => {
     const optionsById = new Map(packItemOptions.map((option) => [option.id, option]));
     const total = packageItems.reduce((accumulator, selected) => {
       const option = optionsById.get(selected.productId);
@@ -139,38 +165,98 @@ export function useProductFormState({
         : ""
       : originalPrice;
 
-  // En modo edición, available_for_packaging ya descuenta el compromiso actual de
-  // este mismo pack sobre cada producto; lo sumamos de vuelta para reflejar cuánto
-  // queda disponible si este pack ajusta su cantidad.
+  const selectedBranchIds = useMemo(() => branches.map((branch) => branch.branchId), [branches]);
+
+  // En edición, available_for_packaging por sede ya descuenta el compromiso
+  // actual de este mismo pack en esa sede; se suma de vuelta para reflejar
+  // cuánto queda disponible si el pack conserva/ajusta su cantidad ahí.
   const effectiveAvailableForPackaging = useMemo(() => {
     const originalQuantities = new Map(
       (initialData?.packageItems ?? []).map((item) => [item.productId, item.quantity])
     );
-    const currentPackQuantity = initialData?.quantityAvailable ?? 0;
+    const originalBranchQuantities = new Map(
+      (initialData?.branches ?? []).map((branch) => [branch.branchId, branch.quantityAvailable])
+    );
 
-    const result = new Map<number, number>();
+    // productId -> branchId -> cantidad efectiva disponible
+    const result = new Map<number, Map<number, number>>();
+
     packItemOptions.forEach((option) => {
-      const originalPivotQuantity = originalQuantities.get(option.id) ?? 0;
-      result.set(
-        option.id,
-        option.availableForPackaging + originalPivotQuantity * currentPackQuantity
-      );
+      const originalItemQuantity = originalQuantities.get(option.id) ?? 0;
+      const perBranch = new Map<number, number>();
+
+      option.branches.forEach((branch) => {
+        const originalPackQuantityInBranch = originalBranchQuantities.get(branch.branchId) ?? 0;
+        perBranch.set(
+          branch.branchId,
+          branch.availableForPackaging + originalItemQuantity * originalPackQuantityInBranch
+        );
+      });
+
+      result.set(option.id, perBranch);
     });
 
     return result;
   }, [packItemOptions, initialData]);
 
-  const maxPacks = useMemo(() => {
-    if (productType !== "package" || packageItems.length === 0) {
-      return undefined;
+  // SCRUM-361, Tarea 6.2: candidatos = componentes con stock asignado (>0)
+  // en TODAS las sedes actualmente seleccionadas para el pack (misma regla
+  // que valida el backend, SCRUM-323). Sin ninguna sede seleccionada, no hay
+  // candidatos: primero hay que elegir dónde vivirá el pack.
+  const candidateOptions = useMemo(() => {
+    if (productType !== "package" || selectedBranchIds.length === 0) {
+      return [];
     }
 
-    return packageItems.reduce((min, item) => {
-      const available = effectiveAvailableForPackaging.get(item.productId) ?? 0;
-      const possiblePacks = item.quantity > 0 ? Math.floor(available / item.quantity) : 0;
-      return Math.min(min, possiblePacks);
-    }, Number.MAX_SAFE_INTEGER);
-  }, [productType, packageItems, effectiveAvailableForPackaging]);
+    return packItemOptions.filter((option) =>
+      selectedBranchIds.every((branchId) => {
+        const branchStock = option.branches.find((b) => b.branchId === branchId);
+        return (branchStock?.quantityAvailable ?? 0) > 0;
+      })
+    );
+  }, [productType, packItemOptions, selectedBranchIds]);
+
+  // Límite para la cantidad de un componente por pack: lo más restrictivo
+  // entre todas las sedes seleccionadas (no se puede necesitar, por pack,
+  // más de lo que la sede más chica soporta).
+  const maxQuantityPerComponent = useMemo(() => {
+    const result = new Map<number, number>();
+
+    candidateOptions.forEach((option) => {
+      const perBranch = effectiveAvailableForPackaging.get(option.id);
+      if (!perBranch || selectedBranchIds.length === 0) {
+        result.set(option.id, 0);
+        return;
+      }
+
+      const min = Math.min(...selectedBranchIds.map((branchId) => perBranch.get(branchId) ?? 0));
+      result.set(option.id, min);
+    });
+
+    return result;
+  }, [candidateOptions, effectiveAvailableForPackaging, selectedBranchIds]);
+
+  // Máximo de packs ofrecibles, por cada sede seleccionada — gobernado por
+  // el componente más escaso en esa sede (Tarea 6.1, hint junto al campo).
+  const maxPacksByBranch = useMemo(() => {
+    const result = new Map<number, number>();
+
+    if (productType !== "package" || packageItems.length === 0) {
+      return result;
+    }
+
+    selectedBranchIds.forEach((branchId) => {
+      const max = packageItems.reduce((min, item) => {
+        const available = effectiveAvailableForPackaging.get(item.productId)?.get(branchId) ?? 0;
+        const possiblePacks = item.quantity > 0 ? Math.floor(available / item.quantity) : 0;
+        return Math.min(min, possiblePacks);
+      }, Number.MAX_SAFE_INTEGER);
+
+      result.set(branchId, max === Number.MAX_SAFE_INTEGER ? 0 : max);
+    });
+
+    return result;
+  }, [productType, packageItems, selectedBranchIds, effectiveAvailableForPackaging]);
 
   const validate = (): boolean => {
     const nextErrors = validateProductForm({
@@ -178,12 +264,10 @@ export function useProductFormState({
       productCategoryId,
       originalPrice: effectiveOriginalPrice,
       discountedPrice,
-      quantityAvailable,
-      branchId,
       branches,
       productType,
       packageItems,
-      maxPacks,
+      maxPacksByBranch,
     });
 
     setLocalErrors(nextErrors);
@@ -198,15 +282,63 @@ export function useProductFormState({
     }
   };
 
-  const handleToggleBranch = (branchId: number) => {
-    setBranches((previous) => {
-      const existing = previous.find((item) => item.branchId === branchId);
-
-      if (existing) {
-        return previous.filter((item) => item.branchId !== branchId);
+  /** Descarta de packageItems los componentes que ya no son candidatos válidos
+   * para el conjunto de sedes dado, avisando cuántos se quitaron (Tarea 6.3). */
+  const reconcilePackageItems = (branchIds: number[]) => {
+    setPackageItems((previous) => {
+      if (productType !== "package" || previous.length === 0) {
+        return previous;
       }
 
-      return [...previous, { branchId, quantityAvailable: 0, isPublished: false }];
+      const validIds = new Set(
+        packItemOptions
+          .filter((option) =>
+            branchIds.every((branchId) => {
+              const branchStock = option.branches.find((b) => b.branchId === branchId);
+              return (branchStock?.quantityAvailable ?? 0) > 0;
+            })
+          )
+          .map((option) => option.id)
+      );
+
+      const kept = previous.filter((item) => validIds.has(item.productId));
+      const removedCount = previous.length - kept.length;
+
+      if (removedCount > 0) {
+        setReconciliationNotice(
+          removedCount === 1
+            ? "Se quitó 1 producto del pack: no tiene inventario en la nueva selección de sedes."
+            : `Se quitaron ${removedCount} productos del pack: no tienen inventario en la nueva selección de sedes.`
+        );
+      }
+
+      return kept;
+    });
+  };
+
+  const handleToggleBranch = (branchId: number) => {
+    setBranches((previous) => {
+      let next: ProductBranchAssignment[];
+
+      if (productType === "package") {
+        // Ajuste funcional 2026-08-03: un pack vive en una sola sede.
+        // Elegir otra sede reemplaza la actual — no se acumulan. La nueva
+        // sede arranca sin cantidad ni publicación: son propias de esa
+        // sede, no tiene sentido arrastrar el compromiso de la anterior.
+        const alreadySelected = previous.length === 1 && previous[0].branchId === branchId;
+        next = alreadySelected ? previous : [{ branchId, quantityAvailable: 0, isPublished: false }];
+
+        if (!alreadySelected) {
+          reconcilePackageItems([branchId]);
+        }
+      } else {
+        const existing = previous.find((item) => item.branchId === branchId);
+        next = existing
+          ? previous.filter((item) => item.branchId !== branchId)
+          : [...previous, { branchId, quantityAvailable: 0, isPublished: false }];
+      }
+
+      return next;
     });
 
     setLocalErrors((previous) => ({ ...previous, branches: undefined }));
@@ -221,9 +353,8 @@ export function useProductFormState({
           ? {
               ...item,
               quantityAvailable: normalizedQuantity,
-              // No puede quedar publicada sin inventario: si la cantidad baja
-              // a 0, se despublica automáticamente en vez de dejar un estado
-              // inconsistente que el servidor rechazaría igual.
+              // No puede quedar publicada sin inventario/compromiso: si la
+              // cantidad baja a 0, se despublica automáticamente.
               isPublished: normalizedQuantity > 0 ? item.isPublished : false,
             }
           : item
@@ -245,6 +376,8 @@ export function useProductFormState({
     setLocalErrors((previous) => ({ ...previous, branches: undefined }));
   };
 
+  const dismissReconciliationNotice = () => setReconciliationNotice(null);
+
   const handleTogglePackItem = (productId: number) => {
     setPackageItems((previous) => {
       const existing = previous.find((item) => item.productId === productId);
@@ -263,11 +396,7 @@ export function useProductFormState({
   };
 
   const handlePackItemQuantityChange = (productId: number, quantity: number) => {
-    const option = packItemOptions.find((item) => item.id === productId);
-    const maxQuantity =
-      effectiveAvailableForPackaging.get(productId) ??
-      option?.quantityAvailable ??
-      Number.MAX_SAFE_INTEGER;
+    const maxQuantity = maxQuantityPerComponent.get(productId) ?? Number.MAX_SAFE_INTEGER;
     const normalizedQuantity = Math.max(1, Math.min(quantity, maxQuantity));
 
     setPackageItems((previous) => {
@@ -298,30 +427,20 @@ export function useProductFormState({
 
     const parsedOriginalPrice = parseDecimal(effectiveOriginalPrice);
     const parsedDiscountedPrice = parseDecimal(discountedPrice);
-    const parsedQuantityAvailable = parseInteger(quantityAvailable);
 
-    // SCRUM-277 Fase 1: quantityAvailable (el campo global "Cantidad
-    // Disponible") solo aplica a packs; para single ya no se edita — el
-    // stock vive en branches[] y el total se deriva, no se parsea aquí.
-    if (
-      parsedOriginalPrice === null ||
-      (productType === "package" && parsedQuantityAvailable === null)
-    ) {
+    if (parsedOriginalPrice === null) {
       return;
     }
 
     await onSubmit(
       buildProductFormSubmitInput({
         commerceId: initialData?.commerceId,
-        quantityTotal: initialData?.quantityTotal,
         title,
         productCategoryId,
         productType,
         originalPrice: parsedOriginalPrice,
         discountedPrice: parsedDiscountedPrice,
-        quantityAvailable: parsedQuantityAvailable ?? 0,
         description,
-        branchId,
         branches,
         packageItems,
       })
@@ -339,19 +458,21 @@ export function useProductFormState({
     setOriginalPrice,
     discountedPrice,
     setDiscountedPrice,
-    quantityAvailable,
-    setQuantityAvailable,
     description,
     setDescription,
-    branchId,
-    setBranchId,
     branches,
     totalQuantityAcrossBranches,
     handleToggleBranch,
     handleBranchQuantityChange,
     handleBranchPublishedChange,
     packageItems,
-    maxPacks,
+    candidateOptions,
+    maxQuantityPerComponent,
+    maxPacksByBranch,
+    packOriginalPrice,
+    packListPrice,
+    reconciliationNotice,
+    dismissReconciliationNotice,
     mergedErrors,
     handleTogglePackItem,
     handlePackItemQuantityChange,

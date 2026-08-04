@@ -83,6 +83,46 @@ class OrderFeatureTest extends TestCase
         $this->assertCount(2, $order->items);
     }
 
+    /**
+     * SCRUM-366: la orden cobraba original_price aunque la app le mostró al
+     * cliente discounted_price — regresión sobre el flujo real de compra.
+     */
+    public function test_store_charges_the_discounted_price_shown_to_the_customer(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('user');
+        $user->givePermissionTo('customer.orders.create');
+        Sanctum::actingAs($user);
+
+        $branch = CommerceBranch::factory()->create();
+        $product = Product::factory()->create([
+            'commerce_id' => $branch->commerce_id,
+            'original_price' => 50000,
+            'discounted_price' => 45000,
+        ]);
+        $product->commerceBranches()->attach($branch->id, [
+            'quantity_available' => 10,
+            'is_published' => true,
+        ]);
+
+        $response = $this->postJson('/api/v1/orders', [
+            'commerce_branch_id' => $branch->id,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 2],
+            ],
+        ]);
+
+        $response->assertCreated();
+
+        $order = Order::latest('id')->first();
+        $this->assertSame(90000.0, (float) $order->total_price);
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'unit_price' => 45000,
+        ]);
+    }
+
     public function test_index_returns_only_authenticated_user_orders(): void
     {
         $user = User::factory()->create();

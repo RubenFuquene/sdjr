@@ -124,7 +124,46 @@ class ProductBranchAssignmentAndPublicationTest extends TestCase
             ->assertJsonValidationErrors(['commerce_branches.0.is_published']);
     }
 
-    public function test_store_rejects_publishing_a_package(): void
+    /**
+     * SCRUM-361, Tarea 5.1: la Fase 1 bloqueaba toda publicación de packs
+     * (Opción A) — esta fase la levanta. Con componentes suficientes en la
+     * sede, publicar un pack ahora se acepta igual que un individual.
+     */
+    public function test_store_publishes_a_package_with_enough_component_stock(): void
+    {
+        [$user, $commerce] = $this->ownerWithCommerce();
+        $category = ProductCategory::factory()->create();
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $component = Product::factory()->create(['commerce_id' => $commerce->id]);
+        $component->commerceBranches()->attach($branch->id, ['quantity_available' => 5, 'is_published' => true]);
+
+        $response = $this->postJson('/api/v1/products/commerce/package-items', [
+            'product' => [
+                'commerce_id' => $commerce->id,
+                'product_category_id' => $category->id,
+                'title' => 'Pack',
+                'product_type' => 'package',
+                // El techo del pack es la suma de los precios de venta
+                // vigentes de sus componentes (ticket derivado de SCRUM-361/323).
+                'original_price' => $component->currentSalePrice(),
+            ],
+            'package_items' => [
+                ['product_id' => $component->id, 'quantity' => 1],
+            ],
+            'commerce_branches' => [
+                ['commerce_branch_id' => $branch->id, 'quantity_available' => 5, 'is_published' => true],
+            ],
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('product_commerce_branch', [
+            'commerce_branch_id' => $branch->id,
+            'quantity_available' => 5,
+            'is_published' => true,
+        ]);
+    }
+
+    public function test_store_rejects_publishing_a_package_without_enough_component_stock(): void
     {
         [$user, $commerce] = $this->ownerWithCommerce();
         $category = ProductCategory::factory()->create();
@@ -139,19 +178,18 @@ class ProductBranchAssignmentAndPublicationTest extends TestCase
                 'title' => 'Pack',
                 'product_type' => 'package',
                 'original_price' => 100,
-                'quantity_total' => 1,
-                'quantity_available' => 1,
             ],
             'package_items' => [
-                ['product_id' => $component->id, 'quantity' => 1],
+                ['product_id' => $component->id, 'quantity' => 2],
             ],
             'commerce_branches' => [
-                ['commerce_branch_id' => $branch->id, 'quantity_available' => 5, 'is_published' => true],
+                // 5 unidades / 2 por pack = máximo 2 packs; se piden 3.
+                ['commerce_branch_id' => $branch->id, 'quantity_available' => 3, 'is_published' => true],
             ],
         ]);
 
         $response->assertUnprocessable()
-            ->assertJsonValidationErrors(['commerce_branches.0.is_published']);
+            ->assertJsonValidationErrors(['commerce_branches.0.quantity_available']);
     }
 
     // ---------------------------------------------------------------

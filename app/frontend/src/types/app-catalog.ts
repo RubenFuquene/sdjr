@@ -48,8 +48,6 @@ export interface NearbyProduct {
   price?: number;
   discounted_price?: number;
   original_price?: number;
-  quantity_total?: number;
-  quantity_available?: number;
   description?: string | null;
   category_id?: number | null;
   product_category_id?: number | null;
@@ -77,11 +75,6 @@ export interface ProductDetail {
   product_type: "single" | "package";
   original_price: number;
   discounted_price: number | null;
-  /** Vestigial para product_type=single (el stock real vive en commerce_branches[]). SCRUM-277. */
-  quantity_total: number;
-  /** Vestigial para product_type=single. Usar commerce_branches[] para el stock real por sede. SCRUM-277. */
-  quantity_available: number;
-  available_for_packaging?: number | null;
   expires_at?: string | null;
   photos?: Array<{ id: number; presigned_url?: string | null; file_path?: string }>;
   status: string;

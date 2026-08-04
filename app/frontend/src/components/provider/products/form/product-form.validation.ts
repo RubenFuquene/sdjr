@@ -1,13 +1,11 @@
 import type { ProductBranchAssignment, ProductType } from "@/types/products";
-import { parseDecimal, parseInteger } from "./product-form.utils";
+import { parseDecimal } from "./product-form.utils";
 
 export interface ProductFormValidationErrors {
   title?: string;
   productCategoryId?: string;
   originalPrice?: string;
   discountedPrice?: string;
-  quantityAvailable?: string;
-  branchId?: string;
   branches?: string;
   packageItems?: string;
 }
@@ -17,12 +15,11 @@ type ProductFormValidationInput = {
   productCategoryId: string;
   originalPrice: string;
   discountedPrice: string;
-  quantityAvailable: string;
-  branchId: string;
   branches: ProductBranchAssignment[];
   productType: ProductType;
   packageItems: Array<{ productId: number; quantity: number }>;
-  maxPacks?: number;
+  /** SCRUM-361: máximo de packs ofrecibles por sede, según el stock de los componentes elegidos en esa sede. */
+  maxPacksByBranch?: Map<number, number>;
 };
 
 export function validateProductForm(
@@ -64,29 +61,30 @@ export function validateProductForm(
     nextErrors.discountedPrice = "El descuento no puede ser mayor al precio original.";
   }
 
-  // SCRUM-277 Fase 1: los packs conservan cantidad global + una sola sede
-  // (comportamiento anterior, sin cambios); los productos individuales pasan
-  // a asignación multi-sede con inventario propio por sede — ver más abajo.
-  const parsedQuantityAvailable = parseInteger(input.quantityAvailable);
-
-  if (input.productType === "package") {
-    if (parsedQuantityAvailable === null || parsedQuantityAvailable < 0) {
-      nextErrors.quantityAvailable = "Ingresa una cantidad disponible válida.";
-    }
-
-    if (!input.branchId) {
-      nextErrors.branchId = "Selecciona una sucursal.";
-    }
-  } else {
-    if (input.branches.length === 0) {
-      nextErrors.branches = "Asigna al menos una sucursal.";
-    } else if (
-      input.branches.some((branch) => !Number.isInteger(branch.quantityAvailable) || branch.quantityAvailable < 0)
-    ) {
-      nextErrors.branches = "Cada sucursal debe tener una cantidad válida (entero, mayor o igual a 0).";
-    } else if (input.branches.some((branch) => branch.isPublished && branch.quantityAvailable === 0)) {
-      nextErrors.branches = "No puedes publicar una sucursal sin inventario cargado.";
-    }
+  // SCRUM-361: ambos tipos de producto se asignan a sedes con la misma
+  // estructura — para individuales, quantityAvailable es stock físico; para
+  // packs, es el compromiso de packs en esa sede.
+  if (input.branches.length === 0) {
+    nextErrors.branches =
+      input.productType === "package" ? "Selecciona la sede del pack." : "Asigna al menos una sucursal.";
+  } else if (input.productType === "package" && input.branches.length > 1) {
+    // Ajuste funcional 2026-08-03: un pack vive en una sola sede. El
+    // selector ya lo impide (selección única); esto es defensa en
+    // profundidad por si algo más arriba llega a construir el estado a mano.
+    nextErrors.branches = "Un pack solo puede ofrecerse en una sede. Usa \"Duplicar\" para otra sede.";
+  } else if (
+    input.branches.some((branch) => !Number.isInteger(branch.quantityAvailable) || branch.quantityAvailable < 0)
+  ) {
+    nextErrors.branches = "Cada sede debe tener una cantidad válida (entero, mayor o igual a 0).";
+  } else if (input.branches.some((branch) => branch.isPublished && branch.quantityAvailable === 0)) {
+    nextErrors.branches = "No puedes publicar una sede sin inventario/compromiso cargado.";
+  } else if (
+    input.productType === "package" &&
+    input.maxPacksByBranch &&
+    input.branches.some((branch) => branch.quantityAvailable > (input.maxPacksByBranch!.get(branch.branchId) ?? Infinity))
+  ) {
+    nextErrors.branches =
+      "La cantidad de packs en una de las sedes supera el máximo disponible según el stock de los componentes en esa sede.";
   }
 
   if (input.productType === "package" && input.packageItems.length === 0) {
@@ -98,15 +96,6 @@ export function validateProductForm(
     input.packageItems.some((item) => !Number.isInteger(item.quantity) || item.quantity < 1)
   ) {
     nextErrors.packageItems = "Cada item del pack debe tener una cantidad valida mayor o igual a 1.";
-  }
-
-  if (
-    input.productType === "package" &&
-    input.maxPacks !== undefined &&
-    parsedQuantityAvailable !== null &&
-    parsedQuantityAvailable > input.maxPacks
-  ) {
-    nextErrors.quantityAvailable = `La cantidad de paquetes no puede superar el máximo disponible (${input.maxPacks}) según el stock de los productos seleccionados.`;
   }
 
   return nextErrors;

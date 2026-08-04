@@ -29,11 +29,10 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function
   },
   ref
 ) {
-  const ariaDescribedBy = error
-    ? describedBy
-      ? `${id}-error ${describedBy}`
-      : `${id}-error`
-    : describedBy;
+  const helperTextId = helperText ? `${id}-helper-text` : undefined;
+  const ariaDescribedBy =
+    [error ? `${id}-error` : null, helperTextId, describedBy].filter(Boolean).join(" ") ||
+    undefined;
 
   return (
     <FormField

@@ -78,6 +78,12 @@ class BranchAvailabilityCalculator
             ->where('orders.status', Constant::ORDER_STATUS_PENDING)
             ->whereIn('order_items.product_id', $productIds)
             ->whereIn('orders.commerce_branch_id', $branchIds)
+            // SCRUM-366/367: las líneas hijas de componente (parent_package_id
+            // no nulo) son informativas, no reservan stock propio — ese
+            // compromiso ya lo cuenta PackageAvailabilityCalculator sobre el
+            // pack. Contarlas aquí también sería reservar la misma compra dos
+            // veces contra el mismo componente.
+            ->whereNull('order_items.parent_package_id')
             ->selectRaw('order_items.product_id as product_id, orders.commerce_branch_id as commerce_branch_id, SUM(order_items.quantity) as total')
             ->groupBy('order_items.product_id', 'orders.commerce_branch_id')
             ->get()

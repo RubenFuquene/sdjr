@@ -6,8 +6,9 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
 use App\Models\Commerce;
+use App\Models\CommerceBranch;
 use App\Models\Product;
-use App\Services\PackageAvailabilityCalculator;
+use App\Services\PackageCompositionValidator;
 use App\Services\ProductService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,8 +30,6 @@ use Illuminate\Validation\Rule;
  *     @OA\Property(property="product_type", type="string", enum={"single","package"}, example="single", description="Type of product (single/package)"),
  *     @OA\Property(property="original_price", type="number", format="float", example=100.00, description="Original price"),
  *     @OA\Property(property="discounted_price", type="number", format="float", nullable=true, example=80.00, description="Discounted price. Required and must be > 0 and <= original_price when product_type is 'single'; optional for 'package'."),
- *     @OA\Property(property="quantity_total", type="integer", example=50, description="Required only for product_type=package (how many packs can be sold). For 'single' the stock lives per branch in commerce_branches[].quantity_available (SCRUM-277)."),
- *     @OA\Property(property="quantity_available", type="integer", example=50, description="Required only for product_type=package. For 'single' the stock lives per branch in commerce_branches[].quantity_available (SCRUM-277)."),
  *     @OA\Property(property="expires_at", type="string", format="date-time", nullable=true, example="2026-12-31T23:59:59", description="Expiration date"),
  *     @OA\Property(property="status", type="string", maxLength=1, example="1", description="Status (1=Activo, 0=Inactivo)"),
  *     @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
@@ -46,8 +45,8 @@ use Illuminate\Validation\Rule;
  *       required={"commerce_branch_id", "quantity_available"},
  *
  *       @OA\Property(property="commerce_branch_id", type="integer", example=1, description="ID of a commerce branch"),
- *       @OA\Property(property="quantity_available", type="integer", minimum=0, example=20, description="Stock available for this product in this branch"),
- *       @OA\Property(property="is_published", type="boolean", default=false, description="Whether the product is visible to customers in this branch. Requires quantity_available > 0.")
+ *       @OA\Property(property="quantity_available", type="integer", minimum=0, example=20, description="For product_type=single: stock available in this branch. For product_type=package: packs committed in this branch (SCRUM-361)."),
+ *       @OA\Property(property="is_published", type="boolean", default=false, description="Whether the product is visible to customers in this branch. Requires quantity_available > 0, and for packages also requires enough component stock in this branch.")
  *     )
  *   ),
  *   @OA\Property(
@@ -109,17 +108,6 @@ class StoreProductRequest extends FormRequest
                 'min:0.01',
                 'lte:product.original_price',
             ],
-            // SCRUM-277 Fase 1: quantity_total/quantity_available a nivel de producto
-            // solo tienen sentido para packs (cuántos packs se pueden vender). Para
-            // single, el stock vive por sede en commerce_branches.*.quantity_available.
-            'product.quantity_total' => [
-                Rule::requiredIf(fn () => $this->input('product.product_type') === Constant::PRODUCT_TYPE_PACKAGE),
-                'integer', 'min:0',
-            ],
-            'product.quantity_available' => [
-                Rule::requiredIf(fn () => $this->input('product.product_type') === Constant::PRODUCT_TYPE_PACKAGE),
-                'integer', 'min:0',
-            ],
             'product.expires_at' => ['nullable', 'date'],
             'product.status' => ['sometimes', 'string', 'max:1'],
 
@@ -150,87 +138,152 @@ class StoreProductRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $this->validateCommerceBranches($validator);
-
-            // TODO: For product_type=single, only the basic rules() (types/ranges/existence) are
-            // enforced. No cross-field business validation is performed (e.g. discounted_price <
-            // original_price, quantity_available <= quantity_total). Analyze in a future task.
-            if (! $this->has('package_items')) {
-                return;
-            }
-
-            $packageItems = collect();
-
-            foreach ($this->input('package_items', []) as $index => $item) {
-                if (! isset($item['product_id'], $item['quantity'])) {
-                    continue;
-                }
-
-                $product = Product::find($item['product_id']);
-
-                if (! $product) {
-                    continue;
-                }
-
-                if ($product->product_type !== Constant::PRODUCT_TYPE_SINGLE) {
-                    $validator->errors()->add(
-                        "package_items.{$index}.product_id",
-                        "The product '{$product->title}' must be of type 'single' to be included in a package."
-                    );
-
-                    continue;
-                }
-
-                if ($item['quantity'] > $product->quantity_available) {
-                    $validator->errors()->add(
-                        "package_items.{$index}.quantity",
-                        "The quantity cannot exceed the available quantity ({$product->quantity_available}) of product '{$product->title}'."
-                    );
-
-                    continue;
-                }
-
-                $packageItems->push(['product' => $product, 'quantity' => (int) $item['quantity']]);
-            }
-
-            if ($packageItems->isEmpty() || $this->input('product.product_type') !== Constant::PRODUCT_TYPE_PACKAGE) {
-                return;
-            }
-
-            $maxPacks = app(PackageAvailabilityCalculator::class)->maxPackageQuantity($packageItems);
-            $requestedPacks = (int) $this->input('product.quantity_available');
-
-            if ($requestedPacks > $maxPacks) {
-                $validator->errors()->add(
-                    'product.quantity_available',
-                    "The requested quantity_available ({$requestedPacks}) exceeds the maximum packs available given current stock (max: {$maxPacks})."
-                );
-            }
+            $this->validateSingleBranchPolicyForPackages($validator);
+            $this->validatePackageComposition($validator);
         });
     }
 
     /**
-     * SCRUM-277 Fase 1 (Tareas 3.4 y 3.8): no se puede publicar (is_published=true)
-     * una sede sin inventario cargado, y los packs no se pueden publicar en
-     * ninguna sede todavía — Opción A: bloqueados hasta que la Fase 2 les dé su
-     * propio cálculo de disponibilidad por sede. Hoy nada es publicable (el bug
-     * original de SCRUM-277), así que este bloqueo no quita funcionalidad
-     * existente a los packs.
+     * Ajuste funcional 2026-08-03: un pack se ofrece en una sola sede. Se
+     * valida aparte de validatePackageComposition() porque debe aplicar
+     * aunque el payload no toque package_items (ej. asignar una segunda
+     * sede a un pack ya armado).
      */
-    private function validateCommerceBranches(Validator $validator): void
+    private function validateSingleBranchPolicyForPackages(Validator $validator): void
     {
-        $productType = $this->input('product.product_type');
+        if ($this->input('product.product_type') !== Constant::PRODUCT_TYPE_PACKAGE) {
+            return;
+        }
 
-        foreach ($this->input('commerce_branches', []) as $index => $branch) {
-            if (! ($branch['is_published'] ?? false)) {
+        $branchIds = collect($this->input('commerce_branches', []))
+            ->pluck('commerce_branch_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        if (app(PackageCompositionValidator::class)->exceedsSingleBranchPolicy($branchIds)) {
+            $validator->errors()->add(
+                'commerce_branches',
+                'A package can only be offered in a single branch. Use "Duplicate" to offer it in another branch.'
+            );
+        }
+    }
+
+    /**
+     * SCRUM-361 (Tarea 4, SCRUM-323): cada componente de un pack debe tener
+     * inventario asignado en cada sede a la que se asigna el pack, y el
+     * compromiso solicitado por sede no puede exceder lo que esos
+     * componentes soportan en esa misma sede.
+     */
+    private function validatePackageComposition(Validator $validator): void
+    {
+        if (! $this->has('package_items')) {
+            return;
+        }
+
+        $packageItems = collect();
+
+        foreach ($this->input('package_items', []) as $index => $item) {
+            if (! isset($item['product_id'], $item['quantity'])) {
                 continue;
             }
 
-            if ($productType === Constant::PRODUCT_TYPE_PACKAGE) {
+            $product = Product::find($item['product_id']);
+
+            if (! $product) {
+                continue;
+            }
+
+            if ($product->product_type !== Constant::PRODUCT_TYPE_SINGLE) {
                 $validator->errors()->add(
-                    "commerce_branches.{$index}.is_published",
-                    'Packages cannot be published yet.'
+                    "package_items.{$index}.product_id",
+                    "The product '{$product->title}' must be of type 'single' to be included in a package."
                 );
 
+                continue;
+            }
+
+            $packageItems->push(['index' => $index, 'product' => $product, 'quantity' => (int) $item['quantity']]);
+        }
+
+        if ($packageItems->isEmpty() || $this->input('product.product_type') !== Constant::PRODUCT_TYPE_PACKAGE) {
+            return;
+        }
+
+        $branchIds = collect($this->input('commerce_branches', []))
+            ->pluck('commerce_branch_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        $compositionValidator = app(PackageCompositionValidator::class);
+
+        foreach ($compositionValidator->componentsMissingBranchStock($packageItems, $branchIds) as $missing) {
+            $branchName = CommerceBranch::find($missing['branchId'])?->name ?? "branch #{$missing['branchId']}";
+
+            $validator->errors()->add(
+                "package_items.{$missing['index']}.product_id",
+                "The product '{$missing['product']->title}' has no stock assigned in branch '{$branchName}'."
+            );
+        }
+
+        $requestedByBranch = collect($this->input('commerce_branches', []))
+            ->mapWithKeys(fn ($branch) => [(int) $branch['commerce_branch_id'] => (int) ($branch['quantity_available'] ?? 0)]);
+
+        $branchIndexById = collect($this->input('commerce_branches', []))
+            ->mapWithKeys(fn ($branch, $index) => [(int) $branch['commerce_branch_id'] => $index]);
+
+        foreach ($compositionValidator->maxPacksByBranch($packageItems, $branchIds, null) as $branchId => $maxPacks) {
+            $requested = $requestedByBranch->get($branchId, 0);
+
+            if ($requested > $maxPacks) {
+                $validator->errors()->add(
+                    "commerce_branches.{$branchIndexById->get($branchId)}.quantity_available",
+                    "The requested quantity_available ({$requested}) exceeds the maximum packs available in this branch given current stock (max: {$maxPacks})."
+                );
+            }
+        }
+
+        $this->validatePackagePriceCeiling($validator, $packageItems, $this->input('product.original_price'));
+    }
+
+    /**
+     * Ticket derivado de SCRUM-361/323 (2026-08-04): el precio del pack no
+     * se acepta a ciegas del cliente aunque la interfaz ya lo calcule y
+     * deshabilite su edición — el techo es la suma de los precios de venta
+     * VIGENTES (con descuento) de sus componentes, no de sus precios de
+     * lista, para que un pack sin descuento propio nunca cueste más que
+     * comprar las partes sueltas.
+     */
+    private function validatePackagePriceCeiling(Validator $validator, \Illuminate\Support\Collection $packageItems, mixed $submittedOriginalPrice): void
+    {
+        $expected = round(
+            $packageItems->sum(fn ($item) => $item['product']->currentSalePrice() * $item['quantity']),
+            2
+        );
+        $submitted = round((float) $submittedOriginalPrice, 2);
+
+        if (abs($submitted - $expected) > 0.01) {
+            $validator->errors()->add(
+                'product.original_price',
+                "The package price must equal the sum of its components' current prices (expected: {$expected})."
+            );
+        }
+    }
+
+    /**
+     * No se puede publicar (is_published=true) una sede sin inventario
+     * cargado. Para packs, esa misma condición ya cubre "sin componentes
+     * suficientes": validatePackageComposition() rechaza cualquier
+     * quantity_available que exceda la capacidad real, así que si el pack
+     * llega hasta aquí con quantity_available > 0, sus componentes ya la
+     * soportan (SCRUM-361, Tarea 5.3 — levanta el guard "packages cannot be
+     * published yet" de la Fase 1).
+     */
+    private function validateCommerceBranches(Validator $validator): void
+    {
+        foreach ($this->input('commerce_branches', []) as $index => $branch) {
+            if (! ($branch['is_published'] ?? false)) {
                 continue;
             }
 

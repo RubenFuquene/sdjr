@@ -1,9 +1,12 @@
 "use client";
 
+import { priceWithinPack } from "./product-form.utils";
+
 interface PackItemOption {
   id: number;
   title: string;
   originalPrice: number;
+  discountedPrice?: number | null;
   quantityAvailable: number;
   availableForPackaging: number;
 }
@@ -15,6 +18,17 @@ interface ProductPackItemsSelectorProps {
   error?: string;
   onToggle: (productId: number) => void;
   onQuantityChange: (productId: number, quantity: number) => void;
+  /** SCRUM-361, Tarea 6.7: mensaje honesto que nombra la sede sin candidatos, en vez del genérico. */
+  emptyStateMessage?: string;
+  /**
+   * Ticket derivado de SCRUM-361/323 (2026-08-04): descuento opcional del
+   * pack (null si el aliado no puso uno) y su techo — necesarios para
+   * prorratear P3 en vivo por componente.
+   */
+  packDiscountedPrice: number | null;
+  packCeiling: number;
+  /** Suma de los precios de lista (sin descuento) de los componentes seleccionados. */
+  packListPrice: number;
 }
 
 function formatCurrency(value: number): string {
@@ -28,8 +42,26 @@ export function ProductPackItemsSelector({
   error,
   onToggle,
   onQuantityChange,
+  emptyStateMessage,
+  packDiscountedPrice,
+  packCeiling,
+  packListPrice,
 }: ProductPackItemsSelectorProps) {
   const selectedById = new Map(selectedItems.map((item) => [item.productId, item.quantity]));
+
+  const selectedOptions = options.filter((option) => selectedById.has(option.id));
+
+  // Ajuste 2026-08-04: los totales se derivan de packListPrice/packCeiling/
+  // packDiscountedPrice directamente, NO sumando las filas ya redondeadas a
+  // centavos de "Dentro del pack" — sumar filas independientemente
+  // redondeadas puede acumular un centavo de diferencia frente al total real
+  // (ej. dos filas de 41.785,71 y 46.428,57 sumaban un centavo de más de
+  // "ahorro adicional" aunque cada precio individual mostrado era correcto).
+  const totals = {
+    listTotal: packListPrice,
+    componentSavings: Number((packListPrice - packCeiling).toFixed(2)),
+    packSavings: packDiscountedPrice === null ? 0 : Number((packCeiling - packDiscountedPrice).toFixed(2)),
+  };
 
   return (
     <div className="space-y-2">
@@ -38,7 +70,7 @@ export function ProductPackItemsSelector({
       {options.length === 0 ? (
         <div className="rounded-[14px] border border-[#E0E0E0] bg-[#F7F7F7] p-4">
           <p className="text-sm text-[#6A6A6A]">
-            No hay productos individuales disponibles para armar packs.
+            {emptyStateMessage ?? "No hay productos individuales disponibles para armar packs."}
           </p>
         </div>
       ) : (
@@ -46,6 +78,11 @@ export function ProductPackItemsSelector({
           {options.map((option) => {
             const selectedQuantity = selectedById.get(option.id) ?? 1;
             const checked = selectedById.has(option.id);
+            const ownSalePrice = option.discountedPrice ?? option.originalPrice;
+            const hasOwnDiscount = option.discountedPrice != null && option.discountedPrice < option.originalPrice;
+            const withinPack = checked
+              ? priceWithinPack({ componentSalePrice: ownSalePrice, packCeiling, packDiscountedPrice })
+              : null;
 
             return (
               <div
@@ -62,9 +99,27 @@ export function ProductPackItemsSelector({
                 <span className="flex-1 text-sm">
                   <span className="block text-[#1A1A1A]">{option.title}</span>
                   <span className="block text-[#6A6A6A]">
-                    {formatCurrency(option.originalPrice)} · Disponible: {option.quantityAvailable}
-                    {" "}· Disponible para empacar: {option.availableForPackaging}
+                    {hasOwnDiscount ? (
+                      <>
+                        <span
+                          className="line-through"
+                          aria-label={`Precio de lista: ${formatCurrency(option.originalPrice)}`}
+                        >
+                          {formatCurrency(option.originalPrice)}
+                        </span>{" "}
+                        <span>Con descuento: {formatCurrency(ownSalePrice)}</span>
+                      </>
+                    ) : (
+                      <span>{formatCurrency(ownSalePrice)}</span>
+                    )}
+                    {" "}· Disponible: {option.quantityAvailable} · Disponible para empacar:{" "}
+                    {option.availableForPackaging}
                   </span>
+                  {withinPack !== null ? (
+                    <span className="block font-medium text-[#1A1A1A]">
+                      Dentro del pack: {formatCurrency(withinPack)}
+                    </span>
+                  ) : null}
                 </span>
 
                 {checked ? (
@@ -97,6 +152,21 @@ export function ProductPackItemsSelector({
           })}
         </div>
       )}
+
+      {selectedOptions.length > 0 ? (
+        <div className="rounded-[14px] border border-[#E0E0E0] bg-[#F7F7F7] p-3 text-sm text-[#1A1A1A] space-y-1">
+          <p>
+            Total de lista: <span className="font-medium">{formatCurrency(totals.listTotal)}</span>
+          </p>
+          <p>
+            Ahorro que ya traían los productos:{" "}
+            <span className="font-medium">{formatCurrency(totals.componentSavings)}</span>
+          </p>
+          <p>
+            Ahorro adicional del pack: <span className="font-medium">{formatCurrency(totals.packSavings)}</span>
+          </p>
+        </div>
+      ) : null}
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
     </div>

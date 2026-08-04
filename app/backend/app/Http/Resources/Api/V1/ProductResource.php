@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
 
-use App\Constants\Constant;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -22,23 +21,23 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="product_type", type="string", enum={"single","package"}),
  *   @OA\Property(property="original_price", type="number", format="float"),
  *   @OA\Property(property="discounted_price", type="number", format="float", nullable=true),
- *   @OA\Property(property="quantity_total", type="integer", nullable=true, description="Solo significativo para product_type=package. Para 'single' es vestigial: el stock real vive por sede en commerce_branches[].quantity_available (SCRUM-277)."),
- *   @OA\Property(property="quantity_available", type="integer", nullable=true, description="Solo significativo para product_type=package. Para 'single' es vestigial (SCRUM-277)."),
- *   @OA\Property(property="available_for_packaging", type="integer", nullable=true, description="Stock still available to be committed to packages (only present for product_type=single)"),
  *   @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
  *   @OA\Property(property="photos", type="array", @OA\Items(ref="#/components/schemas/DocumentUploadResource")),
  *   @OA\Property(
  *     property="commerce_branches",
  *     type="array",
- *     description="Sucursales asignadas al producto, con su inventario y estado de publicación por sede (solo si la relacion commerceBranches esta cargada). SCRUM-277 Fase 1.",
+ *     description="Sucursales asignadas al producto, con su inventario y estado de publicación por sede (solo si la relacion commerceBranches esta cargada). SCRUM-277/361.",
  *
  *     @OA\Items(
  *       type="object",
  *
  *       @OA\Property(property="id", type="integer"),
  *       @OA\Property(property="name", type="string"),
- *       @OA\Property(property="quantity_available", type="integer", nullable=true, description="Stock cargado en esta sede (null si la relacion se cargo sin pivote, ej. commerceBranches sin withPivot)"),
- *       @OA\Property(property="is_published", type="boolean", nullable=true, description="Si el producto es visible a clientes en esta sede")
+ *       @OA\Property(property="quantity_available", type="integer", nullable=true, description="Para product_type=single: unidades disponibles en esta sede. Para product_type=package: packs comprometidos en esta sede (SCRUM-361)."),
+ *       @OA\Property(property="is_published", type="boolean", nullable=true, description="Si el producto es visible a clientes en esta sede"),
+ *       @OA\Property(property="auto_adjusted_at", type="string", format="date-time", nullable=true, description="Solo packs: cuándo se ajustó solo el compromiso por falta de stock de un componente (SCRUM-361)"),
+ *       @OA\Property(property="auto_adjusted_from", type="integer", nullable=true, description="Solo packs: cantidad comprometida antes del ajuste automático"),
+ *       @OA\Property(property="available_for_packaging", type="integer", nullable=true, description="Solo product_type=single, solo presente cuando el backend lo precalculó (ProductService::getByCommerce): stock que queda libre para comprometer en packs en esta sede (SCRUM-361)")
  *     )
  *   ),
  *   @OA\Property(
@@ -83,12 +82,6 @@ class ProductResource extends JsonResource
             'product_type' => $this->product_type,
             'original_price' => $this->original_price,
             'discounted_price' => $this->discounted_price,
-            'quantity_total' => $this->quantity_total,
-            'quantity_available' => $this->quantity_available,
-            'available_for_packaging' => $this->when(
-                $this->product_type === Constant::PRODUCT_TYPE_SINGLE,
-                fn () => $this->available_for_packaging
-            ),
             'expires_at' => $this->expires_at,
             'photos' => $this->whenLoaded('photos', function () {
                 return $this->photos->map(function ($photo) {
@@ -101,6 +94,9 @@ class ProductResource extends JsonResource
                     'name' => $branch->name,
                     'quantity_available' => $branch->pivot->quantity_available,
                     'is_published' => (bool) $branch->pivot->is_published,
+                    'auto_adjusted_at' => $branch->pivot->auto_adjusted_at,
+                    'auto_adjusted_from' => $branch->pivot->auto_adjusted_from,
+                    'available_for_packaging' => $branch->pivot->getAttribute('available_for_packaging'),
                 ]);
             }),
             'package_items' => $this->whenLoaded('packageItems', function () {

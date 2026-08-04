@@ -85,6 +85,7 @@ export {
   updatePackageProduct,
   deleteProduct,
   updateProductBranchPublication,
+  dismissProductBranchAutoAdjustment,
   mapProductFormToCreatePayload,
   mapProductFormToUpdatePayload,
 } from "./products";

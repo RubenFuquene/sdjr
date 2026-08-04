@@ -9,9 +9,6 @@ type ProductFormInitialLike = {
   productCategoryId?: number;
   originalPrice?: number;
   discountedPrice?: number | null;
-  quantityAvailable?: number;
-  quantityTotal?: number;
-  branchId?: number | null;
   branches?: ProductBranchAssignment[];
   packageItems?: Array<{ productId: number; quantity: number }>;
 };
@@ -22,9 +19,7 @@ export type ProductFormDraft = {
   productCategoryId: string;
   originalPrice: string;
   discountedPrice: string;
-  quantityAvailable: string;
   description: string;
-  branchId: string;
   branches: ProductBranchAssignment[];
   packageItems: Array<{ productId: number; quantity: number }>;
 };
@@ -40,6 +35,35 @@ export function parseDecimal(value: string): number | null {
   }
 
   return parsed;
+}
+
+/**
+ * SCRUM-361/323, ticket derivado (2026-08-04): prorrateo P3 del descuento
+ * opcional del pack hacia cada componente — precio_línea = precio_descontado
+ * × (precio_pack_con_descuento ÷ techo_del_pack). Escala uniformemente cada
+ * componente ya descontado por el mismo factor, así que preserva la
+ * estructura relativa de descuentos entre componentes.
+ *
+ * Sin descuento propio del pack (o techo en 0), el factor es 1: el precio
+ * dentro del pack es el mismo precio con descuento del componente — no es un
+ * caso especial, es el caso normal.
+ *
+ * Única implementación: la usan tanto el selector de componentes como su
+ * resumen agregado (Tarea 3), y es la misma fórmula que aplicará el
+ * servidor al explotar order_items (Tarea 4).
+ */
+export function priceWithinPack(params: {
+  componentSalePrice: number;
+  packCeiling: number;
+  packDiscountedPrice: number | null;
+}): number {
+  const { componentSalePrice, packCeiling, packDiscountedPrice } = params;
+
+  if (packDiscountedPrice === null || packCeiling <= 0) {
+    return componentSalePrice;
+  }
+
+  return Number((componentSalePrice * (packDiscountedPrice / packCeiling)).toFixed(2));
 }
 
 export function parseInteger(value: string): number | null {
@@ -66,10 +90,7 @@ export function mapInitialDataToDraft(initialData?: ProductFormInitialLike | nul
       initialData?.discountedPrice !== undefined && initialData?.discountedPrice !== null
         ? String(initialData.discountedPrice)
         : "",
-    quantityAvailable:
-      initialData?.quantityAvailable !== undefined ? String(initialData.quantityAvailable) : "",
     description: initialData?.description ?? "",
-    branchId: initialData?.branchId ? String(initialData.branchId) : "",
     branches: initialData?.branches ?? [],
     packageItems: initialData?.packageItems ?? [],
   };
@@ -77,15 +98,12 @@ export function mapInitialDataToDraft(initialData?: ProductFormInitialLike | nul
 
 type BuildSubmitInputParams = {
   commerceId?: number;
-  quantityTotal?: number;
   title: string;
   productCategoryId: string;
   productType: ProductType;
   originalPrice: number;
   discountedPrice: number | null;
-  quantityAvailable: number;
   description: string;
-  branchId: string;
   branches: ProductBranchAssignment[];
   packageItems: Array<{ productId: number; quantity: number }>;
 };
@@ -95,28 +113,15 @@ export function buildProductFormSubmitInput(
 ): ProviderProductFormInput {
   const {
     commerceId,
-    quantityTotal,
     title,
     productCategoryId,
     productType,
     originalPrice,
     discountedPrice,
-    quantityAvailable,
     description,
-    branchId,
     branches,
     packageItems,
   } = params;
-
-  // SCRUM-277 Fase 1: los packs conservan una sola sede (comportamiento
-  // anterior, sin inventario por sede propio todavía — Fase 2 lo migra); los
-  // individuales envían la asignación multi-sede completa.
-  const submittedBranches: ProductBranchAssignment[] =
-    productType === "package"
-      ? branchId
-        ? [{ branchId: Number(branchId), quantityAvailable: 0, isPublished: false }]
-        : []
-      : branches;
 
   return {
     commerceId,
@@ -125,10 +130,8 @@ export function buildProductFormSubmitInput(
     productType,
     originalPrice,
     discountedPrice,
-    quantityAvailable,
-    quantityTotal: quantityTotal ?? quantityAvailable,
     description: description.trim() ? description.trim() : null,
-    branches: submittedBranches,
+    branches,
     packageItems: productType === "package" ? packageItems : [],
     photos: [],
   };
