@@ -17,6 +17,30 @@ class NearbyFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * `assertJsonFragment`/`assertJsonMissing(['id' => X])` buscan esa
+     * pareja en CUALQUIER punto del árbol JSON, no solo en las entradas de
+     * `data[]` — la respuesta de estos endpoints anida varios "id" propios
+     * (el pivote en `commerce_branches[]`, la sede en `nearest_branch`), así
+     * que el id de un producto/sede EXCLUIDO puede coincidir por casualidad
+     * con uno de esos ids anidados de un elemento SÍ incluido, según el
+     * autoincremental que le toque en cada corrida (visto en CI, no
+     * reproducible siempre en local). Este helper solo mira los ids de
+     * nivel superior en `data[]`, que es lo que realmente se está probando.
+     */
+    private function assertTopLevelIds($response, array $shouldContain = [], array $shouldNotContain = []): void
+    {
+        $ids = collect($response->json('data'))->pluck('id')->all();
+
+        foreach ($shouldContain as $id) {
+            $this->assertContains($id, $ids);
+        }
+
+        foreach ($shouldNotContain as $id) {
+            $this->assertNotContains($id, $ids);
+        }
+    }
+
     public function test_branches_within_radius_are_returned()
     {
         // Arrange: crear branches cercanas y lejanas
@@ -38,8 +62,7 @@ class NearbyFeatureTest extends TestCase
 
         $response = $this->getJson('/api/v1/nearby/branches?latitude=10&longitude=10&radius=10');
         $response->assertOk();
-        $response->assertJsonFragment(['id' => $active->id]);
-        $response->assertJsonMissing(['id' => $inactive->id]);
+        $this->assertTopLevelIds($response, shouldContain: [$active->id], shouldNotContain: [$inactive->id]);
     }
 
     public function test_distance_km_is_present_and_correct()
@@ -68,10 +91,11 @@ class NearbyFeatureTest extends TestCase
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
         $response->assertOk();
-        $response->assertJsonFragment(['id' => $product->id]);
-        $response->assertJsonMissing(['id' => $expired->id]);
-        $response->assertJsonMissing(['id' => $noStock->id]);
-        $response->assertJsonMissing(['id' => $inactive->id]);
+        $this->assertTopLevelIds(
+            $response,
+            shouldContain: [$product->id],
+            shouldNotContain: [$expired->id, $noStock->id, $inactive->id]
+        );
     }
 
     public function test_product_without_nearby_branch_is_not_returned()
@@ -96,8 +120,7 @@ class NearbyFeatureTest extends TestCase
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10&category_id='.$category1->id);
         $response->assertOk();
-        $response->assertJsonFragment(['id' => $product1->id]);
-        $response->assertJsonMissing(['id' => $product2->id]);
+        $this->assertTopLevelIds($response, shouldContain: [$product1->id], shouldNotContain: [$product2->id]);
     }
 
     public function test_max_price_filter_works()
@@ -110,8 +133,7 @@ class NearbyFeatureTest extends TestCase
 
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10&max_price=100');
         $response->assertOk();
-        $response->assertJsonFragment(['id' => $cheap->id]);
-        $response->assertJsonMissing(['id' => $expensive->id]);
+        $this->assertTopLevelIds($response, shouldContain: [$cheap->id], shouldNotContain: [$expensive->id]);
     }
 
     public function test_latitude_validation_fails_out_of_range()
@@ -221,7 +243,7 @@ class NearbyFeatureTest extends TestCase
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
 
         $response->assertOk();
-        $response->assertJsonFragment(['id' => $pack->id]);
+        $this->assertTopLevelIds($response, shouldContain: [$pack->id]);
         $data = collect($response->json('data'));
         $packEntry = $data->firstWhere('id', $pack->id);
         $this->assertSame($branchA->id, $packEntry['nearest_branch']['id']);
@@ -244,7 +266,7 @@ class NearbyFeatureTest extends TestCase
         $response = $this->getJson('/api/v1/nearby/products?latitude=10&longitude=10&radius=10');
 
         $response->assertOk();
-        $response->assertJsonMissing(['id' => $pack->id]);
+        $this->assertTopLevelIds($response, shouldNotContain: [$pack->id]);
     }
 
     public function test_pagination_works()
