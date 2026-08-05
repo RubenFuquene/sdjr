@@ -19,6 +19,7 @@ export const mockPerfiles: Perfil[] = [
       { name: "admin.support.view", description: "Ver soporte" }
     ],
     permisosProveedor: [],
+    permisosCliente: [],
     usuarios: 2,
     activo: true,
   },
@@ -31,6 +32,7 @@ export const mockPerfiles: Perfil[] = [
       { name: "admin.marketing.view", description: "Ver marketing" }
     ],
     permisosProveedor: [],
+    permisosCliente: [],
     usuarios: 5,
     activo: true,
   },
@@ -48,6 +50,7 @@ export const mockPerfiles: Perfil[] = [
       { name: "provider.dashboard.view", description: "Ver dashboard" },
       { name: "provider.support.view", description: "Ver soporte" }
     ],
+    permisosCliente: [],
     usuarios: 15,
     activo: true,
   },

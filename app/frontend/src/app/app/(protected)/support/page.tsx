@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronLeft, MessageCircle, Plus } from "lucide-react";
+import { ChevronLeft, ExternalLink, MessageCircle, Plus } from "lucide-react";
 import { SUPPORT_TICKETS, type SupportTicketStatus } from "@/lib/app/support-mock";
+import { SIC_LABEL, SIC_URL } from "@/lib/app/legal-links";
 
 type SupportTab = "active" | "history";
 
@@ -124,6 +125,21 @@ export default function AppSupportPage() {
           <Plus className="h-4 w-4" />
           Crear solicitud
         </Link>
+      </div>
+
+      {/* SCRUM-363: vía de escalamiento exigida por la Ley 1480 de 2011. */}
+      <div className="app-surface mt-4 p-4 text-sm text-[var(--color-app-text-secondary-purple)]">
+        <p>Si tu queja no fue resuelta, puedes acudir a la:</p>
+        <a
+          href={SIC_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${SIC_LABEL} (abre en una ventana externa)`}
+          className="mt-1 inline-flex items-center gap-1 text-[var(--color-app-text-primary-purple)] underline"
+        >
+          {SIC_LABEL}
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
       </div>
     </section>
   );

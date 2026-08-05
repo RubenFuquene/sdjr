@@ -15,6 +15,15 @@ type ProviderCommerceContextValue = {
   commerceId: number | null;
   registrationStatus: RegistrationStatus;
   isLoadingCommerce: boolean;
+  /**
+   * SCRUM-286: si la última carga falló por algo distinto de "no tiene
+   * comercio" (404), `registrationStatus` cae a "Pendiente" como valor por
+   * defecto — pero eso no es lo que le pasó al proveedor, es que no
+   * pudimos averiguarlo. Quien muestre el estado al usuario debe preferir
+   * este campo sobre `registrationStatus` cuando esté presente, para no
+   * afirmar un estado que no se verificó.
+   */
+  commerceLoadError: string | null;
   refreshCommerce: () => Promise<void>;
 };
 
@@ -45,10 +54,12 @@ export function ProviderCommerceProvider({ children }: ProviderCommerceProviderP
   const [commerceId, setCommerceId] = useState<number | null>(null);
   const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus>("Pendiente");
   const [isLoadingCommerce, setIsLoadingCommerce] = useState(true);
+  const [commerceLoadError, setCommerceLoadError] = useState<string | null>(null);
 
   const refreshCommerce = useCallback(async () => {
     try {
       setIsLoadingCommerce(true);
+      setCommerceLoadError(null);
 
       const response = await getMyCommerce();
       const commerce = response.data;
@@ -73,6 +84,7 @@ export function ProviderCommerceProvider({ children }: ProviderCommerceProviderP
 
       console.error("Error cargando commerce del provider:", error);
       setRegistrationStatus("Pendiente");
+      setCommerceLoadError("No pudimos consultar el estado de tu registro. Intenta de nuevo en unos minutos.");
     } finally {
       setIsLoadingCommerce(false);
     }
@@ -88,9 +100,10 @@ export function ProviderCommerceProvider({ children }: ProviderCommerceProviderP
       commerceId,
       registrationStatus,
       isLoadingCommerce,
+      commerceLoadError,
       refreshCommerce,
     }),
-    [commerce, commerceId, registrationStatus, isLoadingCommerce, refreshCommerce]
+    [commerce, commerceId, registrationStatus, isLoadingCommerce, commerceLoadError, refreshCommerce]
   );
 
   return <ProviderCommerceContext.Provider value={value}>{children}</ProviderCommerceContext.Provider>;

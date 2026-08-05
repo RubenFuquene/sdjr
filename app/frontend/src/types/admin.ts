@@ -117,8 +117,12 @@ export interface RoleFromAPI {
  * - description → descripcion
  * - permissions (filtrar por prefijo "admin.") → permisosAdmin: Array<{name, description}>
  * - permissions (filtrar por prefijo "provider.") → permisosProveedor: Array<{name, description}>
+ * - permissions (filtrar por prefijo "customer.") → permisosCliente: Array<{name, description}>
  * - users_count → usuarios
  * - Nota: Backend no envía campo "activo", se asume true por defecto
+ * - SCRUM-9: hasta 2026-08-04 solo se filtraban admin/provider — los
+ *   permisos customer.* (5 en producción) se descartaban en silencio y
+ *   nunca llegaban al modal de rol, ni en modo ver ni en modo editar.
  */
 
 // ============================================
@@ -131,6 +135,7 @@ export interface Perfil {
   descripcion: string;
   permisosAdmin: Array<{ name: string; description: string }>;
   permisosProveedor: Array<{ name: string; description: string }>;
+  permisosCliente: Array<{ name: string; description: string }>;
   usuarios: number;
   activo: boolean;
 }
