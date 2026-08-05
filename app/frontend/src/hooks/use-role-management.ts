@@ -60,6 +60,9 @@ function mapRoleToPerfil(role: RoleFromAPI): Perfil {
     permisosProveedor: permissionsEntries
       .filter(([key]) => key.startsWith("provider."))
       .map(([key, value]) => ({ name: key, description: value })),
+    permisosCliente: permissionsEntries
+      .filter(([key]) => key.startsWith("customer."))
+      .map(([key, value]) => ({ name: key, description: value })),
     usuarios: role.users_count,
     activo: role.status === "1",
   };
@@ -93,8 +96,9 @@ export function useRoleManagement(perPage: number = 15) {
    * Transforma permisos de 3 niveles → 4 niveles
    */
   const adaptProfileToRole = (perfil: Perfil): AdaptedRole => {
-    // Combinar permisos de admin y proveedor
-    const allPermissions = [...perfil.permisosAdmin, ...perfil.permisosProveedor];
+    // Combinar permisos de admin, proveedor y cliente (SCRUM-9: antes se
+    // descartaban los de cliente, quedaban invisibles en el modal).
+    const allPermissions = [...perfil.permisosAdmin, ...perfil.permisosProveedor, ...perfil.permisosCliente];
     
     // Aplicar adaptador para estructura de 4 niveles
     const adapted4Levels = adaptPermissions(allPermissions);

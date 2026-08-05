@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronRight, Headphones, Leaf, LogOut, Tag, Wallet } from "lucide-react";
+import { ChevronRight, ExternalLink, Headphones, Leaf, LogOut, Tag, Wallet } from "lucide-react";
 import { clearSession } from "@/lib/session";
+import { SIC_DESCRIPTION, SIC_LABEL, SIC_URL } from "@/lib/app/legal-links";
 
 const PROFILE_USER = {
   name: "Maria Garcia",
@@ -17,7 +18,9 @@ type ProfileActionItem = {
   id: string;
   label: string;
   description: string;
-  icon: "wallet" | "coupon" | "support";
+  icon: "wallet" | "coupon" | "support" | "sic";
+  /** Si viene, la acción es un enlace externo real en vez de navegación interna. */
+  externalHref?: string;
 };
 
 const ACTIONS: ProfileActionItem[] = [
@@ -39,6 +42,13 @@ const ACTIONS: ProfileActionItem[] = [
     description: "Ayuda y contacto",
     icon: "support",
   },
+  {
+    id: "sic",
+    label: SIC_LABEL,
+    description: SIC_DESCRIPTION,
+    icon: "sic",
+    externalHref: SIC_URL,
+  },
 ];
 
 function ActionIcon({ icon }: { icon: ProfileActionItem["icon"] }) {
@@ -48,6 +58,10 @@ function ActionIcon({ icon }: { icon: ProfileActionItem["icon"] }) {
 
   if (icon === "coupon") {
     return <Tag className="h-5 w-5 text-[var(--color-app-text-primary-purple)]" />;
+  }
+
+  if (icon === "sic") {
+    return <ExternalLink className="h-5 w-5 text-[var(--color-app-text-primary-purple)]" />;
   }
 
   return <Headphones className="h-5 w-5 text-[var(--color-app-text-primary-purple)]" />;
@@ -104,25 +118,48 @@ export default function AppProfilePage() {
       </div>
 
       <div className="mt-4 space-y-3 px-4">
-        {ACTIONS.map((action) => (
-          <button
-            key={action.id}
-            type="button"
-            onClick={() => handleActionClick(action.id)}
-            className="app-card-action app-surface flex w-full items-center justify-between p-4 text-left"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-app-tomatillo-soft)]">
-                <ActionIcon icon={action.icon} />
+        {ACTIONS.map((action) => {
+          const content = (
+            <>
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-app-tomatillo-soft)]">
+                  <ActionIcon icon={action.icon} />
+                </div>
+                <div>
+                  <p className="text-sm text-[var(--color-app-text-dark)]">{action.label}</p>
+                  <p className="text-xs text-[var(--color-app-text-secondary-purple)]">{action.description}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-[var(--color-app-text-dark)]">{action.label}</p>
-                <p className="text-xs text-[var(--color-app-text-secondary-purple)]">{action.description}</p>
-              </div>
-            </div>
-            <ChevronRight className="h-5 w-5 text-[var(--color-app-text-secondary-purple)]" />
-          </button>
-        ))}
+              <ChevronRight className="h-5 w-5 text-[var(--color-app-text-secondary-purple)]" />
+            </>
+          );
+
+          if (action.externalHref) {
+            return (
+              <a
+                key={action.id}
+                href={action.externalHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${action.label} (abre en una ventana externa)`}
+                className="app-card-action app-surface flex w-full items-center justify-between p-4 text-left"
+              >
+                {content}
+              </a>
+            );
+          }
+
+          return (
+            <button
+              key={action.id}
+              type="button"
+              onClick={() => handleActionClick(action.id)}
+              className="app-card-action app-surface flex w-full items-center justify-between p-4 text-left"
+            >
+              {content}
+            </button>
+          );
+        })}
 
         <button
           type="button"

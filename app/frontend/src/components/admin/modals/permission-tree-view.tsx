@@ -14,6 +14,16 @@ interface PermissionTreeViewProps {
   permissionTree: PermissionTree;
   selectedPermissions: string[];
   onPermissionToggle: (permissionName: string) => void;
+  /**
+   * SCRUM-9: "de solo lectura" (modo "Ver rol") NO es lo mismo que "no se
+   * puede explorar". Este prop controla ÚNICAMENTE los checkboxes de
+   * permiso — navegar por el árbol, volver y buscar son operaciones de
+   * lectura y deben seguir funcionando aunque `disabled` sea true. Antes
+   * este mismo flag bloqueaba también la navegación, así que en modo
+   * "Ver" el árbol quedaba congelado en la raíz sin forma de entrar a
+   * ningún módulo — el reporte original ("no se pueden visualizar los
+   * permisos") era exactamente ese: no había manera de llegar a verlos.
+   */
   disabled?: boolean;
 }
 
@@ -93,8 +103,7 @@ export function PermissionTreeView({
         {canGoBack && (
           <button
             onClick={navigateBack}
-            disabled={disabled}
-            className="flex items-center space-x-1 text-sm text-[#4B236A] hover:text-[#5D2B7D] transition-colors disabled:opacity-50"
+            className="flex items-center space-x-1 text-sm text-[#4B236A] hover:text-[#5D2B7D] transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Atrás</span>
@@ -113,7 +122,7 @@ export function PermissionTreeView({
                 : 'border-[#E0E0E0] hover:border-[#4B236A] hover:bg-[#4B236A]/5 cursor-pointer'
             }`}
             onClick={() => {
-              if (item.type !== 'permission' && !disabled) {
+              if (item.type !== 'permission') {
                 navigateTo(item.key);
               }
             }}
@@ -169,7 +178,6 @@ export function PermissionTreeView({
                 value={summarySearch}
                 onChange={(event) => setSummarySearch(event.target.value)}
                 placeholder="Buscar por permiso, módulo o acción"
-                disabled={disabled}
                 className="w-full h-9 rounded-[10px] border border-[#E0E0E0] bg-white px-3 text-xs text-[#1A1A1A] placeholder:text-[#6A6A6A] focus:outline-none focus:ring-2 focus:ring-[#4B236A]/30 disabled:opacity-50"
               />
 
@@ -246,7 +254,6 @@ export function PermissionTreeView({
                   value={summarySearch}
                   onChange={(event) => setSummarySearch(event.target.value)}
                   placeholder="Buscar por permiso, módulo o acción"
-                  disabled={disabled}
                   className="w-full h-9 rounded-[10px] border border-[#E0E0E0] bg-white px-3 text-xs text-[#1A1A1A] placeholder:text-[#6A6A6A] focus:outline-none focus:ring-2 focus:ring-[#4B236A]/30 disabled:opacity-50"
                 />
 
