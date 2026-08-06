@@ -37,8 +37,10 @@ use Illuminate\Foundation\Http\FormRequest;
  *   @OA\Property(
  *     property="commerce_branch_hours",
  *     type="array",
+ *
  *     @OA\Items(
  *       type="object",
+ *
  *       @OA\Property(property="day_of_week", type="integer", example=1, description="0=Domingo, 1=Lunes, ..."),
  *       @OA\Property(property="open_time", type="string", example="08:00"),
  *       @OA\Property(property="close_time", type="string", example="18:00"),
