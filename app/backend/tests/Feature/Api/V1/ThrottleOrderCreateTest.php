@@ -30,7 +30,7 @@ class ThrottleOrderCreateTest extends TestCase
         $response->assertStatus(429)
             ->assertJson([
                 'status' => false,
-                'message' => 'Too many requests. Please try again later.',
+                'message' => __('throttle.too_many_requests'),
                 'code' => 429,
             ]);
         $response->assertHeader('Retry-After');
