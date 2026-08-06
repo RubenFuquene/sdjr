@@ -36,7 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $response = [
                 'status' => false,
-                'message' => 'Too many requests. Please try again later.',
+                // SCRUM-354: antes hardcodeado en inglés, sin pasar por i18n
+                // — SetLocale ya resuelve el idioma de la request (whitelist
+                // es/en), este handler simplemente no lo usaba.
+                'message' => __('throttle.too_many_requests'),
                 'code' => 429,
             ];
 
