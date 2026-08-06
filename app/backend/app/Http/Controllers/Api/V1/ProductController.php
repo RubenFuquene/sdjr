@@ -12,6 +12,8 @@ use App\Http\Requests\Api\V1\DismissProductBranchAutoAdjustmentRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\PatchProductStatusRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
+use App\Http\Requests\Api\V1\ProductsByCommerceBranchRequest;
+use App\Http\Requests\Api\V1\ProductsByCommerceRequest;
 use App\Http\Requests\Api\V1\ShowProductRequest;
 use App\Http\Requests\Api\V1\StoreProductRequest;
 use App\Http\Requests\Api\V1\UpdateProductBranchPublicationRequest;
@@ -371,7 +373,7 @@ class ProductController extends Controller
      *   @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function byCommerce(int $commerce_id): JsonResponse
+    public function byCommerce(ProductsByCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
             $this->commerceService->show($commerce_id); // Validar que el comercio exista antes de consultar los productos
@@ -405,7 +407,7 @@ class ProductController extends Controller
      *   @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function byCommerceBranch(int $branch_id): JsonResponse
+    public function byCommerceBranch(ProductsByCommerceBranchRequest $request, int $branch_id): JsonResponse
     {
         try {
             $products = $this->productService->getByCommerceBranch($branch_id);

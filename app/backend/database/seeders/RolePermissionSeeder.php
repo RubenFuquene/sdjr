@@ -154,6 +154,10 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'provider.commerces.update', 'guard_name' => $guardName, 'description' => 'Actualizar comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.delete', 'guard_name' => $guardName, 'description' => 'Eliminar comercios', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider.commerces.accept-terms', 'guard_name' => $guardName, 'description' => 'Aceptar términos del comercio', 'created_at' => now(), 'updated_at' => now()],
+            // SCRUM-334: permiso exclusivo de admin — "verificar" un comercio pierde su
+            // sentido si el propio comercio puede autodeclararse verificado. Antes este
+            // endpoint exigía provider.commerces.update, que el rol provider sí tiene.
+            ['name' => 'admin.commerces.verify', 'guard_name' => $guardName, 'description' => 'Verificar o rechazar un comercio', 'created_at' => now(), 'updated_at' => now()],
 
             // Representantes Legales
             ['name' => 'provider.legal_representatives.index', 'guard_name' => $guardName, 'description' => 'Listar representantes legales', 'created_at' => now(), 'updated_at' => now()],
@@ -340,6 +344,7 @@ class RolePermissionSeeder extends Seeder
             'admin.profiles.users.update',
             'provider.branches.update',
             'provider.commerces.update',
+            'admin.commerces.verify',
             'provider.legal_representatives.update',
             'provider.establishment_types.update',
             'provider.product_categories.update',

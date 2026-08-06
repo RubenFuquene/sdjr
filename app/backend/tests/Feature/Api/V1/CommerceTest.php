@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class CommerceTest extends TestCase
@@ -54,11 +55,25 @@ class CommerceTest extends TestCase
         $user->givePermissionTo('provider.commerces.show');
         $this->actingAs($user, 'sanctum');
 
-        $commerce = Commerce::factory()->create();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
         $response->assertOk();
         $response->assertJsonPath('status', true);
         $response->assertJsonPath('data.id', $commerce->id);
+    }
+
+    /**
+     * SCRUM-334 (IDOR): un aliado no puede ver el comercio de otro aliado.
+     */
+    public function test_show_commerce_fails_for_a_commerce_not_owned_by_the_user(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.commerces.show');
+        $this->actingAs($user, 'sanctum');
+
+        $commerce = Commerce::factory()->create();
+        $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
+        $response->assertForbidden();
     }
 
     /**
@@ -89,10 +104,42 @@ class CommerceTest extends TestCase
         $user->givePermissionTo('provider.commerces.delete');
         $this->actingAs($user, 'sanctum');
 
-        $commerce = Commerce::factory()->create();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $response = $this->deleteJson('/api/v1/commerces/'.$commerce->id);
         $response->assertStatus(204);
         $this->assertSoftDeleted('commerces', ['id' => $commerce->id]);
+    }
+
+    /**
+     * SCRUM-334 (IDOR): el más severo de la auditoría — un aliado no puede
+     * borrar el comercio de otro aliado.
+     */
+    public function test_delete_commerce_fails_for_a_commerce_not_owned_by_the_user(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.commerces.delete');
+        $this->actingAs($user, 'sanctum');
+
+        $commerce = Commerce::factory()->create();
+        $response = $this->deleteJson('/api/v1/commerces/'.$commerce->id);
+        $response->assertForbidden();
+        $this->assertDatabaseHas('commerces', ['id' => $commerce->id, 'deleted_at' => null]);
+    }
+
+    /**
+     * Superadmin conserva acceso show/delete a cualquier comercio.
+     */
+    public function test_superadmin_can_show_and_delete_any_commerce(): void
+    {
+        Role::findOrCreate('superadmin', 'sanctum');
+        $admin = User::factory()->create();
+        $admin->assignRole('superadmin');
+        $admin->givePermissionTo(['provider.commerces.show', 'provider.commerces.delete']);
+        $this->actingAs($admin, 'sanctum');
+
+        $commerce = Commerce::factory()->create();
+        $this->getJson('/api/v1/commerces/'.$commerce->id)->assertOk();
+        $this->deleteJson('/api/v1/commerces/'.$commerce->id)->assertStatus(204);
     }
 
     public function test_cannot_create_commerce_without_permission()
@@ -133,7 +180,7 @@ class CommerceTest extends TestCase
         $user->givePermissionTo('provider.commerces.show');
         $this->actingAs($user, 'sanctum');
 
-        $commerce = Commerce::factory()->create(['tax_id_type' => 'NIT']);
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id, 'tax_id_type' => 'NIT']);
         $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
 
         $response->assertOk();
@@ -149,7 +196,7 @@ class CommerceTest extends TestCase
         $user->givePermissionTo('provider.commerces.show');
         $this->actingAs($user, 'sanctum');
 
-        $commerce = Commerce::factory()->create(['tax_id_type' => 'CC']);
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id, 'tax_id_type' => 'CC']);
         $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
 
         $response->assertOk();
@@ -165,7 +212,7 @@ class CommerceTest extends TestCase
         $user->givePermissionTo('provider.commerces.show');
         $this->actingAs($user, 'sanctum');
 
-        $commerce = Commerce::factory()->create(['electronic_invoicing_required' => true]);
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id, 'electronic_invoicing_required' => true]);
         $response = $this->getJson('/api/v1/commerces/'.$commerce->id);
 
         $response->assertOk();

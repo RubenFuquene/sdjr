@@ -23,6 +23,21 @@ class IndexLegalRepresentativeRequest extends FormRequest
         return $this->user()?->can('provider.legal_representatives.index') ?? false;
     }
 
+    /**
+     * SCRUM-334: acota el listado a los comercios del usuario autenticado.
+     * Null (sin acotar) para admin/superadmin, igual que AuthorizesCommerceOwnership.
+     */
+    public function ownerScopeUserId(): ?int
+    {
+        $user = $this->user();
+
+        if ($user->hasAnyRole(['superadmin', 'admin'])) {
+            return null;
+        }
+
+        return $user->id;
+    }
+
     public function rules(): array
     {
         return [

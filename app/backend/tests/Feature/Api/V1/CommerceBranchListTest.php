@@ -9,6 +9,7 @@ use App\Models\CommerceBranch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class CommerceBranchListTest extends TestCase
@@ -25,7 +26,7 @@ class CommerceBranchListTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.show');
-        $commerce = Commerce::factory()->create();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         CommerceBranch::factory()->count(3)->create(['commerce_id' => $commerce->id]);
 
         $this->actingAs($user, 'sanctum')
@@ -44,6 +45,21 @@ class CommerceBranchListTest extends TestCase
     public function test_list_branches_forbidden_without_permission(): void
     {
         $user = User::factory()->create();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        CommerceBranch::factory()->count(2)->create(['commerce_id' => $commerce->id]);
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson("/api/v1/commerces/{$commerce->id}/branches")
+            ->assertForbidden();
+    }
+
+    /**
+     * SCRUM-334 (IDOR): un aliado no puede listar las sucursales de un comercio ajeno.
+     */
+    public function test_list_branches_fails_for_a_commerce_not_owned_by_the_user(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.branches.show');
         $commerce = Commerce::factory()->create();
         CommerceBranch::factory()->count(2)->create(['commerce_id' => $commerce->id]);
 
@@ -52,7 +68,26 @@ class CommerceBranchListTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_list_branches_not_found_for_invalid_commerce(): void
+    public function test_list_branches_allows_superadmin_for_any_commerce(): void
+    {
+        Role::findOrCreate('superadmin', 'sanctum');
+        $admin = User::factory()->create();
+        $admin->assignRole('superadmin');
+        $admin->givePermissionTo('provider.branches.show');
+        $commerce = Commerce::factory()->create();
+        CommerceBranch::factory()->count(2)->create(['commerce_id' => $commerce->id]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson("/api/v1/commerces/{$commerce->id}/branches")
+            ->assertOk();
+    }
+
+    /**
+     * SCRUM-334: un commerce_id inexistente no puede distinguirse de uno
+     * ajeno — la ownership check corre antes que la existencia, mismo
+     * criterio anti-enumeración ya adoptado en el proyecto.
+     */
+    public function test_list_branches_fails_for_a_nonexistent_commerce(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.show');
@@ -60,6 +95,6 @@ class CommerceBranchListTest extends TestCase
 
         $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/commerces/{$invalidId}/branches")
-            ->assertStatus(404);
+            ->assertForbidden();
     }
 }

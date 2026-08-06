@@ -86,7 +86,7 @@ class CommerceBranchController extends Controller
     {
         $filters = $request->validatedFilters();
         $perPage = $request->validatedPerPage();
-        $branches = $this->commerceService->getPaginated($filters, $perPage);
+        $branches = $this->commerceService->getPaginated($filters, $perPage, $request->ownerScopeUserId());
         $resource = CommerceBranchResource::collection($branches);
 
         return $this->paginatedResponse($branches, $resource, 'Branches retrieved successfully');

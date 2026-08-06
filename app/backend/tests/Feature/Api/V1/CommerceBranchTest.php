@@ -147,22 +147,73 @@ class CommerceBranchTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.show');
-        $branch = CommerceBranch::factory()->create();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/commerce-branches/{$branch->id}")
             ->assertOk()
             ->assertJsonFragment(['id' => $branch->id]);
     }
 
+    /**
+     * SCRUM-334: authorize() solo validaba el permiso, nunca la propiedad —
+     * cualquier aliado podía ver la sucursal de un comercio ajeno.
+     */
+    public function test_show_branch_fails_for_a_branch_not_owned_by_the_user(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.branches.show');
+        $branch = CommerceBranch::factory()->create();
+        $this->actingAs($user, 'sanctum')
+            ->getJson("/api/v1/commerce-branches/{$branch->id}")
+            ->assertForbidden();
+    }
+
     public function test_delete_branch_success(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.branches.delete');
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $this->actingAs($user, 'sanctum')
+            ->deleteJson("/api/v1/commerce-branches/{$branch->id}")
+            ->assertNoContent();
+        $this->assertSoftDeleted('commerce_branches', ['id' => $branch->id]);
+    }
+
+    /**
+     * SCRUM-334: la más severa de las tres — permitía BORRAR la sucursal de
+     * un comercio ajeno, no solo verla o moverla.
+     */
+    public function test_delete_branch_fails_for_a_branch_not_owned_by_the_user(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.delete');
         $branch = CommerceBranch::factory()->create();
         $this->actingAs($user, 'sanctum')
             ->deleteJson("/api/v1/commerce-branches/{$branch->id}")
+            ->assertForbidden();
+        $this->assertDatabaseHas('commerce_branches', ['id' => $branch->id, 'deleted_at' => null]);
+    }
+
+    /**
+     * Superadmin conserva acceso a sucursales de cualquier comercio.
+     */
+    public function test_superadmin_can_show_and_delete_any_commerce_branch(): void
+    {
+        \Spatie\Permission\Models\Role::findOrCreate('superadmin', 'sanctum');
+        $admin = User::factory()->create();
+        $admin->assignRole('superadmin');
+        $admin->givePermissionTo(['provider.branches.show', 'provider.branches.delete']);
+        $branch = CommerceBranch::factory()->create();
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson("/api/v1/commerce-branches/{$branch->id}")
+            ->assertOk();
+
+        $this->actingAs($admin, 'sanctum')
+            ->deleteJson("/api/v1/commerce-branches/{$branch->id}")
             ->assertNoContent();
-        $this->assertSoftDeleted('commerce_branches', ['id' => $branch->id]);
     }
 
     /**
@@ -274,11 +325,29 @@ class CommerceBranchTest extends TestCase
         ]);
     }
 
+    /**
+     * SCRUM-334: GET /commerce-branches (listado general) solo debe devolver
+     * las sucursales de los comercios del usuario autenticado.
+     */
+    public function test_index_excludes_branches_from_commerces_not_owned_by_user(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.branches.show');
+        $ownCommerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        CommerceBranch::factory()->create(['commerce_id' => $ownCommerce->id]);
+        CommerceBranch::factory()->create();
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/v1/commerce-branches')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
+
     public function test_index_by_commerce(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.show');
-        $commerce = Commerce::factory()->create();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         CommerceBranch::factory()->count(2)->create(['commerce_id' => $commerce->id]);
         $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/commerces/{$commerce->id}/branches")

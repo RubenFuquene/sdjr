@@ -46,8 +46,8 @@ class ProductFeatureTest extends TestCase
 
     public function test_index_returns_paginated_list()
     {
-        $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         Product::factory()->count(3)->create(['commerce_id' => $commerce->id]);
         $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
         $response->assertOk()->assertJsonStructure(['data']);
@@ -278,16 +278,28 @@ class ProductFeatureTest extends TestCase
 
     public function test_show_returns_product()
     {
-        $this->actingAsAdmin();
-        $product = Product::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
         $response = $this->getJson('/api/v1/products/'.$product->id);
         $response->assertOk()->assertJsonFragment(['id' => $product->id]);
     }
 
-    public function test_show_returns_products_by_commerce()
+    /**
+     * SCRUM-334 (IDOR): un aliado no puede ver el detalle de un producto ajeno.
+     */
+    public function test_show_fails_for_a_product_not_owned_by_the_user(): void
     {
         $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $product = Product::factory()->create();
+        $response = $this->getJson('/api/v1/products/'.$product->id);
+        $response->assertForbidden();
+    }
+
+    public function test_show_returns_products_by_commerce()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         Product::factory()->count(2)->create(['commerce_id' => $commerce->id]);
         $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
         $response->assertOk()->assertJsonCount(2, 'data');
@@ -394,8 +406,9 @@ class ProductFeatureTest extends TestCase
 
     public function test_patch_status_updates_product_status()
     {
-        $this->actingAsAdmin();
-        $product = Product::factory()->create(['status' => (string) Constant::STATUS_ACTIVE]);
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id, 'status' => (string) Constant::STATUS_ACTIVE]);
 
         $response = $this->patchJson('/api/v1/products/'.$product->id.'/status', [
             'status' => (string) Constant::STATUS_INACTIVE,
@@ -421,10 +434,27 @@ class ProductFeatureTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_destroy_deletes_product()
+    /**
+     * SCRUM-334 (IDOR): un aliado no puede cambiar el estado de un producto ajeno.
+     */
+    public function test_patch_status_fails_for_a_product_not_owned_by_the_user(): void
     {
         $this->actingAsAdmin();
-        $product = Product::factory()->create();
+        $product = Product::factory()->create(['status' => (string) Constant::STATUS_ACTIVE]);
+
+        $response = $this->patchJson('/api/v1/products/'.$product->id.'/status', [
+            'status' => (string) Constant::STATUS_INACTIVE,
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('products', ['id' => $product->id, 'status' => (string) Constant::STATUS_ACTIVE]);
+    }
+
+    public function test_destroy_deletes_product()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $product = Product::factory()->create(['commerce_id' => $commerce->id]);
         $payload = ['id' => $product->id];
         $response = $this->deleteJson('/api/v1/products/'.$product->id, $payload);
         $response->assertNoContent();
@@ -440,10 +470,41 @@ class ProductFeatureTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_delete_package_items_deletes_all()
+    /**
+     * SCRUM-334 (IDOR): un aliado no puede borrar un producto ajeno.
+     */
+    public function test_destroy_fails_for_a_product_not_owned_by_the_user(): void
     {
         $this->actingAsAdmin();
-        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        $product = Product::factory()->create();
+        $payload = ['id' => $product->id];
+        $response = $this->deleteJson('/api/v1/products/'.$product->id, $payload);
+        $response->assertForbidden();
+        $this->assertDatabaseHas('products', ['id' => $product->id]);
+    }
+
+    /**
+     * Superadmin conserva acceso show/status/delete a cualquier producto.
+     */
+    public function test_superadmin_can_show_patch_status_and_destroy_any_product(): void
+    {
+        \Spatie\Permission\Models\Role::findOrCreate('superadmin', 'sanctum');
+        $admin = User::factory()->create();
+        $admin->assignRole('superadmin');
+        $admin->givePermissionTo(['provider.products.show', 'provider.products.update', 'provider.products.delete']);
+        $this->actingAs($admin, 'sanctum');
+
+        $product = Product::factory()->create(['status' => (string) Constant::STATUS_ACTIVE]);
+        $this->getJson('/api/v1/products/'.$product->id)->assertOk();
+        $this->patchJson('/api/v1/products/'.$product->id.'/status', ['status' => (string) Constant::STATUS_INACTIVE])->assertOk();
+        $this->deleteJson('/api/v1/products/'.$product->id)->assertNoContent();
+    }
+
+    public function test_delete_package_items_deletes_all()
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $package = Product::factory()->create(['commerce_id' => $commerce->id, 'product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
         $item1 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
         $item2 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
         $package->packageItems()->attach([
@@ -487,8 +548,8 @@ class ProductFeatureTest extends TestCase
 
     public function test_get_products_by_commerce_returns_404_when_none_found()
     {
-        $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
         $response->assertStatus(200)
             ->assertJson([
@@ -500,8 +561,8 @@ class ProductFeatureTest extends TestCase
 
     public function test_get_products_by_commerce_includes_package_items_when_loaded()
     {
-        $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
             'product_type' => Constant::PRODUCT_TYPE_PACKAGE,
@@ -522,8 +583,8 @@ class ProductFeatureTest extends TestCase
 
     public function test_get_products_by_commerce_branch_includes_package_items_when_loaded()
     {
-        $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $package = Product::factory()->create([
             'commerce_id' => $commerce->id,
@@ -543,10 +604,31 @@ class ProductFeatureTest extends TestCase
             ->assertJsonPath('data.0.package_items.0.quantity', 1);
     }
 
-    public function test_get_products_by_commerce_branch_returns_404_when_none_found()
+    /**
+     * SCRUM-343: antes, un branch_id inexistente llegaba al service y
+     * devolvía 404 (mismo trato que "sin productos"). Ahora
+     * ProductsByCommerceBranchRequest valida propiedad antes de llegar al
+     * controller — un branch_id que no resuelve a ningún comercio del
+     * usuario se rechaza con 403, coherente con el criterio anti-enumeración
+     * ya adoptado en el proyecto (403 tanto para recurso ajeno como
+     * inexistente).
+     */
+    public function test_get_products_by_commerce_branch_fails_for_a_nonexistent_branch(): void
     {
         $this->actingAsAdmin();
         $response = $this->getJson('/api/v1/products/commerce/branch/1111');
+        $response->assertForbidden();
+    }
+
+    /**
+     * Cobertura que sí ejerce el 404 real del service: sucursal propia sin productos.
+     */
+    public function test_get_products_by_commerce_branch_returns_404_when_branch_has_no_products(): void
+    {
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
+        $response = $this->getJson('/api/v1/products/commerce/branch/'.$branch->id);
         $response->assertStatus(404)
             ->assertJson([
                 'status' => false,
@@ -554,22 +636,80 @@ class ProductFeatureTest extends TestCase
             ]);
     }
 
-    public function test_get_products_by_commerce_returns_404_when_commerce_not_found()
+    /**
+     * SCRUM-343: mismo criterio — un commerce_id inexistente no puede
+     * distinguirse de uno ajeno, se rechaza con 403 antes de llegar al service.
+     */
+    public function test_get_products_by_commerce_fails_for_a_nonexistent_commerce(): void
     {
         $this->actingAsAdmin();
         $invalidId = 999999;
         $response = $this->getJson('/api/v1/products/commerce/'.$invalidId);
-        $response->assertStatus(404)
-            ->assertJson([
-                'status' => false,
-                'message' => 'Commerce not found with the specified ID.',
-            ]);
+        $response->assertForbidden();
+    }
+
+    /**
+     * SCRUM-343 (IDOR): un aliado no puede ver el catálogo de un comercio ajeno.
+     */
+    public function test_get_products_by_commerce_fails_for_a_commerce_not_owned_by_the_user(): void
+    {
+        $this->actingAsAdmin();
+        $otherCommerce = Commerce::factory()->create();
+        Product::factory()->create(['commerce_id' => $otherCommerce->id]);
+
+        $response = $this->getJson('/api/v1/products/commerce/'.$otherCommerce->id);
+        $response->assertForbidden();
+    }
+
+    /**
+     * SCRUM-343 (IDOR): un aliado no puede ver el catálogo de una sucursal de un comercio ajeno.
+     */
+    public function test_get_products_by_commerce_branch_fails_for_a_branch_not_owned_by_the_user(): void
+    {
+        $this->actingAsAdmin();
+        $otherBranch = CommerceBranch::factory()->create();
+
+        $response = $this->getJson('/api/v1/products/commerce/branch/'.$otherBranch->id);
+        $response->assertForbidden();
+    }
+
+    /**
+     * SCRUM-343: el endpoint estaba bajo auth:sanctum sin ningún permiso —
+     * cualquier autenticado (incluido un customer) alcanzaba el catálogo.
+     */
+    public function test_get_products_by_commerce_fails_without_permission(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user, 'sanctum');
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+
+        $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
+        $response->assertForbidden();
+    }
+
+    /**
+     * Superadmin conserva acceso al catálogo de cualquier comercio.
+     */
+    public function test_superadmin_can_get_products_by_any_commerce(): void
+    {
+        \Spatie\Permission\Models\Role::findOrCreate('superadmin', 'sanctum');
+        $admin = User::factory()->create();
+        $admin->assignRole('superadmin');
+        $admin->givePermissionTo('provider.products.index');
+        $this->actingAs($admin, 'sanctum');
+
+        $commerce = Commerce::factory()->create();
+        Product::factory()->create(['commerce_id' => $commerce->id]);
+
+        $response = $this->getJson('/api/v1/products/commerce/'.$commerce->id);
+        $response->assertOk()->assertJsonCount(1, 'data');
     }
 
     public function test_get_package_items_returns_items()
     {
-        $this->actingAsAdmin();
-        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $package = Product::factory()->create(['commerce_id' => $commerce->id, 'product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
         // Simular items de paquete
         $item1 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
         $item2 = Product::factory()->create(['commerce_id' => $package->commerce_id]);
@@ -586,23 +726,36 @@ class ProductFeatureTest extends TestCase
 
     public function test_get_package_items_returns_empty_when_none()
     {
-        $this->actingAsAdmin();
-        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $package = Product::factory()->create(['commerce_id' => $commerce->id, 'product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
         $response = $this->getJson('/api/v1/products/commerce/package-items/'.$package->id);
         $response->assertOk()
             ->assertJson(['data' => ['package_items' => []]]);
     }
 
-    public function test_get_package_items_returns_404_for_invalid_product()
+    /**
+     * SCRUM-334: un product_package_id inexistente no puede distinguirse de
+     * uno ajeno — la ownership check corre antes que la existencia, mismo
+     * criterio anti-enumeración ya adoptado en el proyecto.
+     */
+    public function test_get_package_items_fails_for_a_nonexistent_product(): void
     {
         $this->actingAsAdmin();
         $invalidId = 999999;
         $response = $this->getJson('/api/v1/products/commerce/package-items/'.$invalidId);
-        $response->assertStatus(404)
-            ->assertJson([
-                'status' => false,
-                'message' => 'Product not found with the specified ID.',
-            ]);
+        $response->assertForbidden();
+    }
+
+    /**
+     * SCRUM-334 (IDOR): un aliado no puede ver los package items de un producto ajeno.
+     */
+    public function test_get_package_items_fails_for_a_product_not_owned_by_the_user(): void
+    {
+        $this->actingAsAdmin();
+        $package = Product::factory()->create(['product_type' => Constant::PRODUCT_TYPE_PACKAGE]);
+        $response = $this->getJson('/api/v1/products/commerce/package-items/'.$package->id);
+        $response->assertForbidden();
     }
 
     public function test_store_package_items_requires_quantity()
@@ -1112,8 +1265,8 @@ class ProductFeatureTest extends TestCase
      */
     public function test_product_resource_exposes_available_for_packaging_for_single_products_only()
     {
-        $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $product = Product::factory()->create(['commerce_id' => $commerce->id]);
         $product->commerceBranches()->attach($branch->id, [
@@ -1142,8 +1295,8 @@ class ProductFeatureTest extends TestCase
 
     public function test_available_for_packaging_does_not_n_plus_one_per_associated_package()
     {
-        $this->actingAsAdmin();
-        $commerce = Commerce::factory()->create();
+        $user = $this->actingAsAdmin();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $branch = CommerceBranch::factory()->create(['commerce_id' => $commerce->id]);
         $product = Product::factory()->create(['commerce_id' => $commerce->id]);
         // SCRUM-277 Fase 1: el stock del componente single vive por sede — sin

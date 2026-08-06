@@ -93,7 +93,7 @@ class LegalRepresentativeController extends Controller
         try {
             $filters = $request->validatedFilters();
             $perPage = $request->validatedPerPage();
-            $legalRepresentatives = $this->legalRepresentativeService->paginate($filters, $perPage);
+            $legalRepresentatives = $this->legalRepresentativeService->paginate($filters, $perPage, $request->ownerScopeUserId());
 
             return $this->paginatedResponse($legalRepresentatives, LegalRepresentativeResource::collection($legalRepresentatives), 'Legal representatives retrieved successfully');
         } catch (Throwable $e) {

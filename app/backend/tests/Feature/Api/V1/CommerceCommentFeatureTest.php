@@ -31,6 +31,8 @@ class CommerceCommentFeatureTest extends TestCase
             Permission::firstOrCreate(['name' => "provider.comments.$action", 'guard_name' => 'sanctum']);
         }
         Permission::firstOrCreate(['name' => 'provider.commerces.update', 'guard_name' => 'sanctum']);
+        // SCRUM-334: verificar/rechazar un comercio exige admin.commerces.verify.
+        Permission::firstOrCreate(['name' => 'admin.commerces.verify', 'guard_name' => 'sanctum']);
 
         // El rol admin omite la verificación de ownership y ve todos los tipos de comentario.
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'sanctum']);

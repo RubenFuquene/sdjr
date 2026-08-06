@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Models\CommerceBranch;
+use App\Services\CommerceBranchUserService;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -18,12 +20,43 @@ use Illuminate\Foundation\Http\FormRequest;
 class ShowCommerceBranchUsersRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * SCRUM-334: antes solo exigía el rol — cualquier provider o branch_leader
+     * veía los usuarios de CUALQUIER sucursal. Dos caminos válidos de
+     * propiedad: el dueño del comercio de la sucursal, o un branch_leader
+     * asignado específicamente a esa sucursal (no a cualquiera).
      */
     public function authorize(): bool
     {
-        // Commerce owners, admins, and branch leaders can view branch users
-        return $this->user()?->hasRole(['provider', 'branch_leader', 'admin', 'superadmin']) ?? false;
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(['superadmin', 'admin'])) {
+            return true;
+        }
+
+        if (! $user->hasRole(['provider', 'branch_leader'])) {
+            return false;
+        }
+
+        $commerceBranchId = (int) ($this->route('commerce_branch_id') ?? 0);
+        if ($commerceBranchId <= 0) {
+            return false;
+        }
+
+        $ownsCommerce = CommerceBranch::query()
+            ->whereKey($commerceBranchId)
+            ->whereHas('commerce', function ($query) use ($user): void {
+                $query->where('owner_user_id', $user->id);
+            })
+            ->exists();
+
+        if ($ownsCommerce) {
+            return true;
+        }
+
+        return app(CommerceBranchUserService::class)->isUserAssignedToBranch($user->id, $commerceBranchId);
     }
 
     /**

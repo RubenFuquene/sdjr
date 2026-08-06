@@ -69,9 +69,15 @@ class CommerceBranchService
     /**
      * Paginate all branches
      */
-    public function getPaginated(array $filters, int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters, int $perPage = 15, ?int $ownerUserId = null): LengthAwarePaginator
     {
         $query = CommerceBranch::with(['department', 'city', 'neighborhood', 'commerceBranchHours', 'commerceBranchPhotos']);
+
+        if ($ownerUserId !== null) {
+            $query->whereHas('commerce', function ($commerceQuery) use ($ownerUserId): void {
+                $commerceQuery->where('owner_user_id', $ownerUserId);
+            });
+        }
 
         if (! empty($filters['name'])) {
             $query->where('name', 'like', "%{$filters['name']}%");

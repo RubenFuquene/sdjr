@@ -53,9 +53,30 @@ use Illuminate\Validation\Rule;
  */
 class CommerceBasicDataRequest extends FormRequest
 {
+    /**
+     * SCRUM-334: a diferencia de StoreCommerceRequest, este flujo (onboarding
+     * básico) no validaba que commerce.owner_user_id fuera el usuario
+     * autenticado — un aliado con el permiso podía crear un comercio
+     * "propiedad" de un tercero.
+     */
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.commerces.create') ?? false;
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        if (! $user->can('provider.commerces.create')) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(['superadmin', 'admin'])) {
+            return true;
+        }
+
+        $ownerUserId = (int) $this->input('commerce.owner_user_id', 0);
+
+        return $ownerUserId > 0 && $ownerUserId === (int) $user->id;
     }
 
     public function rules(): array

@@ -13,6 +13,7 @@ use App\Models\Neighborhood;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class CommerceBasicDataTest extends TestCase
@@ -123,10 +124,15 @@ class CommerceBasicDataTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo('provider.commerces.create');
         $this->actingAs($user, 'sanctum');
-        $response = $this->postJson('/api/v1/commerces/basic', []);
+        // SCRUM-334: commerce.owner_user_id debe ser el usuario autenticado
+        // para pasar authorize() (que corre antes que rules()) — se envía
+        // válido aquí para poder seguir ejerciendo la validación del resto
+        // de campos requeridos.
+        $response = $this->postJson('/api/v1/commerces/basic', [
+            'commerce' => ['owner_user_id' => $user->id],
+        ]);
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'commerce.owner_user_id',
             'commerce.department_id',
             'commerce.city_id',
             'commerce.neighborhood_id',
@@ -140,6 +146,112 @@ class CommerceBasicDataTest extends TestCase
             'legal_representative.document',
             'legal_representative.document_type',
         ]);
+    }
+
+    /**
+     * SCRUM-334 (IDOR): a diferencia de StoreCommerceRequest, este flujo no
+     * validaba que commerce.owner_user_id fuera el usuario autenticado — un
+     * aliado podía crear un comercio "propiedad" de un tercero.
+     */
+    public function test_cannot_create_commerce_basic_data_for_another_owner(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.commerces.create');
+        $this->actingAs($user, 'sanctum');
+        $otherUser = User::factory()->create();
+
+        $bank = Bank::factory()->create();
+        $department = Department::factory()->create();
+        $city = City::factory()->create(['department_id' => $department->id]);
+        $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id]);
+        $establishmentType = EstablishmentType::factory()->create();
+
+        $payload = [
+            'commerce' => [
+                'owner_user_id' => $otherUser->id,
+                'department_id' => $department->id,
+                'city_id' => $city->id,
+                'neighborhood_id' => $neighborhood->id,
+                'establishment_type_id' => $establishmentType->id,
+                'name' => 'Comercio Intruso',
+                'tax_id' => '999999999',
+                'tax_id_type' => 'NIT',
+                'address' => 'Calle 1 #2-3',
+                'is_verified' => false,
+                'is_active' => true,
+                'electronic_invoicing_required' => false,
+            ],
+            'legal_representative' => [
+                'name' => 'Juan',
+                'last_name' => 'Pérez',
+                'document' => '12345678',
+                'document_type' => 'CC',
+                'is_primary' => true,
+            ],
+            'my_account' => [
+                'type' => 'bank',
+                'account_type' => 'savings',
+                'bank_id' => $bank->id,
+                'account_number' => '1234567890',
+                'owner_id' => $otherUser->id,
+                'is_primary' => true,
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/commerces/basic', $payload);
+        $response->assertForbidden();
+        $this->assertDatabaseMissing('commerces', ['name' => 'Comercio Intruso']);
+    }
+
+    public function test_admin_can_create_commerce_basic_data_for_another_owner(): void
+    {
+        Role::findOrCreate('superadmin', 'sanctum');
+        $admin = User::factory()->create();
+        $admin->assignRole('superadmin');
+        $admin->givePermissionTo('provider.commerces.create');
+        $this->actingAs($admin, 'sanctum');
+        $owner = User::factory()->create();
+
+        $bank = Bank::factory()->create();
+        $department = Department::factory()->create();
+        $city = City::factory()->create(['department_id' => $department->id]);
+        $neighborhood = Neighborhood::factory()->create(['city_id' => $city->id]);
+        $establishmentType = EstablishmentType::factory()->create();
+
+        $payload = [
+            'commerce' => [
+                'owner_user_id' => $owner->id,
+                'department_id' => $department->id,
+                'city_id' => $city->id,
+                'neighborhood_id' => $neighborhood->id,
+                'establishment_type_id' => $establishmentType->id,
+                'name' => 'Comercio Onboarding Admin',
+                'tax_id' => '888888888',
+                'tax_id_type' => 'NIT',
+                'address' => 'Calle 1 #2-3',
+                'is_verified' => false,
+                'is_active' => true,
+                'electronic_invoicing_required' => false,
+            ],
+            'legal_representative' => [
+                'name' => 'Juan',
+                'last_name' => 'Pérez',
+                'document' => '12345678',
+                'document_type' => 'CC',
+                'is_primary' => true,
+            ],
+            'my_account' => [
+                'type' => 'bank',
+                'account_type' => 'savings',
+                'bank_id' => $bank->id,
+                'account_number' => '1234567890',
+                'owner_id' => $owner->id,
+                'is_primary' => true,
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/commerces/basic', $payload);
+        $response->assertCreated();
     }
 
     /**
