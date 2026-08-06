@@ -80,16 +80,18 @@ export function BranchesPageClient() {
         setEditing(true);
 
         await updateCommerceBranch(editingBranchId, {
-          name: input.name,
-          address: input.address,
-          latitude: input.latitude ?? null,
-          longitude: input.longitude ?? null,
-          phone: input.phone,
-          email: input.email,
-          department_id: input.departmentId,
-          city_id: input.cityId,
-          neighborhood_id: input.neighborhoodId,
-          status: input.status,
+          commerce_branch: {
+            name: input.name,
+            address: input.address,
+            latitude: input.latitude ?? null,
+            longitude: input.longitude ?? null,
+            phone: input.phone,
+            email: input.email,
+            department_id: input.departmentId,
+            city_id: input.cityId,
+            neighborhood_id: input.neighborhoodId,
+            status: input.status,
+          },
         });
 
         await refresh();

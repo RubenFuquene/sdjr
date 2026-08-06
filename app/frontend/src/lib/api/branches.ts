@@ -80,17 +80,27 @@ export interface CreateCommerceBranchPayload {
   commerce_branch_photos: CreateCommerceBranchPhotoInput[];
 }
 
+/**
+ * SCRUM-287: el backend exige estos campos anidados bajo `commerce_branch`
+ * (mismo contrato que `CreateCommerceBranchPayload`) — antes este tipo los
+ * declaraba planos, así que cada edición de sucursal fallaba con 422
+ * ("commerce_branch.name field is required"). Sin `commerce_id`: el
+ * comercio dueño se deriva de la sucursal existente en el servidor, no se
+ * acepta reenviarlo (ver `UpdateCommerceBranchRequest`).
+ */
 export interface UpdateCommerceBranchPayload {
-  department_id?: number;
-  city_id?: number;
-  neighborhood_id?: number;
-  name?: string;
-  address?: string;
-  latitude?: number | null;
-  longitude?: number | null;
-  phone?: string | null;
-  email?: string | null;
-  status?: boolean;
+  commerce_branch: {
+    department_id?: number;
+    city_id?: number;
+    neighborhood_id?: number;
+    name?: string;
+    address?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    phone?: string | null;
+    email?: string | null;
+    status?: boolean;
+  };
 }
 
 function normalizeTimeToHHmm(value: string): string {

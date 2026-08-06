@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Traits\AuthorizesCommerceOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -66,9 +67,28 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class StoreCommerceBranchRequest extends FormRequest
 {
+    use AuthorizesCommerceOwnership;
+
+    /**
+     * SCRUM-287: antes solo verificaba el permiso, sin mirar de quién era el
+     * comercio — cualquier aliado podía crear una sucursal DENTRO del comercio
+     * de otro, porque el commerce_id llega en el payload y la validación solo
+     * comprobaba `exists:commerces,id`. Se reutiliza el mismo trait que ya usa
+     * StoreDocumentUploadRequest (admin/superadmin siguen pasando).
+     */
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.branches.create') ?? false;
+        $user = $this->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if (! $user->can('provider.branches.create')) {
+            return false;
+        }
+
+        return $this->userCanAccessCommerce((int) $this->input('commerce_branch.commerce_id'));
     }
 
     public function rules(): array
