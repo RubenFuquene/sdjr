@@ -33,7 +33,10 @@ class CommerceBranchTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.create');
-        $commerce = Commerce::factory()->create();
+        // SCRUM-287: el commerce_id del payload ahora se valida contra el
+        // dueño autenticado (antes cualquier comercio pasaba) — el comercio
+        // debe ser del usuario que crea la sucursal.
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         $department = Department::factory()->create();
         $city = City::factory()->create();
         $neighborhood = Neighborhood::factory()->create();
@@ -160,6 +163,115 @@ class CommerceBranchTest extends TestCase
             ->deleteJson("/api/v1/commerce-branches/{$branch->id}")
             ->assertNoContent();
         $this->assertSoftDeleted('commerce_branches', ['id' => $branch->id]);
+    }
+
+    /**
+     * SCRUM-287: antes, el commerce_id del payload solo se validaba con
+     * exists:commerces,id — cualquier comercio del sistema pasaba. Un aliado
+     * podía crear una sucursal DENTRO del comercio de otro.
+     */
+    public function test_create_branch_rejects_a_commerce_id_not_owned_by_the_user(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.branches.create');
+        $otherOwnersCommerce = Commerce::factory()->create();
+        $department = Department::factory()->create();
+        $city = City::factory()->create();
+        $neighborhood = Neighborhood::factory()->create();
+
+        $payload = [
+            'commerce_branch' => [
+                'commerce_id' => $otherOwnersCommerce->id,
+                'department_id' => $department->id,
+                'city_id' => $city->id,
+                'neighborhood_id' => $neighborhood->id,
+                'name' => 'Sucursal Intrusa',
+                'address' => 'Calle 123',
+                'status' => true,
+            ],
+            'commerce_branch_hours' => [
+                ['day_of_week' => 1, 'open_time' => '08:00', 'close_time' => '18:00'],
+            ],
+            'commerce_branch_photos' => [],
+        ];
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/v1/commerce-branches', $payload)
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('commerce_branches', ['name' => 'Sucursal Intrusa']);
+    }
+
+    /**
+     * Superadmin sigue pudiendo crear sucursales en cualquier comercio — la
+     * validación de propiedad no debe alcanzarlo (mismo trait que ya usa
+     * StoreDocumentUploadRequest).
+     */
+    public function test_create_branch_allows_superadmin_for_any_commerce(): void
+    {
+        \Spatie\Permission\Models\Role::findOrCreate('superadmin', 'sanctum');
+        $admin = User::factory()->create();
+        $admin->assignRole('superadmin');
+        // El permiso se exige siempre, incluso a superadmin — igual que en
+        // UpdateCommerceBranchRequest::authorize(). Solo la PROPIEDAD del
+        // comercio se exime por rol (vía AuthorizesCommerceOwnership).
+        $admin->givePermissionTo('provider.branches.create');
+        $commerce = Commerce::factory()->create();
+        $department = Department::factory()->create();
+        $city = City::factory()->create();
+        $neighborhood = Neighborhood::factory()->create();
+
+        $payload = [
+            'commerce_branch' => [
+                'commerce_id' => $commerce->id,
+                'department_id' => $department->id,
+                'city_id' => $city->id,
+                'neighborhood_id' => $neighborhood->id,
+                'name' => 'Sucursal Admin',
+                'address' => 'Calle 123',
+                'status' => true,
+            ],
+            'commerce_branch_hours' => [
+                ['day_of_week' => 1, 'open_time' => '08:00', 'close_time' => '18:00'],
+            ],
+            'commerce_branch_photos' => [],
+        ];
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson('/api/v1/commerce-branches', $payload)
+            ->assertCreated();
+    }
+
+    /**
+     * SCRUM-287: commerce_id ya no se acepta al editar — antes, como
+     * quedaba en el fillable del modelo, un update() masivo permitía mover
+     * una sucursal propia al comercio de un tercero.
+     */
+    public function test_update_branch_ignores_an_attempt_to_reassign_the_commerce(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('provider.branches.update');
+        $ownCommerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
+        $otherCommerce = Commerce::factory()->create();
+        $branch = CommerceBranch::factory()->create(['commerce_id' => $ownCommerce->id]);
+
+        $payload = [
+            'commerce_branch' => [
+                'commerce_id' => $otherCommerce->id,
+                'name' => 'Sucursal Reasignada',
+                'status' => true,
+            ],
+        ];
+
+        $this->actingAs($user, 'sanctum')
+            ->putJson("/api/v1/commerce-branches/{$branch->id}", $payload)
+            ->assertOk();
+
+        $this->assertDatabaseHas('commerce_branches', [
+            'id' => $branch->id,
+            'commerce_id' => $ownCommerce->id,
+            'name' => 'Sucursal reasignada',
+        ]);
     }
 
     public function test_index_by_commerce(): void
