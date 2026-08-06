@@ -54,7 +54,9 @@ class CommerceBranchUserService
 
         $query = $commerce->branchLeaders()
             ->with(['assignedBranches' => function ($q) use ($commerceId) {
-                $q->where('commerce_id', $commerceId);
+                // commerce_id sin calificar es ambiguo tras el join con
+                // commerce_branch_users (que también tiene esa columna).
+                $q->where('commerce_branches.commerce_id', $commerceId);
             }])
             ->withPivot(['created_at', 'updated_at']);
 

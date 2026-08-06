@@ -18,9 +18,15 @@ class LegalRepresentativeService
     /**
      * Get paginated list of legal representatives.
      */
-    public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function paginate(array $filters = [], int $perPage = 15, ?int $ownerUserId = null): LengthAwarePaginator
     {
         $query = LegalRepresentative::with('commerce');
+
+        if ($ownerUserId !== null) {
+            $query->whereHas('commerce', function ($commerceQuery) use ($ownerUserId): void {
+                $commerceQuery->where('owner_user_id', $ownerUserId);
+            });
+        }
 
         if (! empty($filters['name'])) {
             $query->where('name', 'like', "%{$filters['name']}%");

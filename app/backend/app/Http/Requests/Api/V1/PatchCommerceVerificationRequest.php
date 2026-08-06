@@ -10,11 +10,15 @@ use Illuminate\Foundation\Http\FormRequest;
 class PatchCommerceVerificationRequest extends FormRequest
 {
     /**
-     * Autoriza la petición solo si el usuario tiene el permiso provider.commerces.update
+     * SCRUM-334: exige admin.commerces.verify, no provider.commerces.update.
+     * Verificar un comercio es una acción de la plataforma sobre un tercero —
+     * el permiso de "actualizar mi comercio" (que el rol provider sí tiene)
+     * permitía la auto-verificación, vaciando de sentido el estado
+     * "verificado". Este permiso no se asigna al rol provider.
      */
     public function authorize(): bool
     {
-        return $this->user()?->can('provider.commerces.update') ?? false;
+        return $this->user()?->can('admin.commerces.verify') ?? false;
     }
 
     /**

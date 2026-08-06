@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Traits\AuthorizesCommerceOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -21,10 +22,20 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class IndexCommercePayoutMethodRequest extends FormRequest
 {
+    use AuthorizesCommerceOwnership;
+
+    /**
+     * SCRUM-334: sin esto, cualquier aliado con el permiso veía las cuentas
+     * bancarias de cualquier comercio — único consumidor de este Request es
+     * GET /commerces/{commerce_id}/payout-methods.
+     */
     public function authorize(): bool
     {
-        // Permiso: commerce_payout_methods.index
-        return $this->user()?->can('provider.commerce_payout_methods.index') ?? false;
+        if (! $this->user()?->can('provider.commerce_payout_methods.index')) {
+            return false;
+        }
+
+        return $this->userCanAccessCommerce((int) $this->route('commerce_id'));
     }
 
     public function rules(): array

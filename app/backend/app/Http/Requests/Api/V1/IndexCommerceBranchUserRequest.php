@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Traits\AuthorizesCommerceOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -30,13 +31,20 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class IndexCommerceBranchUserRequest extends FormRequest
 {
+    use AuthorizesCommerceOwnership;
+
     /**
-     * Determine if the user is authorized to make this request.
+     * SCRUM-334: antes solo exigía el rol — cualquier provider veía los
+     * líderes (nombre, email, teléfono) de cualquier comercio, sin importar
+     * si era el suyo.
      */
     public function authorize(): bool
     {
-        // Commerce owners and admins can list branch leaders
-        return $this->user()?->hasRole(['provider', 'admin', 'superadmin']) ?? false;
+        if (! $this->user()?->hasRole(['provider', 'admin', 'superadmin'])) {
+            return false;
+        }
+
+        return $this->userCanAccessCommerce((int) $this->input('commerce_id'));
     }
 
     /**

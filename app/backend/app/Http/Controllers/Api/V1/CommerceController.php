@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Constants\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteCommerceRequest;
-use App\Http\Requests\Api\V1\IndexCommerceBranchRequest;
+use App\Http\Requests\Api\V1\IndexBranchesByCommerceRequest;
 use App\Http\Requests\Api\V1\IndexCommercePayoutMethodRequest;
 use App\Http\Requests\Api\V1\IndexCommerceRequest;
 use App\Http\Requests\Api\V1\MyCommerceRequest;
@@ -459,7 +459,7 @@ class CommerceController extends Controller
      *     @OA\Response(response=404, description="Commerce not found")
      * )
      */
-    public function getBranchesByCommerceId(int $commerce_id, IndexCommerceBranchRequest $request): JsonResponse
+    public function getBranchesByCommerceId(int $commerce_id, IndexBranchesByCommerceRequest $request): JsonResponse
     {
         try {
             $perPage = $request->query('per_page', 15);

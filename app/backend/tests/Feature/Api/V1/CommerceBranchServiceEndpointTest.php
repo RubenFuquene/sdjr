@@ -25,7 +25,7 @@ class CommerceBranchServiceEndpointTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('provider.branches.show');
-        $commerce = Commerce::factory()->create();
+        $commerce = Commerce::factory()->create(['owner_user_id' => $user->id]);
         CommerceBranch::factory()->count(5)->create(['commerce_id' => $commerce->id]);
         $this->actingAs($user, 'sanctum');
         $response = $this->getJson("/api/v1/commerces/{$commerce->id}/branches?per_page=3");
@@ -40,6 +40,6 @@ class CommerceBranchServiceEndpointTest extends TestCase
         $user->givePermissionTo('provider.branches.show');
         $this->actingAs($user, 'sanctum');
         $response = $this->getJson('/api/v1/commerces/99999/branches');
-        $response->assertNotFound();
+        $response->assertForbidden();
     }
 }

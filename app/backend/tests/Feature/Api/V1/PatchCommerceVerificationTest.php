@@ -22,12 +22,14 @@ class PatchCommerceVerificationTest extends TestCase
     {
         parent::setUp();
 
-        // Crear permiso
+        // SCRUM-334: verificar un comercio exige admin.commerces.verify, no
+        // provider.commerces.update (ese permiso permitía la auto-verificación).
         Permission::create(['name' => 'provider.commerces.update', 'guard_name' => 'sanctum']);
+        Permission::create(['name' => 'admin.commerces.verify', 'guard_name' => 'sanctum']);
 
         // Crear usuario con permiso
         $this->user = User::factory()->create();
-        $this->user->givePermissionTo('provider.commerces.update');
+        $this->user->givePermissionTo('admin.commerces.verify');
         $this->actingAs($this->user, 'sanctum');
     }
 
@@ -74,6 +76,27 @@ class PatchCommerceVerificationTest extends TestCase
             'message' => 'Este es un mensaje de prueba para verificación.',
         ]);
         $response->assertStatus(403);
+    }
+
+    /**
+     * SCRUM-334: antes bastaba provider.commerces.update (el rol provider lo
+     * tiene) — un aliado podía auto-verificar su propio comercio, vaciando de
+     * sentido el estado "verificado". Ahora exige admin.commerces.verify,
+     * exclusivo de admin/superadmin, incluso sobre el propio comercio.
+     */
+    public function test_patch_commerce_verification_fails_for_provider_role_even_on_own_commerce(): void
+    {
+        $provider = User::factory()->create();
+        $provider->givePermissionTo('provider.commerces.update');
+        $this->actingAs($provider, 'sanctum');
+
+        $commerce = Commerce::factory()->create(['owner_user_id' => $provider->id, 'is_verified' => Constant::STATUS_INACTIVE]);
+        $response = $this->patchJson("/api/v1/commerces/{$commerce->id}/verification", [
+            'is_verified' => Constant::STATUS_ACTIVE,
+            'message' => 'Intento de auto-verificación de mi propio comercio.',
+        ]);
+        $response->assertForbidden();
+        $this->assertDatabaseHas('commerces', ['id' => $commerce->id, 'is_verified' => Constant::STATUS_INACTIVE]);
     }
 
     public function test_patch_commerce_verification_without_message(): void
