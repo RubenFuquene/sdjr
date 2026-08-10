@@ -199,4 +199,21 @@ class Constant
     public const DEFAULT_SEARCH_RADIUS_KM = 10;
 
     public const MAX_SEARCH_RADIUS_KM = 50;
+
+    // Establishment Type codes (SCRUM-362/365)
+    public const ESTABLISHMENT_TYPE_RESTAURANT = 'RE';
+
+    public const ESTABLISHMENT_TYPE_BAKERY = 'PA';
+
+    public const ESTABLISHMENT_TYPE_RETAIL = 'RT';
+
+    /**
+     * Tipos que prestan servicio de expendio de comidas (Art. 426 ET) y por
+     * tanto pueden declarar operación bajo franquicia — determina si el
+     * Impoconsumo queda disponible o excluido de sus opciones fiscales.
+     */
+    public const FRANCHISE_ELIGIBLE_ESTABLISHMENT_TYPE_CODES = [
+        self::ESTABLISHMENT_TYPE_RESTAURANT,
+        self::ESTABLISHMENT_TYPE_BAKERY,
+    ];
 }

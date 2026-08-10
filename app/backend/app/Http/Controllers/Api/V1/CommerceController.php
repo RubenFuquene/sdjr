@@ -14,6 +14,7 @@ use App\Http\Requests\Api\V1\MyCommerceRequest;
 use App\Http\Requests\Api\V1\PatchCommerceAcceptTermsRequest;
 use App\Http\Requests\Api\V1\PatchCommerceStatusRequest;
 use App\Http\Requests\Api\V1\PatchCommerceVerificationRequest;
+use App\Http\Requests\Api\V1\ShowCommerceFiscalCodesRequest;
 use App\Http\Requests\Api\V1\ShowCommerceRequest;
 use App\Http\Requests\Api\V1\StoreCommerceRequest;
 use App\Http\Requests\Api\V1\UpdateCommerceRequest;
@@ -24,8 +25,10 @@ use App\Notifications\CommerceRejectedNotification;
 use App\Notifications\CommerceVerifiedNotification;
 use App\Services\CommerceBranchService;
 use App\Services\CommerceCommentService;
+use App\Services\CommerceFranchiseDeclarationService;
 use App\Services\CommercePayoutMethodService;
 use App\Services\CommerceService;
+use App\Services\FiscalCodeResolver;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -52,16 +55,20 @@ class CommerceController extends Controller
 
     private CommerceCommentService $commerceCommentService;
 
+    private CommerceFranchiseDeclarationService $commerceFranchiseDeclarationService;
+
     public function __construct(
         CommerceService $commerceService,
         CommerceBranchService $commerceBranchService,
         CommercePayoutMethodService $commercePayoutMethodService,
-        CommerceCommentService $commerceCommentService
+        CommerceCommentService $commerceCommentService,
+        CommerceFranchiseDeclarationService $commerceFranchiseDeclarationService
     ) {
         $this->commerceService = $commerceService;
         $this->commerceBranchService = $commerceBranchService;
         $this->commercePayoutMethodService = $commercePayoutMethodService;
         $this->commerceCommentService = $commerceCommentService;
+        $this->commerceFranchiseDeclarationService = $commerceFranchiseDeclarationService;
     }
 
     /**
@@ -149,7 +156,18 @@ class CommerceController extends Controller
     public function store(StoreCommerceRequest $request): JsonResponse
     {
         try {
-            $commerce = $this->commerceService->store($request->validated());
+            $validated = $request->validated();
+            $commerce = $this->commerceService->store($validated);
+
+            if (array_key_exists('operates_under_franchise', $validated)) {
+                $this->commerceFranchiseDeclarationService->record(
+                    $commerce,
+                    (bool) $validated['operates_under_franchise'],
+                    (int) $request->user()->id,
+                    (string) $request->ip(),
+                    $request->userAgent()
+                );
+            }
 
             return $this->successResponse(new CommerceResource($commerce), 'Commerce created successfully', Response::HTTP_CREATED);
         } catch (\Throwable $e) {
@@ -231,7 +249,27 @@ class CommerceController extends Controller
     public function update(UpdateCommerceRequest $request, int $commerce_id): JsonResponse
     {
         try {
-            $commerce = $this->commerceService->update($commerce_id, $request->validated());
+            $validated = $request->validated();
+            $previousFranchiseDeclaration = $this->commerceService->show($commerce_id)->operates_under_franchise;
+
+            $commerce = $this->commerceService->update($commerce_id, $validated);
+
+            // SCRUM-365 CA-06: solo se registra un rastro nuevo cuando el valor
+            // efectivamente cambia — el payload de UpdateCommerceRequest reenvía
+            // todos los campos en cada PUT, así que registrar sin comparar
+            // inundaría el historial con filas idénticas en cada edición ajena.
+            if (
+                array_key_exists('operates_under_franchise', $validated)
+                && (bool) $validated['operates_under_franchise'] !== (bool) $previousFranchiseDeclaration
+            ) {
+                $this->commerceFranchiseDeclarationService->record(
+                    $commerce,
+                    (bool) $validated['operates_under_franchise'],
+                    (int) $request->user()->id,
+                    (string) $request->ip(),
+                    $request->userAgent()
+                );
+            }
 
             return $this->successResponse(new CommerceResource($commerce), 'Commerce updated successfully');
         } catch (\Throwable $e) {
@@ -522,6 +560,65 @@ class CommerceController extends Controller
             Log::error('Error listing payout methods', ['error' => $e->getMessage()]);
 
             return $this->errorResponse('Error listing payout methods', 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/commerces/{commerce_id}/fiscal-codes",
+     *     operationId="getCommerceFiscalCodes",
+     *     tags={"Commerces"},
+     *     summary="Códigos fiscales disponibles para el comercio (SCRUM-362)",
+     *     description="Devuelve los códigos fiscales que el comercio puede usar en sus productos, ya filtrados por tipo de establecimiento y declaración de franquicia. Punto único de la regla — el frontend no debe reimplementarla.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="commerce_id", in="path", required=true, description="ID del comercio", @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *
+     *         @OA\JsonContent(type="object",
+     *
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="value", type="string", example="iva_19_general"),
+     *                 @OA\Property(property="label", type="string", example="IVA general"),
+     *                 @OA\Property(property="vat_rate", type="number", example=19.0),
+     *                 @OA\Property(property="applies_inc", type="boolean", example=false),
+     *                 @OA\Property(property="inc_rate", type="number", example=0.0),
+     *                 @OA\Property(property="legal_basis", type="string", nullable=true, example="Art. 468 ET")
+     *             ))
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Commerce not found")
+     * )
+     */
+    public function fiscalCodes(int $commerce_id, ShowCommerceFiscalCodesRequest $request, FiscalCodeResolver $resolver): JsonResponse
+    {
+        try {
+            $commerce = $this->commerceService->show($commerce_id);
+
+            $codes = array_map(fn ($code) => [
+                'value' => $code->value,
+                'label' => $code->label(),
+                'vat_rate' => $code->vatRate(),
+                'applies_inc' => $code->appliesInc(),
+                'inc_rate' => $code->incRate(),
+                'legal_basis' => $code->legalBasis(),
+            ], $resolver->availableFor($commerce));
+
+            return $this->successResponse($codes, 'Fiscal codes retrieved successfully');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Commerce not found', 404);
+        } catch (\Throwable $e) {
+            Log::error('Error listing fiscal codes', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Error listing fiscal codes', 500);
         }
     }
 

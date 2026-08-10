@@ -124,6 +124,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
             Route::get('{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
+            Route::get('{commerce_id}/fiscal-codes', [CommerceController::class, 'fiscalCodes']);
             Route::post('basic', [CommerceBasicDataController::class, 'store']);
 
             // Commerce Comments endpoints

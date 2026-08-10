@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Traits\ValidatesFranchiseDeclaration;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -29,6 +31,8 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class StoreCommerceRequest extends FormRequest
 {
+    use ValidatesFranchiseDeclaration;
+
     public function authorize(): bool
     {
         $user = $this->user();
@@ -57,7 +61,8 @@ class StoreCommerceRequest extends FormRequest
             'department_id' => ['required', 'integer', 'exists:departments,id'],
             'city_id' => ['required', 'integer', 'exists:cities,id'],
             'neighborhood_id' => ['required', 'integer', 'exists:neighborhoods,id'],
-            'establishment_type_id' => ['nullable', 'integer', 'exists:establishment_types,id'],
+            'establishment_type_id' => ['required', 'integer', 'exists:establishment_types,id'],
+            'operates_under_franchise' => ['sometimes', 'boolean'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:500'],
             'tax_id' => ['required', 'string', 'max:30'],
@@ -70,5 +75,19 @@ class StoreCommerceRequest extends FormRequest
             'terms_accepted_version' => ['nullable', 'integer', 'min:1'],
             'terms_accepted_at' => ['nullable', 'date'],
         ];
+    }
+
+    /**
+     * SCRUM-365: la franquicia es obligatoria para RE/PA y no aplica a RT.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $this->addFranchiseDeclarationErrors(
+                $validator,
+                (int) $this->input('establishment_type_id') ?: null,
+                'operates_under_franchise'
+            );
+        });
     }
 }
