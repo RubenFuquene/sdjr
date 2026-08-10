@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\FiscalCode;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,7 @@ class ProductCategory extends Model
      */
     protected $fillable = [
         'establishment_type_id',
+        'default_fiscal_code',
         'name',
         'description',
         'status',
@@ -47,6 +49,7 @@ class ProductCategory extends Model
         'description' => 'string',
         'status' => 'string',
         'establishment_type_id' => 'integer',
+        'default_fiscal_code' => FiscalCode::class,
     ];
 
     /**

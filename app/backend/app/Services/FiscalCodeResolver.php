@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Constants\Constant;
 use App\Enums\FiscalCode;
 use App\Models\Commerce;
+use App\Models\EstablishmentType;
 
 /**
  * SCRUM-362/365: punto único que responde qué códigos fiscales puede usar un
@@ -57,7 +58,7 @@ class FiscalCodeResolver
             return [];
         }
 
-        $codes = self::ALLOWED_CODES_BY_ESTABLISHMENT_TYPE[$establishmentType->code] ?? [];
+        $codes = $this->allowedForEstablishmentType($establishmentType, includePendingReview: false);
 
         if ($commerce->operates_under_franchise) {
             $codes = array_values(array_filter(
@@ -74,5 +75,25 @@ class FiscalCodeResolver
     public function isAllowed(Commerce $commerce, FiscalCode $code): bool
     {
         return in_array($code, $this->availableFor($commerce), true);
+    }
+
+    /**
+     * Superset sin filtrar por franquicia — usado para validar la coherencia
+     * de `default_fiscal_code` en una categoría comercial, que no está atada
+     * a un comercio concreto. El estrechamiento por franquicia ocurre
+     * siempre en `availableFor()`, al momento de sugerir el código a un
+     * comercio real.
+     *
+     * @return FiscalCode[]
+     */
+    public function allowedForEstablishmentType(EstablishmentType $establishmentType, bool $includePendingReview = true): array
+    {
+        $codes = self::ALLOWED_CODES_BY_ESTABLISHMENT_TYPE[$establishmentType->code] ?? [];
+
+        if ($includePendingReview) {
+            $codes[] = FiscalCode::PendingReview;
+        }
+
+        return $codes;
     }
 }

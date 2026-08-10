@@ -66,6 +66,7 @@ class ProductFeatureTest extends TestCase
             'product' => [
                 'commerce_id' => $commerce->id,
                 'product_category_id' => $category->id,
+                'fiscal_code' => 'iva_19_general',
                 'title' => 'Café Premium',
                 'description' => 'Café de origen especial',
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,

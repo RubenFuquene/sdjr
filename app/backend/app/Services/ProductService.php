@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Constant;
+use App\Enums\FiscalCode;
+use App\Exceptions\FiscalReclassificationConfirmationRequiredException;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
 use App\Models\Order;
@@ -80,7 +82,7 @@ class ProductService
 
             return DB::transaction(function () use ($data) {
 
-                $product = Product::create($data['product']);
+                $product = Product::create($this->applyFiscalDerivation($data['product']));
 
                 // Commerce Branches
                 $this->storeCommerceBranches($product, $data['commerce_branches'] ?? []);
@@ -95,6 +97,59 @@ class ProductService
             Log::error('Error creating Product', ['error' => $e->getMessage()]);
             throw $e;
         }
+    }
+
+    /**
+     * SCRUM-362: deriva vat_rate/applies_inc/inc_rate de fiscal_code en un
+     * solo punto — el aliado nunca digita un porcentaje, y ningún caller de
+     * store()/update() debe calcular esto por su cuenta. Sin fiscal_code en
+     * el payload (packs, o una edición parcial que no lo toca), no hay nada
+     * que derivar.
+     */
+    private function applyFiscalDerivation(array $productData): array
+    {
+        if (! array_key_exists('fiscal_code', $productData) || $productData['fiscal_code'] === null) {
+            return $productData;
+        }
+
+        $fiscalCode = $productData['fiscal_code'] instanceof FiscalCode
+            ? $productData['fiscal_code']
+            : FiscalCode::from($productData['fiscal_code']);
+
+        $productData['vat_rate'] = $fiscalCode->vatRate();
+        $productData['applies_inc'] = $fiscalCode->appliesInc();
+        $productData['inc_rate'] = $fiscalCode->incRate();
+
+        return $productData;
+    }
+
+    /**
+     * SCRUM-370: la categoría del pack se deriva del componente de mayor
+     * valor prorrateado (precio vigente × cantidad), no se le pregunta al
+     * aliado. Desempate determinista por menor product_category_id para que
+     * el resultado no dependa del orden de iteración.
+     *
+     * @param  array<int, array{product_id: int, quantity: int}>  $packageItems
+     */
+    private function deriveCategoryFromComponents(array $packageItems): ?int
+    {
+        $components = collect($packageItems)
+            ->map(fn ($item) => [
+                'product' => isset($item['product_id']) ? Product::find($item['product_id']) : null,
+                'quantity' => (int) ($item['quantity'] ?? 0),
+            ])
+            ->filter(fn (array $component) => $component['product'] !== null);
+
+        if ($components->isEmpty()) {
+            return null;
+        }
+
+        $best = $components->sortBy(fn (array $component) => [
+            -($component['product']->currentSalePrice() * $component['quantity']),
+            $component['product']->product_category_id,
+        ])->first();
+
+        return $best['product']->product_category_id;
     }
 
     /**
@@ -262,14 +317,23 @@ class ProductService
      *
      * @throws Exception
      * @throws \App\Exceptions\PackageAdjustmentConfirmationRequiredException
+     * @throws FiscalReclassificationConfirmationRequiredException
      */
-    public function update(int $id, array $data, bool $confirmPackageAdjustments = false): Product
+    public function update(int $id, array $data, bool $confirmPackageAdjustments = false, bool $confirmFiscalReclassification = false): Product
     {
         try {
 
-            return DB::transaction(function () use ($data, $id, $confirmPackageAdjustments) {
+            return DB::transaction(function () use ($data, $id, $confirmPackageAdjustments, $confirmFiscalReclassification) {
 
                 $product = Product::findOrFail($id);
+
+                $isReclassifyingToPendingReview = array_key_exists('fiscal_code', $data['product'])
+                    && $data['product']['fiscal_code'] === FiscalCode::PendingReview->value
+                    && $product->fiscal_code !== FiscalCode::PendingReview;
+
+                if ($isReclassifyingToPendingReview) {
+                    $this->cascadeUnpublishOnFiscalReclassification($product, $confirmFiscalReclassification);
+                }
 
                 $isSingleWithBranchChanges = $product->product_type === Constant::PRODUCT_TYPE_SINGLE
                     && array_key_exists('commerce_branches', $data)
@@ -281,7 +345,7 @@ class ProductService
                     )
                     : collect();
 
-                $product->update($data['product']);
+                $product->update($this->applyFiscalDerivation($data['product']));
 
                 // Commerce Branches: null = clave ausente del payload, no tocar la
                 // relacion existente. [] = clave presente y vacia, limpiar a proposito.
@@ -490,6 +554,16 @@ class ProductService
             return DB::transaction(function () use ($data) {
 
                 $data['product']['product_type'] = Constant::PRODUCT_TYPE_PACKAGE;
+
+                // SCRUM-370: la categoría no se le pregunta al pack, se deriva.
+                if (isset($data['package_items']) && is_array($data['package_items'])) {
+                    $derivedCategoryId = $this->deriveCategoryFromComponents($data['package_items']);
+
+                    if ($derivedCategoryId !== null) {
+                        $data['product']['product_category_id'] = $derivedCategoryId;
+                    }
+                }
+
                 $productPackage = $this->store($data);
 
                 $productPackage->packageItems()->detach();
@@ -519,6 +593,17 @@ class ProductService
     {
         try {
             $items['product']['product_type'] = Constant::PRODUCT_TYPE_PACKAGE;
+
+            // SCRUM-370: recalcular la categoría derivada solo cuando la
+            // composición cambia — ausente significa "no tocar" (D9/3.9).
+            if (array_key_exists('package_items', $items)) {
+                $derivedCategoryId = $this->deriveCategoryFromComponents($items['package_items'] ?? []);
+
+                if ($derivedCategoryId !== null) {
+                    $items['product']['product_category_id'] = $derivedCategoryId;
+                }
+            }
+
             $productPackage = $this->update($product_package_id, $items);
 
             // package_items ausente del payload: no tocar los items existentes
@@ -668,6 +753,10 @@ class ProductService
                 return false;
             }
 
+            if (! $this->isFiscallyPurchasable($product)) {
+                return false;
+            }
+
             $pivot = ProductCommerceBranch::query()
                 ->where('product_id', $product->id)
                 ->where('commerce_branch_id', $commerceBranchId)
@@ -679,6 +768,78 @@ class ProductService
         }
 
         return true;
+    }
+
+    /**
+     * SCRUM-362 (CR-01): un producto con fiscal_code = otro_verificar nunca
+     * puede terminar en un carrito pagado, ni suelto ni como componente de
+     * un pack. La composición ya bloquea agregar un componente así
+     * (StoreProductRequest/UpdateProductRequest), pero se revalida aquí en
+     * profundidad, en el punto real de venta — la única fuente de verdad que
+     * importa cuando hay dinero de por medio.
+     */
+    private function isFiscallyPurchasable(Product $product): bool
+    {
+        if ($product->fiscal_code === FiscalCode::PendingReview) {
+            return false;
+        }
+
+        if ($product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
+            $product->loadMissing('packageItems');
+
+            return $product->packageItems->every(
+                fn (Product $component) => $component->fiscal_code !== FiscalCode::PendingReview
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * SCRUM-362 (D9): reclasificar a otro_verificar despublica en cascada
+     * las sedes donde el producto está publicado y los packs que lo
+     * contienen — de lo contrario quedan publicados y revientan en el
+     * checkout (la guarda de compra de isFiscallyPurchasable() los rechaza,
+     * pero el aliado seguiría viéndolos como disponibles en su catálogo).
+     * Sin impacto real, no se exige confirmación — no tiene sentido
+     * molestar al aliado con una confirmación vacía.
+     *
+     * @throws FiscalReclassificationConfirmationRequiredException
+     */
+    private function cascadeUnpublishOnFiscalReclassification(Product $product, bool $confirmed): void
+    {
+        $publishedBranches = $product->commerceBranches()->wherePivot('is_published', true)->get();
+
+        $affectedPackages = $product->package()->get()->filter(
+            fn (Product $package) => $package->commerceBranches()->wherePivot('is_published', true)->exists()
+        );
+
+        if ($publishedBranches->isEmpty() && $affectedPackages->isEmpty()) {
+            return;
+        }
+
+        if (! $confirmed) {
+            throw new FiscalReclassificationConfirmationRequiredException(
+                $publishedBranches->map(fn ($branch) => [
+                    'commerce_branch_id' => $branch->id,
+                    'commerce_branch_name' => $branch->name,
+                ])->all(),
+                $affectedPackages->map(fn (Product $package) => [
+                    'package_id' => $package->id,
+                    'package_title' => $package->title,
+                ])->values()->all()
+            );
+        }
+
+        foreach ($publishedBranches as $branch) {
+            $product->commerceBranches()->updateExistingPivot($branch->id, ['is_published' => false]);
+        }
+
+        foreach ($affectedPackages as $package) {
+            foreach ($package->commerceBranches()->wherePivot('is_published', true)->get() as $branch) {
+                $package->commerceBranches()->updateExistingPivot($branch->id, ['is_published' => false]);
+            }
+        }
     }
 
     /**

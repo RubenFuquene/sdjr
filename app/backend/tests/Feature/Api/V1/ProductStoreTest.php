@@ -44,6 +44,7 @@ class ProductStoreTest extends TestCase
             'product' => [
                 'commerce_id' => $commerce->id,
                 'product_category_id' => $category->id,
+                'fiscal_code' => 'iva_19_general',
                 'title' => 'Producto Test',
                 'description' => 'Descripción de prueba',
                 'product_type' => 'single',

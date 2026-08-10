@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Enums\FiscalCode;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
 use App\Models\Product;
+use App\Services\FiscalCodeResolver;
 use App\Services\PackageCompositionValidator;
 use App\Services\ProductService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 /**
  * @OA\Schema(
@@ -94,7 +97,18 @@ class StoreProductRequest extends FormRequest
         return [
 
             'product.commerce_id' => ['required', 'integer', 'exists:commerces,id'],
-            'product.product_category_id' => ['required', 'integer', 'exists:product_categories,id'],
+            // SCRUM-370: un pack no elige categoría — se deriva de sus
+            // componentes (ProductService). Solo obligatoria para 'single'.
+            'product.product_category_id' => [
+                Rule::requiredIf(fn () => $this->input('product.product_type') !== Constant::PRODUCT_TYPE_PACKAGE),
+                'integer',
+                'exists:product_categories,id',
+            ],
+            // SCRUM-362: el aliado nunca digita porcentaje — la pertenencia al
+            // conjunto permitido del comercio y la obligatoriedad para
+            // 'single' se validan en withValidator() (validateFiscalCode()),
+            // aquí solo se garantiza que sea un valor del enum.
+            'product.fiscal_code' => ['nullable', new Enum(FiscalCode::class)],
             'product.title' => ['required', 'string', 'max:100'],
             'product.description' => ['nullable', 'string', 'max:255'],
             'product.product_type' => ['required', 'string', 'in:'.Constant::PRODUCT_TYPE_SINGLE.','.Constant::PRODUCT_TYPE_PACKAGE],
@@ -140,7 +154,68 @@ class StoreProductRequest extends FormRequest
             $this->validateCommerceBranches($validator);
             $this->validateSingleBranchPolicyForPackages($validator);
             $this->validatePackageComposition($validator);
+            $this->validateFiscalCode($validator);
+            $this->validatePackageCategoryIsDerivable($validator);
         });
+    }
+
+    /**
+     * SCRUM-362: fiscal_code es obligatorio para 'single' (los packs no
+     * llevan uno propio — D4) y debe estar dentro del conjunto que
+     * FiscalCodeResolver permite para el comercio dueño del producto, no
+     * solo ser un valor válido del enum.
+     */
+    private function validateFiscalCode(Validator $validator): void
+    {
+        if ($this->input('product.product_type') !== Constant::PRODUCT_TYPE_SINGLE) {
+            return;
+        }
+
+        $fiscalCode = $this->input('product.fiscal_code');
+
+        if ($fiscalCode === null || $fiscalCode === '') {
+            $validator->errors()->add('product.fiscal_code', 'The fiscal_code field is required for single products.');
+
+            return;
+        }
+
+        $fiscalCodeEnum = FiscalCode::tryFrom($fiscalCode);
+
+        if (! $fiscalCodeEnum) {
+            return; // Ya reportado por la regla Enum de rules().
+        }
+
+        $commerce = Commerce::find($this->input('product.commerce_id'));
+
+        if ($commerce && ! app(FiscalCodeResolver::class)->isAllowed($commerce, $fiscalCodeEnum)) {
+            $validator->errors()->add(
+                'product.fiscal_code',
+                'This fiscal_code is not allowed for the commerce establishment type.'
+            );
+        }
+    }
+
+    /**
+     * SCRUM-370: la categoría del pack se deriva del componente de mayor
+     * valor (ProductService), nunca se pregunta. Pero product_category_id
+     * sigue siendo NOT NULL en BD, así que un pack necesita al menos un
+     * componente válido para poder crearse — si no, no hay de dónde derivar.
+     */
+    private function validatePackageCategoryIsDerivable(Validator $validator): void
+    {
+        if ($this->input('product.product_type') !== Constant::PRODUCT_TYPE_PACKAGE) {
+            return;
+        }
+
+        $hasValidComponent = collect($this->input('package_items', []))
+            ->contains(fn ($item) => isset($item['product_id']) && Product::find($item['product_id']));
+
+        if (! $hasValidComponent) {
+            $validator->errors()->add(
+                'package_items',
+                'A package needs at least one valid component to determine its category.'
+            );
+        }
     }
 
     /**
@@ -191,6 +266,15 @@ class StoreProductRequest extends FormRequest
             $product = Product::find($item['product_id']);
 
             if (! $product) {
+                continue;
+            }
+
+            if ($product->fiscal_code === FiscalCode::PendingReview) {
+                $validator->errors()->add(
+                    "package_items.{$index}.product_id",
+                    "The product '{$product->title}' cannot be added to a package while its fiscal classification is pending review."
+                );
+
                 continue;
             }
 
@@ -284,6 +368,17 @@ class StoreProductRequest extends FormRequest
     {
         foreach ($this->input('commerce_branches', []) as $index => $branch) {
             if (! ($branch['is_published'] ?? false)) {
+                continue;
+            }
+
+            // SCRUM-362: un producto sin clasificar no se publica — solo
+            // aplica a 'single', un pack nunca tiene fiscal_code propio.
+            if ($this->input('product.fiscal_code') === FiscalCode::PendingReview->value) {
+                $validator->errors()->add(
+                    "commerce_branches.{$index}.is_published",
+                    'Cannot publish a product with a pending fiscal classification.'
+                );
+
                 continue;
             }
 

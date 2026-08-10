@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\FiscalCode;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $expires_at
  * @property string $product_type
  * @property string $status
+ *
+ * fiscal_code/vat_rate/applies_inc/inc_rate son nullable a nivel de BD pero
+ * obligatorios para product_type=single (SCRUM-362, exigido en el form
+ * request). Un pack NUNCA los recibe propios: se factura por sus líneas
+ * hijas (parent_package_id en OrderItem), cada una con su propio código y
+ * base ya prorrateada — facturar también al pack cobraría dos veces.
  */
 class Product extends Model
 {
@@ -31,6 +38,10 @@ class Product extends Model
     protected $fillable = [
         'commerce_id',
         'product_category_id',
+        'fiscal_code',
+        'vat_rate',
+        'applies_inc',
+        'inc_rate',
         'title',
         'description',
         'product_type',
@@ -44,6 +55,10 @@ class Product extends Model
         'id' => 'integer',
         'commerce_id' => 'integer',
         'product_category_id' => 'integer',
+        'fiscal_code' => FiscalCode::class,
+        'vat_rate' => 'float',
+        'applies_inc' => 'boolean',
+        'inc_rate' => 'float',
         'title' => 'string',
         'description' => 'string',
         'product_type' => 'string',

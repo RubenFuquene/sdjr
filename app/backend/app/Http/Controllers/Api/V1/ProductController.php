@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\FiscalReclassificationConfirmationRequiredException;
 use App\Exceptions\PackageAdjustmentConfirmationRequiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteProductRequest;
@@ -188,18 +189,28 @@ class ProductController extends Controller
      *   @OA\Response(response=401, description="Unauthenticated"),
      *   @OA\Response(response=403, description="Forbidden"),
      *   @OA\Response(response=404, description="Not found"),
-     *   @OA\Response(response=409, description="Change affects existing packs — resend with confirm_package_adjustments=true to apply (SCRUM-361)"),
+     *   @OA\Response(response=409, description="Change affects existing packs — resend with confirm_package_adjustments=true to apply (SCRUM-361). Or: reclassifying to otro_verificar would unpublish branches/packs — resend with confirm_fiscal_reclassification=true to apply (SCRUM-362)"),
      *   @OA\Response(response=422, description="Validation error")
      * )
      */
     public function update(UpdateProductRequest $request, int $id): JsonResponse
     {
         try {
-            $product = $this->productService->update($id, $request->validated(), $request->boolean('confirm_package_adjustments'));
+            $product = $this->productService->update(
+                $id,
+                $request->validated(),
+                $request->boolean('confirm_package_adjustments'),
+                $request->boolean('confirm_fiscal_reclassification')
+            );
 
             return $this->successResponse(new ProductResource($product), 'Product updated successfully', Response::HTTP_OK);
         } catch (PackageAdjustmentConfirmationRequiredException $e) {
             return $this->errorResponse($e->getMessage(), Response::HTTP_CONFLICT, ['affected_packages' => $e->affectedPackages()]);
+        } catch (FiscalReclassificationConfirmationRequiredException $e) {
+            return $this->errorResponse($e->getMessage(), Response::HTTP_CONFLICT, [
+                'affected_branches' => $e->affectedBranches(),
+                'affected_packages' => $e->affectedPackages(),
+            ]);
         } catch (Exception $e) {
             return $this->errorResponse('Error updating product', Response::HTTP_INTERNAL_SERVER_ERROR);
         }

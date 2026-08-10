@@ -450,6 +450,10 @@ Alimenta el bloque `mandante` (4 campos) y el `customer` de la factura de comisi
 > [Reintento vs. contingencia](#reintento-transitorio-vs-contingencia-dian) — requiere un job
 > recurrente propio, no solo el reintento reactivo del flujo normal.
 
+> ⚠️ **La FAN se arma desde el snapshot fiscal de `order_items`, nunca desde `products` en vivo.** Ver
+> el hueco de snapshot anotado en [Dependencias → SCRUM-362](#dependencias) — un producto reclasificado
+> entre la venta y la emisión no debe cambiar lo que ya se facturó.
+
 ### `settlements`
 
 El corte semanal por comercio. **No existe hoy en el repo y es prerequisito**: colgar la FAN de
@@ -903,6 +907,21 @@ certificación mensual con su plazo.
   puede emitir una FAN de venta válida ni calcular la ReteIVA. Nota: el T&C (cláusula 5.3) establece
   que la clasificación la declara **el comercio** y que Ñapa no la verifica — el diseño debe permitir
   capturarla por producto, individualmente y por carga masiva de catálogo.
+  > ⚠️ **Hueco de snapshot fiscal (detectado al implementar SCRUM-362, 2026-08-10).**
+  > `products.fiscal_code`/`vat_rate`/`applies_inc`/`inc_rate` reflejan la clasificación **vigente** del
+  > catálogo — no un valor congelado por venta. Un aliado puede reclasificar un producto en cualquier
+  > momento (corrigiendo un error, o porque cambió de tipo/franquicia), y el motor de FAN, tal como está
+  > descrito en este documento, leería esos campos **al momento de emitir**, no al momento de la venta.
+  > Si la emisión no es inmediata a la orden (cola, reintento, contingencia DIAN — ver
+  > [Reintento vs. contingencia](#reintento-transitorio-vs-contingencia-dian)), la FAN podría terminar
+  > liquidando un IVA distinto al que el comprador vio y aceptó al pagar.
+  >
+  > `order_items` hoy no tiene columnas fiscales propias. Antes de implementar el motor de emisión, hay
+  > que decidir el punto de congelamiento: lo más seguro es copiar `fiscal_code`/`vat_rate`/`applies_inc`/
+  > `inc_rate` a `order_items` **en el momento de crear la orden** (mismo patrón que `unit_price`, que ya
+  > se congela ahí y no se relee de `products` después). La FAN se emite siempre desde el snapshot de la
+  > orden, nunca desde el catálogo vigente. Pendiente de diseño detallado en la implementación de este
+  > ticket — anotado aquí para que no se descubra tarde, como pasó con el DSN.
 - **SCRUM-339** (migración a movii) — la pasarela debe **reportar sus retenciones por transacción**.
   Si no las expone, la certificación mensual es inviable. Coordinar antes de cerrar ese diseño.
 - **SCRUM-187** (`GET /api/v1/documents/legal`, sin iniciar) — el hueco donde vive el Contrato de

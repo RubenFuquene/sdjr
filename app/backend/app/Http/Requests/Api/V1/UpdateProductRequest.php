@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Enums\FiscalCode;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
 use App\Models\Product;
+use App\Services\FiscalCodeResolver;
 use App\Services\PackageCompositionValidator;
 use App\Services\ProductService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 /**
  * @OA\Schema(
@@ -69,7 +72,8 @@ use Illuminate\Foundation\Http\FormRequest;
  *       )
  *     )
  *   ),
- *   @OA\Property(property="confirm_package_adjustments", type="boolean", default=false, description="SCRUM-361: confirms applying automatic adjustments to packs affected by a stock decrease in this product. Without it, a 409 is returned listing the affected packs instead of applying the change.")
+ *   @OA\Property(property="confirm_package_adjustments", type="boolean", default=false, description="SCRUM-361: confirms applying automatic adjustments to packs affected by a stock decrease in this product. Without it, a 409 is returned listing the affected packs instead of applying the change."),
+ *   @OA\Property(property="confirm_fiscal_reclassification", type="boolean", default=false, description="SCRUM-362: confirms unpublishing this product's branches and any packs that contain it when reclassifying to otro_verificar. Without it, a 409 is returned listing the affected branches/packs instead of applying the change.")
  * )
  */
 class UpdateProductRequest extends FormRequest
@@ -92,6 +96,7 @@ class UpdateProductRequest extends FormRequest
 
             'product.commerce_id' => ['required', 'integer', 'exists:commerces,id'],
             'product.product_category_id' => ['sometimes', 'integer', 'exists:product_categories,id'],
+            'product.fiscal_code' => ['sometimes', 'nullable', new Enum(FiscalCode::class)],
             'product.title' => ['sometimes', 'string', 'max:100'],
             'product.description' => ['nullable', 'string', 'max:255'],
             'product.product_type' => ['sometimes', 'string', 'in:single,package'],
@@ -125,6 +130,10 @@ class UpdateProductRequest extends FormRequest
             // 409 salvo que esta bandera venga en true — entonces aplica el
             // ajuste junto con la edición, atómicamente.
             'confirm_package_adjustments' => ['sometimes', 'boolean'],
+
+            // SCRUM-362 (D9): reclasificar a otro_verificar despublica en
+            // cascada sedes y packs — 409 salvo que venga en true.
+            'confirm_fiscal_reclassification' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -139,10 +148,82 @@ class UpdateProductRequest extends FormRequest
             $existingPackage = $currentPackageId ? Product::find($currentPackageId) : null;
 
             $this->validateDiscountedPrice($validator, $existingPackage);
-            $this->validateCommerceBranches($validator);
+            $this->validateCommerceBranches($validator, $existingPackage);
             $this->validateSingleBranchPolicyForPackages($validator, $existingPackage);
             $this->validatePackageComposition($validator, $existingPackage, $currentPackageId);
+            $this->validateFiscalCode($validator, $existingPackage);
+            $this->validatePackageCategoryIsDerivable($validator, $existingPackage);
         });
+    }
+
+    /**
+     * SCRUM-362: mismo criterio que validateDiscountedPrice() — valor
+     * efectivo (payload ?? BD), porque una edición parcial puede no tocar
+     * fiscal_code y el producto ya tiene uno guardado. Fuera de rules()
+     * porque también valida pertenencia al conjunto permitido del comercio
+     * (FiscalCodeResolver), no solo la forma del valor.
+     */
+    private function validateFiscalCode(Validator $validator, ?Product $existingProduct): void
+    {
+        $productType = $this->input('product.product_type', $existingProduct?->product_type);
+
+        if ($productType !== Constant::PRODUCT_TYPE_SINGLE) {
+            return;
+        }
+
+        $fiscalCode = $this->has('product.fiscal_code')
+            ? $this->input('product.fiscal_code')
+            : $existingProduct?->fiscal_code?->value;
+
+        if ($fiscalCode === null || $fiscalCode === '') {
+            $validator->errors()->add('product.fiscal_code', 'The fiscal_code field is required for single products.');
+
+            return;
+        }
+
+        $fiscalCodeEnum = FiscalCode::tryFrom($fiscalCode);
+
+        if (! $fiscalCodeEnum) {
+            return; // Ya reportado por la regla Enum de rules().
+        }
+
+        $commerceId = $this->input('product.commerce_id', $existingProduct?->commerce_id);
+        $commerce = $commerceId ? Commerce::find($commerceId) : null;
+
+        if ($commerce && ! app(FiscalCodeResolver::class)->isAllowed($commerce, $fiscalCodeEnum)) {
+            $validator->errors()->add(
+                'product.fiscal_code',
+                'This fiscal_code is not allowed for the commerce establishment type.'
+            );
+        }
+    }
+
+    /**
+     * SCRUM-370: solo se exige cuando package_items viene en el payload —
+     * ausente significa "no tocar la composición", y la categoría ya
+     * derivada en BD sigue siendo válida sin necesidad de recalcularla.
+     */
+    private function validatePackageCategoryIsDerivable(Validator $validator, ?Product $existingPackage): void
+    {
+        if (! $this->has('package_items')) {
+            return;
+        }
+
+        $productType = $this->input('product.product_type', $existingPackage?->product_type);
+
+        if ($productType !== Constant::PRODUCT_TYPE_PACKAGE) {
+            return;
+        }
+
+        $hasValidComponent = collect($this->input('package_items', []))
+            ->contains(fn ($item) => isset($item['product_id']) && Product::find($item['product_id']));
+
+        if (! $hasValidComponent) {
+            $validator->errors()->add(
+                'package_items',
+                'A package needs at least one valid component to determine its category.'
+            );
+        }
     }
 
     /**
@@ -197,6 +278,15 @@ class UpdateProductRequest extends FormRequest
             $product = Product::find($item['product_id']);
 
             if (! $product) {
+                continue;
+            }
+
+            if ($product->fiscal_code === FiscalCode::PendingReview) {
+                $validator->errors()->add(
+                    "package_items.{$index}.product_id",
+                    "The product '{$product->title}' cannot be added to a package while its fiscal classification is pending review."
+                );
+
                 continue;
             }
 
@@ -342,10 +432,25 @@ class UpdateProductRequest extends FormRequest
      * (SCRUM-361, Tarea 5.3 — levanta el guard "packages cannot be
      * published yet" de la Fase 1).
      */
-    private function validateCommerceBranches(Validator $validator): void
+    private function validateCommerceBranches(Validator $validator, ?Product $existingProduct): void
     {
+        $fiscalCode = $this->has('product.fiscal_code')
+            ? $this->input('product.fiscal_code')
+            : $existingProduct?->fiscal_code?->value;
+
         foreach ($this->input('commerce_branches', []) as $index => $branch) {
             if (! ($branch['is_published'] ?? false)) {
+                continue;
+            }
+
+            // SCRUM-362: un producto sin clasificar no se publica — solo
+            // aplica a 'single', un pack nunca tiene fiscal_code propio.
+            if ($fiscalCode === FiscalCode::PendingReview->value) {
+                $validator->errors()->add(
+                    "commerce_branches.{$index}.is_published",
+                    'Cannot publish a product with a pending fiscal classification.'
+                );
+
                 continue;
             }
 

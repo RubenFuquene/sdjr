@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Enums\FiscalCode;
 use App\Models\Commerce;
 use App\Models\Product;
 use App\Models\ProductCommerceBranch;
@@ -81,6 +82,19 @@ class UpdateProductBranchPublicationRequest extends FormRequest
                 return;
             }
 
+            $product = Product::find($this->route('id'));
+
+            // SCRUM-362: un producto sin clasificar no se publica — solo
+            // aplica a 'single', un pack nunca tiene fiscal_code propio.
+            if ($product?->fiscal_code === FiscalCode::PendingReview) {
+                $validator->errors()->add(
+                    'is_published',
+                    'Cannot publish a product with a pending fiscal classification.'
+                );
+
+                return;
+            }
+
             if ($pivot->quantity_available === 0) {
                 $validator->errors()->add(
                     'is_published',
@@ -89,8 +103,6 @@ class UpdateProductBranchPublicationRequest extends FormRequest
 
                 return;
             }
-
-            $product = Product::find($this->route('id'));
 
             if ($product?->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
                 $this->validatePackageCapacity($validator, $product, (int) $this->route('branchId'), (int) $pivot->quantity_available);
