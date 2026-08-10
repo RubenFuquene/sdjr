@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteProductRequest;
 use App\Http\Requests\Api\V1\DestroyProductPhotoRequest;
 use App\Http\Requests\Api\V1\DismissProductBranchAutoAdjustmentRequest;
+use App\Http\Requests\Api\V1\IndexPendingFiscalClassificationRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\PatchProductStatusRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
@@ -91,6 +92,43 @@ class ProductController extends Controller
             return $this->successResponse(ProductResource::collection($products));
         } catch (Exception $e) {
             return $this->errorResponse('Error fetching products', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *   path="/api/v1/products/pending-fiscal-classification",
+     *   operationId="getPendingFiscalClassificationProducts",
+     *   tags={"Products"},
+     *   summary="Productos sin clasificar fiscalmente (SCRUM-362, CA-09)",
+     *   description="Reporte interno de productos con fiscal_code = otro_verificar. Ruta de administración.",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="commerce_id", in="query", required=false, @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *
+     *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
+     *
+     *     @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ProductResource")),
+     *     @OA\Property(property="meta", type="object"),
+     *     @OA\Property(property="links", type="object")
+     *   )),
+     *
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function pendingFiscalClassification(IndexPendingFiscalClassificationRequest $request): JsonResponse
+    {
+        try {
+            $products = $this->productService->paginatePendingFiscalClassification(
+                $request->input('commerce_id') ? (int) $request->input('commerce_id') : null,
+                $request->validatedPerPage()
+            );
+
+            return $this->paginatedResponse($products, ProductResource::collection($products), 'Pending fiscal classification products retrieved successfully');
+        } catch (Exception $e) {
+            return $this->errorResponse('Error fetching pending fiscal classification products', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

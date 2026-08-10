@@ -438,14 +438,31 @@ class UpdateProductRequest extends FormRequest
             ? $this->input('product.fiscal_code')
             : $existingProduct?->fiscal_code?->value;
 
+        // SCRUM-362 (D9): el formulario de edición reenvía siempre el estado
+        // completo de commerce_branches, incluidas las sedes que ya estaban
+        // publicadas y que el aliado no tocó. Sin distinguir eso de un
+        // intento nuevo de publicar, este guard bloquearía con 422 antes de
+        // que la cascada de confirmación (cascadeUnpublishOnFiscalReclassification)
+        // tuviera oportunidad de ofrecer el 409 — dejando esa ruta inalcanzable
+        // desde el formulario real. Solo bloquea un intento GENUINO de
+        // publicar (una sede que no estaba publicada antes); una sede que ya
+        // estaba publicada y sigue viniendo en true es responsabilidad de la
+        // cascada, no de este guard.
+        $previouslyPublishedBranchIds = $existingProduct
+            ? $existingProduct->commerceBranches()->wherePivot('is_published', true)->pluck('commerce_branches.id')->all()
+            : [];
+
         foreach ($this->input('commerce_branches', []) as $index => $branch) {
             if (! ($branch['is_published'] ?? false)) {
                 continue;
             }
 
-            // SCRUM-362: un producto sin clasificar no se publica — solo
-            // aplica a 'single', un pack nunca tiene fiscal_code propio.
-            if ($fiscalCode === FiscalCode::PendingReview->value) {
+            $branchId = (int) ($branch['commerce_branch_id'] ?? 0);
+            $wasAlreadyPublished = in_array($branchId, $previouslyPublishedBranchIds, true);
+
+            // SCRUM-362: un producto sin clasificar no se publica de nuevo —
+            // solo aplica a 'single', un pack nunca tiene fiscal_code propio.
+            if ($fiscalCode === FiscalCode::PendingReview->value && ! $wasAlreadyPublished) {
                 $validator->errors()->add(
                     "commerce_branches.{$index}.is_published",
                     'Cannot publish a product with a pending fiscal classification.'

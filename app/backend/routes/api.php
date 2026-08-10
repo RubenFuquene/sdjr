@@ -172,6 +172,9 @@ Route::prefix('v1')->group(function () {
         });
 
         // Product Management routes
+        // SCRUM-362: registrada antes del apiResource — {product} del resource
+        // capturaría 'pending-fiscal-classification' como id si fuera después.
+        Route::get('products/pending-fiscal-classification', [ProductController::class, 'pendingFiscalClassification']);
         Route::apiResource('products', ProductController::class);
         Route::patch('products/{id}/status', [ProductController::class, 'patchStatus']);
         Route::patch('products/{id}/branches/{branchId}', [ProductController::class, 'patchBranchPublication']);

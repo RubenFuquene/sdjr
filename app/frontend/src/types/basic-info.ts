@@ -53,6 +53,10 @@ export interface BasicInfoFormData {
   // Autodeclaración: ¿obligado a emitir factura electrónica? null = sin responder aún
   electronicInvoicingRequired: boolean | null;
 
+  // SCRUM-365: ¿opera bajo franquicia? Solo aplica a RE/PA (Art. 426 ET).
+  // null = sin responder aún; irrelevante y no se envía para RT.
+  operatesUnderFranchise: boolean | null;
+
   // Representante Legal
   legalRepresentative: LegalRepresentative;
 
@@ -85,6 +89,7 @@ export interface FormErrors {
   identity?: string;
   commerceChamber?: string;
   electronicInvoicingRequired?: string;
+  operatesUnderFranchise?: string;
   rut?: string;
   form1876?: string;
   observations?: string;
@@ -114,6 +119,7 @@ export const INITIAL_BASIC_INFO_FORM: BasicInfoFormData = {
   mainAddress: '',
 
   electronicInvoicingRequired: null,
+  operatesUnderFranchise: null,
 
   legalRepresentative: {
     firstName: '',
@@ -142,6 +148,14 @@ export const DOCUMENT_TYPE_OPTIONS = [
   { value: 'ce', label: 'Cédula de Extranjería' },
   { value: 'passport', label: 'Pasaporte' },
 ];
+
+/**
+ * SCRUM-365: códigos reales de tipo de establecimiento (seeder del backend)
+ * que prestan servicio de expendio de comidas (Art. 426 ET) y por tanto
+ * pueden declarar operación bajo franquicia. Espejo de
+ * Constant::FRANCHISE_ELIGIBLE_ESTABLISHMENT_TYPE_CODES.
+ */
+export const FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES = ['RE', 'PA'];
 
 export const ESTABLISHMENT_TYPE_OPTIONS = [
   { value: 'restaurant', label: 'Restaurante' },

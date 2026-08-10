@@ -56,6 +56,11 @@ export interface ProductFromAPI {
   id: number;
   commerce_id: number;
   product_category_id: number;
+  /** SCRUM-362: null solo en packs — nunca llevan clasificación propia, se facturan por sus líneas hijas. */
+  fiscal_code?: string | null;
+  vat_rate?: number | null;
+  applies_inc?: boolean | null;
+  inc_rate?: number | null;
   title: string;
   description: string | null;
   product_type: ProductType;
@@ -74,14 +79,42 @@ export interface ProductCategoryFromAPI {
   id: number;
   name: string;
   description: string | null;
+  establishment_type_id?: number | null;
+  /** SCRUM-362: sugerencia de código fiscal — nunca se aplica a ciegas, pasa por el resolver del comercio. */
+  default_fiscal_code?: string | null;
   status: string;
   created_at: string;
   updated_at: string;
 }
 
+/** SCRUM-362: opción del desplegable de código fiscal — GET /commerces/{id}/fiscal-codes. */
+export interface FiscalCodeOption {
+  value: string;
+  label: string;
+  vat_rate: number;
+  applies_inc: boolean;
+  inc_rate: number;
+  legal_basis: string | null;
+}
+
+/** SCRUM-362 (D9): sede afectada por una despublicación en cascada al reclasificar a "otro_verificar". */
+export interface AffectedFiscalBranch {
+  commerceBranchId: number;
+  commerceBranchName: string;
+}
+
+/** SCRUM-362 (D9): pack afectado por la misma cascada. */
+export interface AffectedFiscalPackage {
+  packageId: number;
+  packageTitle: string;
+}
+
 export interface ProductFormInput {
   commerceId: number;
+  /** SCRUM-370: obligatorio solo para 'single' — un pack la deriva de sus componentes, nunca se pregunta. */
   productCategoryId: number;
+  /** SCRUM-362: obligatorio solo para 'single' — un pack nunca lleva clasificación propia. */
+  fiscalCode?: string | null;
   title: string;
   description?: string | null;
   productType: ProductType;
@@ -110,6 +143,12 @@ export interface ProductFormInput {
    * cambio con impacto responde 409 en vez de aplicarse.
    */
   confirmPackageAdjustments?: boolean;
+  /**
+   * SCRUM-362 (D9): confirma despublicar en cascada sedes y packs al
+   * reclasificar a "otro_verificar". Sin esto, un cambio con impacto
+   * responde 409 en vez de aplicarse.
+   */
+  confirmFiscalReclassification?: boolean;
 }
 
 export type ProviderProductFormFieldErrors = Record<string, string>;

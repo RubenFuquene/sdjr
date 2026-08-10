@@ -18,6 +18,8 @@ import type {
 } from './commerces';
 import { normalizeCommerceVerificationStatus } from './commerces';
 import type { BasicInfoFormData, DocumentType } from './basic-info';
+import { FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES } from './basic-info';
+import type { EstablishmentType } from '@/lib/api/establishment-types';
 
 // ============================================
 // Mapeadores Principales
@@ -449,12 +451,23 @@ export const obtenerLabelEstado = (activo: boolean, verificado: boolean): string
  */
 export const basicInfoToCommerceBasicPayload = (
   formData: BasicInfoFormData,
-  ownerUserId: number
+  ownerUserId: number,
+  establishmentTypes: EstablishmentType[] = []
 ): CommerceBasicPayload => {
   const departmentId = requireNumber(formData.departmentId, 'department_id');
   const cityId = requireNumber(formData.cityId, 'city_id');
   const neighborhoodId = parseNeighborhoodId(formData.neighborhood);
   const establishmentTypeId = parseEstablishmentTypeId(formData.establishmentType);
+
+  // SCRUM-365 (CR-01): el backend rechaza el campo si el tipo es RT — se
+  // omite la clave por completo, no basta con enviar `false`.
+  const selectedEstablishmentType = establishmentTypes.find(
+    (type) => type.id === establishmentTypeId
+  );
+  const isFranchiseEligible = Boolean(
+    selectedEstablishmentType &&
+      FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES.includes(selectedEstablishmentType.code)
+  );
 
   return {
     commerce: {
@@ -473,6 +486,9 @@ export const basicInfoToCommerceBasicPayload = (
       is_verified: 0,
       is_active: true,
       electronic_invoicing_required: formData.electronicInvoicingRequired ?? false,
+      ...(isFranchiseEligible
+        ? { operates_under_franchise: formData.operatesUnderFranchise ?? false }
+        : {}),
     },
     legal_representative: {
       name: formData.legalRepresentative?.firstName?.trim() || 'N/A',

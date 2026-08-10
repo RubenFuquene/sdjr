@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/admin/shared/confirmation-dialog";
-import { PackageAdjustmentConfirmationDialog } from "../shared";
+import { FiscalReclassificationConfirmationDialog, PackageAdjustmentConfirmationDialog } from "../shared";
 import { ApiError, getPackageItemsByProductId, getProductById } from "@/lib/api";
 import { useProviderBranches, useProviderProductForm, useProviderProducts } from "@/hooks/index";
 import type { ProductFromAPI, ProviderProductFormInput } from "@/types/products";
@@ -32,10 +32,12 @@ export function ProductsPageClient() {
     error: formError,
     fieldErrors,
     affectedPackages,
+    fiscalReclassificationImpact,
     createProduct,
     updateProduct,
     deleteProduct,
     clearAffectedPackages,
+    clearFiscalReclassificationImpact,
     resetErrors,
   } =
     useProviderProductForm();
@@ -92,6 +94,7 @@ export function ProductsPageClient() {
     description: product.description,
     productType: product.product_type,
     productCategoryId: product.product_category_id,
+    fiscalCode: product.fiscal_code,
     originalPrice: product.original_price,
     discountedPrice: product.discounted_price,
     // SCRUM-361: ambos tipos reconstruyen la asignación multi-sede completa
@@ -227,6 +230,31 @@ export function ProductsPageClient() {
     clearAffectedPackages();
   };
 
+  const handleConfirmFiscalReclassification = async () => {
+    if (!pendingConfirmation) {
+      return;
+    }
+
+    const updated = await updateProduct(pendingConfirmation.productId, {
+      ...pendingConfirmation.input,
+      confirmFiscalReclassification: true,
+    });
+
+    if (!updated) {
+      return;
+    }
+
+    setPendingConfirmation(null);
+    await refresh();
+    closeModal();
+    toast.success("Producto actualizado y despublicado donde correspondía");
+  };
+
+  const handleCancelFiscalReclassification = () => {
+    setPendingConfirmation(null);
+    clearFiscalReclassificationImpact();
+  };
+
   const handleDeleteProduct = (product: ProductFromAPI) => {
     setProductPendingDeletion(product);
   };
@@ -287,6 +315,15 @@ export function ProductsPageClient() {
         isLoading={submitting}
         onConfirm={handleConfirmPackageAdjustment}
         onCancel={handleCancelPackageAdjustment}
+      />
+
+      <FiscalReclassificationConfirmationDialog
+        isOpen={Boolean(fiscalReclassificationImpact)}
+        affectedBranches={fiscalReclassificationImpact?.affectedBranches ?? []}
+        affectedPackages={fiscalReclassificationImpact?.affectedPackages ?? []}
+        isLoading={submitting}
+        onConfirm={handleConfirmFiscalReclassification}
+        onCancel={handleCancelFiscalReclassification}
       />
 
       <ConfirmationDialog

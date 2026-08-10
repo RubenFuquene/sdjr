@@ -4,6 +4,7 @@ import { parseDecimal } from "./product-form.utils";
 export interface ProductFormValidationErrors {
   title?: string;
   productCategoryId?: string;
+  fiscalCode?: string;
   originalPrice?: string;
   discountedPrice?: string;
   branches?: string;
@@ -13,6 +14,7 @@ export interface ProductFormValidationErrors {
 type ProductFormValidationInput = {
   title: string;
   productCategoryId: string;
+  fiscalCode: string;
   originalPrice: string;
   discountedPrice: string;
   branches: ProductBranchAssignment[];
@@ -31,8 +33,14 @@ export function validateProductForm(
     nextErrors.title = "El nombre del producto es obligatorio.";
   }
 
-  if (!input.productCategoryId) {
+  // SCRUM-370: un pack no elige categoría, se deriva de sus componentes.
+  if (input.productType !== "package" && !input.productCategoryId) {
     nextErrors.productCategoryId = "Selecciona una categoría.";
+  }
+
+  // SCRUM-362: un pack nunca lleva clasificación fiscal propia.
+  if (input.productType !== "package" && !input.fiscalCode) {
+    nextErrors.fiscalCode = "Selecciona una clasificación fiscal.";
   }
 
   const parsedOriginalPrice = parseDecimal(input.originalPrice);

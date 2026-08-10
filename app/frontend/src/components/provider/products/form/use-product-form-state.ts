@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import type {
+  FiscalCodeOption,
   ProductBranchAssignment,
+  ProductCategoryFromAPI,
   ProductType,
   ProviderProductFormFieldErrors,
   ProviderProductFormInput,
@@ -67,6 +69,10 @@ type UseProductFormStateParams = {
   initialData?: ProductFormInitialData | null;
   fieldErrors: ProviderProductFormFieldErrors;
   packItemOptions: PackItemOption[];
+  /** SCRUM-362 (5.3): categorías cargadas, para sugerir default_fiscal_code al elegir una. */
+  categories: ProductCategoryFromAPI[];
+  /** SCRUM-362: conjunto de códigos fiscales permitidos para el comercio (Tarea 2). */
+  fiscalCodeOptions: FiscalCodeOption[];
   onSubmit: (input: ProviderProductFormInput) => Promise<void>;
 };
 
@@ -74,13 +80,16 @@ export function useProductFormState({
   initialData,
   fieldErrors,
   packItemOptions,
+  categories,
+  fiscalCodeOptions,
   onSubmit,
 }: UseProductFormStateParams) {
   const initialDraft = mapInitialDataToDraft(initialData);
 
   const [title, setTitle] = useState(initialDraft.title);
   const [productType, setProductType] = useState<ProductType>(initialDraft.productType);
-  const [productCategoryId, setProductCategoryId] = useState(initialDraft.productCategoryId);
+  const [productCategoryId, setProductCategoryIdState] = useState(initialDraft.productCategoryId);
+  const [fiscalCode, setFiscalCode] = useState(initialDraft.fiscalCode);
   const [originalPrice, setOriginalPrice] = useState(initialDraft.originalPrice);
   const [discountedPrice, setDiscountedPrice] = useState(initialDraft.discountedPrice);
   const [description, setDescription] = useState(initialDraft.description);
@@ -112,6 +121,7 @@ export function useProductFormState({
       title: localErrors.title ?? fieldErrors["product.title"],
       productCategoryId:
         localErrors.productCategoryId ?? fieldErrors["product.product_category_id"],
+      fiscalCode: localErrors.fiscalCode ?? fieldErrors["product.fiscal_code"],
       originalPrice: localErrors.originalPrice ?? fieldErrors["product.original_price"],
       discountedPrice:
         localErrors.discountedPrice ?? fieldErrors["product.discounted_price"],
@@ -262,6 +272,7 @@ export function useProductFormState({
     const nextErrors = validateProductForm({
       title,
       productCategoryId,
+      fiscalCode,
       originalPrice: effectiveOriginalPrice,
       discountedPrice,
       branches,
@@ -279,6 +290,26 @@ export function useProductFormState({
 
     if (nextType === "single") {
       setPackageItems([]);
+    }
+  };
+
+  /**
+   * SCRUM-362 (5.3): sugiere el default_fiscal_code de la categoría elegida,
+   * pero nunca a ciegas — solo si está dentro del conjunto que el comercio
+   * tiene permitido (fiscalCodeOptions ya viene filtrado por franquicia
+   * desde el backend, Tarea 2). El aliado puede sobrescribirla después
+   * eligiendo otro valor en el desplegable de código fiscal.
+   */
+  const handleProductCategoryChange = (nextCategoryId: string) => {
+    setProductCategoryIdState(nextCategoryId);
+    setLocalErrors((previous) => ({ ...previous, productCategoryId: undefined }));
+
+    const category = categories.find((item) => String(item.id) === nextCategoryId);
+    const suggestion = category?.default_fiscal_code;
+
+    if (suggestion && fiscalCodeOptions.some((option) => option.value === suggestion)) {
+      setFiscalCode(suggestion);
+      setLocalErrors((previous) => ({ ...previous, fiscalCode: undefined }));
     }
   };
 
@@ -437,6 +468,7 @@ export function useProductFormState({
         commerceId: initialData?.commerceId,
         title,
         productCategoryId,
+        fiscalCode,
         productType,
         originalPrice: parsedOriginalPrice,
         discountedPrice: parsedDiscountedPrice,
@@ -453,7 +485,9 @@ export function useProductFormState({
     productType,
     handleProductTypeChange,
     productCategoryId,
-    setProductCategoryId,
+    handleProductCategoryChange,
+    fiscalCode,
+    setFiscalCode,
     originalPrice: effectiveOriginalPrice,
     setOriginalPrice,
     discountedPrice,

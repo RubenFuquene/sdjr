@@ -72,6 +72,24 @@ class ProductService
     }
 
     /**
+     * SCRUM-362 (CA-09): reporte interno de productos sin clasificar.
+     * Eager-load de `commerce` para que el listado muestre a qué comercio
+     * pertenece cada uno sin una consulta por fila.
+     */
+    public function paginatePendingFiscalClassification(?int $commerceId, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = Product::query()
+            ->with('commerce')
+            ->where('fiscal_code', FiscalCode::PendingReview);
+
+        if ($commerceId !== null) {
+            $query->where('commerce_id', $commerceId);
+        }
+
+        return $query->orderBy('created_at')->paginate($perPage);
+    }
+
+    /**
      * Store a new product.
      *
      * @throws Exception
@@ -331,9 +349,16 @@ class ProductService
                     && $data['product']['fiscal_code'] === FiscalCode::PendingReview->value
                     && $product->fiscal_code !== FiscalCode::PendingReview;
 
-                if ($isReclassifyingToPendingReview) {
-                    $this->cascadeUnpublishOnFiscalReclassification($product, $confirmFiscalReclassification);
-                }
+                // SCRUM-362 (D9): el impacto se calcula y, si hace falta, se
+                // exige confirmación ANTES de escribir nada. Pero la
+                // despublicación en sí se aplica DESPUÉS de
+                // storeCommerceBranches() — el formulario real reenvía
+                // siempre el estado completo de sedes, incluidas las que ya
+                // estaban publicadas y el aliado no tocó, y ese sync()
+                // pisaría la despublicación si corriera primero.
+                $fiscalReclassificationImpact = $isReclassifyingToPendingReview
+                    ? $this->resolveFiscalReclassificationImpact($product, $confirmFiscalReclassification)
+                    : null;
 
                 $isSingleWithBranchChanges = $product->product_type === Constant::PRODUCT_TYPE_SINGLE
                     && array_key_exists('commerce_branches', $data)
@@ -360,6 +385,10 @@ class ProductService
                     if ($touchedBranchIds->isNotEmpty()) {
                         $this->packageCommitmentSyncService->syncAfterComponentEdit($product, $touchedBranchIds, $confirmPackageAdjustments);
                     }
+                }
+
+                if ($fiscalReclassificationImpact) {
+                    $this->applyFiscalUnpublishCascade($fiscalReclassificationImpact);
                 }
 
                 return $product->load(['photos', 'commerceBranches']);
@@ -796,17 +825,21 @@ class ProductService
     }
 
     /**
-     * SCRUM-362 (D9): reclasificar a otro_verificar despublica en cascada
-     * las sedes donde el producto está publicado y los packs que lo
-     * contienen — de lo contrario quedan publicados y revientan en el
-     * checkout (la guarda de compra de isFiscallyPurchasable() los rechaza,
-     * pero el aliado seguiría viéndolos como disponibles en su catálogo).
-     * Sin impacto real, no se exige confirmación — no tiene sentido
-     * molestar al aliado con una confirmación vacía.
+     * SCRUM-362 (D9): calcula el impacto de reclasificar a otro_verificar
+     * (sedes publicadas del producto y packs que lo contienen y están
+     * publicados) y exige confirmación si hay impacto real. Deliberadamente
+     * NO aplica la despublicación aquí — solo detecta y, si hace falta,
+     * lanza la excepción — porque debe ejecutarse ANTES de escribir nada,
+     * mientras que aplicar el cambio debe esperar a DESPUÉS de
+     * storeCommerceBranches() (ver applyFiscalUnpublishCascade()). Sin
+     * impacto real, no se exige confirmación — no tiene sentido molestar al
+     * aliado con una confirmación vacía.
+     *
+     * @return array{product: Product, branches: \Illuminate\Support\Collection, packages: \Illuminate\Support\Collection}|null
      *
      * @throws FiscalReclassificationConfirmationRequiredException
      */
-    private function cascadeUnpublishOnFiscalReclassification(Product $product, bool $confirmed): void
+    private function resolveFiscalReclassificationImpact(Product $product, bool $confirmed): ?array
     {
         $publishedBranches = $product->commerceBranches()->wherePivot('is_published', true)->get();
 
@@ -815,7 +848,7 @@ class ProductService
         );
 
         if ($publishedBranches->isEmpty() && $affectedPackages->isEmpty()) {
-            return;
+            return null;
         }
 
         if (! $confirmed) {
@@ -831,11 +864,27 @@ class ProductService
             );
         }
 
-        foreach ($publishedBranches as $branch) {
-            $product->commerceBranches()->updateExistingPivot($branch->id, ['is_published' => false]);
+        return ['product' => $product, 'branches' => $publishedBranches, 'packages' => $affectedPackages];
+    }
+
+    /**
+     * SCRUM-362 (D9): aplica la despublicación en cascada calculada por
+     * resolveFiscalReclassificationImpact(). Se llama DESPUÉS de
+     * storeCommerceBranches() a propósito: el formulario real reenvía
+     * siempre el estado completo de sedes, incluidas las que ya estaban
+     * publicadas y el aliado no tocó, y ese sync() pisaría esta
+     * despublicación si corriera antes — aquí siempre gana la última
+     * escritura.
+     *
+     * @param  array{product: Product, branches: \Illuminate\Support\Collection, packages: \Illuminate\Support\Collection}  $impact
+     */
+    private function applyFiscalUnpublishCascade(array $impact): void
+    {
+        foreach ($impact['branches'] as $branch) {
+            $impact['product']->commerceBranches()->updateExistingPivot($branch->id, ['is_published' => false]);
         }
 
-        foreach ($affectedPackages as $package) {
+        foreach ($impact['packages'] as $package) {
             foreach ($package->commerceBranches()->wherePivot('is_published', true)->get() as $branch) {
                 $package->commerceBranches()->updateExistingPivot($branch->id, ['is_published' => false]);
             }

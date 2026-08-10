@@ -8,7 +8,7 @@ import type {
   ProviderProductFormInput,
 } from "@/types/products";
 import { FormField, InputField, SelectField, Textarea } from "@/components/provider/ui";
-import { useProductCategories } from "@/hooks/index";
+import { useCommerceFiscalCodes, useProductCategories } from "@/hooks/index";
 import type { ProductBranchOption } from "./product-form-modal";
 import { ProductTypeToggle } from "./product-type-toggle";
 import { ProductPackItemsSelector } from "./product-pack-items-selector";
@@ -26,6 +26,7 @@ export interface ProductFormInitialData {
   description?: string | null;
   productType?: "single" | "package";
   productCategoryId?: number;
+  fiscalCode?: string | null;
   originalPrice?: number;
   discountedPrice?: number | null;
   /** Asignación multi-sede, para ambos tipos de producto (SCRUM-361). */
@@ -59,6 +60,11 @@ export function ProductForm({
   const titleRef = useRef<HTMLInputElement>(null);
 
   const { categories, categoriesLoading, categoriesError } = useProductCategories();
+  const {
+    fiscalCodes,
+    fiscalCodesLoading,
+    fiscalCodesError,
+  } = useCommerceFiscalCodes(initialData?.commerceId);
 
   // SCRUM-361: cada candidato trae su disponibilidad por sede (no un único
   // número global) — el armado de packs filtra y calcula por sede
@@ -85,7 +91,9 @@ export function ProductForm({
     productType,
     handleProductTypeChange,
     productCategoryId,
-    setProductCategoryId,
+    handleProductCategoryChange,
+    fiscalCode,
+    setFiscalCode,
     originalPrice,
     setOriginalPrice,
     discountedPrice,
@@ -113,6 +121,8 @@ export function ProductForm({
     initialData,
     fieldErrors,
     packItemOptions,
+    categories,
+    fiscalCodeOptions: fiscalCodes,
     onSubmit,
   });
 
@@ -123,6 +133,10 @@ export function ProductForm({
   const categoryOptions = useMemo(() => {
     return categories.map((category) => ({ value: String(category.id), label: category.name }));
   }, [categories]);
+
+  const fiscalCodeOptions = useMemo(() => {
+    return fiscalCodes.map((option) => ({ value: option.value, label: option.label }));
+  }, [fiscalCodes]);
 
   const packItemSelectorOptions = useMemo(() => {
     return candidateOptions.map((option) => {
@@ -186,25 +200,58 @@ export function ProductForm({
         placeholder="Ej: Hamburguesa Especial"
       />
 
-      <div className="space-y-2">
-        <SelectField
-          id="product-category"
-          label="Categoría"
-          required
-          value={productCategoryId}
-          onValueChange={setProductCategoryId}
-          disabled={submitting || categoriesLoading}
-          error={mergedErrors.productCategoryId}
-          describedBy={categoriesError ? "product-category-fetch-error" : undefined}
-          placeholder="Selecciona una categoría"
-          options={categoryOptions}
-        />
-        {categoriesError ? (
-          <p id="product-category-fetch-error" className="text-sm text-red-600">
-            {categoriesError}
-          </p>
-        ) : null}
-      </div>
+      {/* SCRUM-370: un pack no elige categoría — se deriva de sus
+          componentes por valor prorrateado. Preguntarla no tiene respuesta
+          correcta cuando el pack mezcla varias categorías. */}
+      {productType === "single" ? (
+        <div className="space-y-2">
+          <SelectField
+            id="product-category"
+            label="Categoría"
+            required
+            value={productCategoryId}
+            onValueChange={handleProductCategoryChange}
+            disabled={submitting || categoriesLoading}
+            error={mergedErrors.productCategoryId}
+            describedBy={categoriesError ? "product-category-fetch-error" : undefined}
+            placeholder="Selecciona una categoría"
+            options={categoryOptions}
+          />
+          {categoriesError ? (
+            <p id="product-category-fetch-error" className="text-sm text-red-600">
+              {categoriesError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* SCRUM-362: clasificación fiscal obligatoria por producto. El
+          aliado nunca digita un porcentaje — el desplegable solo muestra
+          las etiquetas que FiscalCodeResolver permite para este comercio
+          (tipo de establecimiento + franquicia), y se sugiere sola al
+          elegir categoría (handleProductCategoryChange). */}
+      {productType === "single" ? (
+        <div className="space-y-2">
+          <SelectField
+            id="product-fiscal-code"
+            label="Clasificación fiscal"
+            required
+            value={fiscalCode}
+            onValueChange={setFiscalCode}
+            disabled={submitting || fiscalCodesLoading}
+            error={mergedErrors.fiscalCode}
+            describedBy={fiscalCodesError ? "product-fiscal-code-fetch-error" : undefined}
+            placeholder={fiscalCodesLoading ? "Cargando clasificaciones..." : "Selecciona una clasificación"}
+            options={fiscalCodeOptions}
+            helperText="Esta clasificación determina el IVA o INC que se aplicará en tu factura. Si no estás seguro, selecciona &quot;No estoy seguro&quot; y el equipo de ÑAPA te contactará."
+          />
+          {fiscalCodesError ? (
+            <p id="product-fiscal-code-fetch-error" className="text-sm text-red-600">
+              {fiscalCodesError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Ajuste 2026-08-04: referencia de precio de lista antes de la grilla
           principal — sin esto, "Precio" (que para un pack ya es la suma CON
