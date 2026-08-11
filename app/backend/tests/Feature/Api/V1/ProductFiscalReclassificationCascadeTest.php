@@ -69,9 +69,10 @@ class ProductFiscalReclassificationCascadeTest extends TestCase
         ]);
 
         $response->assertStatus(409);
-        $response->assertJsonPath('errors.affected_branches.0.commerce_branch_id', $branchA->id);
-        $response->assertJsonPath('errors.affected_branches.1.commerce_branch_id', $branchB->id);
-        $response->assertJsonPath('errors.affected_packages.0.package_id', $pack->id);
+        $response->assertJsonPath('errors.fiscal.affected_branches.0.commerce_branch_id', $branchA->id);
+        $response->assertJsonPath('errors.fiscal.affected_branches.1.commerce_branch_id', $branchB->id);
+        $response->assertJsonPath('errors.fiscal.affected_packages.0.package_id', $pack->id);
+        $response->assertJsonMissingPath('errors.stock');
 
         // Nada se aplicó — ni el fiscal_code, ni la publicación.
         $this->assertDatabaseHas('products', ['id' => $product->id, 'fiscal_code' => 'iva_19_general']);
@@ -115,7 +116,7 @@ class ProductFiscalReclassificationCascadeTest extends TestCase
 
         $response = $this->putJson('/api/v1/products/'.$product->id, [
             'product' => ['commerce_id' => $commerce->id, 'fiscal_code' => 'otro_verificar'],
-            'confirm_fiscal_reclassification' => true,
+            'confirm_changes' => true,
         ]);
 
         $response->assertOk();
@@ -168,14 +169,15 @@ class ProductFiscalReclassificationCascadeTest extends TestCase
         ]);
 
         $response->assertStatus(409);
-        $response->assertJsonPath('errors.affected_branches.0.commerce_branch_id', $branch->id);
+        $response->assertJsonPath('errors.fiscal.affected_branches.0.commerce_branch_id', $branch->id);
+        $response->assertJsonMissingPath('errors.stock');
 
         $confirmed = $this->putJson('/api/v1/products/'.$product->id, [
             'product' => ['commerce_id' => $commerce->id, 'fiscal_code' => 'otro_verificar'],
             'commerce_branches' => [
                 ['commerce_branch_id' => $branch->id, 'quantity_available' => 5, 'is_published' => true],
             ],
-            'confirm_fiscal_reclassification' => true,
+            'confirm_changes' => true,
         ]);
 
         $confirmed->assertOk();

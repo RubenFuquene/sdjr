@@ -87,10 +87,14 @@ export interface UpdateProductPayload {
     quantity: number;
   }>;
   photos?: CreateProductPhotoInput[];
-  /** SCRUM-361, Tarea 3.3-3.4: confirma el ajuste automático de packs afectados. */
-  confirm_package_adjustments?: boolean;
-  /** SCRUM-362 (D9): confirma despublicar en cascada sedes y packs al reclasificar a otro_verificar. */
-  confirm_fiscal_reclassification?: boolean;
+  /**
+   * SCRUM-362/361 (unificación): confirma aplicar los cambios pendientes —
+   * ajuste automático de packs afectados por stock (SCRUM-361) y/o
+   * despublicación en cascada al reclasificar a otro_verificar (SCRUM-362,
+   * D9). Un solo flag: el backend detecta ambos motivos y los combina en un
+   * único 409 si aplican.
+   */
+  confirm_changes?: boolean;
 }
 
 export interface PackageItemFromAPI extends ProductFromAPI {
@@ -320,8 +324,7 @@ export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdatePr
     commerce_branches: normalizeBranches(input.branches),
     package_items: normalizePackageItems(input),
     photos: normalizePhotos(input),
-    confirm_package_adjustments: input.confirmPackageAdjustments,
-    confirm_fiscal_reclassification: input.confirmFiscalReclassification,
+    confirm_changes: input.confirmChanges,
   };
 }
 

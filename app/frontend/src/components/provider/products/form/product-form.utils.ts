@@ -110,7 +110,7 @@ type BuildSubmitInputParams = {
   description: string;
   branches: ProductBranchAssignment[];
   packageItems: Array<{ productId: number; quantity: number }>;
-  confirmFiscalReclassification?: boolean;
+  confirmChanges?: boolean;
 };
 
 export function buildProductFormSubmitInput(
@@ -127,7 +127,7 @@ export function buildProductFormSubmitInput(
     description,
     branches,
     packageItems,
-    confirmFiscalReclassification,
+    confirmChanges,
   } = params;
 
   return {
@@ -144,6 +144,6 @@ export function buildProductFormSubmitInput(
     branches,
     packageItems: productType === "package" ? packageItems : [],
     photos: [],
-    confirmFiscalReclassification,
+    confirmChanges,
   };
 }

@@ -14,77 +14,38 @@ import {
   updatePackageProduct,
 } from "@/lib/api";
 import type {
-  AffectedFiscalBranch,
-  AffectedFiscalPackage,
-  AffectedPackage,
   ProductFromAPI,
+  ProductUpdateConfirmationImpact,
   ProviderProductFormFieldErrors,
   ProviderProductFormInput,
 } from "@/types/products";
 
 type ApiValidationErrors = Record<string, string[] | string>;
 
-/** SCRUM-362 (D9): impacto de reclasificar a otro_verificar, del último 409. */
-export interface FiscalReclassificationImpact {
-  affectedBranches: AffectedFiscalBranch[];
-  affectedPackages: AffectedFiscalPackage[];
-}
-
 interface UseProviderProductFormReturn {
   submitting: boolean;
   error: string | null;
   fieldErrors: ProviderProductFormFieldErrors;
-  /** SCRUM-361, Tarea 3.3: packs afectados por la última edición rechazada con 409. */
-  affectedPackages: AffectedPackage[] | null;
-  /** SCRUM-362 (D9): sedes/packs que se despublicarían al reclasificar a otro_verificar. */
-  fiscalReclassificationImpact: FiscalReclassificationImpact | null;
+  /**
+   * SCRUM-362/361 (unificación): impacto del último 409 al editar — motivo
+   * fiscal y/o de stock, cada uno presente solo si aplica.
+   */
+  confirmationImpact: ProductUpdateConfirmationImpact | null;
   createProduct: (input: ProviderProductFormInput) => Promise<ProductFromAPI | null>;
   updateProduct: (productId: number, input: ProviderProductFormInput) => Promise<ProductFromAPI | null>;
   deleteProduct: (productId: number) => Promise<boolean>;
   dismissAutoAdjustment: (productId: number, branchId: number) => Promise<boolean>;
-  clearAffectedPackages: () => void;
-  clearFiscalReclassificationImpact: () => void;
+  clearConfirmationImpact: () => void;
   resetErrors: () => void;
 }
 
-function extractAffectedPackages(data: unknown): AffectedPackage[] | null {
-  if (!data || typeof data !== "object") {
+function extractFiscalImpact(raw: unknown): ProductUpdateConfirmationImpact["fiscal"] {
+  if (!raw || typeof raw !== "object") {
     return null;
   }
 
-  const errors = (data as { errors?: unknown }).errors;
-  if (!errors || typeof errors !== "object") {
-    return null;
-  }
-
-  const raw = (errors as { affected_packages?: unknown }).affected_packages;
-  if (!Array.isArray(raw) || raw.length === 0) {
-    return null;
-  }
-
-  return raw
-    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
-    .map((item) => ({
-      packageId: Number(item.package_id),
-      packageTitle: String(item.package_title ?? ""),
-      commerceBranchId: Number(item.commerce_branch_id),
-      currentQuantity: Number(item.current_quantity),
-      adjustedQuantity: Number(item.adjusted_quantity),
-    }));
-}
-
-function extractFiscalReclassificationImpact(data: unknown): FiscalReclassificationImpact | null {
-  if (!data || typeof data !== "object") {
-    return null;
-  }
-
-  const errors = (data as { errors?: unknown }).errors;
-  if (!errors || typeof errors !== "object") {
-    return null;
-  }
-
-  const rawBranches = (errors as { affected_branches?: unknown }).affected_branches;
-  const rawPackages = (errors as { affected_packages?: unknown }).affected_packages;
+  const rawBranches = (raw as { affected_branches?: unknown }).affected_branches;
+  const rawPackages = (raw as { affected_packages?: unknown }).affected_packages;
 
   const affectedBranches = Array.isArray(rawBranches)
     ? rawBranches
@@ -109,6 +70,57 @@ function extractFiscalReclassificationImpact(data: unknown): FiscalReclassificat
   }
 
   return { affectedBranches, affectedPackages };
+}
+
+function extractStockImpact(raw: unknown): ProductUpdateConfirmationImpact["stock"] {
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+
+  const rawPackages = (raw as { affected_packages?: unknown }).affected_packages;
+
+  const affectedPackages = Array.isArray(rawPackages)
+    ? rawPackages
+        .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+        .map((item) => ({
+          packageId: Number(item.package_id),
+          packageTitle: String(item.package_title ?? ""),
+          commerceBranchId: Number(item.commerce_branch_id),
+          currentQuantity: Number(item.current_quantity),
+          adjustedQuantity: Number(item.adjusted_quantity),
+        }))
+    : [];
+
+  if (affectedPackages.length === 0) {
+    return null;
+  }
+
+  return { affectedPackages };
+}
+
+/**
+ * SCRUM-362/361 (unificación): lee errors.fiscal / errors.stock, ambos
+ * namespaced por separado — a diferencia del shape viejo, aquí no hay
+ * ambigüedad posible de a qué motivo pertenece cada affected_packages.
+ */
+function extractConfirmationImpact(data: unknown): ProductUpdateConfirmationImpact | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  const errors = (data as { errors?: unknown }).errors;
+  if (!errors || typeof errors !== "object") {
+    return null;
+  }
+
+  const fiscal = extractFiscalImpact((errors as { fiscal?: unknown }).fiscal);
+  const stock = extractStockImpact((errors as { stock?: unknown }).stock);
+
+  if (!fiscal && !stock) {
+    return null;
+  }
+
+  return { fiscal, stock };
 }
 
 function extractValidationErrors(data: unknown): ProviderProductFormFieldErrors {
@@ -171,23 +183,16 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ProviderProductFormFieldErrors>({});
-  const [affectedPackages, setAffectedPackages] = useState<AffectedPackage[] | null>(null);
-  const [fiscalReclassificationImpact, setFiscalReclassificationImpact] =
-    useState<FiscalReclassificationImpact | null>(null);
+  const [confirmationImpact, setConfirmationImpact] = useState<ProductUpdateConfirmationImpact | null>(null);
 
   const resetErrors = useCallback(() => {
     setError(null);
     setFieldErrors({});
-    setAffectedPackages(null);
-    setFiscalReclassificationImpact(null);
+    setConfirmationImpact(null);
   }, []);
 
-  const clearAffectedPackages = useCallback(() => {
-    setAffectedPackages(null);
-  }, []);
-
-  const clearFiscalReclassificationImpact = useCallback(() => {
-    setFiscalReclassificationImpact(null);
+  const clearConfirmationImpact = useCallback(() => {
+    setConfirmationImpact(null);
   }, []);
 
   const createProductAction = useCallback(
@@ -260,8 +265,7 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
           }
 
           if (err.status === 409) {
-            setAffectedPackages(extractAffectedPackages(err.data));
-            setFiscalReclassificationImpact(extractFiscalReclassificationImpact(err.data));
+            setConfirmationImpact(extractConfirmationImpact(err.data));
           }
 
           setError(mapApiErrorToMessage(err));
@@ -322,14 +326,12 @@ export function useProviderProductForm(): UseProviderProductFormReturn {
     submitting,
     error,
     fieldErrors,
-    affectedPackages,
-    fiscalReclassificationImpact,
+    confirmationImpact,
     createProduct: createProductAction,
     updateProduct: updateProductAction,
     deleteProduct: deleteProductAction,
     dismissAutoAdjustment: dismissAutoAdjustmentAction,
-    clearAffectedPackages,
-    clearFiscalReclassificationImpact,
+    clearConfirmationImpact,
     resetErrors,
   };
 }

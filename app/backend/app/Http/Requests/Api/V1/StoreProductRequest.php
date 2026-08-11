@@ -272,7 +272,7 @@ class StoreProductRequest extends FormRequest
             if ($product->fiscal_code === FiscalCode::PendingReview) {
                 $validator->errors()->add(
                     "package_items.{$index}.product_id",
-                    "The product '{$product->title}' cannot be added to a package while its fiscal classification is pending review."
+                    __('products.package_composition.pending_review', ['title' => $product->title])
                 );
 
                 continue;
@@ -281,7 +281,7 @@ class StoreProductRequest extends FormRequest
             if ($product->product_type !== Constant::PRODUCT_TYPE_SINGLE) {
                 $validator->errors()->add(
                     "package_items.{$index}.product_id",
-                    "The product '{$product->title}' must be of type 'single' to be included in a package."
+                    __('products.package_composition.not_single_type', ['title' => $product->title])
                 );
 
                 continue;
@@ -307,7 +307,10 @@ class StoreProductRequest extends FormRequest
 
             $validator->errors()->add(
                 "package_items.{$missing['index']}.product_id",
-                "The product '{$missing['product']->title}' has no stock assigned in branch '{$branchName}'."
+                __('products.package_composition.missing_stock', [
+                    'title' => $missing['product']->title,
+                    'branch' => $branchName,
+                ])
             );
         }
 
@@ -321,9 +324,18 @@ class StoreProductRequest extends FormRequest
             $requested = $requestedByBranch->get($branchId, 0);
 
             if ($requested > $maxPacks) {
+                // SCRUM-227: se resuelve el nombre de sede aquí también (antes
+                // solo lo hacía la validación de missing_stock) para unificar
+                // el mensaje con el de UpdateProductRequest, que ya lo incluía.
+                $branchName = CommerceBranch::find($branchId)?->name ?? "branch #{$branchId}";
+
                 $validator->errors()->add(
                     "commerce_branches.{$branchIndexById->get($branchId)}.quantity_available",
-                    "The requested quantity_available ({$requested}) exceeds the maximum packs available in this branch given current stock (max: {$maxPacks})."
+                    __('products.package_composition.max_packs_exceeded', [
+                        'requested' => $requested,
+                        'branch' => $branchName,
+                        'max' => $maxPacks,
+                    ])
                 );
             }
         }
@@ -350,7 +362,7 @@ class StoreProductRequest extends FormRequest
         if (abs($submitted - $expected) > 0.01) {
             $validator->errors()->add(
                 'product.original_price',
-                "The package price must equal the sum of its components' current prices (expected: {$expected})."
+                __('products.package_composition.price_ceiling', ['expected' => $expected])
             );
         }
     }

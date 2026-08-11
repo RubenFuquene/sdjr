@@ -72,8 +72,7 @@ use Illuminate\Validation\Rules\Enum;
  *       )
  *     )
  *   ),
- *   @OA\Property(property="confirm_package_adjustments", type="boolean", default=false, description="SCRUM-361: confirms applying automatic adjustments to packs affected by a stock decrease in this product. Without it, a 409 is returned listing the affected packs instead of applying the change."),
- *   @OA\Property(property="confirm_fiscal_reclassification", type="boolean", default=false, description="SCRUM-362: confirms unpublishing this product's branches and any packs that contain it when reclassifying to otro_verificar. Without it, a 409 is returned listing the affected branches/packs instead of applying the change.")
+ *   @OA\Property(property="confirm_changes", type="boolean", default=false, description="SCRUM-362/361: confirms applying changes that require confirmation — automatic adjustments to packs affected by a stock decrease (SCRUM-361), and/or unpublishing branches/packs when reclassifying to otro_verificar (SCRUM-362). Without it, a 409 is returned listing whichever affected branches/packs apply (errors.fiscal and/or errors.stock) instead of applying the change.")
  * )
  */
 class UpdateProductRequest extends FormRequest
@@ -125,15 +124,13 @@ class UpdateProductRequest extends FormRequest
             'package_items.*.product_id' => ['required', 'integer', 'exists:products,id', 'distinct'],
             'package_items.*.quantity' => ['required', 'integer', 'min:1'],
 
-            // SCRUM-361, Tarea 3.3-3.4: si bajar el stock de un componente (o
-            // quitarle una sede) deja packs sobre-comprometidos, la API responde
-            // 409 salvo que esta bandera venga en true — entonces aplica el
-            // ajuste junto con la edición, atómicamente.
-            'confirm_package_adjustments' => ['sometimes', 'boolean'],
-
-            // SCRUM-362 (D9): reclasificar a otro_verificar despublica en
-            // cascada sedes y packs — 409 salvo que venga en true.
-            'confirm_fiscal_reclassification' => ['sometimes', 'boolean'],
+            // SCRUM-362/361 (unificación): si bajar el stock de un componente
+            // deja packs sobre-comprometidos (SCRUM-361, Tarea 3.3-3.4) y/o
+            // reclasificar a otro_verificar despublica sedes/packs (SCRUM-362,
+            // D9), la API responde 409 con el detalle de lo que aplique —
+            // salvo que esta bandera venga en true, en cuyo caso aplica todo
+            // lo pendiente junto con la edición, atómicamente.
+            'confirm_changes' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -284,7 +281,7 @@ class UpdateProductRequest extends FormRequest
             if ($product->fiscal_code === FiscalCode::PendingReview) {
                 $validator->errors()->add(
                     "package_items.{$index}.product_id",
-                    "The product '{$product->title}' cannot be added to a package while its fiscal classification is pending review."
+                    __('products.package_composition.pending_review', ['title' => $product->title])
                 );
 
                 continue;
@@ -293,7 +290,7 @@ class UpdateProductRequest extends FormRequest
             if ($product->product_type !== Constant::PRODUCT_TYPE_SINGLE) {
                 $validator->errors()->add(
                     "package_items.{$index}.product_id",
-                    "The product '{$product->title}' must be of type 'single' to be included in a package."
+                    __('products.package_composition.not_single_type', ['title' => $product->title])
                 );
 
                 continue;
@@ -326,7 +323,10 @@ class UpdateProductRequest extends FormRequest
 
             $validator->errors()->add(
                 "package_items.{$missing['index']}.product_id",
-                "The product '{$missing['product']->title}' has no stock assigned in branch '{$branchName}'."
+                __('products.package_composition.missing_stock', [
+                    'title' => $missing['product']->title,
+                    'branch' => $branchName,
+                ])
             );
         }
 
@@ -355,7 +355,11 @@ class UpdateProductRequest extends FormRequest
 
             $validator->errors()->add(
                 $errorKey,
-                "The requested quantity_available ({$requested}) exceeds the maximum packs available in branch '{$branchName}' given current stock (max: {$maxPacks})."
+                __('products.package_composition.max_packs_exceeded', [
+                    'requested' => $requested,
+                    'branch' => $branchName,
+                    'max' => $maxPacks,
+                ])
             );
         }
 
@@ -380,7 +384,7 @@ class UpdateProductRequest extends FormRequest
         if (abs($submitted - $expected) > 0.01) {
             $validator->errors()->add(
                 'product.original_price',
-                "The package price must equal the sum of its components' current prices (expected: {$expected})."
+                __('products.package_composition.price_ceiling', ['expected' => $expected])
             );
         }
     }

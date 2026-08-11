@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Constants\Constant;
 use App\Enums\FiscalCode;
-use App\Exceptions\FiscalReclassificationConfirmationRequiredException;
+use App\Exceptions\ProductUpdateConfirmationRequiredException;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
 use App\Models\Order;
@@ -324,24 +324,35 @@ class ProductService
     /**
      * Update a product by ID.
      *
-     * SCRUM-361, Tarea 3 (disparador manual): si el producto es un
-     * individual y la edición baja el stock de una sede o le quita la
-     * asignación, eso puede dejar packs de esa sede sobre-comprometidos.
-     * Sin $confirmPackageAdjustments, PackageCommitmentSyncService lanza
-     * PackageAdjustmentConfirmationRequiredException con el detalle — al
-     * propagarse fuera de la transacción, todo lo ya aplicado en este
-     * update() se revierte (DB::transaction hace rollback automático ante
-     * cualquier excepción). El caller (controlador) la traduce a un 409.
+     * SCRUM-362/361 (unificación — ver plan
+     * unificacionConfirmacion409Fiscal361): dos motivos independientes
+     * pueden exigir confirmación en el mismo submit — reclasificar a
+     * otro_verificar despublica sedes/packs (SCRUM-362, D9) y bajar el
+     * stock de un componente puede sobre-comprometer packs (SCRUM-361,
+     * Tarea 3). Ambos se DETECTAN antes de decidir si se exige
+     * confirmación, y solo entonces se lanza
+     * ProductUpdateConfirmationRequiredException con los que apliquen —
+     * así el aliado confirma una sola vez, en vez de que el primero en
+     * dispararse esconda al segundo.
+     *
+     * Asimetría entre ambas detecciones, a propósito: el impacto fiscal se
+     * calcula ANTES de escribir (no depende de nada que esta misma edición
+     * vaya a cambiar), pero el impacto de stock necesita el stock YA
+     * actualizado por storeCommerceBranches() para saber cuántos packs
+     * soporta de verdad — por eso se calcula DESPUÉS. Las dos cascadas de
+     * aplicación (applyFiscalUnpublishCascade / applyComponentEditAdjustments)
+     * también corren DESPUÉS de storeCommerceBranches(): el formulario real
+     * reenvía siempre el estado completo de sedes, y ese sync() pisaría
+     * cualquier cascada que corriera antes.
      *
      * @throws Exception
-     * @throws \App\Exceptions\PackageAdjustmentConfirmationRequiredException
-     * @throws FiscalReclassificationConfirmationRequiredException
+     * @throws ProductUpdateConfirmationRequiredException
      */
-    public function update(int $id, array $data, bool $confirmPackageAdjustments = false, bool $confirmFiscalReclassification = false): Product
+    public function update(int $id, array $data, bool $confirmChanges = false): Product
     {
         try {
 
-            return DB::transaction(function () use ($data, $id, $confirmPackageAdjustments, $confirmFiscalReclassification) {
+            return DB::transaction(function () use ($data, $id, $confirmChanges) {
 
                 $product = Product::findOrFail($id);
 
@@ -349,15 +360,8 @@ class ProductService
                     && $data['product']['fiscal_code'] === FiscalCode::PendingReview->value
                     && $product->fiscal_code !== FiscalCode::PendingReview;
 
-                // SCRUM-362 (D9): el impacto se calcula y, si hace falta, se
-                // exige confirmación ANTES de escribir nada. Pero la
-                // despublicación en sí se aplica DESPUÉS de
-                // storeCommerceBranches() — el formulario real reenvía
-                // siempre el estado completo de sedes, incluidas las que ya
-                // estaban publicadas y el aliado no tocó, y ese sync()
-                // pisaría la despublicación si corriera primero.
-                $fiscalReclassificationImpact = $isReclassifyingToPendingReview
-                    ? $this->resolveFiscalReclassificationImpact($product, $confirmFiscalReclassification)
+                $fiscalImpact = $isReclassifyingToPendingReview
+                    ? $this->resolveFiscalReclassificationImpact($product)
                     : null;
 
                 $isSingleWithBranchChanges = $product->product_type === Constant::PRODUCT_TYPE_SINGLE
@@ -379,16 +383,40 @@ class ProductService
                 // Photos
                 $this->storePhotos($product->id, $data['photos'] ?? []);
 
+                $stockImpact = collect();
+
                 if ($isSingleWithBranchChanges) {
                     $touchedBranchIds = $this->branchesWithReducedOrRemovedStock($previousBranchQuantities, $data['commerce_branches']);
 
                     if ($touchedBranchIds->isNotEmpty()) {
-                        $this->packageCommitmentSyncService->syncAfterComponentEdit($product, $touchedBranchIds, $confirmPackageAdjustments);
+                        $stockImpact = $this->packageCommitmentSyncService->resolveComponentEditImpact($product, $touchedBranchIds);
                     }
                 }
 
-                if ($fiscalReclassificationImpact) {
-                    $this->applyFiscalUnpublishCascade($fiscalReclassificationImpact);
+                if (($fiscalImpact || $stockImpact->isNotEmpty()) && ! $confirmChanges) {
+                    throw new ProductUpdateConfirmationRequiredException(
+                        $fiscalImpact ? [
+                            'affected_branches' => $fiscalImpact['branches']->map(fn ($branch) => [
+                                'commerce_branch_id' => $branch->id,
+                                'commerce_branch_name' => $branch->name,
+                            ])->all(),
+                            'affected_packages' => $fiscalImpact['packages']->map(fn (Product $package) => [
+                                'package_id' => $package->id,
+                                'package_title' => $package->title,
+                            ])->values()->all(),
+                        ] : null,
+                        $stockImpact->isNotEmpty() ? [
+                            'affected_packages' => $this->packageCommitmentSyncService->toStockPayload($stockImpact),
+                        ] : null
+                    );
+                }
+
+                if ($fiscalImpact) {
+                    $this->applyFiscalUnpublishCascade($fiscalImpact);
+                }
+
+                if ($stockImpact->isNotEmpty()) {
+                    $this->packageCommitmentSyncService->applyComponentEditAdjustments($stockImpact);
                 }
 
                 return $product->load(['photos', 'commerceBranches']);
@@ -827,19 +855,16 @@ class ProductService
     /**
      * SCRUM-362 (D9): calcula el impacto de reclasificar a otro_verificar
      * (sedes publicadas del producto y packs que lo contienen y están
-     * publicados) y exige confirmación si hay impacto real. Deliberadamente
-     * NO aplica la despublicación aquí — solo detecta y, si hace falta,
-     * lanza la excepción — porque debe ejecutarse ANTES de escribir nada,
-     * mientras que aplicar el cambio debe esperar a DESPUÉS de
-     * storeCommerceBranches() (ver applyFiscalUnpublishCascade()). Sin
-     * impacto real, no se exige confirmación — no tiene sentido molestar al
-     * aliado con una confirmación vacía.
+     * publicados). Detección pura — no aplica nada ni exige confirmación
+     * aquí; el caller (ProductService::update()) combina este resultado con
+     * el impacto de stock antes de decidir si exige confirmación (SCRUM-362/
+     * 361, unificación). Debe ejecutarse ANTES de escribir nada, mientras
+     * que aplicar el cambio espera a DESPUÉS de storeCommerceBranches() (ver
+     * applyFiscalUnpublishCascade()). Sin impacto real, retorna null.
      *
      * @return array{product: Product, branches: \Illuminate\Support\Collection, packages: \Illuminate\Support\Collection}|null
-     *
-     * @throws FiscalReclassificationConfirmationRequiredException
      */
-    private function resolveFiscalReclassificationImpact(Product $product, bool $confirmed): ?array
+    private function resolveFiscalReclassificationImpact(Product $product): ?array
     {
         $publishedBranches = $product->commerceBranches()->wherePivot('is_published', true)->get();
 
@@ -849,19 +874,6 @@ class ProductService
 
         if ($publishedBranches->isEmpty() && $affectedPackages->isEmpty()) {
             return null;
-        }
-
-        if (! $confirmed) {
-            throw new FiscalReclassificationConfirmationRequiredException(
-                $publishedBranches->map(fn ($branch) => [
-                    'commerce_branch_id' => $branch->id,
-                    'commerce_branch_name' => $branch->name,
-                ])->all(),
-                $affectedPackages->map(fn (Product $package) => [
-                    'package_id' => $package->id,
-                    'package_title' => $package->title,
-                ])->values()->all()
-            );
         }
 
         return ['product' => $product, 'branches' => $publishedBranches, 'packages' => $affectedPackages];

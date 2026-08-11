@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type {
   FiscalCodeOption,
   ProductBranchAssignment,
@@ -62,8 +62,44 @@ export type PackItemOption = {
   title: string;
   originalPrice: number;
   discountedPrice?: number | null;
+  /** SCRUM-362: 'otro_verificar' bloquea el uso de este producto como componente de pack. */
+  fiscalCode: string | null;
   branches: PackItemOptionBranch[];
 };
+
+/**
+ * SCRUM-362: candidato mostrado en el selector de armado de pack, ya
+ * asignado a la(s) sede(s) elegida(s) (con o sin stock) — se muestra
+ * siempre, pero solo es marcable si isSelectable es true.
+ */
+export type PackItemCandidate = PackItemOption & {
+  isSelectable: boolean;
+  disabledReason?: "stock" | "fiscal";
+};
+
+/**
+ * Única fuente de verdad de por qué un componente no es seleccionable —
+ * usada tanto por packItemCandidates (universo mostrado, sedes ya en
+ * estado) como por reconcilePackageItems (recibe branchIds explícito
+ * porque se llama antes de que el nuevo estado de sedes se refleje en el
+ * render). Fiscal tiene prioridad sobre stock si ambas aplican: es el
+ * bloqueo que el aliado no puede resolver subiendo inventario.
+ */
+function computeDisabledReason(
+  option: PackItemOption,
+  branchIds: number[]
+): "stock" | "fiscal" | undefined {
+  if (option.fiscalCode === "otro_verificar") {
+    return "fiscal";
+  }
+
+  const hasStockEverywhere = branchIds.every((branchId) => {
+    const branchStock = option.branches.find((b) => b.branchId === branchId);
+    return (branchStock?.quantityAvailable ?? 0) > 0;
+  });
+
+  return hasStockEverywhere ? undefined : "stock";
+}
 
 type UseProductFormStateParams = {
   initialData?: ProductFormInitialData | null;
@@ -101,6 +137,12 @@ export function useProductFormState({
   // SCRUM-361, Tarea 6.3: aviso de reconciliación al cambiar de sede — región
   // viva para que se anuncie, no solo aparezca visualmente (wcag.md).
   const [reconciliationNotice, setReconciliationNotice] = useState<string | null>(null);
+  // SCRUM-362: productos que se sacaron solos de packageItems (por stock o
+  // fiscal) durante esta sesión de edición — señal para la animación de
+  // pulso en su fila del selector. No se limpia: la señal es persistente
+  // mientras el formulario esté abierto (comportamiento intencional, no un
+  // aviso temporal que desaparece).
+  const [excludedProductIds, setExcludedProductIds] = useState<Set<number>>(new Set());
 
   const totalQuantityAcrossBranches = useMemo(
     () => branches.reduce((sum, branch) => sum + branch.quantityAvailable, 0),
@@ -209,22 +251,34 @@ export function useProductFormState({
     return result;
   }, [packItemOptions, initialData]);
 
-  // SCRUM-361, Tarea 6.2: candidatos = componentes con stock asignado (>0)
-  // en TODAS las sedes actualmente seleccionadas para el pack (misma regla
-  // que valida el backend, SCRUM-323). Sin ninguna sede seleccionada, no hay
-  // candidatos: primero hay que elegir dónde vivirá el pack.
-  const candidateOptions = useMemo(() => {
+  // SCRUM-362: universo MOSTRADO en el selector — todo componente asignado a
+  // la(s) sede(s) elegida(s) (con o sin stock), marcado con isSelectable/
+  // disabledReason en vez de excluido del todo. Sin ninguna sede
+  // seleccionada, no hay candidatos: primero hay que elegir dónde vivirá el
+  // pack. Si ambas razones aplican a la vez, se reporta "fiscal" — es el
+  // bloqueo que el aliado no puede resolver subiendo inventario.
+  const packItemCandidates: PackItemCandidate[] = useMemo(() => {
     if (productType !== "package" || selectedBranchIds.length === 0) {
       return [];
     }
 
-    return packItemOptions.filter((option) =>
-      selectedBranchIds.every((branchId) => {
-        const branchStock = option.branches.find((b) => b.branchId === branchId);
-        return (branchStock?.quantityAvailable ?? 0) > 0;
-      })
-    );
+    return packItemOptions
+      .filter((option) =>
+        selectedBranchIds.every((branchId) => option.branches.some((b) => b.branchId === branchId))
+      )
+      .map((option) => {
+        const disabledReason = computeDisabledReason(option, selectedBranchIds);
+        return { ...option, isSelectable: disabledReason === undefined, disabledReason };
+      });
   }, [productType, packItemOptions, selectedBranchIds]);
+
+  // SCRUM-361, Tarea 6.2: subconjunto realmente elegible — misma regla que
+  // valida el backend (SCRUM-323/362). Alimenta los cálculos de máximos por
+  // componente; el universo MOSTRADO en el selector es packItemCandidates.
+  const candidateOptions = useMemo(
+    () => packItemCandidates.filter((option) => option.isSelectable),
+    [packItemCandidates]
+  );
 
   // Límite para la cantidad de un componente por pack: lo más restrictivo
   // entre todas las sedes seleccionadas (no se puede necesitar, por pack,
@@ -313,39 +367,78 @@ export function useProductFormState({
     }
   };
 
-  /** Descarta de packageItems los componentes que ya no son candidatos válidos
-   * para el conjunto de sedes dado, avisando cuántos se quitaron (Tarea 6.3). */
+  /**
+   * Descarta de packageItems los componentes que ya no son candidatos
+   * válidos para el conjunto de sedes dado — por stock (Tarea 6.3) o por
+   * clasificación fiscal pendiente (SCRUM-362) — avisando cuántos y por
+   * qué se quitaron, y marcándolos en excludedProductIds para la animación
+   * de su fila (siguen visibles, inhabilitados, en el selector).
+   *
+   * Recibe branchIds explícito en vez de leer selectedBranchIds: se llama
+   * desde handleToggleBranch ANTES de que el nuevo estado de sedes se
+   * refleje en el render, así que el derivado packItemCandidates todavía
+   * tendría las sedes viejas en ese momento.
+   */
   const reconcilePackageItems = (branchIds: number[]) => {
     setPackageItems((previous) => {
       if (productType !== "package" || previous.length === 0) {
         return previous;
       }
 
-      const validIds = new Set(
-        packItemOptions
-          .filter((option) =>
-            branchIds.every((branchId) => {
-              const branchStock = option.branches.find((b) => b.branchId === branchId);
-              return (branchStock?.quantityAvailable ?? 0) > 0;
-            })
-          )
-          .map((option) => option.id)
-      );
+      const optionsById = new Map(packItemOptions.map((option) => [option.id, option]));
+      const removedTitlesByReason: { stock: string[]; fiscal: string[] } = { stock: [], fiscal: [] };
+      const removedIds: number[] = [];
 
-      const kept = previous.filter((item) => validIds.has(item.productId));
-      const removedCount = previous.length - kept.length;
+      const kept = previous.filter((item) => {
+        const option = optionsById.get(item.productId);
+        const reason = option ? computeDisabledReason(option, branchIds) : "stock";
 
-      if (removedCount > 0) {
-        setReconciliationNotice(
-          removedCount === 1
-            ? "Se quitó 1 producto del pack: no tiene inventario en la nueva selección de sedes."
-            : `Se quitaron ${removedCount} productos del pack: no tienen inventario en la nueva selección de sedes.`
-        );
+        if (!reason) {
+          return true;
+        }
+
+        removedTitlesByReason[reason].push(option?.title ?? `Producto #${item.productId}`);
+        removedIds.push(item.productId);
+        return false;
+      });
+
+      if (removedIds.length > 0) {
+        setExcludedProductIds((prevIds) => new Set([...prevIds, ...removedIds]));
+
+        const messages: string[] = [];
+
+        if (removedTitlesByReason.fiscal.length > 0) {
+          messages.push(
+            removedTitlesByReason.fiscal.length === 1
+              ? `Se quitó "${removedTitlesByReason.fiscal[0]}" del pack: su clasificación fiscal quedó pendiente de revisión.`
+              : `Se quitaron ${removedTitlesByReason.fiscal.length} productos del pack porque su clasificación fiscal quedó pendiente de revisión (${removedTitlesByReason.fiscal.join(", ")}).`
+          );
+        }
+
+        if (removedTitlesByReason.stock.length > 0) {
+          messages.push(
+            removedTitlesByReason.stock.length === 1
+              ? "Se quitó 1 producto del pack: no tiene inventario en la nueva selección de sedes."
+              : `Se quitaron ${removedTitlesByReason.stock.length} productos del pack: no tienen inventario en la nueva selección de sedes.`
+          );
+        }
+
+        setReconciliationNotice(messages.join(" "));
       }
 
       return kept;
     });
   };
+
+  // SCRUM-362: reconcilia también al MONTAR el formulario en modo edición —
+  // hasta ahora reconcilePackageItems solo se disparaba al cambiar de sede
+  // (handleToggleBranch); sin esto, un pack que YA contenía un componente
+  // sin stock o pendiente de revisión fiscal al abrir el formulario nunca
+  // se limpiaba solo, había que tocar la sede para que corriera.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reconcilePackageItems(selectedBranchIds);
+  }, []);
 
   const handleToggleBranch = (branchId: number) => {
     setBranches((previous) => {
@@ -501,6 +594,8 @@ export function useProductFormState({
     handleBranchPublishedChange,
     packageItems,
     candidateOptions,
+    packItemCandidates,
+    excludedProductIds,
     maxQuantityPerComponent,
     maxPacksByBranch,
     packOriginalPrice,

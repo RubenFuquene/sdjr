@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Constant;
-use App\Exceptions\PackageAdjustmentConfirmationRequiredException;
 use App\Models\Product;
 use App\Models\ProductCommerceBranch;
 use Illuminate\Support\Collection;
@@ -18,7 +17,9 @@ use Illuminate\Support\Collection;
  *
  *   - El aliado baja el stock de un componente (o le quita una sede):
  *     avisar antes, confirmar, y solo entonces aplicar (ver
- *     syncAfterComponentEdit()).
+ *     resolveComponentEditImpact() / applyComponentEditAdjustments() — el
+ *     caller, ProductService::update(), decide cuándo exigir confirmación
+ *     combinando esto con otros impactos de la misma edición, SCRUM-362).
  *   - Un cliente compra el componente y el pago se confirma: no hay a quién
  *     preguntar, así que se ajusta en silencio y se marca la fila (ver
  *     syncAfterPurchase()).
@@ -35,36 +36,42 @@ class PackageCommitmentSyncService
 
     /**
      * Disparador manual: el aliado edita el stock/sedes de un componente.
-     * Sin confirmar, lanza PackageAdjustmentConfirmationRequiredException si
-     * hay impacto — el llamador corre dentro de una transacción, así que el
-     * caller debe dejar que la excepción revierta los cambios ya aplicados.
-     * Confirmado, aplica el ajuste sin marcar auto_adjusted_at: el aliado ya
+     * Detección pura — no aplica nada ni lanza excepción. El caller (hoy,
+     * ProductService::update()) decide si exige confirmación combinándolo
+     * con otros impactos de la misma edición (SCRUM-362/361, unificación).
+     *
+     * @param  Collection<int, int>  $branchIds  Sedes donde el stock del componente pudo haber bajado o donde se le quitó la asignación.
+     * @return Collection<int, array{package: Product, pivot: ProductCommerceBranch, currentQuantity: int, adjustedQuantity: int}>
+     */
+    public function resolveComponentEditImpact(Product $component, Collection $branchIds): Collection
+    {
+        return $branchIds->flatMap(
+            fn (int $branchId) => $this->affectedPackagesForComponent($component, $branchId)
+        );
+    }
+
+    /**
+     * Aplica el ajuste ya detectado por resolveComponentEditImpact() y
+     * confirmado por el aliado. Sin marcar auto_adjusted_at: el aliado ya
      * vio el detalle y lo autorizó, marcarlo sería avisarle de algo que
      * acaba de aprobar.
      *
-     * @param  Collection<int, int>  $branchIds  Sedes donde el stock del componente pudo haber bajado o donde se le quitó la asignación.
-     *
-     * @throws PackageAdjustmentConfirmationRequiredException
+     * @param  Collection<int, array{package: Product, pivot: ProductCommerceBranch, currentQuantity: int, adjustedQuantity: int}>  $affected
      */
-    public function syncAfterComponentEdit(Product $component, Collection $branchIds, bool $confirmed): void
+    public function applyComponentEditAdjustments(Collection $affected): void
     {
-        $affected = $branchIds->flatMap(
-            fn (int $branchId) => $this->affectedPackagesForComponent($component, $branchId)
-        );
-
-        if ($affected->isEmpty()) {
-            return;
-        }
-
-        if (! $confirmed) {
-            throw new PackageAdjustmentConfirmationRequiredException(
-                $affected->map(fn (array $entry) => $this->toPayload($entry))->values()->all()
-            );
-        }
-
         foreach ($affected as $entry) {
             $this->applyAdjustment($entry, markAsAutomatic: false);
         }
+    }
+
+    /**
+     * @param  Collection<int, array{package: Product, pivot: ProductCommerceBranch, currentQuantity: int, adjustedQuantity: int}>  $affected
+     * @return array<int, array{package_id:int, package_title:string, commerce_branch_id:int, current_quantity:int, adjusted_quantity:int}>
+     */
+    public function toStockPayload(Collection $affected): array
+    {
+        return $affected->map(fn (array $entry) => $this->toPayload($entry))->values()->all();
     }
 
     /**

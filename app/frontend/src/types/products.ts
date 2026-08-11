@@ -138,17 +138,13 @@ export interface ProductFormInput {
     metadata?: Record<string, unknown>;
   }>;
   /**
-   * SCRUM-361, Tarea 3.3-3.4: confirma aplicar el ajuste automático a los
-   * packs afectados por bajar el stock de un componente. Sin esto, un
-   * cambio con impacto responde 409 en vez de aplicarse.
+   * SCRUM-362/361 (unificación): confirma aplicar los cambios pendientes de
+   * la edición — ajuste automático a packs afectados por bajar el stock de
+   * un componente (SCRUM-361) y/o despublicación en cascada de sedes/packs
+   * al reclasificar a "otro_verificar" (SCRUM-362, D9). Sin esto, un cambio
+   * con cualquiera de los dos impactos responde 409 en vez de aplicarse.
    */
-  confirmPackageAdjustments?: boolean;
-  /**
-   * SCRUM-362 (D9): confirma despublicar en cascada sedes y packs al
-   * reclasificar a "otro_verificar". Sin esto, un cambio con impacto
-   * responde 409 en vez de aplicarse.
-   */
-  confirmFiscalReclassification?: boolean;
+  confirmChanges?: boolean;
 }
 
 export type ProviderProductFormFieldErrors = Record<string, string>;
@@ -164,4 +160,15 @@ export interface AffectedPackage {
   commerceBranchId: number;
   currentQuantity: number;
   adjustedQuantity: number;
+}
+
+/**
+ * SCRUM-362/361 (unificación): impacto de un 409 al editar un producto.
+ * Cada motivo es independiente y puede venir solo o los dos a la vez — el
+ * backend los detecta ambos antes de exigir confirmación (ver plan
+ * unificacionConfirmacion409Fiscal361).
+ */
+export interface ProductUpdateConfirmationImpact {
+  fiscal: { affectedBranches: AffectedFiscalBranch[]; affectedPackages: AffectedFiscalPackage[] } | null;
+  stock: { affectedPackages: AffectedPackage[] } | null;
 }

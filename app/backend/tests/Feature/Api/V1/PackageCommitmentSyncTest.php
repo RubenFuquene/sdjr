@@ -98,9 +98,10 @@ class PackageCommitmentSyncTest extends TestCase
         ]);
 
         $response->assertStatus(409);
-        $response->assertJsonPath('errors.affected_packages.0.package_id', $pack->id);
-        $response->assertJsonPath('errors.affected_packages.0.current_quantity', 5);
-        $response->assertJsonPath('errors.affected_packages.0.adjusted_quantity', 2);
+        $response->assertJsonPath('errors.stock.affected_packages.0.package_id', $pack->id);
+        $response->assertJsonPath('errors.stock.affected_packages.0.current_quantity', 5);
+        $response->assertJsonPath('errors.stock.affected_packages.0.adjusted_quantity', 2);
+        $response->assertJsonMissingPath('errors.fiscal');
 
         // Nada se persistió: ni el stock del componente ni el pack.
         $this->assertSame(10, (int) $this->pivotFor($component->id, $branch->id)->quantity_available);
@@ -118,7 +119,7 @@ class PackageCommitmentSyncTest extends TestCase
             'commerce_branches' => [
                 ['commerce_branch_id' => $branch->id, 'quantity_available' => 4, 'is_published' => true],
             ],
-            'confirm_package_adjustments' => true,
+            'confirm_changes' => true,
         ]);
 
         $response->assertOk();
@@ -162,7 +163,7 @@ class PackageCommitmentSyncTest extends TestCase
             'commerce_branches' => [
                 ['commerce_branch_id' => $branch->id, 'quantity_available' => 0, 'is_published' => false],
             ],
-            'confirm_package_adjustments' => true,
+            'confirm_changes' => true,
         ]);
 
         $response->assertOk();
@@ -184,8 +185,8 @@ class PackageCommitmentSyncTest extends TestCase
         ]);
 
         $response->assertStatus(409);
-        $response->assertJsonPath('errors.affected_packages.0.package_id', $pack->id);
-        $response->assertJsonPath('errors.affected_packages.0.adjusted_quantity', 0);
+        $response->assertJsonPath('errors.stock.affected_packages.0.package_id', $pack->id);
+        $response->assertJsonPath('errors.stock.affected_packages.0.adjusted_quantity', 0);
     }
 
     // -----------------------------------------------------------------

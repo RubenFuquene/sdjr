@@ -77,6 +77,7 @@ export function ProductForm({
         title: product.title,
         originalPrice: product.original_price,
         discountedPrice: product.discounted_price,
+        fiscalCode: product.fiscal_code ?? null,
         branches: (product.commerce_branches ?? []).map((branch) => ({
           branchId: branch.id,
           quantityAvailable: branch.quantity_available ?? 0,
@@ -106,7 +107,8 @@ export function ProductForm({
     handleBranchQuantityChange,
     handleBranchPublishedChange,
     packageItems,
-    candidateOptions,
+    packItemCandidates,
+    excludedProductIds,
     maxQuantityPerComponent,
     maxPacksByBranch,
     packOriginalPrice,
@@ -139,7 +141,7 @@ export function ProductForm({
   }, [fiscalCodes]);
 
   const packItemSelectorOptions = useMemo(() => {
-    return candidateOptions.map((option) => {
+    return packItemCandidates.map((option) => {
       const selectedBranchIds = branches.map((b) => b.branchId);
       const minRawStock = selectedBranchIds.length
         ? Math.min(
@@ -156,9 +158,12 @@ export function ProductForm({
         discountedPrice: option.discountedPrice,
         quantityAvailable: minRawStock,
         availableForPackaging: maxQuantityPerComponent.get(option.id) ?? 0,
+        isSelectable: option.isSelectable,
+        disabledReason: option.disabledReason,
+        wasAutoExcluded: excludedProductIds.has(option.id),
       };
     });
-  }, [candidateOptions, branches, maxQuantityPerComponent]);
+  }, [packItemCandidates, branches, maxQuantityPerComponent, excludedProductIds]);
 
   // Ticket derivado de SCRUM-361/323 (2026-08-04): descuento opcional que el
   // aliado le puso al pack completo, para prorratear P3 en vivo en el
