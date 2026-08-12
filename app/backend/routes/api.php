@@ -124,6 +124,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('{commerce_id}/branches', [CommerceController::class, 'getBranchesByCommerceId']);
             Route::get('{commerce_id}/payout-methods', [CommerceController::class, 'getPayoutMethodsByCommerceId']);
+            Route::get('{commerce_id}/fiscal-codes', [CommerceController::class, 'fiscalCodes']);
             Route::post('basic', [CommerceBasicDataController::class, 'store']);
 
             // Commerce Comments endpoints
@@ -171,6 +172,9 @@ Route::prefix('v1')->group(function () {
         });
 
         // Product Management routes
+        // SCRUM-362: registrada antes del apiResource — {product} del resource
+        // capturaría 'pending-fiscal-classification' como id si fuera después.
+        Route::get('products/pending-fiscal-classification', [ProductController::class, 'pendingFiscalClassification']);
         Route::apiResource('products', ProductController::class);
         Route::patch('products/{id}/status', [ProductController::class, 'patchStatus']);
         Route::patch('products/{id}/branches/{branchId}', [ProductController::class, 'patchBranchPublication']);

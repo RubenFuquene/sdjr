@@ -30,3 +30,7 @@ design-layout-emails/
 
 # Documentos de contexto/planeacion locales (no versionar)
 .opencode/plans/
+
+# Documentacion de proveedores tecnologicos (material de terceros, no versionar)
+aliaddo-doc/
+movii-doc/

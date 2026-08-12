@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Constants\Constant;
 use App\Models\Traits\SanitizesTextAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -58,5 +59,16 @@ class EstablishmentType extends Model
     public function productCategories(): HasMany
     {
         return $this->hasMany(ProductCategory::class, 'establishment_type_id');
+    }
+
+    /**
+     * SCRUM-365: solo RE/PA prestan servicio de expendio de comidas
+     * (Art. 426 ET) y por tanto pueden declarar operación bajo franquicia.
+     * Punto único reutilizado por la validación del comercio (SCRUM-362) y
+     * por el resolver de códigos fiscales.
+     */
+    public function isFranchiseEligible(): bool
+    {
+        return in_array($this->code, Constant::FRANCHISE_ELIGIBLE_ESTABLISHMENT_TYPE_CODES, true);
     }
 }

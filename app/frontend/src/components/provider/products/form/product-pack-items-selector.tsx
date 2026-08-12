@@ -9,6 +9,11 @@ interface PackItemOption {
   discountedPrice?: number | null;
   quantityAvailable: number;
   availableForPackaging: number;
+  /** SCRUM-362: false si no se puede marcar (sin stock o clasificación fiscal pendiente). */
+  isSelectable: boolean;
+  disabledReason?: "stock" | "fiscal";
+  /** Se seleccionó en algún momento de esta sesión de edición y se sacó solo. */
+  wasAutoExcluded: boolean;
 }
 
 interface ProductPackItemsSelectorProps {
@@ -87,14 +92,30 @@ export function ProductPackItemsSelector({
             return (
               <div
                 key={option.id}
-                className="flex items-start gap-3 rounded-[12px] px-3 py-2 hover:bg-[#F7F7F7]"
+                className={[
+                  "relative flex items-start gap-3 rounded-[12px] px-3 py-2",
+                  !option.isSelectable ? "opacity-60" : "hover:bg-[#F7F7F7]",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
               >
+                {option.wasAutoExcluded ? (
+                  // Halo decorativo aparte: solo esta capa pulsa (Tailwind
+                  // `animate-pulse` anima opacity) — si se aplicara sobre la
+                  // fila completa, competiría con `opacity-60` de arriba y
+                  // el pulso terminaría siendo imperceptible (mismo valor en
+                  // el punto medio del keyframe que el estado estático).
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-[12px] border-2 border-amber-400 bg-amber-400/10 animate-halo-pulse"
+                  />
+                ) : null}
                 <input
                   type="checkbox"
                   checked={checked}
-                  disabled={disabled}
+                  disabled={disabled || !option.isSelectable}
                   onChange={() => onToggle(option.id)}
-                  className="mt-1 h-4 w-4 accent-[#4B236A]"
+                  className="mt-1 h-4 w-4 accent-[#4B236A] disabled:cursor-not-allowed"
                 />
                 <span className="flex-1 text-sm">
                   <span className="block text-[#1A1A1A]">{option.title}</span>

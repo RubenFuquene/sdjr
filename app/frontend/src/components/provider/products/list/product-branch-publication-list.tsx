@@ -35,24 +35,6 @@ function extractFirstErrorMessage(data: unknown): string | undefined {
   return undefined;
 }
 
-function translatePublicationError(err: ApiError): string {
-  const detail = extractFirstErrorMessage(err.data) ?? err.message;
-
-  if (detail.toLowerCase().includes("zero available quantity")) {
-    return "No puedes publicar una sede sin inventario/compromiso cargado.";
-  }
-
-  if (detail.toLowerCase().includes("only support")) {
-    return "Los componentes de este pack ya no alcanzan para el compromiso en esa sede.";
-  }
-
-  if (detail.toLowerCase().includes("not assigned to the given branch")) {
-    return "Este producto ya no está asignado a esa sede.";
-  }
-
-  return "No pudimos actualizar la publicación. Intenta nuevamente.";
-}
-
 function formatAutoAdjustedAt(value: string): string {
   try {
     return new Date(value).toLocaleString("es-CO", {
@@ -103,7 +85,7 @@ export function ProductBranchPublicationList({
       setLocalBranches(previousBranches);
       toast.error(
         err instanceof ApiError
-          ? translatePublicationError(err)
+          ? (extractFirstErrorMessage(err.data) ?? err.message)
           : "Error inesperado al actualizar la publicación."
       );
     } finally {

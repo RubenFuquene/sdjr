@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Enums\FiscalCode;
 use App\Models\Commerce;
 use App\Models\Product;
 use App\Models\ProductCommerceBranch;
@@ -71,7 +72,7 @@ class UpdateProductBranchPublicationRequest extends FormRequest
             if (! $pivot) {
                 $validator->errors()->add(
                     'commerce_branch_id',
-                    'This product is not assigned to the given branch.'
+                    __('products.branch_publication.not_assigned')
                 );
 
                 return;
@@ -81,21 +82,67 @@ class UpdateProductBranchPublicationRequest extends FormRequest
                 return;
             }
 
-            if ($pivot->quantity_available === 0) {
+            $product = Product::find($this->route('id'));
+
+            // SCRUM-362: un producto sin clasificar no se publica — solo
+            // aplica a 'single', un pack nunca tiene fiscal_code propio.
+            if ($product?->fiscal_code === FiscalCode::PendingReview) {
                 $validator->errors()->add(
                     'is_published',
-                    'Cannot publish a branch with zero available quantity.'
+                    __('products.branch_publication.pending_review')
                 );
 
                 return;
             }
 
-            $product = Product::find($this->route('id'));
+            if ($pivot->quantity_available === 0) {
+                $validator->errors()->add(
+                    'is_published',
+                    __('products.branch_publication.zero_quantity')
+                );
+
+                return;
+            }
 
             if ($product?->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
+                if ($this->validatePackageComponentsFiscalStatus($validator, $product)) {
+                    return;
+                }
+
                 $this->validatePackageCapacity($validator, $product, (int) $this->route('branchId'), (int) $pivot->quantity_available);
             }
         });
+    }
+
+    /**
+     * SCRUM-362: un pack nunca tiene fiscal_code propio, así que el guard de
+     * arriba (que solo mira $product->fiscal_code) nunca se dispara para un
+     * pack — sin este chequeo, un pack con un componente otro_verificar se
+     * podía publicar igual desde este endpoint (bug real, detectado en
+     * producción: StoreProductRequest/UpdateProductRequest sí revisaban
+     * package_items, este endpoint dedicado no). Bloquea con el mismo
+     * criterio que validatePackageComposition() de esos dos.
+     *
+     * @return bool true si bloqueó (el caller no debe seguir validando).
+     */
+    private function validatePackageComponentsFiscalStatus(Validator $validator, Product $package): bool
+    {
+        $package->loadMissing('packageItems');
+
+        $pendingComponent = $package->packageItems->first(
+            fn (Product $item) => $item->fiscal_code === FiscalCode::PendingReview
+        );
+
+        if (! $pendingComponent) {
+            return false;
+        }
+
+        $validator->errors()->add(
+            'is_published',
+            __('products.branch_publication.package_component_pending_review', ['title' => $pendingComponent->title])
+        );
+
+        return true;
     }
 
     /**
@@ -119,7 +166,10 @@ class UpdateProductBranchPublicationRequest extends FormRequest
         if ($committed > $maxPacks) {
             $validator->errors()->add(
                 'is_published',
-                "Cannot publish: components in this branch only support {$maxPacks} pack(s), but {$committed} are committed."
+                __('products.branch_publication.package_capacity_exceeded', [
+                    'max' => $maxPacks,
+                    'committed' => $committed,
+                ])
             );
         }
     }

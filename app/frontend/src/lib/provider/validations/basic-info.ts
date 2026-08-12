@@ -1,6 +1,17 @@
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
+import { FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES } from '@/types/basic-info';
+import type { EstablishmentType } from '@/lib/api/establishment-types';
 
-export const validateBasicInfoForm = (formData: BasicInfoFormData): FormErrors => {
+/**
+ * SCRUM-365 (CR-01): mismo criterio que el backend — obligatoria para
+ * RE/PA, irrelevante para el resto. `establishmentTypes` puede venir vacío
+ * mientras el catálogo carga; en ese caso no se valida (evita un error
+ * fantasma antes de que el fetch resuelva).
+ */
+export const validateBasicInfoForm = (
+  formData: BasicInfoFormData,
+  establishmentTypes: EstablishmentType[] = []
+): FormErrors => {
   const newErrors: FormErrors = {};
 
   if (!formData.commercialName?.trim()) {
@@ -77,6 +88,18 @@ export const validateBasicInfoForm = (formData: BasicInfoFormData): FormErrors =
 
   if (formData.electronicInvoicingRequired === null) {
     newErrors.electronicInvoicingRequired = 'Debes indicar si estás obligado a emitir factura electrónica';
+  }
+
+  const selectedEstablishmentType = establishmentTypes.find(
+    (type) => String(type.id) === formData.establishmentType
+  );
+
+  if (
+    selectedEstablishmentType &&
+    FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES.includes(selectedEstablishmentType.code) &&
+    formData.operatesUnderFranchise === null
+  ) {
+    newErrors.operatesUnderFranchise = 'Debes indicar si operas bajo franquicia';
   }
 
   if (!formData.documents.rut?.trim()) {

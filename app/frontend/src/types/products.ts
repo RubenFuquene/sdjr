@@ -56,6 +56,11 @@ export interface ProductFromAPI {
   id: number;
   commerce_id: number;
   product_category_id: number;
+  /** SCRUM-362: null solo en packs — nunca llevan clasificación propia, se facturan por sus líneas hijas. */
+  fiscal_code?: string | null;
+  vat_rate?: number | null;
+  applies_inc?: boolean | null;
+  inc_rate?: number | null;
   title: string;
   description: string | null;
   product_type: ProductType;
@@ -74,14 +79,42 @@ export interface ProductCategoryFromAPI {
   id: number;
   name: string;
   description: string | null;
+  establishment_type_id?: number | null;
+  /** SCRUM-362: sugerencia de código fiscal — nunca se aplica a ciegas, pasa por el resolver del comercio. */
+  default_fiscal_code?: string | null;
   status: string;
   created_at: string;
   updated_at: string;
 }
 
+/** SCRUM-362: opción del desplegable de código fiscal — GET /commerces/{id}/fiscal-codes. */
+export interface FiscalCodeOption {
+  value: string;
+  label: string;
+  vat_rate: number;
+  applies_inc: boolean;
+  inc_rate: number;
+  legal_basis: string | null;
+}
+
+/** SCRUM-362 (D9): sede afectada por una despublicación en cascada al reclasificar a "otro_verificar". */
+export interface AffectedFiscalBranch {
+  commerceBranchId: number;
+  commerceBranchName: string;
+}
+
+/** SCRUM-362 (D9): pack afectado por la misma cascada. */
+export interface AffectedFiscalPackage {
+  packageId: number;
+  packageTitle: string;
+}
+
 export interface ProductFormInput {
   commerceId: number;
+  /** SCRUM-370: obligatorio solo para 'single' — un pack la deriva de sus componentes, nunca se pregunta. */
   productCategoryId: number;
+  /** SCRUM-362: obligatorio solo para 'single' — un pack nunca lleva clasificación propia. */
+  fiscalCode?: string | null;
   title: string;
   description?: string | null;
   productType: ProductType;
@@ -105,11 +138,13 @@ export interface ProductFormInput {
     metadata?: Record<string, unknown>;
   }>;
   /**
-   * SCRUM-361, Tarea 3.3-3.4: confirma aplicar el ajuste automático a los
-   * packs afectados por bajar el stock de un componente. Sin esto, un
-   * cambio con impacto responde 409 en vez de aplicarse.
+   * SCRUM-362/361 (unificación): confirma aplicar los cambios pendientes de
+   * la edición — ajuste automático a packs afectados por bajar el stock de
+   * un componente (SCRUM-361) y/o despublicación en cascada de sedes/packs
+   * al reclasificar a "otro_verificar" (SCRUM-362, D9). Sin esto, un cambio
+   * con cualquiera de los dos impactos responde 409 en vez de aplicarse.
    */
-  confirmPackageAdjustments?: boolean;
+  confirmChanges?: boolean;
 }
 
 export type ProviderProductFormFieldErrors = Record<string, string>;
@@ -125,4 +160,15 @@ export interface AffectedPackage {
   commerceBranchId: number;
   currentQuantity: number;
   adjustedQuantity: number;
+}
+
+/**
+ * SCRUM-362/361 (unificación): impacto de un 409 al editar un producto.
+ * Cada motivo es independiente y puede venir solo o los dos a la vez — el
+ * backend los detecta ambos antes de exigir confirmación (ver plan
+ * unificacionConfirmacion409Fiscal361).
+ */
+export interface ProductUpdateConfirmationImpact {
+  fiscal: { affectedBranches: AffectedFiscalBranch[]; affectedPackages: AffectedFiscalPackage[] } | null;
+  stock: { affectedPackages: AffectedPackage[] } | null;
 }

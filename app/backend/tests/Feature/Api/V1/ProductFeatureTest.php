@@ -66,6 +66,7 @@ class ProductFeatureTest extends TestCase
             'product' => [
                 'commerce_id' => $commerce->id,
                 'product_category_id' => $category->id,
+                'fiscal_code' => 'iva_19_general',
                 'title' => 'Café Premium',
                 'description' => 'Café de origen especial',
                 'product_type' => Constant::PRODUCT_TYPE_SINGLE,
@@ -1086,7 +1087,7 @@ class ProductFeatureTest extends TestCase
             ->assertJsonValidationErrors(['commerce_branches.0.quantity_available'])
             ->assertJsonFragment([
                 'commerce_branches.0.quantity_available' => [
-                    'The requested quantity_available (6) exceeds the maximum packs available in this branch given current stock (max: 5).',
+                    "The requested quantity_available (6) exceeds the maximum packs available in branch '{$commerceBranch->name}' given current stock (max: 5).",
                 ],
             ]);
     }
@@ -1246,7 +1247,7 @@ class ProductFeatureTest extends TestCase
             ->assertJsonValidationErrors(['commerce_branches.0.quantity_available'])
             ->assertJsonFragment([
                 'commerce_branches.0.quantity_available' => [
-                    'The requested quantity_available (3) exceeds the maximum packs available in this branch given current stock (max: 2).',
+                    "The requested quantity_available (3) exceeds the maximum packs available in branch '{$commerceBranch->name}' given current stock (max: 2).",
                 ],
             ]);
 

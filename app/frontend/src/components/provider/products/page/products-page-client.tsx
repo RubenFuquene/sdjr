@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/admin/shared/confirmation-dialog";
-import { PackageAdjustmentConfirmationDialog } from "../shared";
+import { ProductUpdateConfirmationDialog } from "../shared";
 import { ApiError, getPackageItemsByProductId, getProductById } from "@/lib/api";
 import { useProviderBranches, useProviderProductForm, useProviderProducts } from "@/hooks/index";
 import type { ProductFromAPI, ProviderProductFormInput } from "@/types/products";
@@ -18,8 +18,8 @@ export function ProductsPageClient() {
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [editingInitialData, setEditingInitialData] = useState<ProductFormInitialData | null>(null);
   const [productPendingDeletion, setProductPendingDeletion] = useState<ProductFromAPI | null>(null);
-  // SCRUM-361, Tarea 3.3/6.4: la edición que disparó el 409, guardada para
-  // poder reenviarla con confirmPackageAdjustments=true si el aliado confirma.
+  // SCRUM-362/361 (unificación): la edición que disparó el 409, guardada
+  // para poder reenviarla con confirmChanges=true si el aliado confirma.
   const [pendingConfirmation, setPendingConfirmation] = useState<{
     productId: number;
     input: ProviderProductFormInput;
@@ -31,11 +31,11 @@ export function ProductsPageClient() {
     submitting,
     error: formError,
     fieldErrors,
-    affectedPackages,
+    confirmationImpact,
     createProduct,
     updateProduct,
     deleteProduct,
-    clearAffectedPackages,
+    clearConfirmationImpact,
     resetErrors,
   } =
     useProviderProductForm();
@@ -92,6 +92,7 @@ export function ProductsPageClient() {
     description: product.description,
     productType: product.product_type,
     productCategoryId: product.product_category_id,
+    fiscalCode: product.fiscal_code,
     originalPrice: product.original_price,
     discountedPrice: product.discounted_price,
     // SCRUM-361: ambos tipos reconstruyen la asignación multi-sede completa
@@ -178,7 +179,7 @@ export function ProductsPageClient() {
       const updated = await updateProduct(editingProductId, input);
 
       if (!updated) {
-        // Si fue un 409, useProviderProductForm ya dejó affectedPackages
+        // Si fue un 409, useProviderProductForm ya dejó confirmationImpact
         // poblado — guardamos la edición para poder reenviarla si confirma.
         setPendingConfirmation({ productId: editingProductId, input });
         return;
@@ -202,14 +203,14 @@ export function ProductsPageClient() {
     toast.success(input.productType === "package" ? "Pack creado correctamente" : "Producto creado correctamente");
   };
 
-  const handleConfirmPackageAdjustment = async () => {
+  const handleConfirmChanges = async () => {
     if (!pendingConfirmation) {
       return;
     }
 
     const updated = await updateProduct(pendingConfirmation.productId, {
       ...pendingConfirmation.input,
-      confirmPackageAdjustments: true,
+      confirmChanges: true,
     });
 
     if (!updated) {
@@ -219,12 +220,12 @@ export function ProductsPageClient() {
     setPendingConfirmation(null);
     await refresh();
     closeModal();
-    toast.success("Producto actualizado y packs ajustados correctamente");
+    toast.success("Producto actualizado correctamente");
   };
 
-  const handleCancelPackageAdjustment = () => {
+  const handleCancelChanges = () => {
     setPendingConfirmation(null);
-    clearAffectedPackages();
+    clearConfirmationImpact();
   };
 
   const handleDeleteProduct = (product: ProductFromAPI) => {
@@ -280,13 +281,14 @@ export function ProductsPageClient() {
         onSubmit={handleSubmitProductForm}
       />
 
-      <PackageAdjustmentConfirmationDialog
-        isOpen={Boolean(affectedPackages && affectedPackages.length > 0)}
-        affectedPackages={affectedPackages ?? []}
+      <ProductUpdateConfirmationDialog
+        isOpen={Boolean(confirmationImpact)}
+        fiscalImpact={confirmationImpact?.fiscal ?? null}
+        stockImpact={confirmationImpact?.stock ?? null}
         branchNameById={branchNameById}
         isLoading={submitting}
-        onConfirm={handleConfirmPackageAdjustment}
-        onCancel={handleCancelPackageAdjustment}
+        onConfirm={handleConfirmChanges}
+        onCancel={handleCancelChanges}
       />
 
       <ConfirmationDialog

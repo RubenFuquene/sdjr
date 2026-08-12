@@ -18,13 +18,14 @@ import {
   CitySelect,
   NeighborhoodSelect,
 } from '@/components/provider/ui';
+import { AlertCircle } from 'lucide-react';
 import type { BasicInfoFormData, FormErrors } from '@/types/basic-info';
-import { DOCUMENT_TYPE_OPTIONS } from '@/types/basic-info';
+import { DOCUMENT_TYPE_OPTIONS, FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES } from '@/types/basic-info';
 import { useLocation, useEstablishmentTypes } from '@/hooks/index';
 
 interface EstablecimientoCardProps {
   formData: BasicInfoFormData;
-  onFieldChange: (field: string, value: string | number | null) => void;
+  onFieldChange: (field: string, value: string | number | boolean | null) => void;
   errors?: Partial<FormErrors>;
 }
 
@@ -54,6 +55,17 @@ export function EstablecimientoCard({
     loading: loadingEstablishmentTypes,
     error: establishmentTypesError,
   } = useEstablishmentTypes();
+
+  // SCRUM-365: la franquicia solo se pregunta para tipos que prestan
+  // servicio de expendio de comidas (Art. 426 ET) — mismo criterio que
+  // CR-01 del backend, aplicado aquí para decidir si se muestra el campo.
+  const selectedEstablishmentType = establishmentTypes.find(
+    (type) => String(type.id) === formData.establishmentType
+  );
+  const isFranchiseEligible = Boolean(
+    selectedEstablishmentType &&
+      FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES.includes(selectedEstablishmentType.code)
+  );
 
   const filteredCities = useMemo(() => {
     if (!selectedDept) return [];
@@ -250,6 +262,60 @@ export function EstablecimientoCard({
               <p className="text-sm text-red-600">No fue posible cargar los tipos de establecimiento.</p>
             )}
           </div>
+
+          {/* ============================================ */}
+          {/* 4b. Operación bajo franquicia (SCRUM-365) — solo RE/PA */}
+          {/* ============================================ */}
+          {isFranchiseEligible && (
+            <div className="md:col-span-2">
+              <fieldset
+                className="flex flex-col space-y-2"
+                aria-describedby="franchise-status"
+              >
+                <legend className="text-sm font-medium text-[#1A1A1A] mb-1">
+                  ¿Tu negocio opera bajo franquicia, concesión o regalía?{' '}
+                  <span className="text-red-500" aria-hidden="true">*</span>
+                  <span className="sr-only"> (obligatorio)</span>
+                </legend>
+                <p className="text-sm text-[#6A6A6A]">
+                  Marca si tu negocio funciona bajo un contrato de franquicia, concesión, regalía
+                  o cualquier forma de explotación de marca de un tercero (por ejemplo: Subway,
+                  Sandwich Qbano, Juan Valdez). Esto determina el régimen tributario que aplica a
+                  tus productos.
+                </p>
+                <div className="flex gap-6" role="radiogroup" aria-required="true">
+                  <label className="flex items-center gap-2 text-sm text-[#1A1A1A] cursor-pointer">
+                    <input
+                      type="radio"
+                      name="operatesUnderFranchise"
+                      checked={formData.operatesUnderFranchise === true}
+                      onChange={() => onFieldChange('operatesUnderFranchise', true)}
+                      className="h-4 w-4 accent-[#4B236A]"
+                    />
+                    Sí, opero bajo franquicia o contrato similar
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-[#1A1A1A] cursor-pointer">
+                    <input
+                      type="radio"
+                      name="operatesUnderFranchise"
+                      checked={formData.operatesUnderFranchise === false}
+                      onChange={() => onFieldChange('operatesUnderFranchise', false)}
+                      className="h-4 w-4 accent-[#4B236A]"
+                    />
+                    No, mi negocio es independiente
+                  </label>
+                </div>
+                <div id="franchise-status" aria-live="polite">
+                  {errors.operatesUnderFranchise && (
+                    <div className="flex items-center gap-2 text-xs text-red-600">
+                      <AlertCircle size={14} />
+                      <span>{errors.operatesUnderFranchise}</span>
+                    </div>
+                  )}
+                </div>
+              </fieldset>
+            </div>
+          )}
 
           {/* ============================================ */}
           {/* 5. Teléfono */}

@@ -48,6 +48,7 @@ class Commerce extends Model
         'city_id',
         'neighborhood_id',
         'establishment_type_id',
+        'operates_under_franchise',
         'name',
         'description',
         'tax_id',
@@ -65,6 +66,7 @@ class Commerce extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'is_verified' => 'integer',
+        'operates_under_franchise' => 'boolean',
         'terms_accepted_at' => 'datetime',
         'terms_accepted_version' => 'integer',
         'electronic_invoicing_required' => 'boolean',
@@ -169,6 +171,17 @@ class Commerce extends Model
     public function establishmentType()
     {
         return $this->belongsTo(EstablishmentType::class);
+    }
+
+    /**
+     * Historial append-only de declaraciones de franquicia (SCRUM-365).
+     * Orden cronológico: la última fila es la vigente.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function franchiseDeclarations()
+    {
+        return $this->hasMany(CommerceFranchiseDeclaration::class)->latest('id');
     }
 
     /**

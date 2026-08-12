@@ -14,6 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   @OA\Property(property="id", type="integer"),
  *   @OA\Property(property="establishment_type_id", type="integer", nullable=true),
  *   @OA\Property(property="establishment_type", ref="#/components/schemas/EstablishmentTypeResource"),
+ *   @OA\Property(property="default_fiscal_code", type="string", nullable=true, example="iva_19_general", description="Sugerencia de código fiscal (SCRUM-362) — el frontend debe descartarla si el comercio la tiene excluida (ej. franquicia)"),
  *   @OA\Property(property="name", type="string"),
  *   @OA\Property(property="description", type="string", nullable=true),
  *   @OA\Property(property="status", type="string"),
@@ -37,6 +38,7 @@ class ProductCategoryResource extends JsonResource
             'establishment_type' => $this->whenLoaded('establishmentType', function () {
                 return new EstablishmentTypeResource($this->establishmentType);
             }),
+            'default_fiscal_code' => $this->default_fiscal_code?->value,
             'name' => $this->name,
             'description' => $this->description,
             'status' => $this->status,

@@ -105,6 +105,8 @@ export interface CommerceFromAPI {
   tax_id_type: string;
   person_type?: 'natural' | 'juridica';
   electronic_invoicing_required?: boolean;
+  /** SCRUM-365: autodeclaración, solo aplica a tipos RE/PA (Art. 426 ET). */
+  operates_under_franchise?: boolean;
   address: string;
   phone?: string;
   email?: string;
@@ -273,6 +275,8 @@ export interface CommerceBasicPayload {
     // Autodeclaración: si el comercio está obligado a facturar electrónicamente.
     // Requerido por el backend (CommerceBasicDataRequest). Determina si aplica el formato 1876.
     electronic_invoicing_required: boolean;
+    /** SCRUM-365: obligatorio si el tipo es RE/PA, prohibido si es RT — omitir la clave para RT. */
+    operates_under_franchise?: boolean;
   };
   legal_representative?: {
     name: string;

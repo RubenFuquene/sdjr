@@ -180,7 +180,7 @@ class PackLifecycleEndToEndTest extends TestCase
             ],
         ]);
         $lowerStockResponse->assertStatus(409);
-        $affectedPackageIds = collect($lowerStockResponse->json('errors.affected_packages'))->pluck('package_id');
+        $affectedPackageIds = collect($lowerStockResponse->json('errors.stock.affected_packages'))->pluck('package_id');
         $this->assertTrue($affectedPackageIds->contains((int) $packAId));
         $this->assertFalse($affectedPackageIds->contains((int) $packBId));
 
@@ -193,7 +193,7 @@ class PackLifecycleEndToEndTest extends TestCase
                 ['commerce_branch_id' => $branchA->id, 'quantity_available' => 3, 'is_published' => true],
                 ['commerce_branch_id' => $branchB->id, 'quantity_available' => 10, 'is_published' => true],
             ],
-            'confirm_package_adjustments' => true,
+            'confirm_changes' => true,
         ]);
         $confirmResponse->assertOk();
 

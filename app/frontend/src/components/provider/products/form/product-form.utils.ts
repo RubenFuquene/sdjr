@@ -7,6 +7,7 @@ type ProductFormInitialLike = {
   description?: string | null;
   productType?: "single" | "package";
   productCategoryId?: number;
+  fiscalCode?: string | null;
   originalPrice?: number;
   discountedPrice?: number | null;
   branches?: ProductBranchAssignment[];
@@ -17,6 +18,7 @@ export type ProductFormDraft = {
   title: string;
   productType: ProductType;
   productCategoryId: string;
+  fiscalCode: string;
   originalPrice: string;
   discountedPrice: string;
   description: string;
@@ -84,6 +86,7 @@ export function mapInitialDataToDraft(initialData?: ProductFormInitialLike | nul
     title: initialData?.title ?? "",
     productType: initialData?.productType ?? "single",
     productCategoryId: initialData?.productCategoryId ? String(initialData.productCategoryId) : "",
+    fiscalCode: initialData?.fiscalCode ?? "",
     originalPrice:
       initialData?.originalPrice !== undefined ? String(initialData.originalPrice) : "",
     discountedPrice:
@@ -100,12 +103,14 @@ type BuildSubmitInputParams = {
   commerceId?: number;
   title: string;
   productCategoryId: string;
+  fiscalCode: string;
   productType: ProductType;
   originalPrice: number;
   discountedPrice: number | null;
   description: string;
   branches: ProductBranchAssignment[];
   packageItems: Array<{ productId: number; quantity: number }>;
+  confirmChanges?: boolean;
 };
 
 export function buildProductFormSubmitInput(
@@ -115,18 +120,23 @@ export function buildProductFormSubmitInput(
     commerceId,
     title,
     productCategoryId,
+    fiscalCode,
     productType,
     originalPrice,
     discountedPrice,
     description,
     branches,
     packageItems,
+    confirmChanges,
   } = params;
 
   return {
     commerceId,
     title: title.trim(),
-    productCategoryId: Number(productCategoryId),
+    // SCRUM-370: un pack no envía categoría, el backend la deriva.
+    productCategoryId: productType === "package" ? 0 : Number(productCategoryId),
+    // SCRUM-362: un pack nunca lleva clasificación fiscal propia.
+    fiscalCode: productType === "package" ? null : fiscalCode || null,
     productType,
     originalPrice,
     discountedPrice,
@@ -134,5 +144,6 @@ export function buildProductFormSubmitInput(
     branches,
     packageItems: productType === "package" ? packageItems : [],
     photos: [],
+    confirmChanges,
   };
 }

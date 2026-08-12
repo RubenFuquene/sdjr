@@ -1,2 +1,3 @@
 export { AddProductButton } from "./add-product-button";
-export { PackageAdjustmentConfirmationDialog } from "./package-adjustment-confirmation-dialog";
+export { ConfirmationDialogShell } from "./confirmation-dialog-shell";
+export { ProductUpdateConfirmationDialog } from "./product-update-confirmation-dialog";

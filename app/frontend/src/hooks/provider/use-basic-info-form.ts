@@ -17,6 +17,8 @@ import { uploadFileToPresignedUrl, getBackendMimeType } from '@/lib/utils/docume
 import { validateBasicInfoForm } from '@/lib/provider/validations/basic-info';
 import { normalizeCommerceVerificationStatus, type CommerceFromAPI } from '@/types/commerces';
 import { useProviderCommerce } from '@/components/provider/context/provider-commerce-context';
+import { useEstablishmentTypes } from '@/hooks/use-establishment-types';
+import { FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES } from '@/types/basic-info';
 
 type DocumentStatus = { status: 'idle' | 'uploading' | 'success' | 'error'; error: string | null };
 
@@ -39,6 +41,7 @@ type DocumentFileKey = keyof DocumentFiles;
 export const useBasicInfoForm = () => {
   const router = useRouter();
   const { commerce, isLoadingCommerce, refreshCommerce } = useProviderCommerce();
+  const { types: establishmentTypes } = useEstablishmentTypes();
   const [formData, setFormData] = useState<BasicInfoFormData>(INITIAL_BASIC_INFO_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -136,7 +139,7 @@ export const useBasicInfoForm = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors = validateBasicInfoForm(formData);
+    const newErrors = validateBasicInfoForm(formData, establishmentTypes);
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -167,7 +170,7 @@ export const useBasicInfoForm = () => {
         throw new Error('missing_owner_user_id');
       }
 
-      const payload = basicInfoToCommerceBasicPayload(formData, ownerUserId);
+      const payload = basicInfoToCommerceBasicPayload(formData, ownerUserId, establishmentTypes);
       let commerceId = existingCommerceId;
 
       if (commerceId) {
@@ -176,6 +179,18 @@ export const useBasicInfoForm = () => {
           ? normalizeCommerceVerificationStatus(commerce.is_verified)
           : 0;
         const verificationStatusForUpdate = currentVerificationStatus === 0 ? 0 : 3;
+        // SCRUM-365 (CR-01): el backend rechaza el campo para RT — se omite
+        // la clave, no basta con enviar `false`. Mismo criterio que
+        // basicInfoToCommerceBasicPayload, duplicado aquí porque este
+        // camino no pasa por ese adaptador (construye el payload de
+        // UpdateCommerceRequest directamente).
+        const selectedEstablishmentType = establishmentTypes.find(
+          (type) => type.id === establishmentTypeId
+        );
+        const isFranchiseEligible = Boolean(
+          selectedEstablishmentType &&
+            FRANCHISE_ELIGIBLE_ESTABLISHMENT_CODES.includes(selectedEstablishmentType.code)
+        );
 
         await updateCommerce(commerceId, {
           owner_user_id: ownerUserId,
@@ -194,6 +209,9 @@ export const useBasicInfoForm = () => {
           city_id: payload.commerce.city_id,
           neighborhood_id: payload.commerce.neighborhood_id,
           electronic_invoicing_required: payload.commerce.electronic_invoicing_required,
+          ...(isFranchiseEligible
+            ? { operates_under_franchise: formData.operatesUnderFranchise ?? false }
+            : {}),
         });
       } else {
         const commerceResponse = await createCommerceBasic(payload);
@@ -423,6 +441,7 @@ const mapCommerceToBasicInfoForm = (commerce: CommerceFromAPI): BasicInfoFormDat
     neighborhood: commerce.neighborhood?.id ? String(commerce.neighborhood.id) : '',
     mainAddress: commerce.address || '',
     electronicInvoicingRequired: commerce.electronic_invoicing_required ?? null,
+    operatesUnderFranchise: commerce.operates_under_franchise ?? null,
     legalRepresentative: {
       firstName: primaryLegalRepresentative?.name || '',
       lastName: primaryLegalRepresentative?.last_name || '',

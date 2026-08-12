@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Exceptions\PackageAdjustmentConfirmationRequiredException;
+use App\Exceptions\ProductUpdateConfirmationRequiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteProductRequest;
 use App\Http\Requests\Api\V1\DestroyProductPhotoRequest;
 use App\Http\Requests\Api\V1\DismissProductBranchAutoAdjustmentRequest;
+use App\Http\Requests\Api\V1\IndexPendingFiscalClassificationRequest;
 use App\Http\Requests\Api\V1\PatchProductPhotoUploadRequest;
 use App\Http\Requests\Api\V1\PatchProductStatusRequest;
 use App\Http\Requests\Api\V1\ProductIndexRequest;
@@ -90,6 +91,43 @@ class ProductController extends Controller
             return $this->successResponse(ProductResource::collection($products));
         } catch (Exception $e) {
             return $this->errorResponse('Error fetching products', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *   path="/api/v1/products/pending-fiscal-classification",
+     *   operationId="getPendingFiscalClassificationProducts",
+     *   tags={"Products"},
+     *   summary="Productos sin clasificar fiscalmente (SCRUM-362, CA-09)",
+     *   description="Reporte interno de productos con fiscal_code = otro_verificar. Ruta de administración.",
+     *   security={{"sanctum":{}}},
+     *
+     *   @OA\Parameter(name="commerce_id", in="query", required=false, @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *
+     *   @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object",
+     *
+     *     @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ProductResource")),
+     *     @OA\Property(property="meta", type="object"),
+     *     @OA\Property(property="links", type="object")
+     *   )),
+     *
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function pendingFiscalClassification(IndexPendingFiscalClassificationRequest $request): JsonResponse
+    {
+        try {
+            $products = $this->productService->paginatePendingFiscalClassification(
+                $request->input('commerce_id') ? (int) $request->input('commerce_id') : null,
+                $request->validatedPerPage()
+            );
+
+            return $this->paginatedResponse($products, ProductResource::collection($products), 'Pending fiscal classification products retrieved successfully');
+        } catch (Exception $e) {
+            return $this->errorResponse('Error fetching pending fiscal classification products', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -188,18 +226,27 @@ class ProductController extends Controller
      *   @OA\Response(response=401, description="Unauthenticated"),
      *   @OA\Response(response=403, description="Forbidden"),
      *   @OA\Response(response=404, description="Not found"),
-     *   @OA\Response(response=409, description="Change affects existing packs — resend with confirm_package_adjustments=true to apply (SCRUM-361)"),
+     *   @OA\Response(response=409, description="Change requires confirmation — resend with confirm_changes=true to apply. errors.fiscal is present when reclassifying to otro_verificar would unpublish branches/packs (SCRUM-362); errors.stock is present when the change affects existing packs (SCRUM-361); both may be present at once"),
      *   @OA\Response(response=422, description="Validation error")
      * )
      */
     public function update(UpdateProductRequest $request, int $id): JsonResponse
     {
         try {
-            $product = $this->productService->update($id, $request->validated(), $request->boolean('confirm_package_adjustments'));
+            $product = $this->productService->update(
+                $id,
+                $request->validated(),
+                $request->boolean('confirm_changes')
+            );
 
             return $this->successResponse(new ProductResource($product), 'Product updated successfully', Response::HTTP_OK);
-        } catch (PackageAdjustmentConfirmationRequiredException $e) {
-            return $this->errorResponse($e->getMessage(), Response::HTTP_CONFLICT, ['affected_packages' => $e->affectedPackages()]);
+        } catch (ProductUpdateConfirmationRequiredException $e) {
+            $errors = array_filter([
+                'fiscal' => $e->fiscalImpact(),
+                'stock' => $e->stockImpact(),
+            ], fn (?array $impact) => $impact !== null);
+
+            return $this->errorResponse($e->getMessage(), Response::HTTP_CONFLICT, $errors);
         } catch (Exception $e) {
             return $this->errorResponse('Error updating product', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -446,12 +493,12 @@ class ProductController extends Controller
         try {
             $productPackage = $this->productService->storePackageItems($request->validated());
 
-            return $this->successResponse(new ProductResource($productPackage), 'Product package items stored successfully', Response::HTTP_OK);
+            return $this->successResponse(new ProductResource($productPackage), __('products.package_items.store_success'), Response::HTTP_OK);
 
         } catch (Exception $e) {
             Log::error('Error storing product package items', ['error' => $e->getMessage().' on line '.$e->getLine()]);
 
-            return $this->errorResponse('Error storing product package items', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse(__('products.package_items.store_error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -479,13 +526,13 @@ class ProductController extends Controller
         try {
             $product = $this->productService->getProductPackage($product_package_id);
 
-            return $this->successResponse(new ProductResource($product), 'Package items fetched successfully', 200);
+            return $this->successResponse(new ProductResource($product), __('products.package_items.get_success'), 200);
         } catch (ModelNotFoundException $e) {
-            return $this->errorResponse('Product not found with the specified ID.', 404);
+            return $this->errorResponse(__('products.package_items.get_not_found'), 404);
         } catch (Exception $e) {
             Log::error('Error fetching package items', ['error' => $e->getMessage()]);
 
-            return $this->errorResponse('Error fetching package items', 500);
+            return $this->errorResponse(__('products.package_items.get_error'), 500);
         }
     }
 
@@ -516,11 +563,11 @@ class ProductController extends Controller
         try {
             $product = $this->productService->updatePackageItems($product_package_id, $request->validated());
 
-            return $this->successResponse(new ProductResource($product), 'Product package items updated successfully', Response::HTTP_OK);
+            return $this->successResponse(new ProductResource($product), __('products.package_items.update_success'), Response::HTTP_OK);
         } catch (Exception $e) {
             Log::error('Error updating product package items', ['error' => $e->getMessage()]);
 
-            return $this->errorResponse('Error updating product package items', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse(__('products.package_items.update_error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -551,9 +598,9 @@ class ProductController extends Controller
 
             return response()->json([], Response::HTTP_NO_CONTENT);
         } catch (ModelNotFoundException $e) {
-            return $this->errorResponse('Product package not found', Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(__('products.package_items.delete_not_found'), Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
-            return $this->errorResponse('Error deleting package items', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse(__('products.package_items.delete_error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

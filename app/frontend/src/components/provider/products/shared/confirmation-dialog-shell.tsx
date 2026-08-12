@@ -1,36 +1,46 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { AlertTriangle, X } from "lucide-react";
-import type { AffectedPackage } from "@/types/products";
 
-interface PackageAdjustmentConfirmationDialogProps {
+interface ConfirmationDialogShellProps {
   isOpen: boolean;
-  affectedPackages: AffectedPackage[];
-  branchNameById: Map<number, string>;
+  titleId: string;
+  descriptionId: string;
+  title: string;
+  description: ReactNode;
+  confirmLabel: string;
+  cancelLabel?: string;
   isLoading?: boolean;
   onConfirm: () => void | Promise<void>;
   onCancel: () => void;
+  /** Cuerpo del diálogo — listas u otro contenido específico de cada caso. */
+  children?: ReactNode;
 }
 
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
- * SCRUM-361, Tarea 3.3/6.4: ante un 409 al bajar el stock de un componente,
- * muestra los packs afectados con su cantidad actual y la resultante.
- * Confirmar reenvía la edición con confirm_package_adjustments=true;
- * cancelar descarta también la edición del stock (no hay un estado
- * intermedio: el 409 nunca llegó a aplicarse en el servidor).
+ * SCRUM-362, Tarea 5.7: carcasa de modal (focus trap, ESC, backdrop, header
+ * con ícono/título/cierre, footer con cancelar/confirmar) extraída de
+ * PackageAdjustmentConfirmationDialog (SCRUM-361) para que un segundo
+ * diálogo de confirmación con impacto (FiscalReclassificationConfirmationDialog)
+ * no duplique la mecánica — solo cambia el contenido, vía `children`.
  */
-export function PackageAdjustmentConfirmationDialog({
+export function ConfirmationDialogShell({
   isOpen,
-  affectedPackages,
-  branchNameById,
+  titleId,
+  descriptionId,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel = "Cancelar edición",
   isLoading = false,
   onConfirm,
   onCancel,
-}: PackageAdjustmentConfirmationDialogProps) {
+  children,
+}: ConfirmationDialogShellProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -81,8 +91,8 @@ export function PackageAdjustmentConfirmationDialog({
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="package-adjustment-title"
-      aria-describedby="package-adjustment-description"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       ref={dialogRef}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
@@ -94,12 +104,11 @@ export function PackageAdjustmentConfirmationDialog({
               <AlertTriangle className="w-6 h-6" aria-hidden />
             </span>
             <div>
-              <h2 id="package-adjustment-title" className="text-xl font-semibold text-[#1A1A1A]">
-                Este cambio afecta packs existentes
+              <h2 id={titleId} className="text-xl font-semibold text-[#1A1A1A]">
+                {title}
               </h2>
-              <p id="package-adjustment-description" className="mt-1 text-sm text-[#6A6A6A] leading-relaxed">
-                Bajar este stock deja los siguientes packs sin suficientes componentes. Si
-                confirmas, se ajustan automáticamente a la cantidad máxima que soportan.
+              <p id={descriptionId} className="mt-1 text-sm text-[#6A6A6A] leading-relaxed">
+                {description}
               </p>
             </div>
           </div>
@@ -114,25 +123,7 @@ export function PackageAdjustmentConfirmationDialog({
           </button>
         </header>
 
-        <ul className="max-h-64 overflow-y-auto space-y-2" aria-live="polite">
-          {affectedPackages.map((item, index) => (
-            <li
-              key={`${item.packageId}-${item.commerceBranchId}-${index}`}
-              className="flex items-center justify-between gap-3 rounded-[12px] border border-[#E0E0E0] bg-[#F7F7F7] px-4 py-3 text-sm"
-            >
-              <div>
-                <p className="font-medium text-[#1A1A1A]">{item.packageTitle}</p>
-                <p className="text-[#6A6A6A]">
-                  {branchNameById.get(item.commerceBranchId) ?? `Sede #${item.commerceBranchId}`}
-                </p>
-              </div>
-              <p className="text-[#1A1A1A] whitespace-nowrap">
-                {item.currentQuantity} <span className="text-[#6A6A6A]">&rarr;</span>{" "}
-                <span className="font-semibold text-[#B58A1A]">{item.adjustedQuantity}</span> packs
-              </p>
-            </li>
-          ))}
-        </ul>
+        {children}
 
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-end pt-2">
           <button
@@ -141,7 +132,7 @@ export function PackageAdjustmentConfirmationDialog({
             disabled={isLoading}
             className="h-[52px] px-5 border border-[#E0E0E0] rounded-xl text-[#1A1A1A] hover:border-[#4B236A] hover:text-[#4B236A] transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Cancelar edición
+            {cancelLabel}
           </button>
           <button
             type="button"
@@ -152,7 +143,7 @@ export function PackageAdjustmentConfirmationDialog({
             {isLoading && (
               <span className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" aria-hidden />
             )}
-            <span>Confirmar y ajustar packs</span>
+            <span>{confirmLabel}</span>
           </button>
         </div>
       </div>

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Constants\Constant;
+use App\Traits\ValidatesFranchiseDeclaration;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -53,6 +55,8 @@ use Illuminate\Validation\Rule;
  */
 class CommerceBasicDataRequest extends FormRequest
 {
+    use ValidatesFranchiseDeclaration;
+
     /**
      * SCRUM-334: a diferencia de StoreCommerceRequest, este flujo (onboarding
      * básico) no validaba que commerce.owner_user_id fuera el usuario
@@ -110,6 +114,7 @@ class CommerceBasicDataRequest extends FormRequest
             'commerce.is_verified' => ['boolean'],
             'commerce.is_active' => ['boolean'],
             'commerce.electronic_invoicing_required' => ['required', 'boolean'],
+            'commerce.operates_under_franchise' => ['sometimes', 'boolean'],
 
             'legal_representative' => ['nullable', 'array'],
             'legal_representative.name' => ['required', 'string', 'max:255'],
@@ -127,6 +132,20 @@ class CommerceBasicDataRequest extends FormRequest
             // 'my_account.owner_id' => ['required', 'exists:users,id'],
             // 'my_account.is_primary' => ['boolean'],
         ];
+    }
+
+    /**
+     * SCRUM-365: la franquicia es obligatoria para RE/PA y no aplica a RT.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $this->addFranchiseDeclarationErrors(
+                $validator,
+                (int) $this->input('commerce.establishment_type_id') ?: null,
+                'commerce.operates_under_franchise'
+            );
+        });
     }
 
     /**

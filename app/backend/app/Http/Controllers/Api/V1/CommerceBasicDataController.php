@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CommerceBasicDataRequest;
 use App\Http\Resources\Api\V1\CommerceBasicDataResource;
 use App\Services\CommerceBasicDataService;
+use App\Services\CommerceFranchiseDeclarationService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -26,9 +27,12 @@ class CommerceBasicDataController extends Controller
 
     private CommerceBasicDataService $commerceBasicDataService;
 
-    public function __construct(CommerceBasicDataService $service)
+    private CommerceFranchiseDeclarationService $commerceFranchiseDeclarationService;
+
+    public function __construct(CommerceBasicDataService $service, CommerceFranchiseDeclarationService $commerceFranchiseDeclarationService)
     {
         $this->commerceBasicDataService = $service;
+        $this->commerceFranchiseDeclarationService = $commerceFranchiseDeclarationService;
     }
 
     /**
@@ -91,6 +95,16 @@ class CommerceBasicDataController extends Controller
         try {
             $payload = $request->validated();
             $commerce = $this->commerceBasicDataService->store($payload);
+
+            if (array_key_exists('operates_under_franchise', $payload['commerce'] ?? [])) {
+                $this->commerceFranchiseDeclarationService->record(
+                    $commerce,
+                    (bool) $payload['commerce']['operates_under_franchise'],
+                    (int) $request->user()->id,
+                    (string) $request->ip(),
+                    $request->userAgent()
+                );
+            }
 
             return $this->successResponse(new CommerceBasicDataResource($commerce), 'Commerce basic data created successfully', Response::HTTP_CREATED);
         } catch (Throwable $e) {

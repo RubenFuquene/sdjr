@@ -378,3 +378,19 @@ body {
 .animate-scale-fade {
   animation: scale-fade 0.4s ease-out;
 }
+
+/* SCRUM-362: halo que señala un item de pack excluido automáticamente
+   (fiscal/stock) — pulso lento que casi desaparece en el punto medio, sin
+   tocar la opacidad del contenido de la fila (ver product-pack-items-selector). */
+@keyframes halo-pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.animate-halo-pulse {
+  animation: halo-pulse 3s ease-in-out infinite;
+}

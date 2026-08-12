@@ -6,6 +6,7 @@
 import { fetchWithErrorHandling } from "./client";
 import type { ApiSuccess } from "./types";
 import type {
+  FiscalCodeOption,
   ProductBranchAssignment,
   ProductCategoryFromAPI,
   ProductFormInput,
@@ -15,6 +16,7 @@ import type {
 
 // Backward compatibility: maintain temporary type exports from API layer.
 export type {
+  FiscalCodeOption,
   ProductCategoryFromAPI,
   ProductFormInput,
   ProductFromAPI,
@@ -46,7 +48,10 @@ export interface CommerceBranchAssignmentPayload {
 export interface CreateProductPayload {
   product: {
     commerce_id: number;
-    product_category_id: number;
+    /** SCRUM-370: ausente para packs — el backend la deriva de sus componentes. */
+    product_category_id?: number;
+    /** SCRUM-362: ausente para packs — nunca llevan clasificación propia. */
+    fiscal_code?: string | null;
     title: string;
     description?: string | null;
     product_type: ProductType;
@@ -67,6 +72,7 @@ export interface UpdateProductPayload {
   product: {
     commerce_id: number;
     product_category_id?: number;
+    fiscal_code?: string | null;
     title?: string;
     description?: string | null;
     product_type?: ProductType;
@@ -81,8 +87,14 @@ export interface UpdateProductPayload {
     quantity: number;
   }>;
   photos?: CreateProductPhotoInput[];
-  /** SCRUM-361, Tarea 3.3-3.4: confirma el ajuste automático de packs afectados. */
-  confirm_package_adjustments?: boolean;
+  /**
+   * SCRUM-362/361 (unificación): confirma aplicar los cambios pendientes —
+   * ajuste automático de packs afectados por stock (SCRUM-361) y/o
+   * despublicación en cascada al reclasificar a otro_verificar (SCRUM-362,
+   * D9). Un solo flag: el backend detecta ambos motivos y los combina en un
+   * único 409 si aplican.
+   */
+  confirm_changes?: boolean;
 }
 
 export interface PackageItemFromAPI extends ProductFromAPI {
@@ -160,6 +172,14 @@ function normalizeProduct(product: ProductFromAPI): ProductFromAPI {
       product.discounted_price === null || product.discounted_price === undefined
         ? null
         : toNumber(product.discounted_price),
+    vat_rate:
+      product.vat_rate === null || product.vat_rate === undefined
+        ? null
+        : toNumber(product.vat_rate),
+    inc_rate:
+      product.inc_rate === null || product.inc_rate === undefined
+        ? null
+        : toNumber(product.inc_rate),
     photos: product.photos ?? [],
     commerce_branches: product.commerce_branches?.map((branch) => ({
       ...branch,
@@ -183,6 +203,14 @@ function normalizeCategory(category: ProductCategoryFromAPI): ProductCategoryFro
     ...category,
     id: toInteger(category.id),
     description: category.description ?? null,
+  };
+}
+
+function normalizeFiscalCodeOption(option: FiscalCodeOption): FiscalCodeOption {
+  return {
+    ...option,
+    vat_rate: toNumber(option.vat_rate),
+    inc_rate: toNumber(option.inc_rate),
   };
 }
 
@@ -248,10 +276,15 @@ function normalizeBranches(
 }
 
 export function mapProductFormToCreatePayload(input: ProductFormInput): CreateProductPayload {
+  const isPackage = input.productType === "package";
+
   return {
     product: {
       commerce_id: toInteger(input.commerceId),
-      product_category_id: toInteger(input.productCategoryId),
+      // SCRUM-370: un pack no elige categoría, el backend la deriva.
+      product_category_id: isPackage ? undefined : toInteger(input.productCategoryId),
+      // SCRUM-362: un pack nunca lleva clasificación fiscal propia.
+      fiscal_code: isPackage ? undefined : (input.fiscalCode ?? null),
       title: input.title.trim(),
       description: toTrimmedString(input.description) ?? null,
       product_type: input.productType,
@@ -270,10 +303,13 @@ export function mapProductFormToCreatePayload(input: ProductFormInput): CreatePr
 }
 
 export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdateProductPayload {
+  const isPackage = input.productType === "package";
+
   return {
     product: {
       commerce_id: toInteger(input.commerceId),
-      product_category_id: toInteger(input.productCategoryId),
+      product_category_id: isPackage ? undefined : toInteger(input.productCategoryId),
+      fiscal_code: isPackage ? undefined : (input.fiscalCode ?? null),
       title: input.title.trim(),
       description: toTrimmedString(input.description) ?? null,
       product_type: input.productType,
@@ -288,7 +324,7 @@ export function mapProductFormToUpdatePayload(input: ProductFormInput): UpdatePr
     commerce_branches: normalizeBranches(input.branches),
     package_items: normalizePackageItems(input),
     photos: normalizePhotos(input),
-    confirm_package_adjustments: input.confirmPackageAdjustments,
+    confirm_changes: input.confirmChanges,
   };
 }
 
@@ -368,6 +404,26 @@ export async function getProductCategories(
   return {
     ...response,
     data: categories.map(normalizeCategory),
+  };
+}
+
+/**
+ * GET /api/v1/commerces/{id}/fiscal-codes
+ * SCRUM-362: códigos fiscales que el comercio puede usar en sus productos,
+ * ya filtrados por tipo de establecimiento y declaración de franquicia.
+ */
+export async function getCommerceFiscalCodes(
+  commerceId: number
+): Promise<ApiSuccess<FiscalCodeOption[]>> {
+  const response = await fetchWithErrorHandling<ApiSuccess<unknown>>(
+    `/api/v1/commerces/${commerceId}/fiscal-codes`
+  );
+
+  const options = extractCollectionData<FiscalCodeOption>(response.data);
+
+  return {
+    ...response,
+    data: options.map(normalizeFiscalCodeOption),
   };
 }
 
