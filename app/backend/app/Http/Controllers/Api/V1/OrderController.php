@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\ProductFiscalClassificationUnavailableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteOrderRequest;
 use App\Http\Requests\Api\V1\IndexOrderRequest;
@@ -140,6 +141,8 @@ class OrderController extends Controller
             $order = $this->orderService->store($data);
 
             return $this->createdResponse(new OrderResource($order), 'Order created successfully');
+        } catch (ProductFiscalClassificationUnavailableException $e) {
+            return $this->errorResponse($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (Throwable $e) {
             Log::error('Order creation failed', ['error' => $e->getMessage()]);
 

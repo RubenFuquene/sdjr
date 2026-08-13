@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\Constant;
 use App\Enums\FiscalCode;
+use App\Exceptions\ProductFiscalClassificationUnavailableException;
 use App\Exceptions\ProductUpdateConfirmationRequiredException;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
@@ -810,8 +811,16 @@ class ProductService
                 return false;
             }
 
-            if (! $this->isFiscallyPurchasable($product)) {
-                return false;
+            $blockedProduct = $this->fiscallyBlockedProduct($product);
+
+            if ($blockedProduct) {
+                Log::warning('Order rejected: product without a valid fiscal classification', [
+                    'product_id' => $blockedProduct->id,
+                    'fiscal_code' => $blockedProduct->fiscal_code?->value,
+                    'commerce_branch_id' => $commerceBranchId,
+                ]);
+
+                throw new ProductFiscalClassificationUnavailableException($blockedProduct);
             }
 
             $pivot = ProductCommerceBranch::query()
@@ -828,28 +837,31 @@ class ProductService
     }
 
     /**
-     * SCRUM-362 (CR-01): un producto con fiscal_code = otro_verificar nunca
-     * puede terminar en un carrito pagado, ni suelto ni como componente de
-     * un pack. La composición ya bloquea agregar un componente así
-     * (StoreProductRequest/UpdateProductRequest), pero se revalida aquí en
-     * profundidad, en el punto real de venta — la única fuente de verdad que
-     * importa cuando hay dinero de por medio.
+     * SCRUM-362 (CR-01) / SCRUM-376: identifica qué producto bloquea la
+     * compra por clasificación fiscal — el propio producto si es de tipo
+     * single, o el primer componente sin clasificar si es un pack (un pack
+     * nunca tiene fiscal_code propio, así que revisarlo a él mismo no
+     * aplica). Null si no hay bloqueo. Cubre tanto "otro_verificar"
+     * (pendiente de revisión) como NULL (producto anterior a la migración de
+     * SCRUM-362, nunca clasificado) — antes de SCRUM-376 solo se cubría el
+     * primero, dejando pasar productos legacy sin clasificar.
      */
-    private function isFiscallyPurchasable(Product $product): bool
+    private function fiscallyBlockedProduct(Product $product): ?Product
     {
-        if ($product->fiscal_code === FiscalCode::PendingReview) {
-            return false;
-        }
-
         if ($product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
             $product->loadMissing('packageItems');
 
-            return $product->packageItems->every(
-                fn (Product $component) => $component->fiscal_code !== FiscalCode::PendingReview
+            return $product->packageItems->first(
+                fn (Product $component) => $this->isFiscallyBlocked($component->fiscal_code)
             );
         }
 
-        return true;
+        return $this->isFiscallyBlocked($product->fiscal_code) ? $product : null;
+    }
+
+    private function isFiscallyBlocked(?FiscalCode $fiscalCode): bool
+    {
+        return $fiscalCode === null || $fiscalCode === FiscalCode::PendingReview;
     }
 
     /**

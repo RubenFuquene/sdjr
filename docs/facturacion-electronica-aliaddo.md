@@ -624,6 +624,12 @@ idempotencia que necesitamos— y usa el campo `mode` en el body en vez de tres 
 
 ### Emisión: guardas antes de gastar una transacción
 
+> **Fuente del dato fiscal (SCRUM-376):** el motor de emisión liquida siempre desde el snapshot
+> congelado en `order_items` (`fiscal_code`/`vat_rate`/`applies_inc`/`inc_rate`, tomados al crear la
+> orden), **nunca** desde `products` — ver [Dependencias](#dependencias). Leer del catálogo vigente
+> reabriría el hueco que este snapshot cierra: una reclasificación del aliado entre la venta y la
+> emisión liquidaría un IVA distinto al que el comprador aceptó al pagar.
+
 Cada rechazo de la DIAN **se cobra igual que un documento aceptado**.
 
 ```
@@ -907,21 +913,21 @@ certificación mensual con su plazo.
   puede emitir una FAN de venta válida ni calcular la ReteIVA. Nota: el T&C (cláusula 5.3) establece
   que la clasificación la declara **el comercio** y que Ñapa no la verifica — el diseño debe permitir
   capturarla por producto, individualmente y por carga masiva de catálogo.
-  > ⚠️ **Hueco de snapshot fiscal (detectado al implementar SCRUM-362, 2026-08-10).**
-  > `products.fiscal_code`/`vat_rate`/`applies_inc`/`inc_rate` reflejan la clasificación **vigente** del
-  > catálogo — no un valor congelado por venta. Un aliado puede reclasificar un producto en cualquier
-  > momento (corrigiendo un error, o porque cambió de tipo/franquicia), y el motor de FAN, tal como está
-  > descrito en este documento, leería esos campos **al momento de emitir**, no al momento de la venta.
-  > Si la emisión no es inmediata a la orden (cola, reintento, contingencia DIAN — ver
-  > [Reintento vs. contingencia](#reintento-transitorio-vs-contingencia-dian)), la FAN podría terminar
-  > liquidando un IVA distinto al que el comprador vio y aceptó al pagar.
+  > ✅ **Snapshot fiscal resuelto (SCRUM-376, 2026-08-13).** El hueco detectado al implementar SCRUM-362
+  > —`products.fiscal_code`/`vat_rate`/`applies_inc`/`inc_rate` reflejaban la clasificación **vigente**
+  > del catálogo, no la del momento de la venta— ya está cerrado: `order_items` congela las cuatro
+  > columnas **al crear la orden**, mismo patrón que `unit_price`. El motor de FAN (este ticket) **debe
+  > leer siempre de `order_items`, nunca de `products`** — ver la nota en
+  > [Emisión: guardas antes de gastar una transacción](#emisión-guardas-antes-de-gastar-una-transacción).
   >
-  > `order_items` hoy no tiene columnas fiscales propias. Antes de implementar el motor de emisión, hay
-  > que decidir el punto de congelamiento: lo más seguro es copiar `fiscal_code`/`vat_rate`/`applies_inc`/
-  > `inc_rate` a `order_items` **en el momento de crear la orden** (mismo patrón que `unit_price`, que ya
-  > se congela ahí y no se relee de `products` después). La FAN se emite siempre desde el snapshot de la
-  > orden, nunca desde el catálogo vigente. Pendiente de diseño detallado en la implementación de este
-  > ticket — anotado aquí para que no se descubra tarde, como pasó con el DSN.
+  > Detalles relevantes para el motor de emisión:
+  > - La línea **padre** de un pack no lleva snapshot propio (los packs nunca tienen `fiscal_code`
+  >   propio, SCRUM-362 D4) — se factura por sus líneas **hijas** de componente
+  >   (`order_items.parent_package_id`), cada una con la clasificación real de su producto.
+  > - `NULL` en el snapshot tiene dos causas distintas: línea padre de pack (siempre), u orden creada
+  >   antes de esta migración (2026-08-11, sin backfill — pre-MVP, dato efímero). El motor de emisión
+  >   no debería encontrarse el segundo caso en producción: la compra ya rechaza cualquier producto sin
+  >   clasificación fiscal válida (`otro_verificar` o `NULL`) desde `ProductService::validateProductAvailability()`.
 - **SCRUM-339** (migración a movii) — la pasarela debe **reportar sus retenciones por transacción**.
   Si no las expone, la certificación mensual es inviable. Coordinar antes de cerrar ese diseño.
 - **SCRUM-187** (`GET /api/v1/documents/legal`, sin iniciar) — el hueco donde vive el Contrato de
