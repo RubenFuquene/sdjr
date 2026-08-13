@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Constant;
+use App\Enums\FiscalCode;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -56,12 +57,18 @@ class OrderService
             foreach ($data['items'] as $item) {
                 $product = Product::find((int) $item['product_id']);
                 $price = $item['unit_price'] ?? ($product ? $product->currentSalePrice() : 0.0);
+                $isPackage = $product && $product->product_type === Constant::PRODUCT_TYPE_PACKAGE;
 
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $price,
+                    // SCRUM-376 (D4): la línea padre de un pack nunca lleva
+                    // snapshot fiscal propio — los packs no tienen
+                    // fiscal_code propio (SCRUM-362), se facturan por sus
+                    // líneas hijas de componente, cada una con el suyo.
+                    ...($isPackage ? $this->fiscalSnapshotFor(null) : $this->fiscalSnapshotFor($product)),
                 ]);
                 $total += $price * $item['quantity'];
 
@@ -69,7 +76,7 @@ class OrderService
                 // de componente, al precio realmente cobrado por esta línea
                 // (no el techo recalculado) — el padre sigue siendo el único
                 // que suma al total y descuenta stock (Order::items()).
-                if ($product && $product->product_type === Constant::PRODUCT_TYPE_PACKAGE) {
+                if ($isPackage) {
                     foreach ($this->packagePriceProrationService->prorate($product, (float) $price, (int) $item['quantity']) as $line) {
                         OrderItem::create([
                             'order_id' => $order->id,
@@ -77,6 +84,9 @@ class OrderService
                             'parent_package_id' => $product->id,
                             'quantity' => $line['quantity'],
                             'unit_price' => $line['unit_price'],
+                            // SCRUM-376: snapshot del componente real, no del
+                            // pack — es el que se factura.
+                            ...$this->fiscalSnapshotFor($line['product']),
                         ]);
                     }
                 }
@@ -234,5 +244,32 @@ class OrderService
         $product = Product::find($productId);
 
         return $product ? $product->currentSalePrice() : 0.0;
+    }
+
+    /**
+     * SCRUM-376: único punto que arma el snapshot fiscal de una línea de
+     * orden, tomado del producto en el instante de la venta. No relee la
+     * regla de FiscalCodeResolver ni deriva tarifas — copia lo que
+     * ProductService ya calculó y persistió en el producto.
+     *
+     * @return array{fiscal_code: ?FiscalCode, vat_rate: ?float, applies_inc: ?bool, inc_rate: ?float}
+     */
+    private function fiscalSnapshotFor(?Product $product): array
+    {
+        if (! $product) {
+            return [
+                'fiscal_code' => null,
+                'vat_rate' => null,
+                'applies_inc' => null,
+                'inc_rate' => null,
+            ];
+        }
+
+        return [
+            'fiscal_code' => $product->fiscal_code,
+            'vat_rate' => $product->vat_rate,
+            'applies_inc' => $product->applies_inc,
+            'inc_rate' => $product->inc_rate,
+        ];
     }
 }
