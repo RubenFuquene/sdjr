@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Exceptions\ProductFiscalClassificationUnavailableException;
+use App\Exceptions\OrderItemRejectedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\DeleteOrderRequest;
 use App\Http\Requests\Api\V1\IndexOrderRequest;
@@ -133,15 +133,15 @@ class OrderController extends Controller
         try {
             $data = $request->validated();
 
-            // Validar la disponibilidad del/ los productos antes de continuar
-            if (! $this->productService->validateProductAvailability($data['items'], $data['commerce_branch_id'])) {
-                return $this->errorResponse('One or more products are not available in the requested quantity', Response::HTTP_UNPROCESSABLE_ENTITY);
-            }
+            // Validar la disponibilidad del/los productos antes de continuar.
+            // SCRUM-375: contrato unificado a excepción (D5) — un solo catch
+            // cubre clasificación fiscal, compuertas de catálogo y stock.
+            $this->productService->validateProductAvailability($data['items'], $data['commerce_branch_id']);
 
             $order = $this->orderService->store($data);
 
             return $this->createdResponse(new OrderResource($order), 'Order created successfully');
-        } catch (ProductFiscalClassificationUnavailableException $e) {
+        } catch (OrderItemRejectedException $e) {
             return $this->errorResponse($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (Throwable $e) {
             Log::error('Order creation failed', ['error' => $e->getMessage()]);

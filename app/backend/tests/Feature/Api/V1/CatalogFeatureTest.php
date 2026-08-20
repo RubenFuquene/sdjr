@@ -82,6 +82,49 @@ class CatalogFeatureTest extends TestCase
         $response->assertNotFound();
     }
 
+    /**
+     * SCRUM-375: el detalle público no filtraba expires_at — un producto
+     * vencido seguía siendo activo y visible por id, aunque nearbyProducts()
+     * ya lo excluyera del descubrimiento (asimetría detectada al planificar
+     * las compuertas de catálogo en la compra).
+     */
+    public function test_expired_product_is_not_visible_by_id()
+    {
+        $product = Product::factory()->create([
+            'status' => Constant::STATUS_ACTIVE,
+            'expires_at' => now()->subDay(),
+        ]);
+
+        $response = $this->getJson("/api/v1/catalog/products/{$product->id}");
+
+        $response->assertNotFound();
+    }
+
+    /**
+     * expires_at es nullable y "sin fecha" significa "no vence" — un filtro
+     * que solo comparara `> now()` descartaría también a estos productos,
+     * que son la mayoría del catálogo.
+     */
+    public function test_product_without_expiration_date_is_visible_by_id()
+    {
+        $product = Product::factory()->create([
+            'status' => Constant::STATUS_ACTIVE,
+            'expires_at' => null,
+        ]);
+
+        $this->getJson("/api/v1/catalog/products/{$product->id}")->assertOk();
+    }
+
+    public function test_product_with_future_expiration_date_is_visible_by_id()
+    {
+        $product = Product::factory()->create([
+            'status' => Constant::STATUS_ACTIVE,
+            'expires_at' => now()->addYear(),
+        ]);
+
+        $this->getJson("/api/v1/catalog/products/{$product->id}")->assertOk();
+    }
+
     public function test_nonexistent_product_returns_404()
     {
         $response = $this->getJson('/api/v1/catalog/products/999999');
