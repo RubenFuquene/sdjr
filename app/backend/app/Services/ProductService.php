@@ -6,7 +6,9 @@ namespace App\Services;
 
 use App\Constants\Constant;
 use App\Enums\FiscalCode;
+use App\Exceptions\InsufficientStockException;
 use App\Exceptions\ProductFiscalClassificationUnavailableException;
+use App\Exceptions\ProductUnavailableException;
 use App\Exceptions\ProductUpdateConfirmationRequiredException;
 use App\Models\Commerce;
 use App\Models\CommerceBranch;
@@ -15,6 +17,7 @@ use App\Models\Product;
 use App\Models\ProductCommerceBranch;
 use App\Models\ProductPhoto;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -302,6 +305,14 @@ class ProductService
      * Mostrar un producto para consumo público (app cliente).
      * A diferencia de show(), solo expone productos activos: un producto
      * inactivo/borrador no debe ser visible por id aunque se conozca el id.
+     *
+     * SCRUM-375: agrega el filtro de expires_at que le faltaba frente a
+     * nearbyProducts() — un producto vencido dejaba de listarse en el
+     * descubrimiento pero seguía siendo visible por id en su propio
+     * detalle. whereNull OR > now(): expires_at es nullable y "sin fecha"
+     * significa "no vence" (ver NearbySearchService::nearbyProducts), un
+     * filtro que solo comparara `> now()` descartaría también a los
+     * productos sin vencimiento, que son la mayoría.
      */
     public function showPublic(int $id): Product
     {
@@ -319,6 +330,7 @@ class ProductService
             'commerceBranches' => fn ($query) => $query->wherePivot('is_published', true),
         ])
             ->where('status', Constant::STATUS_ACTIVE)
+            ->where(fn (Builder $q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->findOrFail($id);
     }
 
@@ -802,13 +814,30 @@ class ProductService
      * está creando la orden — el pivote producto-sede es la única fuente de
      * verdad, tanto para stock físico (single) como para compromiso (package).
      */
-    public function validateProductAvailability(array $items, int $commerceBranchId): bool
+    /**
+     * SCRUM-375: contrato unificado a excepción (D5) — todo rechazo, sea por
+     * clasificación fiscal, compuertas de catálogo o stock insuficiente,
+     * lanza una OrderItemRejectedException. El caller (OrderController) ya
+     * no necesita distinguir un `false` de una excepción para la misma
+     * respuesta 422.
+     *
+     * @throws OrderItemRejectedException
+     */
+    public function validateProductAvailability(array $items, int $commerceBranchId): void
     {
         foreach ($items as $item) {
             $product = Product::find($item['product_id']);
 
             if (! $product) {
-                return false;
+                // Defensivo: StoreOrderRequest ya valida exists:products,id
+                // en el mismo request, así que esto solo ocurriría por una
+                // carrera con un borrado concurrente.
+                Log::warning('Order rejected: product not found', [
+                    'product_id' => $item['product_id'],
+                    'commerce_branch_id' => $commerceBranchId,
+                ]);
+
+                throw new ProductUnavailableException;
             }
 
             $blockedProduct = $this->fiscallyBlockedProduct($product);
@@ -828,9 +857,67 @@ class ProductService
                 ->where('commerce_branch_id', $commerceBranchId)
                 ->first();
 
-            if (! $pivot || $this->branchAvailabilityCalculator->availableFor($pivot) < $item['quantity']) {
-                return false;
+            if (! $pivot) {
+                Log::warning('Order rejected: product not assigned to this branch', [
+                    'product_id' => $product->id,
+                    'commerce_branch_id' => $commerceBranchId,
+                ]);
+
+                throw new InsufficientStockException($product);
             }
+
+            if (! $this->isCatalogPurchasable($product, $pivot)) {
+                Log::warning('Order rejected: product does not meet catalog gates', [
+                    'product_id' => $product->id,
+                    'is_published' => $pivot->is_published,
+                    'status' => $product->status,
+                    'expires_at' => $product->expires_at,
+                    'commerce_branch_id' => $commerceBranchId,
+                ]);
+
+                throw new ProductUnavailableException($product);
+            }
+
+            if ($this->branchAvailabilityCalculator->availableFor($pivot) < $item['quantity']) {
+                Log::warning('Order rejected: insufficient stock', [
+                    'product_id' => $product->id,
+                    'commerce_branch_id' => $commerceBranchId,
+                    'requested' => $item['quantity'],
+                ]);
+
+                throw new InsufficientStockException($product);
+            }
+        }
+    }
+
+    /**
+     * SCRUM-375 (D1): las mismas tres compuertas que ya aplican al
+     * descubrimiento (NearbySearchService::nearbyProducts) y al detalle
+     * público (showPublic), revalidadas en el punto de venta — lo que el
+     * catálogo no ofrece, tampoco se puede comprar por otra vía (ej. un
+     * carrito viejo, o la cascada de despublicación fiscal de SCRUM-362).
+     *
+     * D6: no desciende a componentes de pack. El compromiso de un pack es
+     * sobre el *stock* de sus componentes (PackageAvailabilityCalculator),
+     * no sobre si cada componente está publicado individualmente — un
+     * componente puede venderse solo dentro de un pack, sin venderse suelto.
+     */
+    private function isCatalogPurchasable(Product $product, ProductCommerceBranch $pivot): bool
+    {
+        if (! $pivot->is_published) {
+            return false;
+        }
+
+        // status está casteado a string en el modelo (Product::$casts) —
+        // comparar sin normalizar contra el int de Constant::STATUS_ACTIVE
+        // haría que la igualdad estricta fallara siempre. Mismo patrón que
+        // AuthService::validate() para el status de usuario.
+        if ((int) $product->status !== Constant::STATUS_ACTIVE) {
+            return false;
+        }
+
+        if ($product->expires_at !== null && $product->expires_at->isPast()) {
+            return false;
         }
 
         return true;
