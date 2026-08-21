@@ -344,11 +344,11 @@ export function EstablecimientoCard({
           </div>
 
           {/* ============================================ */}
-          {/* 6. Correo Electrónico */}
+          {/* 6. Correo de contacto del establecimiento */}
           {/* ============================================ */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
-              Correo Electrónico <span className="text-red-500">*</span>
+              Correo de contacto del establecimiento <span className="text-red-500">*</span>
             </Label>
             <Input
               id="email"
@@ -356,11 +356,22 @@ export function EstablecimientoCard({
               value={formData.email}
               onChange={(e) => onFieldChange('email', e.target.value)}
               placeholder="contacto@negocio.com"
+              aria-describedby="email-description"
+              aria-invalid={Boolean(errors.email)}
               className={`h-[50px] rounded-[14px] border-[#E0E0E0] ${
                 errors.email ? 'border-red-500' : ''
               }`}
             />
-            {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+            {/* SCRUM-369: contenedor único para ayuda/error del campo — este correo
+                es el del comercio (commerce.email), no el de la sesión del proveedor
+                (users.email), y ambos pueden diferir. */}
+            <p
+              id="email-description"
+              className={`text-sm ${errors.email ? 'text-red-600' : 'text-[#4B236A]/60'}`}
+            >
+              {errors.email ||
+                'Este es el correo público de tu negocio. Puede ser distinto del correo con el que inicias sesión.'}
+            </p>
           </div>
 
           {/* ============================================ */}
